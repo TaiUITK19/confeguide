@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ConfGuide - Tra cứu hội nghị</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="css/style-timkiem.css">
+</head>
+
+<body>
+  <header class="site-header">
+    <a class="brand" href="#">
+      <div class="brand-icon"><i class="fa-solid fa-graduation-cap"></i></div>
+      <div>
+        <div class="brand-name">ConfGuide</div>
+        <div class="brand-tagline">Find the Right Place for Your Research</div>
+      </div>
+    </a>
+
+    <nav class="main-nav" aria-label="Điều hướng chính">
+      <a href="index.html"><i class="fa-solid fa-house"></i><span>Trang chủ</span></a>
+      <a class="active" href="search.html"><i class="fa-solid fa-magnifying-glass"></i><span>Tra cứu</span></a>
+      <a href="logs.html"><i class="fa-regular fa-newspaper"></i><span>Nhật ký hội nghị</span></a>
+      <a href="profile.html"><i class="fa-regular fa-folder"></i><span>Hồ sơ</span></a>
+    </nav>
+
+    <div class="header-actions">
+      <button class="icon-btn" id="themeToggle" title="Đổi giao diện"><i class="fa-regular fa-sun"></i></button>
+      <div class="avatar">NH</div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero" id="search">
+      <div class="hero-overlay"></div>
+      <div class="container hero-content">
+        <h1>Tìm hội nghị phù hợp với lĩnh vực nghiên cứu của bạn</h1>
+        <p>Khám phá hàng nghìn hội nghị quốc tế, lọc theo lĩnh vực, hình thức và thời gian để tìm cơ hội phù hợp nhất.</p>
+
+        <form class="search-box" id="searchForm">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input id="searchInput" type="search" placeholder="Tìm kiếm hội nghị theo tên, từ khóa, lĩnh vực nghiên cứu..." autocomplete="off">
+          <button type="submit">Tìm kiếm</button>
+        </form>
+
+        <div class="examples">
+          <strong>Ví dụ:</strong>
+          <button type="button" class="keyword" data-keyword="machine learning">machine learning</button>
+          <button type="button" class="keyword" data-keyword="computer vision">computer vision</button>
+          <button type="button" class="keyword" data-keyword="network security">network security</button>
+          <button type="button" class="keyword" data-keyword="NLP">NLP</button>
+          <button type="button" class="keyword" data-keyword="data mining">data mining</button>
+          <button type="button" class="keyword" data-keyword="artificial intelligence">artificial intelligence</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="results-section">
+      <div class="container results-layout">
+
+        <aside class="filters">
+          <div class="filter-title"><i class="fa-solid fa-filter"></i><h2>Bộ lọc tìm kiếm</h2></div>
+
+          <div class="filter-group">
+            <h3>HẠN NỘP BÀI</h3>
+            <div class="date-range">
+              <label><i class="fa-regular fa-calendar"></i><input type="date" id="fromDate"></label>
+              <span>–</span>
+              <label><i class="fa-regular fa-calendar"></i><input type="date" id="toDate"></label>
+            </div>
+          </div>
+
+          <button class="apply-btn" id="applyFilters"><i class="fa-solid fa-sliders"></i> Áp dụng bộ lọc</button>
+          <button class="reset-btn" id="resetFilters">Xóa bộ lọc</button>
+        </aside>
+
+        <section class="results">
+          <div class="results-head">
+            <div>Tìm thấy <strong id="resultCount">0</strong> hội nghị</div>
+            <select id="sortSelect" aria-label="Sắp xếp">
+              <option value="relevance">Sắp xếp: Phù hợp nhất</option>
+              <option value="deadline">Hạn nộp gần nhất</option>
+              <option value="date">Ngày diễn ra gần nhất</option>
+              <option value="name">Tên A-Z</option>
+            </select>
+          </div>
+
+          <div id="conferenceList" class="conference-list"></div>
+
+          <div id="emptyState" class="empty-state hidden">
+            <i class="fa-regular fa-face-frown"></i>
+            <h3>Không tìm thấy hội nghị phù hợp</h3>
+            <p>Hãy thử đổi từ khóa hoặc nới rộng bộ lọc.</p>
+          </div>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>

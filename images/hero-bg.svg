@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 520">
+<defs><linearGradient id="g" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#eaf5ff"/><stop offset="1" stop-color="#9cccf7"/></linearGradient></defs>
+<rect width="900" height="520" fill="url(#g)"/>
+<circle cx="720" cy="100" r="70" fill="#ffffff" opacity=".22"/>
+<path d="M0 370 L170 190 L270 300 L390 150 L520 330 L650 220 L900 390 V520 H0Z" fill="#0d4772" opacity=".55"/>
+<path d="M0 415 L130 300 L260 380 L410 245 L590 400 L760 300 L900 420 V520 H0Z" fill="#6ba6d7" opacity=".52"/>
+<rect x="70" y="345" width="760" height="4" rx="2" fill="#fff" opacity=".65"/>
+<text x="60" y="430" fill="white" font-family="Arial, sans-serif" font-size="54" font-weight="700">ConfGuide</text>
+<text x="63" y="472" fill="white" opacity=".9" font-family="Arial, sans-serif" font-size="23">Research Conference Discovery</text>
+</svg>

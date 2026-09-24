@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="ConfGuide - Tìm kiếm và khám phá hội nghị khoa học phù hợp với nghiên cứu của bạn.">
+  <title>ConfGuide — Tìm hội nghị phù hợp</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container nav-wrap">
+      <a class="brand" href="#" aria-label="ConfGuide - Trang chủ">
+        <img src="images/logo.svg" alt="ConfGuide logo">
+        <span class="brand-copy">
+          <strong>ConfGuide</strong>
+          <small>Find the Right Place for Your Research</small>
+        </span>
+      </a>
+
+      <nav class="main-nav" aria-label="Điều hướng chính">
+        <a class="nav-link active" href="#home"><span class="icon">⌂</span>Trang chủ</a>
+        <a class="nav-link" href="search.html"><span class="icon">⌕</span>Tra cứu</a>
+        <a class="nav-link" href="#logs"><span class="icon">▤</span>Nhật ký hội nghị</a>
+        <a class="nav-link" href="#profile"><span class="icon">□</span>Hồ sơ</a>
+      </nav>
+
+      <div class="nav-actions">
+        <button class="theme-toggle" id="themeToggle" type="button" aria-label="Đổi giao diện">
+          <span>☼</span><span>☾</span>
+        </button>
+        <button class="avatar" type="button" aria-label="Hồ sơ người dùng">NH</button>
+      </div>
+    </div>
+  </header>
+
+  <main id="home">
+    <section class="hero">
+      <div class="hero-bg"></div>
+      <div class="container hero-inner">
+        <div class="hero-content">
+          <p class="eyebrow">KHÁM PHÁ CƠ HỘI CÔNG BỐ NGHIÊN CỨU</p>
+          <h1>Tìm hội nghị phù hợp<br>cho <span>nghiên cứu của bạn</span></h1>
+          <p class="hero-description">
+            Khám phá, tra cứu và nhận gợi ý các hội nghị, tạp chí khoa học phù hợp
+            với lĩnh vực nghiên cứu, giúp bạn đưa công trình đến đúng cộng đồng.
+          </p>
+
+          <form class="search-box" id="searchForm">
+            <span class="search-icon">⌕</span>
+            <input id="searchInput" type="search"
+                   placeholder="Tìm kiếm hội nghị theo tên, từ khóa, lĩnh vực nghiên cứu..."
+                   autocomplete="off">
+            <button type="submit">Tìm kiếm</button>
+          </form>
+
+          <div class="suggestions">
+            <span>Ví dụ:</span>
+            <button type="button" class="chip keyword-chip">machine learning</button>
+            <button type="button" class="chip keyword-chip">computer vision</button>
+            <button type="button" class="chip keyword-chip">network security</button>
+            <button type="button" class="chip keyword-chip">NLP</button>
+            <button type="button" class="chip keyword-chip">data mining</button>
+          </div>
+        </div>
+
+        <blockquote class="quote">
+          <p>“Research finds new worlds.”</p>
+          <cite>— Neil Armstrong</cite>
+        </blockquote>
+      </div>
+    </section>
+
+    <section class="conference-section" id="search">
+      <div class="container">
+        <div class="section-heading">
+          <div>
+            <div class="heading-row">
+              <span class="calendar-icon">▣</span>
+              <h2>Hội nghị sắp diễn ra</h2>
+            </div>
+            <p>Những hội nghị, tạp chí sắp mở hoặc sắp đến hạn nộp bài. Đừng bỏ lỡ cơ hội!</p>
+          </div>
+          <button class="view-all" id="viewAllBtn">Xem tất cả <span>→</span></button>
+        </div>
+
+        <div class="filter-bar" id="filterBar">
+          <button class="filter active" data-filter="all">Tất cả</button>
+          <button class="filter" data-filter="Việt Nam">Việt Nam</button>
+          <button class="filter" data-filter="Quốc tế">Quốc tế</button>
+        </div>
+
+        <div class="results-meta">
+          <span id="resultsCount"></span>
+          <button class="clear-search" id="clearSearch" hidden>Xóa tìm kiếm ×</button>
+        </div>
+
+        <div class="conference-grid" id="conferenceGrid"></div>
+
+        <div class="empty-state" id="emptyState" hidden>
+          <div class="empty-icon">⌕</div>
+          <h3>Không tìm thấy hội nghị phù hợp</h3>
+          <p>Thử một từ khóa khác hoặc bỏ bộ lọc hiện tại.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="how-section" id="logs">
+      <div class="container">
+        <div class="section-heading compact">
+          <div>
+            <div class="heading-row">
+              <span class="calendar-icon">✦</span>
+              <h2>Tra cứu thông minh hơn</h2>
+            </div>
+            <p>ConfGuide giúp rút ngắn thời gian tìm kiếm cơ hội công bố.</p>
+          </div>
+        </div>
+
+        <div class="feature-grid">
+          <article class="feature-card">
+            <div class="feature-icon">⌕</div>
+            <h3>Tìm theo chủ đề</h3>
+            <p>Nhập lĩnh vực hoặc từ khóa nghiên cứu để lọc những hội nghị liên quan.</p>
+          </article>
+          <article class="feature-card">
+            <div class="feature-icon">◷</div>
+            <h3>Theo dõi deadline</h3>
+            <p>Quan sát hạn nộp bài và ưu tiên những cơ hội đang đến gần.</p>
+          </article>
+          <article class="feature-card">
+            <div class="feature-icon">☆</div>
+            <h3>Lưu hội nghị</h3>
+            <p>Đánh dấu các hội nghị quan tâm để quay lại xem và so sánh sau.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer" id="profile">
+    <div class="container footer-inner">
+      <div>
+        <strong>ConfGuide</strong>
+        <p>Nền tảng hỗ trợ tra cứu và khám phá cơ hội công bố nghiên cứu.</p>
+      </div>
+      <span>© 2026 ConfGuide</span>
+    </div>
+  </footer>
+
+  <dialog class="detail-modal" id="detailModal">
+    <div class="modal-card">
+      <button class="modal-close" id="modalClose" aria-label="Đóng">×</button>
+      <div id="modalContent"></div>
+    </div>
+  </dialog>
+
+  <script src="js/script.js"></script>
+</body>
+</html>
