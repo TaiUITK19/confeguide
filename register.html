@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Tạo tài khoản ConfGuide để lưu hội nghị và quản lý hồ sơ nghiên cứu.">
+  <title>Đăng ký | ConfGuide</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/auth.css">
+</head>
+<body class="auth-page">
+  <header class="site-header auth-header">
+    <div class="container auth-header-inner">
+      <a class="brand" href="index.html" aria-label="ConfGuide - Trang chủ">
+        <img src="images/logo.svg" alt="">
+        <span class="brand-copy"><strong>ConfGuide</strong><small>Find the Right Place for Your Research</small></span>
+      </a>
+      <nav class="auth-nav" aria-label="Tài khoản">
+        <a class="auth-nav-link" href="login.html">Đăng nhập</a>
+        <a class="auth-nav-link signup-link active" href="register.html" aria-current="page">Đăng ký</a>
+        <button class="theme-toggle" id="themeToggle" type="button" aria-label="Đổi giao diện" aria-pressed="false"><span aria-hidden="true">☼</span><span aria-hidden="true">☾</span></button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="auth-main">
+    <div class="auth-layout">
+      <section class="auth-promo" aria-labelledby="promoTitle">
+        <p class="auth-eyebrow"><span aria-hidden="true">✦</span> Khám phá cơ hội công bố nghiên cứu</p>
+        <h1 id="promoTitle">Tìm đúng hội nghị<br><span>cho nghiên cứu của bạn</span></h1>
+        <p class="auth-promo-copy">Tra cứu các hội nghị khoa học theo lĩnh vực nghiên cứu, thời hạn nộp bài và phạm vi tổ chức.</p>
+        <ul class="auth-benefits">
+          <li><span aria-hidden="true">✓</span> Tìm hội nghị theo lĩnh vực nghiên cứu</li>
+          <li><span aria-hidden="true">✓</span> Theo dõi thời hạn nộp bài</li>
+          <li><span aria-hidden="true">✓</span> Lưu và quản lý hội nghị quan tâm</li>
+        </ul>
+      </section>
+
+      <section class="login-card register-card" aria-labelledby="registerTitle">
+        <div class="login-heading">
+          <h2 id="registerTitle">Đăng ký tài khoản</h2>
+        </div>
+        <form id="registerForm" novalidate>
+          <div class="form-field">
+            <label for="fullName">Họ và tên</label>
+            <input id="fullName" name="name" type="text" autocomplete="name" required aria-describedby="nameError">
+            <p class="field-error" id="nameError" aria-live="polite"></p>
+          </div>
+          <div class="form-field">
+            <label for="registerEmail">Email</label>
+            <input id="registerEmail" name="email" type="email" autocomplete="email" required aria-describedby="registerEmailError">
+            <p class="field-error" id="registerEmailError" aria-live="polite"></p>
+          </div>
+          <div class="form-field">
+            <label for="registerPassword">Mật khẩu</label>
+            <div class="password-wrap">
+              <input id="registerPassword" name="password" type="password" autocomplete="new-password" required aria-describedby="passwordRequirements registerPasswordError">
+              <button class="password-toggle" type="button" data-password-target="registerPassword" aria-label="Hiện mật khẩu" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button>
+            </div>
+            <div class="password-requirements" id="passwordRequirements" aria-live="polite">
+              <span class="requirements-title">Mật khẩu cần có:</span>
+              <ul>
+                <li data-rule="length"><span aria-hidden="true">○</span> Ít nhất 8 ký tự</li>
+                <li data-rule="upper"><span aria-hidden="true">○</span> Có chữ hoa</li>
+                <li data-rule="lower"><span aria-hidden="true">○</span> Có chữ thường</li>
+                <li data-rule="number"><span aria-hidden="true">○</span> Có chữ số</li>
+              </ul>
+            </div>
+            <p class="field-error" id="registerPasswordError" aria-live="polite"></p>
+          </div>
+          <div class="form-field">
+            <label for="confirmPassword">Xác nhận mật khẩu</label>
+            <div class="password-wrap">
+              <input id="confirmPassword" name="confirmPassword" type="password" autocomplete="new-password" required aria-describedby="confirmPasswordError">
+              <button class="password-toggle" type="button" data-password-target="confirmPassword" aria-label="Hiện mật khẩu xác nhận" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button>
+            </div>
+            <p class="field-error" id="confirmPasswordError" aria-live="polite"></p>
+          </div>
+          <div class="terms-field">
+            <label class="terms-option">
+              <input id="termsAccepted" type="checkbox" aria-describedby="termsError">
+              <span>Tôi đồng ý với <a href="terms.html">Điều khoản sử dụng</a> và <a href="privacy.html">Chính sách bảo mật</a> của ConfGuide.</span>
+            </label>
+            <p class="field-error" id="termsError" aria-live="polite"></p>
+          </div>
+          <p class="form-message" id="registerMessage" role="status" aria-live="polite"></p>
+          <button class="login-submit" id="registerSubmit" type="submit" disabled><span class="button-label">Tạo tài khoản</span></button>
+        </form>
+        <p class="register-prompt">Đã có tài khoản? <a href="login.html">Đăng nhập</a></p>
+      </section>
+    </div>
+  </main>
+  <script src="js/auth.js"></script>
+</body>
+</html>
