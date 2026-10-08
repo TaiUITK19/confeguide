@@ -1,11 +1,130 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ConfGuide - Nhật ký hội nghị</title>
+  <link rel="stylesheet" href="css/logs.css">
 </head>
 <body>
-    
+  <header class="topbar">
+    <div class="brand">
+      
+      <div>
+        <div class="brand-name">ConfGuide</div>
+        <div class="brand-tagline">Find the Right Place for Your Research</div>
+      </div>
+    </div>
+
+    <nav class="nav">
+      <a href="index.html"><span>⌂</span> Trang chủ</a>
+      <a href="search.html"><span>⌕</span> Tra cứu</a>
+      <a class="active" href="logs.html">Nhật ký hội nghị</a>
+      <a href="profile.html">Hồ sơ</a>
+    </nav>
+
+    <div class="header-tools">
+      <button class="icon-btn" id="themeBtn" title="Đổi giao diện">☼</button>
+      <div class="avatar">NH</div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="hero-overlay"></div>
+      <div class="hero-content">
+        <div class="eyebrow">NHẬT KÝ HỘI NGHỊ</div>
+        <h1>Quản lý nhật ký hội nghị</h1>
+        <p>Theo dõi, thêm, chỉnh sửa và quản lý các hội nghị mà bạn đang quan tâm.</p>
+      </div>
+      <div class="quote">
+        <div>“Good conferences<br>create great research journeys.”</div>
+        <span></span>
+      </div>
+    </section>
+
+    <section class="content-card">
+      <div class="toolbar">
+        <div class="stat-box">
+          <div>Tổng số hội nghị đã lưu</div>
+          <strong id="totalCount">5</strong>
+        </div>
+        <button class="primary-btn" id="addBtn">＋&nbsp; Thêm hội nghị</button>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Tên hội nghị</th>
+              <th>Lĩnh vực</th>
+              <th>Hạn nộp bài</th>
+              <th>Hành động</th>
+            </tr>
+          </thead>
+          <tbody id="conferenceBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <div class="notice">
+      <div class="notice-icon">i</div>
+      <div>
+        <div>Bạn có thể thêm/sửa/xóa hội nghị trực tiếp trên trình duyệt.</div>
+        <div>Danh sách được lưu trữ vào trình duyệt (localStorage) và chỉ hiển thị trên thiết bị này.</div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="footer-brand">
+      <div class="footer-logo">◆</div>
+      <div>
+        <div class="brand-name">ConfGuide</div>
+        <div class="brand-tagline">Find the Right Place for Your Research</div>
+      </div>
+    </div>
+    <div class="footer-links">
+      <a href="#">Trang chủ</a>
+      <a href="#">Tra cứu</a>
+      <a href="#">Nhật ký hội nghị</a>
+      <a href="#">Hồ sơ</a>
+    </div>
+    <div class="socials">
+      <span>◉</span><span>in</span><span>✉</span>
+    </div>
+  </footer>
+
+  <div class="modal" id="conferenceModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h2 id="modalTitle">Thêm hội nghị</h2>
+        <button class="close-btn" id="closeModal">×</button>
+      </div>
+
+      <form id="conferenceForm">
+        <input type="hidden" id="editId">
+
+        <label>Tên hội nghị</label>
+        <input id="name" required placeholder="Ví dụ: ACM Symposium on Applied Computing">
+
+        <label>Logo / ký hiệu</label>
+        <input id="logo" placeholder="Ví dụ: ACM ATC">
+
+        <label>Lĩnh vực</label>
+        <input id="fields" required placeholder="machine learning, deep learning">
+
+        <label>Hạn nộp bài</label>
+        <input id="deadline" type="date" required>
+
+        <div class="form-actions">
+          <button type="button" class="cancel-btn" id="cancelBtn">Hủy</button>
+          <button type="submit" class="primary-btn">Lưu hội nghị</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="js/logs.js"></script>
 </body>
 </html>
