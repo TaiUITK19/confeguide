@@ -1,0 +1,25 @@
+{
+  "id": "cvpr-2026",
+  "code": "CVPR 2026",
+  "name": "IEEE/CVF Conference on Computer Vision and Pattern Recognition",
+  "eyebrow": "HỘI NGHỊ QUỐC TẾ HÀNG ĐẦU VỀ THỊ GIÁC MÁY TÍNH",
+  "summary": "Hội nghị hàng đầu thế giới về thị giác máy tính và nhận dạng mẫu, thu hút cộng đồng nghiên cứu toàn cầu với những công trình tiên tiến và có ảnh hưởng lớn.",
+  "location": "Vancouver, Canada",
+  "format": "Trực tiếp (In-person)",
+  "dates": "14 – 19 Jun 2026",
+  "publisher": "IEEE / Computer Vision Foundation (CVF)",
+  "deadline": "15 Jan 2026",
+  "daysLeft": 45,
+  "fields": "Computer Vision, Pattern Recognition, Machine Learning, AI",
+  "rank": "A",
+  "website": "https://cvpr.thecvf.com/",
+  "rating": 4.2,
+  "totalReviews": 128,
+  "tags": [
+    "computer vision",
+    "deep learning",
+    "multimodal"
+  ],
+  "quote": "“Advancing computer vision for a more open world.”",
+  "relatedCount": 12
+}
