@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CVPR 2026 - Chi Tiết Hội Nghị | ConfGuide</title>
+  <meta name="description" content="Chi tiết hội nghị IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR 2026) - Vancouver, Canada. Đánh giá cộng đồng, hạn nộp bài và hội nghị liên quan.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- CSS riêng biệt -->
+  <link rel="stylesheet" href="css/shared.css">
+  <link rel="stylesheet" href="css/chitiethoinghi.css">
+
+  <!-- Javascript riêng biệt -->
+  <script src="js/theme.js"></script>
+  <script src="js/ui.js" defer></script>
+  <script src="js/nav.js" defer></script>
+  <script src="js/data.js" defer></script>
+  <script src="js/chitiethoinghi.js" defer></script>
+</head>
+<body>
+
+  <!-- Hero Section (Full-width với hình nền & Mouse Glow) -->
+  <section class="hero" id="hero">
+    <div class="hero-img-bg" aria-hidden="true"></div>
+    <div class="hero-inner">
+      <div class="hero-text">
+        <div class="eyebrow">HỘI NGHỊ QUỐC TẾ HÀNG ĐẦU VỀ THỊ GIÁC MÁY TÍNH</div>
+        <h1>CVPR 2026</h1>
+        <h2>IEEE/CVF Conference on Computer Vision and Pattern Recognition</h2>
+        <p>Hội nghị hàng đầu thế giới về thị giác máy tính và nhận dạng mẫu, thu hút cộng đồng nghiên cứu toàn cầu với những công trình tiên tiến và có ảnh hưởng lớn.</p>
+        
+        <div class="tags">
+          <span class="tag">computer vision</span>
+          <span class="tag">deep learning</span>
+          <span class="tag">multimodal</span>
+        </div>
+        
+        <div class="meta">
+          <span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1d5fd8" stroke-width="2">
+              <path d="M12 22s7-6.5 7-12a7 7 0 0 0-14 0c0 5.5 7 12 7 12z" fill="#1d5fd8"/>
+              <circle cx="12" cy="10" r="2.5" fill="#fff" stroke="none"/>
+            </svg>
+            Vancouver, Canada
+          </span>
+          <i class="dot"></i>
+          <span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1d5fd8" stroke-width="2">
+              <rect x="3" y="5" width="18" height="16" rx="2"/>
+              <path d="M3 10h18M8 3v4M16 3v4"/>
+            </svg>
+            14 – 19 Jun 2026
+          </span>
+          <i class="dot"></i>
+          <span class="rank-badge rank-a">Rank A</span>
+        </div>
+      </div>
+
+      <!-- Deadline Widget nổi bên phải Hero -->
+      <div class="hero-side-widget">
+        <div class="deadline-card glow-card">
+          <div class="deadline-top">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1d5fd8" stroke-width="2">
+              <rect x="3" y="5" width="18" height="16" rx="2"/>
+              <path d="M3 10h18M8 3v4M16 3v4"/>
+            </svg>
+            <span class="lb">Hạn nộp bài còn</span>
+          </div>
+          <strong>45 ngày</strong>
+          <small>(15 Jan 2026)</small>
+        </div>
+        <div class="hero-quote">
+          “Advancing computer vision for a more open world.”
+          <small>— CVPR 2026</small>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Khung nội dung chính -->
+  <main class="wrap">
+    <!-- Thanh điều hướng Tab nội bộ -->
+    <div class="inpage-tabs" role="tablist" aria-label="Nội dung hội nghị">
+      <button type="button" class="inpage-tab active" id="tabBtnDetail" role="tab" aria-selected="true" onclick="switchDetailTab('detail')">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+        </svg>
+        <span>Thông tin chi tiết</span>
+      </button>
+      <button type="button" class="inpage-tab" id="tabBtnReviews" role="tab" aria-selected="false" onclick="switchDetailTab('reviews')">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+        </svg>
+        <span>Đánh giá cộng đồng (128)</span>
+      </button>
+      <button type="button" class="inpage-tab" id="tabBtnRelated" role="tab" aria-selected="false" onclick="switchDetailTab('related')">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="7" height="7"/>
+          <rect x="14" y="3" width="7" height="7"/>
+          <rect x="14" y="14" width="7" height="7"/>
+          <rect x="3" y="14" width="7" height="7"/>
+        </svg>
+        <span>Hội nghị liên quan (12)</span>
+      </button>
+    </div>
+
+    <!-- Panel 1: Thông tin chi tiết hội nghị -->
+    <div id="panelDetail" class="tab-panel">
+      <div class="main">
+        <section class="card desc">
+          <h3>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1d5fd8" stroke-width="1.8">
+              <path d="M6 2h8l5 5v15H6z"/>
+              <path d="M14 2v5h5M9 12h7M9 16h7"/>
+            </svg>
+            Mô tả chi tiết hội nghị
+          </h3>
+          <p>CVPR (IEEE/CVF Conference on Computer Vision and Pattern Recognition) là hội nghị quốc tế uy tín nhất thế giới trong lĩnh vực thị giác máy tính và nhận dạng mẫu. Được tổ chức thường niên bởi IEEE và Computer Vision Foundation (CVF), CVPR là diễn đàn hàng đầu để công bố các nghiên cứu đột phá, chia sẻ ý tưởng mới và thúc đẩy hợp tác học thuật giữa các nhà nghiên cứu, kỹ sư và chuyên gia trong lĩnh vực trí tuệ nhân tạo và thị giác máy tính.</p>
+          <p>CVPR 2026 sẽ được tổ chức tại Vancouver, Canada, quy tụ các nhà nghiên cứu, học giả và chuyên gia từ khắp nơi trên thế giới. Hội nghị bao gồm các phiên báo cáo khoa học, hội thảo chuyên đề (workshops), bài giảng mới (tutorials), và các sự kiện kết nối cộng đồng nghiên cứu.</p>
+          <hr>
+          <div class="info-title">
+            <svg width="22" height="22" viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="11" fill="#1d5fd8"/>
+              <rect x="11" y="10" width="2" height="8" fill="#fff"/>
+              <circle cx="12" cy="7" r="1.4" fill="#fff"/>
+            </svg>
+            Thông tin chi tiết
+          </div>
+          <div class="info">
+            <div class="row">
+              <span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="#1d5fd8"><path d="M12 22s7-6.5 7-12a7 7 0 0 0-14 0c0 5.5 7 12 7 12z"/><circle cx="12" cy="10" r="2.5" fill="#fff"/></svg></span>
+              <span class="k">Địa điểm</span><span>:</span><span class="v">Vancouver, Canada</span>
+            </div>
+            <div class="row">
+              <span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1d5fd8" stroke-width="2"><rect x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
+              <span class="k">Hình thức</span><span>:</span><span class="v">Trực tiếp (In-person)</span>
+            </div>
+            <div class="row">
+              <span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1d5fd8" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></span>
+              <span class="k">Ngày tổ chức</span><span>:</span><span class="v">14 – 19 Jun 2026</span>
+            </div>
+            <div class="row">
+              <span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="#1d5fd8"><circle cx="9" cy="8" r="3.5"/><path d="M2 21c0-4 3-6 7-6s7 2 7 6z"/><circle cx="17" cy="9" r="2.6"/><path d="M17 14c3 0 5 1.8 5 5h-4"/></svg></span>
+              <span class="k">Nhà xuất bản</span><span>:</span><span class="v">IEEE / Computer Vision Foundation (CVF)</span>
+            </div>
+            <div class="row">
+              <span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1d5fd8" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>
+              <span class="k">Hạn nộp bài</span><span>:</span><span class="v">15 Jan 2026 <em>(còn 45 ngày)</em></span>
+            </div>
+            <div class="row">
+              <span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="#1d5fd8"><path d="M3 12V3h9l9 9-9 9z"/><circle cx="7.5" cy="7.5" r="1.5" fill="#fff"/></svg></span>
+              <span class="k">Lĩnh vực</span><span>:</span><span class="v">Computer Vision, Pattern Recognition, Machine Learning, AI</span>
+            </div>
+            <div class="row">
+              <span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1d5fd8" stroke-width="2" stroke-linejoin="round"><path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4 6.1 20.5l1.2-6.5L2.500 9.400l6.600-.9z"/></svg></span>
+              <span class="k">Xếp hạng</span><span>:</span><span class="v"><span class="badge">A</span></span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Sidebar bên phải -->
+        <aside class="side">
+          <div class="card">
+            <button type="button" class="btn-line" id="saveBtn" aria-pressed="false">
+              <svg width="22" height="22" viewBox="0 0 24 24"><path class="star-fill" d="M12 2.500l2.900 6 6.600.9-4.800 4.600 1.200 6.500L12 17.400 6.100 20.500l1.200-6.500L2.500 9.400l6.600-.9z"/></svg>
+              <span id="saveText">Lưu hội nghị này</span>
+            </button>
+          </div>
+
+          <div class="card rate-box clickable" id="openReviews" role="link" tabindex="0" title="Nhấp để xem tất cả 128 đánh giá">
+            <div class="avg">Đánh giá:
+              <svg width="18" height="18" viewBox="0 0 24 24"><path d="M12 2.500l2.900 6 6.600.9-4.800 4.600 1.200 6.500L12 17.400 6.100 20.500l1.200-6.500L2.500 9.400l6.600-.9z" fill="#f5b301"/></svg>
+              <svg width="18" height="18" viewBox="0 0 24 24" style="margin-left:-4px"><path d="M12 2.500l2.900 6 6.600.9-4.800 4.600 1.200 6.500L12 17.400 6.100 20.500l1.200-6.500L2.500 9.400l6.600-.9z" fill="#f5b301"/></svg>
+              <svg width="18" height="18" viewBox="0 0 24 24" style="margin-left:-4px"><path d="M12 2.500l2.900 6 6.600.9-4.800 4.600 1.200 6.500L12 17.400 6.100 20.500l1.200-6.500L2.500 9.400l6.600-.9z" fill="#f5b301"/></svg>
+              <svg width="18" height="18" viewBox="0 0 24 24" style="margin-left:-4px"><path d="M12 2.500l2.900 6 6.600.9-4.800 4.600 1.200 6.500L12 17.400 6.100 20.500l1.200-6.500L2.500 9.400l6.600-.9z" fill="#f5b301"/></svg>
+              <svg width="18" height="18" viewBox="0 0 24 24" style="margin-left:-4px"><path d="M12 2.500l2.900 6 6.600.9-4.800 4.600 1.200 6.500L12 17.400 6.100 20.500l1.200-6.500L2.500 9.400l6.600-.9z" fill="none" stroke="#f5b301" stroke-width="1.6" stroke-linejoin="round"/></svg>
+              (4.2)
+            </div>
+            <small>Dựa trên 128 đánh giá từ cộng đồng (Nhấn để xem)</small>
+          </div>
+
+          <div class="card rate-box">
+            <h4>Chấm điểm của bạn</h4>
+            <div class="stars" id="stars"></div>
+            <div id="rateMsg" aria-live="polite"></div>
+          </div>
+
+          <div class="card">
+            <a class="btn-line" href="https://cvpr.thecvf.com/" target="_blank" rel="noopener noreferrer" id="webBtn">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M10 14a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 10a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg>
+              Website chính thức
+            </a>
+          </div>
+        </aside>
+      </div>
+    </div>
+
+    <!-- Panel 2: Đánh giá cộng đồng -->
+    <div id="panelReviews" class="tab-panel" hidden>
+      <h2 class="rv-page-title">Đánh giá của cộng đồng · CVPR 2026</h2>
+      <section class="card rv-summary">
+        <div class="rv-score">
+          <strong id="rvAvg">4.2</strong>
+          <div class="rv-stars-lg" id="rvStars"></div>
+          <small id="rvTotal">128 đánh giá</small>
+        </div>
+        <div class="rv-bars" id="rvBars"></div>
+      </section>
+      <h3 class="rv-list-title" id="rvListTitle">Tất cả đánh giá (128)</h3>
+      <div id="rvList"></div>
+    </div>
+
+    <!-- Panel 3: Hội nghị liên quan -->
+    <div id="panelRelated" class="tab-panel" hidden>
+      <h3 style="font-size:20px;color:var(--navy);margin-bottom:16px;font-weight:700;">Hội nghị cùng chủ đề (Computer Vision / AI)</h3>
+      <div class="grid" id="relGrid"></div>
+    </div>
+  </main>
+
+</body>
+</html>
