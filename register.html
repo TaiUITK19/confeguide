@@ -5,26 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Tạo tài khoản ConfGuide để lưu hội nghị và quản lý hồ sơ nghiên cứu.">
   <title>Đăng ký | ConfGuide</title>
+  
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="css/base.css">
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/auth.css">
 </head>
 <body class="auth-page">
-  <header class="site-header auth-header">
-    <div class="container auth-header-inner">
-      <a class="brand" href="index.html" aria-label="ConfGuide - Trang chủ">
-        <img src="images/logo.svg" alt="">
-        <span class="brand-copy"><strong>ConfGuide</strong><small>Find the Right Place for Your Research</small></span>
-      </a>
-      <nav class="auth-nav" aria-label="Tài khoản">
-        <a class="auth-nav-link" href="login.html">Đăng nhập</a>
-        <a class="auth-nav-link signup-link active" href="register.html" aria-current="page">Đăng ký</a>
-        <button class="theme-toggle" id="themeToggle" type="button" aria-label="Đổi giao diện" aria-pressed="false"><span aria-hidden="true">☼</span><span aria-hidden="true">☾</span></button>
-      </nav>
-    </div>
-  </header>
+  <!-- Shared Header -->
+  <div id="site-header"></div>
 
   <main class="auth-main">
     <div class="auth-layout">
@@ -58,41 +50,42 @@
             <label for="registerPassword">Mật khẩu</label>
             <div class="password-wrap">
               <input id="registerPassword" name="password" type="password" autocomplete="new-password" required aria-describedby="passwordRequirements registerPasswordError">
-              <button class="password-toggle" type="button" data-password-target="registerPassword" aria-label="Hiện mật khẩu" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button>
-            </div>
-            <div class="password-requirements" id="passwordRequirements" aria-live="polite">
-              <span class="requirements-title">Mật khẩu cần có:</span>
-              <ul>
-                <li data-rule="length"><span aria-hidden="true">○</span> Ít nhất 8 ký tự</li>
-                <li data-rule="upper"><span aria-hidden="true">○</span> Có chữ hoa</li>
-                <li data-rule="lower"><span aria-hidden="true">○</span> Có chữ thường</li>
-                <li data-rule="number"><span aria-hidden="true">○</span> Có chữ số</li>
-              </ul>
+              <button class="password-toggle" id="registerPasswordToggle" type="button" aria-label="Hiện mật khẩu" aria-pressed="false" data-password-target="registerPassword"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button>
             </div>
             <p class="field-error" id="registerPasswordError" aria-live="polite"></p>
+            <ul class="password-requirements" id="passwordRequirements" aria-label="Yêu cầu mật khẩu">
+              <li data-rule="length"><span aria-hidden="true">○</span> Ít nhất 8 ký tự</li>
+              <li data-rule="upper"><span aria-hidden="true">○</span> Có chữ in hoa (A-Z)</li>
+              <li data-rule="lower"><span aria-hidden="true">○</span> Có chữ thường (a-z)</li>
+              <li data-rule="number"><span aria-hidden="true">○</span> Có ít nhất 1 chữ số</li>
+            </ul>
           </div>
           <div class="form-field">
             <label for="confirmPassword">Xác nhận mật khẩu</label>
             <div class="password-wrap">
               <input id="confirmPassword" name="confirmPassword" type="password" autocomplete="new-password" required aria-describedby="confirmPasswordError">
-              <button class="password-toggle" type="button" data-password-target="confirmPassword" aria-label="Hiện mật khẩu xác nhận" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button>
+              <button class="password-toggle" id="confirmPasswordToggle" type="button" aria-label="Hiện mật khẩu" aria-pressed="false" data-password-target="confirmPassword"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button>
             </div>
             <p class="field-error" id="confirmPasswordError" aria-live="polite"></p>
           </div>
-          <div class="terms-field">
-            <label class="terms-option">
-              <input id="termsAccepted" type="checkbox" aria-describedby="termsError">
-              <span>Tôi đồng ý với <a href="terms.html">Điều khoản sử dụng</a> và <a href="privacy.html">Chính sách bảo mật</a> của ConfGuide.</span>
-            </label>
+          <div class="form-options">
+            <label class="terms-option"><input id="termsAccepted" name="terms" type="checkbox" required aria-describedby="termsError"><span>Tôi đồng ý với <a href="terms.html" target="_blank">Điều khoản sử dụng</a> và <a href="privacy.html" target="_blank">Chính sách bảo mật</a></span></label>
             <p class="field-error" id="termsError" aria-live="polite"></p>
           </div>
           <p class="form-message" id="registerMessage" role="status" aria-live="polite"></p>
-          <button class="login-submit" id="registerSubmit" type="submit" disabled><span class="button-label">Tạo tài khoản</span></button>
+          <button class="login-submit" id="registerSubmit" type="submit" disabled><span class="button-label">Đăng ký tài khoản</span></button>
         </form>
+        <div class="auth-divider"><span>Hoặc đăng ký với</span></div>
+        <button class="google-login" id="googleRegister" type="button"><svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#4285F4" d="M43.6 24.5c0-1.4-.1-2.8-.4-4.1H24v7.8h11a9.4 9.4 0 0 1-4.1 6.2v5.1h6.7c3.9-3.6 6-8.8 6-15Z"/><path fill="#34A853" d="M24 44c5.5 0 10.1-1.8 13.5-4.8l-6.7-5.1c-1.9 1.3-4.1 2-6.8 2-5.2 0-9.6-3.5-11.2-8.2H5.9v5.3A20 20 0 0 0 24 44Z"/><path fill="#FBBC05" d="M12.8 27.9a12 12 0 0 1 0-7.7v-5.3H5.9a20 20 0 0 0 0 18.3l6.9-5.3Z"/><path fill="#EA4335" d="M24 12c3 0 5.7 1 7.8 3.1l5.9-5.9A19.7 19.7 0 0 0 24 4 20 20 0 0 0 5.9 14.9l6.9 5.3C14.4 15.5 18.8 12 24 12Z"/></svg><span>Đăng ký với Google</span></button>
         <p class="register-prompt">Đã có tài khoản? <a href="login.html">Đăng nhập</a></p>
       </section>
     </div>
   </main>
+
+  <!-- Shared Footer -->
+  <div id="site-footer"></div>
+
+  <script src="js/layout.js"></script>
   <script src="js/auth.js"></script>
 </body>
 </html>

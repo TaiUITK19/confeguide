@@ -20,18 +20,18 @@ const defaultConferences = [
     name: "International Conference on Learning Representations",
     logo: "ICLR<br>2026",
     fields: ["machine learning", "representation learning"],
-    deadline: "2025-10-22"
+    deadline: "2026-10-22"
   },
   {
     id: 4,
-    name: "The International Symposium on Information and Communication ...",
+    name: "The International Symposium on Information and Communication Technology",
     logo: "SOICT<br>2026",
     fields: ["information systems", "computer science"],
     deadline: "2026-09-16"
   },
   {
     id: 5,
-    name: "International Conference on Machine Learning and Pattern ...",
+    name: "International Conference on Machine Learning and Pattern Recognition",
     logo: "MAPR<br>2026",
     fields: ["machine learning", "pattern recognition"],
     deadline: "2026-05-15"
@@ -50,6 +50,7 @@ function save() {
 }
 
 function formatDate(date) {
+  if (!date) return "Chưa cập nhật";
   const d = new Date(date + "T00:00:00");
   return d.toLocaleDateString("vi-VN", {
     day: "2-digit",
@@ -59,19 +60,21 @@ function formatDate(date) {
 }
 
 function logoClass(logo) {
+  if (!logo) return "";
   if (logo.toLowerCase().includes("soict")) return "red";
   if (logo.toLowerCase().includes("mapr")) return "yellow";
   return "";
 }
 
 function render() {
-  totalCount.textContent = conferences.length;
+  if (!body) return;
+  if (totalCount) totalCount.textContent = conferences.length;
 
   if (conferences.length === 0) {
     body.innerHTML = `
       <tr>
         <td colspan="4" style="text-align:center;padding:35px;color:#6d87a9">
-          Chưa có hội nghị nào được lưu.
+          Chưa có hội nghị nào trong danh sách theo dõi. Nhấn "Thêm hội nghị" để bắt đầu.
         </td>
       </tr>`;
     return;
@@ -81,13 +84,13 @@ function render() {
     <tr>
       <td>
         <div class="conference-name">
-          <div class="logo-placeholder ${logoClass(c.logo)}">${c.logo}</div>
+          <div class="logo-placeholder ${logoClass(c.logo)}">${c.logo || 'CONF'}</div>
           <div class="name-text">${escapeHtml(c.name)}</div>
         </div>
       </td>
       <td>
         <div class="tags">
-          ${c.fields.map(f => `<span class="tag">${escapeHtml(f)}</span>`).join("")}
+          ${(c.fields || []).map(f => `<span class="tag">${escapeHtml(f)}</span>`).join("")}
         </div>
       </td>
       <td>
@@ -99,7 +102,7 @@ function render() {
       <td>
         <div class="actions">
           <button class="action-btn" onclick="editConference(${c.id})">✎ &nbsp; Sửa</button>
-          <button class="action-btn delete" onclick="deleteConference(${c.id})">♙ &nbsp; Xóa</button>
+          <button class="action-btn delete" onclick="deleteConference(${c.id})">✕ &nbsp; Xóa</button>
         </div>
       </td>
     </tr>
@@ -107,7 +110,8 @@ function render() {
 }
 
 function escapeHtml(value) {
-  return value
+  if (!value) return "";
+  return String(value)
     .replaceAll("&", "&amp;")
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;")
@@ -116,7 +120,7 @@ function escapeHtml(value) {
 }
 
 function openAddModal() {
-  document.getElementById("modalTitle").textContent = "Thêm hội nghị";
+  document.getElementById("modalTitle").textContent = "Thêm hội nghị theo dõi";
   form.reset();
   document.getElementById("editId").value = "";
   modal.classList.add("show");
@@ -130,8 +134,8 @@ function editConference(id) {
   document.getElementById("modalTitle").textContent = "Chỉnh sửa hội nghị";
   document.getElementById("editId").value = c.id;
   document.getElementById("name").value = c.name;
-  document.getElementById("logo").value = c.logo.replaceAll("<br>", " ");
-  document.getElementById("fields").value = c.fields.join(", ");
+  document.getElementById("logo").value = (c.logo || "").replaceAll("<br>", " ");
+  document.getElementById("fields").value = (c.fields || []).join(", ");
   document.getElementById("deadline").value = c.deadline;
 
   modal.classList.add("show");
@@ -141,68 +145,72 @@ function deleteConference(id) {
   const c = conferences.find(item => item.id === id);
   if (!c) return;
 
-  if (confirm(`Bạn có chắc muốn xóa "${c.name}" không?`)) {
+  if (confirm(`Bạn có chắc muốn xóa "${c.name}" khỏi danh sách theo dõi không?`)) {
     conferences = conferences.filter(item => item.id !== id);
     save();
     render();
   }
 }
 
-form.addEventListener("submit", event => {
-  event.preventDefault();
+if (form) {
+  form.addEventListener("submit", event => {
+    event.preventDefault();
 
-  const id = document.getElementById("editId").value;
-  const name = document.getElementById("name").value.trim();
-  const logo = document.getElementById("logo").value.trim().replace(/\s+/g, " ");
-  const fields = document.getElementById("fields").value
-    .split(",")
-    .map(x => x.trim())
-    .filter(Boolean);
-  const deadline = document.getElementById("deadline").value;
+    const id = document.getElementById("editId").value;
+    const name = document.getElementById("name").value.trim();
+    const logo = document.getElementById("logo").value.trim().replace(/\s+/g, " ");
+    const fields = document.getElementById("fields").value
+      .split(",")
+      .map(x => x.trim())
+      .filter(Boolean);
+    const deadline = document.getElementById("deadline").value;
 
-  if (id) {
-    const index = conferences.findIndex(c => c.id === Number(id));
-    conferences[index] = {
-      ...conferences[index],
-      name,
-      logo: logo.replace(" ", "<br>"),
-      fields,
-      deadline
-    };
-  } else {
-    conferences.push({
-      id: Date.now(),
-      name,
-      logo: logo.replace(" ", "<br>"),
-      fields,
-      deadline
-    });
-  }
+    if (id) {
+      const index = conferences.findIndex(c => c.id === Number(id));
+      if (index !== -1) {
+        conferences[index] = {
+          ...conferences[index],
+          name,
+          logo: logo.replace(" ", "<br>"),
+          fields,
+          deadline
+        };
+      }
+    } else {
+      conferences.push({
+        id: Date.now(),
+        name,
+        logo: logo.replace(" ", "<br>"),
+        fields,
+        deadline
+      });
+    }
 
-  save();
-  render();
-  modal.classList.remove("show");
-});
+    save();
+    render();
+    modal.classList.remove("show");
+  });
+}
 
-document.getElementById("addBtn").addEventListener("click", openAddModal);
-document.getElementById("closeModal").addEventListener("click", () => modal.classList.remove("show"));
-document.getElementById("cancelBtn").addEventListener("click", () => modal.classList.remove("show"));
+const addBtn = document.getElementById("addBtn");
+const closeBtn = document.getElementById("closeModal");
+const cancelBtn = document.getElementById("cancelBtn");
 
-modal.addEventListener("click", event => {
-  if (event.target === modal) modal.classList.remove("show");
-});
+if (addBtn) addBtn.addEventListener("click", openAddModal);
+if (closeBtn) closeBtn.addEventListener("click", () => modal.classList.remove("show"));
+if (cancelBtn) cancelBtn.addEventListener("click", () => modal.classList.remove("show"));
+
+if (modal) {
+  modal.addEventListener("click", event => {
+    if (event.target === modal) modal.classList.remove("show");
+  });
+}
 
 document.addEventListener("keydown", event => {
-  if (event.key === "Escape") modal.classList.remove("show");
+  if (event.key === "Escape" && modal) modal.classList.remove("show");
 });
 
-document.getElementById("themeBtn").addEventListener("click", () => {
-  document.body.classList.toggle("dark");
-  localStorage.setItem("darkMode", document.body.classList.contains("dark"));
-});
-
-if (localStorage.getItem("darkMode") === "true") {
-  document.body.classList.add("dark");
-}
+window.editConference = editConference;
+window.deleteConference = deleteConference;
 
 render();

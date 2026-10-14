@@ -1,0 +1,6 @@
+/* =========================================================
+   ConfGuide — Style Entry Point / Alias
+   Import main design tokens & styles from home.css
+   ========================================================= */
+
+@import url("home.css");

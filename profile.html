@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Hồ sơ nghiên cứu cá nhân, danh sách hội nghị đã lưu và tiến độ nộp bài | ConfGuide.">
+  <title>Hồ sơ nghiên cứu | ConfGuide</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/profile.css">
+</head>
+<body>
+
+  <!-- Shared Header -->
+  <div id="site-header"></div>
+
+  <!-- Main Content -->
+  <main class="profile-page-main">
+    <div class="container">
+      
+      <!-- Banner & Thông báo trạng thái -->
+      <div class="profile-page-alert" id="pageAlert" role="alert" aria-live="polite"></div>
+
+      <!-- ================= 1. HERO PROFILE CARD ================= -->
+      <section class="profile-hero-card" aria-label="Thông tin hồ sơ nghiên cứu cá nhân">
+        <div class="profile-hero-banner"></div>
+        
+        <div class="profile-hero-content">
+          <div class="profile-hero-top-row">
+            
+            <!-- Avatar lớn -->
+            <div class="profile-avatar-outer">
+              <div class="profile-avatar-display" id="profileAvatarBig">U</div>
+              <button type="button" class="profile-avatar-upload-btn" id="triggerAvatarUploadBtn" title="Tải ảnh đại diện mới" aria-label="Tải ảnh đại diện">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                  <circle cx="12" cy="13" r="4"></circle>
+                </svg>
+              </button>
+              <span class="profile-avatar-badge" title="Tài khoản nghiên cứu đã xác thực">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+              </span>
+            </div>
+
+            <!-- Nút hành động chính -->
+            <div class="profile-hero-actions">
+              <button type="button" class="btn btn-primary" id="openEditProfileBtn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M12 20h9"></path>
+                  <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                </svg>
+                <span>Chỉnh sửa hồ sơ</span>
+              </button>
+              <a href="search.html" class="btn btn-secondary">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <span>Tra cứu hội nghị</span>
+              </a>
+              <a href="tracker.html" class="btn btn-secondary">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                  <polyline points="14 2 14 8 20 8"></polyline>
+                </svg>
+                <span>Theo dõi nộp bài</span>
+              </a>
+            </div>
+
+          </div>
+
+          <!-- Thông tin định danh -->
+          <div class="profile-identity-block">
+            <h1 class="profile-full-name" id="profileNameDisplay">Nhà nghiên cứu</h1>
+            <p class="profile-headline" id="profileTitleAffiliation">Nghiên cứu sinh / Giảng viên • Đại học Quốc gia TP.HCM</p>
+
+            <!-- Chips thông tin phụ -->
+            <div class="profile-meta-chips">
+              <div class="profile-meta-chip">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                  <polyline points="22,6 12,13 2,6"></polyline>
+                </svg>
+                <span id="profileEmailDisplay">user@confguide.vn</span>
+              </div>
+
+              <div class="profile-meta-chip" id="profileUsernameChip">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+                <span id="profileUsernameDisplay">@user</span>
+              </div>
+
+              <a href="#" target="_blank" rel="noopener noreferrer" class="profile-meta-chip profile-scholar-chip" id="profileScholarLink" style="display: none;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                  <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+                </svg>
+                <span>Hồ sơ Google Scholar / ORCID</span>
+              </a>
+            </div>
+
+            <!-- Lĩnh vực nghiên cứu -->
+            <div class="profile-fields-wrap">
+              <span class="profile-fields-label">Lĩnh vực nghiên cứu:</span>
+              <div class="profile-fields-chips" id="profileFieldsChips">
+                <!-- Nạp động -->
+              </div>
+            </div>
+
+            <!-- Giới thiệu / Bio -->
+            <div class="profile-bio-box" id="profileBioBox">
+              <p class="profile-bio-text" id="profileBioText">
+                Quan tâm đến các hội nghị khoa học quốc tế uy tín thuộc xếp hạng CORE A*/A.
+              </p>
+            </div>
+
+          </div>
+
+        </div>
+      </section>
+
+
+      <!-- ================= 2. THỐNG KÊ HOẠT ĐỘNG NGHIÊN CỨU ================= -->
+      <section class="profile-stats-grid" aria-label="Thống kê hoạt động nghiên cứu">
+        
+        <div class="profile-stat-box">
+          <div class="stat-icon-circle stat-icon-blue">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+            </svg>
+          </div>
+          <div class="stat-content">
+            <div class="stat-num" id="statSavedNum">0</div>
+            <div class="stat-title">Hội nghị đã lưu</div>
+            <div class="stat-hint">Đang theo dõi mốc nộp</div>
+          </div>
+        </div>
+
+        <div class="profile-stat-box">
+          <div class="stat-icon-circle stat-icon-navy">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+            </svg>
+          </div>
+          <div class="stat-content">
+            <div class="stat-num" id="statTrackerNum">0</div>
+            <div class="stat-title">Bài báo trong Tracker</div>
+            <div class="stat-hint">Tiến độ chuẩn bị bản thảo</div>
+          </div>
+        </div>
+
+        <div class="profile-stat-box">
+          <div class="stat-icon-circle stat-icon-green">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+          </div>
+          <div class="stat-content">
+            <div class="stat-num" style="font-size: 20px; font-weight: 700; color: var(--green);">AoE (UTC-12)</div>
+            <div class="stat-title">Múi giờ deadline</div>
+            <div class="stat-hint">Tối đa hóa thời gian nộp bài</div>
+          </div>
+        </div>
+
+        <div class="profile-stat-box">
+          <div class="stat-icon-circle stat-icon-amber">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            </svg>
+          </div>
+          <div class="stat-content">
+            <div class="stat-num" style="font-size: 20px; font-weight: 700; color: #b45309;" id="statUserStatus">Đã xác thực</div>
+            <div class="stat-title">Tài khoản học thuật</div>
+            <div class="stat-hint">Lưu trữ bảo mật trên trình duyệt</div>
+          </div>
+        </div>
+
+      </section>
+
+
+      <!-- ================= 3. DANH SÁCH HỘI NGHỊ ĐÃ LƯU THEO DÕI ================= -->
+      <section class="profile-section-card" aria-label="Danh sách hội nghị đã lưu">
+        
+        <div class="section-card-header">
+          <div>
+            <h2 class="section-card-title">Hội nghị đã lưu theo dõi</h2>
+            <p class="section-card-subtitle">Các hội nghị bạn đã bookmark từ trang Tra cứu hoặc trang Chi tiết để theo dõi hạn chót nộp bài.</p>
+          </div>
+          <div class="section-card-header-actions">
+            <a href="search.html" class="btn btn-secondary" style="font-size: 13px; padding: 7px 14px;">
+              <span>+ Tìm thêm hội nghị</span>
+            </a>
+            <button type="button" class="btn btn-secondary" id="clearAllSavedBtn" style="font-size: 13px; padding: 7px 14px; color: var(--red);">
+              <span>Xóa tất cả</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="profile-page-alert" id="savedListAlert" role="alert" aria-live="polite"></div>
+
+        <!-- Toolbar tìm kiếm trong danh sách đã lưu -->
+        <div class="saved-search-toolbar">
+          <div class="saved-search-input-wrap">
+            <svg class="saved-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input type="text" id="savedSearchInput" class="saved-search-input" placeholder="Lọc nhanh danh sách đã lưu theo tên hội nghị...">
+          </div>
+        </div>
+
+        <!-- Container danh sách thẻ -->
+        <div class="saved-list-wrapper" id="savedConferencesList">
+          <!-- Render động từ LocalStorage -->
+        </div>
+
+      </section>
+
+
+      <!-- ================= 4. TIẾN ĐỘ NỘP BÀI GẦN ĐÂY (TRACKER OVERVIEW) ================= -->
+      <section class="profile-section-card" aria-label="Tiến độ bài báo trong Tracker">
+        
+        <div class="section-card-header">
+          <div>
+            <h2 class="section-card-title">Tiến độ bài báo đang chuẩn bị (Tracker)</h2>
+            <p class="section-card-subtitle">Tổng hợp trạng thái các bản thảo và bài báo khoa học trong hệ thống theo dõi nộp bài của bạn.</p>
+          </div>
+          <div class="section-card-header-actions">
+            <a href="tracker.html" class="btn btn-primary" style="font-size: 13px; padding: 7px 16px;">
+              <span>Mở bảng Tracker đầy đủ &rarr;</span>
+            </a>
+          </div>
+        </div>
+
+        <div class="tracker-preview-wrapper" id="trackerPreviewContainer">
+          <!-- Render động từ LocalStorage 'confguides' -->
+        </div>
+
+      </section>
+
+    </div>
+  </main>
+
+
+  <!-- ================= MODAL: CHỈNH SỬA HỒ SƠ CÁ NHÂN ================= -->
+  <div class="layout-modal" id="editProfileModal" role="dialog" aria-modal="true" aria-labelledby="editModalTitle" hidden>
+    <div class="layout-modal-backdrop" id="editProfileBackdrop"></div>
+    <div class="layout-modal-box">
+      
+      <div class="layout-modal-header">
+        <h2 id="editModalTitle" class="layout-modal-title">Chỉnh sửa hồ sơ cá nhân</h2>
+        <button type="button" class="layout-modal-close-btn" id="closeEditProfileBtn" aria-label="Đóng cửa sổ">&times;</button>
+      </div>
+
+      <div class="layout-modal-body">
+        <div class="modal-alert" id="editModalAlert" role="alert"></div>
+
+        <form id="editProfileForm" novalidate>
+          
+          <!-- Quản lý ảnh đại diện -->
+          <div class="modal-avatar-editor">
+            <div class="modal-avatar-preview-wrap">
+              <div class="modal-avatar-preview" id="modalAvatarPreview">U</div>
+            </div>
+            <div class="modal-avatar-actions">
+              <div class="modal-avatar-btn-row">
+                <button type="button" class="btn btn-secondary" id="modalUploadAvatarBtn" style="font-size: 13px; padding: 7px 14px;">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="17 8 12 3 7 8"></polyline>
+                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                  </svg>
+                  <span>Tải ảnh mới</span>
+                </button>
+                <button type="button" class="btn btn-secondary" id="modalRemoveAvatarBtn" style="font-size: 13px; padding: 7px 12px; color: var(--red);" title="Xóa ảnh và dùng chữ cái đầu">
+                  <span>Xóa ảnh</span>
+                </button>
+              </div>
+              <p class="modal-hint" style="margin-top: 6px;">Hỗ trợ JPG, PNG, WEBP. Ảnh tự động được căn giữa và nén tối ưu (200x200px).</p>
+            </div>
+          </div>
+
+          <div class="modal-form-grid-2">
+            <div class="modal-form-group">
+              <label for="editFullName">Họ và tên <span style="color: var(--red);">*</span></label>
+              <input type="text" id="editFullName" class="modal-input" placeholder="Nguyễn Văn A" required>
+            </div>
+            <div class="modal-form-group">
+              <label for="editUsername">Tên đăng nhập</label>
+              <input type="text" id="editUsername" class="modal-input" readonly style="background: var(--surface-muted); cursor: not-allowed;" title="Tên đăng nhập không thể thay đổi">
+            </div>
+          </div>
+
+          <div class="modal-form-grid-2">
+            <div class="modal-form-group">
+              <label for="editEmail">Email liên hệ <span style="color: var(--red);">*</span></label>
+              <input type="email" id="editEmail" class="modal-input" placeholder="user@gmail.com" required>
+            </div>
+            <div class="modal-form-group">
+              <label for="editTitle">Chức danh / Học vị</label>
+              <input type="text" id="editTitle" class="modal-input" placeholder="Nghiên cứu sinh / Giảng viên / Thạc sĩ">
+            </div>
+          </div>
+
+          <div class="modal-form-grid-2">
+            <div class="modal-form-group">
+              <label for="editAffiliation">Đơn vị công tác / Trường / Viện</label>
+              <input type="text" id="editAffiliation" class="modal-input" placeholder="Đại học Công nghệ Thông tin - ĐHQG-HCM">
+            </div>
+            <div class="modal-form-group">
+              <label for="editScholar">Liên kết Google Scholar / ORCID</label>
+              <input type="url" id="editScholar" class="modal-input" placeholder="https://scholar.google.com/citations?user=...">
+            </div>
+          </div>
+
+          <div class="modal-form-group">
+            <label for="editFields">Lĩnh vực nghiên cứu chính</label>
+            <input type="text" id="editFields" class="modal-input" placeholder="Trí tuệ nhân tạo, Thị giác máy tính, Xử lý ngôn ngữ tự nhiên...">
+            <span class="modal-hint">Ngăn cách các lĩnh vực nghiên cứu bằng dấu phẩy (,).</span>
+          </div>
+
+          <div class="modal-form-group">
+            <label for="editBio">Giới thiệu bản thân &amp; Hướng nghiên cứu</label>
+            <textarea id="editBio" class="modal-input" rows="3" placeholder="Giới thiệu tóm tắt hướng nghiên cứu và các đề tài quan tâm..."></textarea>
+          </div>
+
+          <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border);">
+            <button type="button" class="btn btn-secondary" id="cancelEditProfileBtn">Hủy</button>
+            <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+          </div>
+
+        </form>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- File input ẩn dùng chung cho tải ảnh đại diện -->
+  <input type="file" id="globalAvatarInput" accept="image/png, image/jpeg, image/webp, image/gif" style="display: none;">
+
+  <!-- Shared Footer -->
+  <div id="site-footer"></div>
+
+  <!-- Scripts -->
+  <script src="js/layout.js"></script>
+  <script src="js/profile.js"></script>
+
+</body>
+</html>

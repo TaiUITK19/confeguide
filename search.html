@@ -3,106 +3,238 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ConfGuide - Tra cứu hội nghị</title>
+  <title>ConfGuide - Tra cứu hội nghị khoa học</title>
+  
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  
+  <link rel="stylesheet" href="css/base.css">
   <link rel="stylesheet" href="css/search.css">
 </head>
 
 <body>
-  <header class="site-header">
-    <a class="brand" href="#">
-      <div class="brand-icon"><i class="fa-solid fa-graduation-cap"></i></div>
-      <div>
-        <div class="brand-name">ConfGuide</div>
-        <div class="brand-tagline">Find the Right Place for Your Research</div>
-      </div>
-    </a>
-
-    <nav class="main-nav" aria-label="Điều hướng chính">
-      <a href="index.html"><i class="fa-solid fa-house"></i><span>Trang chủ</span></a>
-      <a class="active" href="search.html"><i class="fa-solid fa-magnifying-glass"></i><span>Tra cứu</span></a>
-      <a href="logs.html"><i class="fa-regular fa-newspaper"></i><span>Nhật ký hội nghị</span></a>
-      <a href="profile.html"><i class="fa-regular fa-folder"></i><span>Hồ sơ</span></a>
-    </nav>
-
-    <div class="header-actions">
-      <button class="icon-btn" id="themeToggle" title="Đổi giao diện"><i class="fa-regular fa-sun"></i></button>
-      <div class="avatar">NH</div>
-    </div>
-  </header>
+  <!-- Shared Header -->
+  <div id="site-header"></div>
 
   <main>
-    <section class="hero" id="search">
+    <!-- Search Hero -->
+    <section class="hero" id="searchHero">
       <div class="hero-overlay"></div>
       <div class="container hero-content">
-        <h1>Tìm hội nghị phù hợp với lĩnh vực nghiên cứu của bạn</h1>
-        <p>Khám phá hàng nghìn hội nghị quốc tế, lọc theo lĩnh vực, hình thức và thời gian để tìm cơ hội phù hợp nhất.</p>
+        <h1>Tra cứu Hội nghị Khoa học Chuyên sâu</h1>
+        <p>Tìm kiếm và lọc theo phân hạng CORE, lĩnh vực nghiên cứu, hạn nộp bài và chỉ mục quốc tế.</p>
 
-        <form class="search-box" id="searchForm">
-          <i class="fa-solid fa-magnifying-glass"></i>
-          <input id="searchInput" type="search" placeholder="Tìm kiếm hội nghị theo tên, từ khóa, lĩnh vực nghiên cứu..." autocomplete="off">
+        <form class="search-box" id="searchForm" role="search">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="11" cy="11" r="8"/>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <input id="searchInput" type="search" placeholder="Tìm kiếm theo tên hội nghị, viết tắt (CVPR, ATC), lĩnh vực (AI, NLP)..." autocomplete="off" aria-label="Nhập từ khóa">
           <button type="submit">Tìm kiếm</button>
         </form>
 
         <div class="examples">
-          <strong>Ví dụ:</strong>
-          <button type="button" class="keyword" data-keyword="machine learning">machine learning</button>
-          <button type="button" class="keyword" data-keyword="computer vision">computer vision</button>
-          <button type="button" class="keyword" data-keyword="network security">network security</button>
-          <button type="button" class="keyword" data-keyword="NLP">NLP</button>
-          <button type="button" class="keyword" data-keyword="data mining">data mining</button>
-          <button type="button" class="keyword" data-keyword="artificial intelligence">artificial intelligence</button>
+          <strong>Gợi ý nhanh:</strong>
+          <button type="button" class="keyword" data-keyword="computer vision">Computer Vision</button>
+          <button type="button" class="keyword" data-keyword="machine learning">Machine Learning</button>
+          <button type="button" class="keyword" data-keyword="ai">Artificial Intelligence</button>
+          <button type="button" class="keyword" data-keyword="nlp">NLP</button>
+          <button type="button" class="keyword" data-keyword="cyber security">Cyber Security</button>
+          <button type="button" class="keyword" data-keyword="Việt Nam">Việt Nam</button>
         </div>
       </div>
     </section>
 
+    <!-- Main Results & Filter Section -->
     <section class="results-section">
       <div class="container results-layout">
 
-        <aside class="filters">
-          <div class="filter-title"><i class="fa-solid fa-filter"></i><h2>Bộ lọc tìm kiếm</h2></div>
+        <!-- Collapsible Filters Sidebar -->
+        <aside class="filters" id="filtersSidebar">
+          <div class="filter-header-bar">
+            <div class="filter-title">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+              </svg>
+              <h2>Bộ lọc nâng cao</h2>
+            </div>
+            <button type="button" class="btn-clear-all" id="btnResetAllFilters" title="Đặt lại toàn bộ bộ lọc">
+              Đặt lại
+            </button>
+          </div>
 
-          <div class="filter-group">
-            <h3>HẠN NỘP BÀI</h3>
-            <div class="date-range">
-              <label><i class="fa-regular fa-calendar"></i><input type="date" id="fromDate"></label>
-              <span>–</span>
-              <label><i class="fa-regular fa-calendar"></i><input type="date" id="toDate"></label>
+          <!-- Filter Group 1: Xếp hạng (Rank) -->
+          <div class="filter-accordion open" data-group="rank">
+            <button type="button" class="accordion-head" aria-expanded="true">
+              <span>XẾP HẠNG (CORE RANK)</span>
+              <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="accordion-body">
+              <label class="check-row"><input type="checkbox" name="rank" value="A*"> <span>Rank A* (Hàng đầu thế giới)</span></label>
+              <label class="check-row"><input type="checkbox" name="rank" value="A"> <span>Rank A (Rất uy tín)</span></label>
+              <label class="check-row"><input type="checkbox" name="rank" value="B"> <span>Rank B (Uy tín)</span></label>
+              <label class="check-row"><input type="checkbox" name="rank" value="C"> <span>Rank C / Khác</span></label>
             </div>
           </div>
 
-          <button class="apply-btn" id="applyFilters"><i class="fa-solid fa-sliders"></i> Áp dụng bộ lọc</button>
-          <button class="reset-btn" id="resetFilters">Xóa bộ lọc</button>
+          <!-- Filter Group 2: Khu vực (Region) -->
+          <div class="filter-accordion open" data-group="region">
+            <button type="button" class="accordion-head" aria-expanded="true">
+              <span>KHU VỰC TỔ CHỨC</span>
+              <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="accordion-body">
+              <label class="check-row"><input type="checkbox" name="region" value="vietnam"> <span>Việt Nam</span></label>
+              <label class="check-row"><input type="checkbox" name="region" value="international"> <span>Quốc tế</span></label>
+            </div>
+          </div>
+
+          <!-- Filter Group 3: Hình thức tổ chức (Mode) -->
+          <div class="filter-accordion open" data-group="mode">
+            <button type="button" class="accordion-head" aria-expanded="true">
+              <span>HÌNH THỨC THAM GIA</span>
+              <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="accordion-body">
+              <label class="check-row"><input type="checkbox" name="mode" value="Trực tiếp"> <span>Trực tiếp (In-person)</span></label>
+              <label class="check-row"><input type="checkbox" name="mode" value="Online"> <span>Trực tuyến (Online)</span></label>
+              <label class="check-row"><input type="checkbox" name="mode" value="Hybrid"> <span>Kết hợp (Hybrid)</span></label>
+            </div>
+          </div>
+
+          <!-- Filter Group 4: Lĩnh vực nghiên cứu (Dynamic Fields) -->
+          <div class="filter-accordion open" data-group="fields">
+            <button type="button" class="accordion-head" aria-expanded="true">
+              <span>LĨNH VỰC NGHIÊN CỨU</span>
+              <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="accordion-body" id="dynamicFieldsContainer">
+              <!-- Rendered dynamically by js/app.js -->
+            </div>
+          </div>
+
+          <!-- Filter Group 5: Nhà xuất bản & Chỉ mục -->
+          <div class="filter-accordion" data-group="publisher">
+            <button type="button" class="accordion-head" aria-expanded="false">
+              <span>NHÀ XUẤT BẢN &amp; CHỈ MỤC</span>
+              <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="accordion-body">
+              <label class="check-row"><input type="checkbox" name="publisher" value="ieee"> <span>IEEE</span></label>
+              <label class="check-row"><input type="checkbox" name="publisher" value="acm"> <span>ACM</span></label>
+              <label class="check-row"><input type="checkbox" name="publisher" value="springer"> <span>Springer</span></label>
+              <label class="check-row"><input type="checkbox" name="publisher" value="elsevier"> <span>Elsevier</span></label>
+              <label class="check-row"><input type="checkbox" name="publisher" value="scopus"> <span>Chỉ mục Scopus</span></label>
+              <label class="check-row"><input type="checkbox" name="publisher" value="dblp"> <span>Chỉ mục DBLP</span></label>
+            </div>
+          </div>
+
+          <!-- Filter Group 6: Trạng thái nộp bài -->
+          <div class="filter-accordion" data-group="status">
+            <button type="button" class="accordion-head" aria-expanded="false">
+              <span>TRẠNG THÁI NỘP BÀI</span>
+              <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="accordion-body">
+              <label class="check-row"><input type="checkbox" name="status" value="open"> <span>Đang mở nộp bài</span></label>
+              <label class="check-row"><input type="checkbox" name="status" value="urgent"> <span>Sắp hết hạn (≤ 30 ngày)</span></label>
+              <label class="check-row"><input type="checkbox" name="status" value="closed"> <span>Đã đóng đợt nộp</span></label>
+            </div>
+          </div>
+
+          <!-- Filter Group 7: Khoảng thời gian Deadline -->
+          <div class="filter-accordion" data-group="dates">
+            <button type="button" class="accordion-head" aria-expanded="false">
+              <span>HẠN NỘP BÀI (DEADLINE)</span>
+              <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="accordion-body">
+              <div class="date-range">
+                <label>
+                  <span>Từ:</span>
+                  <input type="date" id="fromDate">
+                </label>
+                <label>
+                  <span>Đến:</span>
+                  <input type="date" id="toDate">
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Filter Group 8: Tùy chọn hội nghị đã diễn ra -->
+          <div class="filter-accordion open" data-group="past">
+            <button type="button" class="accordion-head" aria-expanded="true">
+              <span>TÙY CHỌN HIỂN THỊ</span>
+              <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="accordion-body">
+              <label class="check-row">
+                <input type="checkbox" id="includePastConferences">
+                <span>Hiện cả hội nghị đã diễn ra</span>
+              </label>
+            </div>
+          </div>
+
+          <button class="apply-btn" id="applyFiltersBtn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            <span>Áp dụng bộ lọc</span>
+          </button>
         </aside>
 
+        <!-- Results Main Area -->
         <section class="results">
+          <!-- Active Filter Chips Area -->
+          <div class="active-chips-bar" id="activeChipsBar" style="display: none;">
+            <div class="chips-label">Đang lọc theo:</div>
+            <div class="chips-container" id="activeChipsContainer"></div>
+            <button type="button" class="btn-clear-chips" id="btnClearAllChips">Xóa tất cả</button>
+          </div>
+
+          <!-- Header status + sorting -->
           <div class="results-head">
-            <div>Tìm thấy <strong id="resultCount">0</strong> hội nghị</div>
-            <select id="sortSelect" aria-label="Sắp xếp">
+            <div>Tìm thấy <strong id="resultCount">0</strong> hội nghị phù hợp</div>
+            <select id="sortSelect" aria-label="Sắp xếp kết quả">
               <option value="relevance">Sắp xếp: Phù hợp nhất</option>
               <option value="deadline">Hạn nộp gần nhất</option>
-              <option value="date">Ngày diễn ra gần nhất</option>
-              <option value="name">Tên A-Z</option>
+              <option value="rating">Đánh giá cao nhất</option>
+              <option value="date">Ngày tổ chức</option>
+              <option value="name">Tên hội nghị A–Z</option>
             </select>
           </div>
 
+          <!-- Conference Cards List -->
           <div id="conferenceList" class="conference-list"></div>
 
+          <!-- Empty State -->
           <div id="emptyState" class="empty-state hidden">
-            <i class="fa-regular fa-face-frown"></i>
+            <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <circle cx="11" cy="11" r="8"/>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              <line x1="8" y1="11" x2="14" y2="11"/>
+            </svg>
             <h3>Không tìm thấy hội nghị phù hợp</h3>
-            <p>Hãy thử đổi từ khóa hoặc nới rộng bộ lọc.</p>
+            <p>Hãy thử thay đổi từ khóa tìm kiếm hoặc bấm đặt lại bộ lọc để xem toàn bộ danh sách.</p>
+            <button type="button" class="btn-reset-empty" id="btnResetFromEmpty">Đặt lại bộ lọc</button>
           </div>
         </section>
+
       </div>
     </section>
   </main>
 
+  <!-- Shared Footer -->
+  <div id="site-footer"></div>
+
+  <!-- Toast notification -->
   <div class="toast" id="toast"></div>
 
+  <!-- Scripts -->
+  <script src="js/utils.js"></script>
+  <script src="js/layout.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

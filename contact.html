@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Liên hệ và đóng góp dữ liệu hội nghị khoa học cho nền tảng ConfGuide.">
+  <title>Liên hệ &amp; Đóng góp | ConfGuide</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/home.css">
+</head>
+<body>
+
+  <!-- Shared Header -->
+  <div id="site-header"></div>
+
+  <!-- Main Content -->
+  <main class="section-pad">
+    <div class="container">
+      
+      <div class="section-head">
+        <span class="eyebrow">KẾT NỐI &amp; ĐÓNG GÓP</span>
+        <h1>Liên hệ với Nhóm Phát triển ConfGuide</h1>
+        <p>Gửi đề xuất thêm hội nghị khoa học mới, phản hồi tính năng hoặc trao đổi hợp tác học thuật cùng chúng tôi.</p>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 3fr 2fr; gap: 36px; align-items: start;">
+        
+        <!-- Form liên hệ -->
+        <section class="card-surface" style="padding: 36px;">
+          <h2 style="font-size: 20px; color: var(--text); margin-bottom: 20px;">Gửi thông điệp / Đóng góp dữ liệu</h2>
+          
+          <form id="contactForm" style="display: flex; flex-direction: column; gap: 18px;">
+            <div>
+              <label for="fullName" style="display: block; font-size: 14px; font-weight: 600; margin-bottom: 6px;">Họ và tên *</label>
+              <input id="fullName" type="text" required placeholder="Ví dụ: Nguyễn Văn A" style="width: 100%; padding: 12px 14px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface); color: var(--text);">
+            </div>
+
+            <div>
+              <label for="email" style="display: block; font-size: 14px; font-weight: 600; margin-bottom: 6px;">Email học thuật / cá nhân *</label>
+              <input id="email" type="email" required placeholder="name@uit.edu.vn" style="width: 100%; padding: 12px 14px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface); color: var(--text);">
+            </div>
+
+            <div>
+              <label for="topic" style="display: block; font-size: 14px; font-weight: 600; margin-bottom: 6px;">Chủ đề liên hệ</label>
+              <select id="topic" style="width: 100%; padding: 12px 14px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface); color: var(--text);">
+                <option value="suggest">Đề xuất thêm hội nghị khoa học mới</option>
+                <option value="bug">Báo cáo sai lệch thời hạn nộp bài (deadline)</option>
+                <option value="feature">Góp ý nâng cấp giao diện / tính năng</option>
+                <option value="other">Hợp tác nghiên cứu khác</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="message" style="display: block; font-size: 14px; font-weight: 600; margin-bottom: 6px;">Nội dung tin nhắn *</label>
+              <textarea id="message" rows="5" required placeholder="Nhập tên hội nghị, đường dẫn website hoặc ý kiến đóng góp của bạn..." style="width: 100%; padding: 12px 14px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface); color: var(--text);"></textarea>
+            </div>
+
+            <button class="btn btn-primary" type="submit" style="align-self: flex-start; padding: 12px 28px;">
+              Gửi thông điệp
+            </button>
+            <div id="formMsg" style="font-size: 14px; color: var(--green); font-weight: 600;"></div>
+          </form>
+        </section>
+
+        <!-- Thông tin liên hệ trực tiếp -->
+        <aside style="display: flex; flex-direction: column; gap: 24px;">
+          <div class="card-surface" style="padding: 30px;">
+            <h3 style="font-size: 18px; color: var(--text); margin-bottom: 16px;">Văn phòng Đồ án</h3>
+            <p style="font-size: 14.5px; color: var(--text-muted); line-height: 1.6; margin-bottom: 14px;">
+              <strong>Địa chỉ:</strong> Trường Đại học Công nghệ Thông tin — ĐHQG-HCM<br>
+              Khu phố 6, Phường Linh Trung, Thành phố Thủ Đức, TP. Hồ Chí Minh
+            </p>
+            <p style="font-size: 14.5px; color: var(--text-muted); line-height: 1.6; margin-bottom: 14px;">
+              <strong>Email:</strong> support@confguide.uit.edu.vn
+            </p>
+            <p style="font-size: 14.5px; color: var(--text-muted); line-height: 1.6;">
+              <strong>Môn học:</strong> IE104 — Thiết kế Giao diện Người dùng
+            </p>
+          </div>
+
+          <div class="card-surface" style="padding: 30px; background: var(--primary-soft); border-color: rgba(18, 104, 201, 0.2);">
+            <h3 style="font-size: 17px; color: var(--navy); margin-bottom: 10px;">Quy trình kiểm duyệt hội nghị</h3>
+            <p style="font-size: 14px; color: var(--text); line-height: 1.5;">
+              Mọi hội nghị được đề xuất sẽ được nhóm quản trị kiểm tra tính chính danh (CFP, nhà xuất bản IEEE/ACM/Springer, chỉ số CORE Ranking) và cập nhật lên hệ thống trong vòng 24 - 48 giờ.
+            </p>
+          </div>
+        </aside>
+
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Shared Footer -->
+  <div id="site-footer"></div>
+
+  <!-- Scripts -->
+  <script src="js/layout.js"></script>
+  <script>
+    // Form submission feedback
+    const form = document.getElementById("contactForm");
+    const msg = document.getElementById("formMsg");
+    if (form && msg) {
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        msg.textContent = "Cảm ơn bạn! Thông điệp của bạn đã được gửi thành công đến nhóm ConfGuide.";
+        form.reset();
+      });
+    }
+  </script>
+</body>
+</html>
