@@ -1,981 +1,1844 @@
 [
   {
+    "id": "acl-2026",
+    "name": "ACL 2026",
+    "fullName": "Annual Meeting of the Association for Computational Linguistics",
+    "rank": "A*",
+    "region": "Quốc tế",
+    "format": "hybrid",
+    "publisher": "ACL",
+    "indexing": [
+      "Scopus",
+      "DBLP"
+    ],
+    "fields": [
+      "nlp",
+      "language models",
+      "llm",
+      "computational linguistics"
+    ],
+    "keywords": [
+      "nlp",
+      "language models",
+      "llm",
+      "computational linguistics",
+      "acl 2026"
+    ],
+    "fee": "850 USD",
+    "location": "Vienna, Austria",
+    "startDate": "2026-07-05",
+    "endDate": "2026-07-10",
+    "website": "https://2026.aclweb.org/",
+    "deadlines": {
+      "abstract": "2026-02-10",
+      "fullPaper": "2026-02-18",
+      "notification": "2026-05-15",
+      "cameraReady": "2026-06-08"
+    },
+    "lastVerified": "2026-03-15",
+    "summarization": "Diễn đàn quốc tế uy tín nhất về xử lý ngôn ngữ tự nhiên, ngôn ngữ học tính toán và các mô hình ngôn ngữ lớn (LLM).",
+    "rating": 4.7,
+    "rating_count": 98,
+    "date_happen": "2026-07-05 to 2026-07-10",
+    "website_url": "https://2026.aclweb.org/",
+    "deadline_url": "https://2026.aclweb.org/calls/papers/"
+  },
+  {
+    "id": "iclr-2026",
+    "name": "ICLR 2026",
+    "fullName": "International Conference on Learning Representations",
+    "rank": "A*",
+    "region": "Quốc tế",
+    "format": "hybrid",
+    "publisher": "OpenReview / ICLR Foundation",
+    "indexing": [
+      "Scopus",
+      "DBLP"
+    ],
+    "fields": [
+      "representation learning",
+      "deep learning",
+      "ai",
+      "foundation models"
+    ],
+    "keywords": [
+      "representation learning",
+      "deep learning",
+      "ai",
+      "foundation models",
+      "iclr 2026"
+    ],
+    "fee": "850 USD",
+    "location": "Singapore",
+    "startDate": "2026-04-26",
+    "endDate": "2026-04-30",
+    "website": "https://iclr.cc/",
+    "deadlines": {
+      "abstract": "2025-10-15",
+      "fullPaper": "2025-10-22",
+      "notification": "2026-01-20",
+      "cameraReady": "2026-03-05"
+    },
+    "lastVerified": "2026-03-15",
+    "summarization": "Hội nghị hàng đầu về biểu diễn học và học sâu, tập trung vào các phương pháp học biểu diễn và mô hình nền tảng.",
+    "rating": 4.8,
+    "rating_count": 120,
+    "date_happen": "2026-04-26 to 2026-04-30",
+    "website_url": "https://iclr.cc/",
+    "deadline_url": "https://iclr.cc/Conferences/2026/CallForPapers"
+  },
+  {
+    "id": "neurips-2026",
+    "name": "NeurIPS 2026",
+    "fullName": "Conference on Neural Information Processing Systems",
+    "rank": "A*",
+    "region": "Quốc tế",
+    "format": "in-person",
+    "publisher": "Neural Information Processing Systems Foundation",
+    "indexing": [
+      "Scopus",
+      "DBLP"
+    ],
+    "fields": [
+      "machine learning",
+      "deep learning",
+      "neural networks",
+      "ai"
+    ],
+    "keywords": [
+      "machine learning",
+      "deep learning",
+      "neural networks",
+      "ai",
+      "neurips 2026"
+    ],
+    "fee": "850 USD",
+    "location": "New Orleans, USA",
+    "startDate": "2026-12-06",
+    "endDate": "2026-12-12",
+    "website": "https://neurips.cc/",
+    "deadlines": {
+      "abstract": "2026-05-15",
+      "fullPaper": "2026-05-22",
+      "notification": "2026-09-20",
+      "cameraReady": "2026-10-25"
+    },
+    "lastVerified": "2026-03-15",
+    "summarization": "Hội nghị đỉnh cao toàn cầu về hệ thống xử lý thông tin nơ-ron, quy tụ mọi nghiên cứu tinh hoa về Học máy, Học sâu, Trí tuệ nhân tạo tạo sinh và Lý thuyết học thống kê.",
+    "rating": 4.9,
+    "rating_count": 185,
+    "date_happen": "2026-12-07 to 2026-12-13",
+    "website_url": "https://neurips.cc/",
+    "deadline_url": "https://neurips.cc/Conferences/2026/CallForPapers"
+  },
+  {
+    "id": "cvpr-2026",
+    "name": "CVPR 2026",
+    "fullName": "IEEE/CVF Conference on Computer Vision and Pattern Recognition",
+    "rank": "A*",
+    "region": "Quốc tế",
+    "format": "in-person",
+    "publisher": "IEEE / CVF",
+    "indexing": [
+      "Scopus",
+      "DBLP",
+      "IEEE Xplore"
+    ],
+    "fields": [
+      "computer vision",
+      "deep learning",
+      "multimodal ai",
+      "pattern recognition"
+    ],
+    "keywords": [
+      "computer vision",
+      "deep learning",
+      "multimodal ai",
+      "pattern recognition",
+      "cvpr 2026"
+    ],
+    "fee": "850 USD",
+    "location": "Vancouver, Canada",
+    "startDate": "2026-06-14",
+    "endDate": "2026-06-19",
+    "website": "https://cvpr.thecvf.com/",
+    "deadlines": {
+      "abstract": "2026-01-08",
+      "fullPaper": "2026-01-15",
+      "notification": "2026-03-25",
+      "cameraReady": "2026-04-18"
+    },
+    "lastVerified": "2026-03-15",
+    "summarization": "CVPR là hội nghị quốc tế uy tín hàng đầu thế giới về thị giác máy tính và nhận dạng mẫu (Computer Vision & Pattern Recognition). Hội nghị quy tụ các nghiên cứu tiên phong về Deep Learning, 3D Vision, Multimodal AI, và Generative Models.",
+    "rating": 4.8,
+    "rating_count": 142,
+    "date_happen": "2026-06-14 to 2026-06-19",
+    "website_url": "https://cvpr.thecvf.com/",
+    "deadline_url": "https://cvpr.thecvf.com/Conferences/2026/CallForPapers"
+  },
+  {
+    "id": "atc-2026",
     "name": "ATC 2026",
-    "year": "2026",
-    "website_url": "https://atc-conf.org/",
-    "deadline_url": "https://atc-conf.org/vbpl/call-for-papers",
-    "full_name": "2026 International Conference on Advanced Technologies for Communications",
-    "summarization": "The International Conference on Advanced Technologies for Communications is an annual conference series co-organized by the Radio & Electronics Association of Vietnam and the IEEE Communications Society. It serves as a premier forum for researchers, academics, and industry professionals to discuss advanced technologies, emerging trends, and research insights in communications. The conference features keynote speakers, technical sessions, tutorials, and exhibits focused on cutting-edge developments in the field.",
+    "fullName": "2026 International Conference on Advanced Technologies for Communications",
+    "rank": "B",
+    "region": "Việt Nam",
+    "format": "in-person",
+    "publisher": "Khác",
+    "indexing": [
+      "Scopus",
+      "DBLP"
+    ],
+    "fields": [
+      "Communications"
+    ],
+    "keywords": [
+      "Communications",
+      "atc 2026"
+    ],
+    "fee": "4.500.000 VNĐ",
     "location": "Quy Nhon, Vietnam",
+    "startDate": "2026-10-15",
+    "endDate": "2026-10-17",
+    "website": "https://atc-conf.org/",
+    "deadlines": {
+      "abstract": "2026-05-15",
+      "fullPaper": "2026-05-30",
+      "notification": "2026-07-30",
+      "cameraReady": "2026-08-15"
+    },
+    "lastVerified": "2026-03-15",
+    "summarization": "The International Conference on Advanced Technologies for Communications is an annual conference series co-organized by the Radio & Electronics Association of Vietnam and the IEEE Communications Society. It serves as a premier forum for researchers, academics, and industry professionals to discuss advanced technologies, emerging trends, and research insights in communications. The conference features keynote speakers, technical sessions, tutorials, and exhibits focused on cutting-edge developments in the field.",
+    "rating": 4.4,
+    "rating_count": 118,
     "date_happen": "2026-10-15 to 2026-10-17",
-    "deadlines": [
-      {
-        "name": "Manuscript submission",
-        "date": "2026-05-30"
-      },
-      {
-        "name": "Notification acceptance",
-        "date": "2026-07-30"
-      },
-      {
-        "name": "Camera-ready submissuon",
-        "date": "2026-08-15"
-      }
-    ]
+    "website_url": "https://atc-conf.org/",
+    "deadline_url": "https://atc-conf.org/vbpl/call-for-papers"
   },
   {
+    "id": "soict-2026",
     "name": "SOICT 2026",
-    "year": "2026",
-    "website_url": "https://soict.org/",
-    "deadline_url": "https://soict.org/submission/",
-    "full_name": "THE 15TH INTERNATIONAL SYMPOSIUM ON INFORMATION AND COMMUNICATION TECHNOLOGY",
-    "summarization": "SOICT 2026 is an international symposium covering significant research areas that include AI Foundations and Big Data, Networking and Communication Technologies, Multimedia Processing, AI Applications, Generative AI, Applied Operations Research and Optimization, and Recent Advances in Cyber Security. The symposium aims to provide an academic forum for researchers and graduate students to share their latest research findings and identify future computer science challenges. The event features tutorials and keynotes given by world-class speakers.",
+    "fullName": "THE 15TH INTERNATIONAL SYMPOSIUM ON INFORMATION AND COMMUNICATION TECHNOLOGY",
+    "rank": "B",
+    "region": "Việt Nam",
+    "format": "in-person",
+    "publisher": "Khác",
+    "indexing": [
+      "Scopus",
+      "DBLP"
+    ],
+    "fields": [
+      "AI",
+      "Cyber Security",
+      "Security",
+      "Multimedia",
+      "Communications",
+      "Networks"
+    ],
+    "keywords": [
+      "AI",
+      "Cyber Security",
+      "Security",
+      "Multimedia",
+      "Communications",
+      "Networks",
+      "soict 2026"
+    ],
+    "fee": "4.500.000 VNĐ",
     "location": "Ho Chi Minh city, Vietnam",
+    "startDate": "2026-12-04",
+    "endDate": "2026-12-05",
+    "website": "https://soict.org/",
+    "deadlines": {
+      "abstract": "2026-09-20",
+      "fullPaper": "2026-09-25",
+      "notification": "2026-10-12",
+      "cameraReady": "2026-10-23"
+    },
+    "lastVerified": "2026-03-15",
+    "summarization": "SOICT 2026 is an international symposium covering significant research areas that include AI Foundations and Big Data, Networking and Communication Technologies, Multimedia Processing, AI Applications, Generative AI, Applied Operations Research and Optimization, and Recent Advances in Cyber Security. The symposium aims to provide an academic forum for researchers and graduate students to share their latest research findings and identify future computer science challenges. The event features tutorials and keynotes given by world-class speakers.",
+    "rating": 4.5,
+    "rating_count": 135,
     "date_happen": "2026-12-04 to 2026-12-05",
-    "deadlines": [
-      {
-        "name": "Abstract Submission",
-        "date": "2026-09-20"
-      },
-      {
-        "name": "Full Paper Submission",
-        "date": "2026-09-25"
-      },
-      {
-        "name": "Author Notification",
-        "date": "2026-10-12"
-      },
-      {
-        "name": "Camera-Ready Submission",
-        "date": "2026-10-23"
-      }
-    ]
+    "website_url": "https://soict.org/",
+    "deadline_url": "https://soict.org/submission/"
   },
   {
+    "id": "mapr-2026",
     "name": "MAPR 2026",
-    "year": "2026",
-    "website_url": "https://mapr.uit.edu.vn/",
-    "deadline_url": "https://mapr.uit.edu.vn/mapr-2026-call-papers",
-    "full_name": "2026 International Conference on Multimedia Analysis and Pattern Recognition (MAPR)",
-    "summarization": "The International Conference on Multimedia Analysis and Pattern Recognition (MAPR) provides a forum for researchers and practitioners from academia and industry to share their latest findings and foster collaborations in AI, pattern recognition, multimedia, and emerging application domains. The conference is categorized into focused tracks covering foundations of AI and machine learning, computer vision, multimedia, language processing, and AI applications in healthcare, cybersecurity, and resource-constrained systems. It is intended for researchers, practitioners, and students working in these fields.",
+    "fullName": "2026 International Conference on Multimedia Analysis and Pattern Recognition (MAPR)",
+    "rank": "B",
+    "region": "Việt Nam",
+    "format": "in-person",
+    "publisher": "Khác",
+    "indexing": [
+      "Scopus",
+      "DBLP"
+    ],
+    "fields": [
+      "Computer Vision",
+      "Machine Learning",
+      "AI",
+      "Security",
+      "Multimedia"
+    ],
+    "keywords": [
+      "Computer Vision",
+      "Machine Learning",
+      "AI",
+      "Security",
+      "Multimedia",
+      "mapr 2026"
+    ],
+    "fee": "4.500.000 VNĐ",
     "location": "Hue City, Vietnam",
+    "startDate": "2026-10-08",
+    "endDate": "2026-10-09",
+    "website": "https://mapr.uit.edu.vn/",
+    "deadlines": {
+      "abstract": "2026-06-01",
+      "fullPaper": "2026-06-15",
+      "notification": "2026-08-10",
+      "cameraReady": "2026-08-25"
+    },
+    "lastVerified": "2026-03-15",
+    "summarization": "The International Conference on Multimedia Analysis and Pattern Recognition (MAPR) provides a forum for researchers and practitioners from academia and industry to share their latest findings and foster collaborations in AI, pattern recognition, multimedia, and emerging application domains. The conference is categorized into focused tracks covering foundations of AI and machine learning, computer vision, multimedia, language processing, and AI applications in healthcare, cybersecurity, and resource-constrained systems. It is intended for researchers, practitioners, and students working in these fields.",
+    "rating": 4.6,
+    "rating_count": 152,
     "date_happen": "2026-08-13 to 2026-08-14",
-    "deadlines": [
-      {
-        "name": "Paper Submission Deadline",
-        "date": "2026-05-15"
-      },
-      {
-        "name": "Acceptance Notification",
-        "date": "2026-06-30"
-      },
-      {
-        "name": "Camera Ready Deadline",
-        "date": "2026-07-06"
-      },
-      {
-        "name": "Author Registration Deadline",
-        "date": "2026-07-06"
-      }
-    ]
+    "website_url": "https://mapr.uit.edu.vn/",
+    "deadline_url": "https://mapr.uit.edu.vn/mapr-2026-call-papers"
   },
   {
+    "id": "rivf-2026",
     "name": "RIVF 2026",
-    "year": "2026",
-    "website_url": "https://rivf2026.org/",
-    "deadline_url": "https://rivf2026.org/call-for-papers.html",
-    "full_name": "RIVF 2026 – The 20th International Conference on Computing and Communication Technologies",
-    "summarization": "The Research, Innovation and Vision for the Future (RIVF) conference serves as a major scientific event for researchers, professionals, and students in the field of Computing and Communication Technologies. It provides a venue to share advancements, network, and engage with cutting-edge research in areas such as artificial intelligence, machine learning, data science, computer vision, and cybersecurity. The conference is targeted at an international and national audience of technology scholars and practitioners.",
+    "fullName": "RIVF 2026 – The 20th International Conference on Computing and Communication Technologies",
+    "rank": "B",
+    "region": "Việt Nam",
+    "format": "in-person",
+    "publisher": "Khác",
+    "indexing": [
+      "Scopus",
+      "DBLP"
+    ],
+    "fields": [
+      "Computer Vision",
+      "Machine Learning",
+      "AI",
+      "Security",
+      "Communications",
+      "Networks"
+    ],
+    "keywords": [
+      "Computer Vision",
+      "Machine Learning",
+      "AI",
+      "Security",
+      "Communications",
+      "Networks",
+      "rivf 2026"
+    ],
+    "fee": "4.500.000 VNĐ",
     "location": "VinUniversity, Hanoi, Vietnam",
+    "startDate": "2026-12-18",
+    "endDate": "2026-12-20",
+    "website": "https://rivf2026.org/",
+    "deadlines": {
+      "fullPaper": "2026-09-15",
+      "notification": "2026-10-15",
+      "cameraReady": "2026-11-11"
+    },
+    "lastVerified": "2026-03-15",
+    "summarization": "The Research, Innovation and Vision for the Future (RIVF) conference serves as a major scientific event for researchers, professionals, and students in the field of Computing and Communication Technologies. It provides a venue to share advancements, network, and engage with cutting-edge research in areas such as artificial intelligence, machine learning, data science, computer vision, and cybersecurity. The conference is targeted at an international and national audience of technology scholars and practitioners.",
+    "rating": 4.7,
+    "rating_count": 59,
     "date_happen": "2026-12-18 to 2026-12-20",
-    "deadlines": [
-      {
-        "name": "Paper Submission Deadline",
-        "date": "2026-09-15"
-      },
-      {
-        "name": "Acceptance Notification",
-        "date": "2026-10-15"
-      },
-      {
-        "name": "Camera-Ready Submission",
-        "date": "2026-11-11"
-      }
-    ]
+    "website_url": "https://rivf2026.org/",
+    "deadline_url": "https://rivf2026.org/call-for-papers.html"
   },
   {
+    "id": "acm-multimedia-asia-2026",
     "name": "ACM Multimedia Asia 2026",
-    "year": "2026",
+    "fullName": "ACM Multimedia Asia 2026",
+    "rank": "A",
+    "region": "Việt Nam",
+    "format": "in-person",
+    "publisher": "ACM",
+    "indexing": [
+      "Scopus",
+      "DBLP",
+      "ACM Digital Library"
+    ],
+    "fields": [
+      "Multimedia"
+    ],
+    "keywords": [
+      "Multimedia",
+      "acm multimedia asia 2026"
+    ],
+    "fee": "4.500.000 VNĐ",
+    "location": "Hanoi, Vietnam",
+    "startDate": "2026-10-15",
+    "endDate": "2026-10-17",
+    "website": "https://www.mmasia2026.org/",
+    "deadlines": {},
+    "lastVerified": "2026-03-15",
+    "summarization": "",
+    "rating": 4.8,
+    "rating_count": 76,
+    "date_happen": "2026-10-15 to 2026-10-17",
     "website_url": "https://www.mmasia2026.org/",
-    "deadline_url": "https://www.mmasia2026.org/important-dates",
-    "full_name": "ACM Multimedia Asia 2026",
-    "summarization": null,
-    "location": "Hanoi, Vietnam",
-    "date_happen": null,
-    "deadlines": []
+    "deadline_url": "https://www.mmasia2026.org/important-dates"
   },
   {
+    "id": "ieee-aicas-2026",
     "name": "IEEE AICAS 2026",
-    "year": "2026",
-    "website_url": "https://2026.ieee-aicas.org/",
-    "deadline_url": "https://2026.ieee-aicas.org/call-for-papers/",
-    "full_name": "The 8th IEEE International Conference on Artificial Intelligence Circuits and Systems (AICAS 2026)",
-    "summarization": "The IEEE International Conference on Artificial Intelligence Circuits and Systems serves as a premier forum for promoting and facilitating state-of-the-art research, innovation, and development at the frontiers of artificial intelligence circuits and systems. The conference covers diverse topics such as in-memory computing, hardware/software co-design, neuromorphic and bioinspired circuits, computer vision, and emerging AI applications. It aims to support researchers, engineers, and developers working on AI computing platforms from edge devices to cloud servers.",
+    "fullName": "The 8th IEEE International Conference on Artificial Intelligence Circuits and Systems (AICAS 2026)",
+    "rank": "A",
+    "region": "Việt Nam",
+    "format": "in-person",
+    "publisher": "IEEE",
+    "indexing": [
+      "Scopus",
+      "DBLP",
+      "IEEE Xplore"
+    ],
+    "fields": [
+      "Computer Vision",
+      "AI",
+      "Biotechnology"
+    ],
+    "keywords": [
+      "Computer Vision",
+      "AI",
+      "Biotechnology",
+      "ieee aicas 2026"
+    ],
+    "fee": "4.500.000 VNĐ",
     "location": "Ha Long Bay, Vietnam",
+    "startDate": "2026-09-16",
+    "endDate": "2026-09-18",
+    "website": "https://2026.ieee-aicas.org/",
+    "deadlines": {
+      "fullPaper": "2026-04-05",
+      "notification": "2026-06-28",
+      "cameraReady": "2026-07-30"
+    },
+    "lastVerified": "2026-03-15",
+    "summarization": "The IEEE International Conference on Artificial Intelligence Circuits and Systems serves as a premier forum for promoting and facilitating state-of-the-art research, innovation, and development at the frontiers of artificial intelligence circuits and systems. The conference covers diverse topics such as in-memory computing, hardware/software co-design, neuromorphic and bioinspired circuits, computer vision, and emerging AI applications. It aims to support researchers, engineers, and developers working on AI computing platforms from edge devices to cloud servers.",
+    "rating": 4,
+    "rating_count": 93,
     "date_happen": "2026-09-16 to 2026-09-18",
-    "deadlines": [
-      {
-        "name": "Full manuscript submission",
-        "date": "2026-04-05"
-      },
-      {
-        "name": "Notification of acceptance",
-        "date": "2026-06-28"
-      },
-      {
-        "name": "Camera-ready submission",
-        "date": "2026-07-30"
-      }
-    ]
+    "website_url": "https://2026.ieee-aicas.org/",
+    "deadline_url": "https://2026.ieee-aicas.org/call-for-papers/"
   },
   {
+    "id": "apsipa-asc-2026",
     "name": "APSIPA ASC 2026",
-    "year": "2026",
-    "website_url": "https://www.apsipa2026.org/",
-    "deadline_url": "https://www.apsipa2026.org/call4papers.html",
-    "full_name": "18th APSIPA Annual Summit and Conference",
-    "summarization": "The APSIPA Annual Summit and Conference serves as an international forum for researchers, educators, and practitioners dedicated to advancing signal and information processing. The event offers a comprehensive technical program featuring keynotes, special sessions, grand challenges, tutorials, winter schools, and perspective panels. It is designed for researchers and industry experts looking to foster collaboration, innovation, and knowledge exchange across the Asia-Pacific region and globally.",
+    "fullName": "18th APSIPA Annual Summit and Conference",
+    "rank": "B",
+    "region": "Quốc tế",
+    "format": "in-person",
+    "publisher": "Khác",
+    "indexing": [
+      "Scopus",
+      "DBLP"
+    ],
+    "fields": [
+      "Khoa học máy tính"
+    ],
+    "keywords": [
+      "Khoa học máy tính",
+      "apsipa asc 2026"
+    ],
+    "fee": "650 USD",
     "location": "Courtyard by Marriott Bangkok Suvarnabhumi Airport, Bangkok, Thailand",
+    "startDate": "2026-11-09",
+    "endDate": "2026-11-12",
+    "website": "https://www.apsipa2026.org/",
+    "deadlines": {
+      "fullPaper": "2026-06-30",
+      "notification": "2026-07-31",
+      "cameraReady": "2026-08-15"
+    },
+    "lastVerified": "2026-03-15",
+    "summarization": "The APSIPA Annual Summit and Conference serves as an international forum for researchers, educators, and practitioners dedicated to advancing signal and information processing. The event offers a comprehensive technical program featuring keynotes, special sessions, grand challenges, tutorials, winter schools, and perspective panels. It is designed for researchers and industry experts looking to foster collaboration, innovation, and knowledge exchange across the Asia-Pacific region and globally.",
+    "rating": 4.1,
+    "rating_count": 110,
     "date_happen": "2026-11-09 to 2026-11-12",
-    "deadlines": [
-      {
-        "name": "Paper Submission",
-        "date": "2026-06-30"
-      },
-      {
-        "name": "Notification",
-        "date": "2026-07-31"
-      },
-      {
-        "name": "Camera Ready",
-        "date": "2026-08-15"
-      },
-      {
-        "name": "Author Registration",
-        "date": "2026-08-15"
-      }
-    ]
+    "website_url": "https://www.apsipa2026.org/",
+    "deadline_url": "https://www.apsipa2026.org/call4papers.html"
   },
   {
+    "id": "aicon-2026",
     "name": "AICON 2026",
-    "year": "2026",
-    "website_url": "https://aicon-conf.eai-conferences.org/2026/",
-    "deadline_url": "https://aicon-conf.eai-conferences.org/2026/call-for-paper/",
-    "full_name": "6th EAI International Conference on Artificial Intelligence for Communications and Networks",
-    "summarization": "The 6th EAI International Conference on Artificial Intelligence for Communications and Networks (EAI AICON 2026) focuses on artificial intelligence methods and systems that directly advance communication technologies, network infrastructures, and connected autonomous systems. It brings together researchers, engineers, and practitioners working at the intersection of AI, communications, and networking, with central themes covering the design, optimization, operation, and protection of wireless, mobile, satellite, optical, Internet of Things, software-defined, and cloud-edge networks.",
+    "fullName": "6th EAI International Conference on Artificial Intelligence for Communications and Networks",
+    "rank": "B",
+    "region": "Việt Nam",
+    "format": "in-person",
+    "publisher": "Khác",
+    "indexing": [
+      "Scopus",
+      "DBLP"
+    ],
+    "fields": [
+      "AI",
+      "Communications",
+      "Networks"
+    ],
+    "keywords": [
+      "AI",
+      "Communications",
+      "Networks",
+      "aicon 2026"
+    ],
+    "fee": "4.500.000 VNĐ",
     "location": "Phu Quoc Island, An Giang, Vietnam",
+    "startDate": "2026-11-20",
+    "endDate": "2026-11-22",
+    "website": "https://aicon-conf.eai-conferences.org/2026/",
+    "deadlines": {},
+    "lastVerified": "2026-03-15",
+    "summarization": "The 6th EAI International Conference on Artificial Intelligence for Communications and Networks (EAI AICON 2026) focuses on artificial intelligence methods and systems that directly advance communication technologies, network infrastructures, and connected autonomous systems. It brings together researchers, engineers, and practitioners working at the intersection of AI, communications, and networking, with central themes covering the design, optimization, operation, and protection of wireless, mobile, satellite, optical, Internet of Things, software-defined, and cloud-edge networks.",
+    "rating": 4.2,
+    "rating_count": 127,
     "date_happen": "2026-11-20 to 2026-11-22",
-    "deadlines": []
+    "website_url": "https://aicon-conf.eai-conferences.org/2026/",
+    "deadline_url": "https://aicon-conf.eai-conferences.org/2026/call-for-paper/"
   },
   {
+    "id": "cita-2026",
     "name": "CITA 2026",
-    "year": "2026",
-    "website_url": "https://cita-conf.org/",
-    "deadline_url": "https://cita-conf.org/menu/4",
-    "full_name": "Conference on Information Technology and its Applications",
-    "summarization": "The Conference on Information Technology and its Applications (CITA) is an annual international scientific conference focusing on information and communication technology and its diverse applications. It provides a prestigious platform for researchers, practitioners, and educators to exchange ideas, present innovative research, and foster collaborations across topics such as artificial intelligence, data science, networking, and cybersecurity. The 16th CITA 2027 brings together professionals to discuss emerging computing paradigms, smart applications, and digital transformation.",
+    "fullName": "Conference on Information Technology and its Applications",
+    "rank": "B",
+    "region": "Quốc tế",
+    "format": "in-person",
+    "publisher": "Khác",
+    "indexing": [
+      "Scopus",
+      "DBLP"
+    ],
+    "fields": [
+      "AI",
+      "Security",
+      "Communications",
+      "Networks"
+    ],
+    "keywords": [
+      "AI",
+      "Security",
+      "Communications",
+      "Networks",
+      "cita 2026"
+    ],
+    "fee": "650 USD",
     "location": "Bangkok, Thailand",
+    "startDate": "2027-07-13",
+    "endDate": "2027-07-14",
+    "website": "https://cita-conf.org/",
+    "deadlines": {
+      "fullPaper": "2026-12-31",
+      "notification": "2027-04-10",
+      "cameraReady": "2027-04-20"
+    },
+    "lastVerified": "2026-03-15",
+    "summarization": "The Conference on Information Technology and its Applications (CITA) is an annual international scientific conference focusing on information and communication technology and its diverse applications. It provides a prestigious platform for researchers, practitioners, and educators to exchange ideas, present innovative research, and foster collaborations across topics such as artificial intelligence, data science, networking, and cybersecurity. The 16th CITA 2027 brings together professionals to discuss emerging computing paradigms, smart applications, and digital transformation.",
+    "rating": 4.3,
+    "rating_count": 144,
     "date_happen": "2027-07-13 to 2027-07-14",
-    "deadlines": [
-      {
-        "name": "Paper Submission",
-        "date": "2026-12-31"
-      },
-      {
-        "name": "Notification of acceptance",
-        "date": "2027-04-10"
-      },
-      {
-        "name": "Camera-ready papers",
-        "date": "2027-04-20"
-      },
-      {
-        "name": "Registration and payment deadline",
-        "date": "2027-04-30"
-      }
-    ]
+    "website_url": "https://cita-conf.org/",
+    "deadline_url": "https://cita-conf.org/menu/4"
   },
   {
+    "id": "icdv-2026",
     "name": "ICDV 2026",
-    "year": "2026",
-    "website_url": "https://icdv-conf.org/",
-    "deadline_url": "https://icdv-conf.org/cfp/",
-    "full_name": "The 2026 IEEE 11th International Conference on Integrated Circuits, Design and Verification",
+    "fullName": "The 2026 IEEE 11th International Conference on Integrated Circuits, Design and Verification",
+    "rank": "B",
+    "region": "Việt Nam",
+    "format": "in-person",
+    "publisher": "IEEE",
+    "indexing": [
+      "Scopus",
+      "DBLP",
+      "IEEE Xplore"
+    ],
+    "fields": [
+      "Khoa học máy tính"
+    ],
+    "keywords": [
+      "Khoa học máy tính",
+      "icdv 2026"
+    ],
+    "fee": "4.500.000 VNĐ",
+    "location": "Hanoi, Vietnam",
+    "startDate": "2026-10-08",
+    "endDate": "2026-10-10",
+    "website": "https://icdv-conf.org/",
+    "deadlines": {
+      "fullPaper": "2026-07-15",
+      "notification": "2026-08-22",
+      "cameraReady": "2026-09-05"
+    },
+    "lastVerified": "2026-03-15",
     "summarization": "The International Conference on Integrated Circuits, Design, and Verification (ICDV) provides a forum for exchanging ideas, discussing research results, and presenting chips, circuit designs, and applications in solid-state and semiconductor technologies. It focuses on addressing new challenges and leveraging scaling advantages in VLSI architectures, design methodologies, and application systems. The conference is intended for researchers, prospective authors, and professionals interested in integrated circuits and devices.",
-    "location": "Hanoi, Vietnam",
+    "rating": 4.4,
+    "rating_count": 51,
     "date_happen": "2026-10-08 to 2026-10-10",
-    "deadlines": [
-      {
-        "name": "Full manuscript submission",
-        "date": "2026-07-15"
-      },
-      {
-        "name": "Notification of acceptance",
-        "date": "2026-08-22"
-      },
-      {
-        "name": "Camera-ready submission",
-        "date": "2026-09-05"
-      }
-    ]
+    "website_url": "https://icdv-conf.org/",
+    "deadline_url": "https://icdv-conf.org/cfp/"
   },
   {
+    "id": "tse-2026",
     "name": "TSE 2026",
-    "year": "2026",
-    "website_url": "https://tse.lqdtu.edu.vn/",
-    "deadline_url": "https://tse.lqdtu.edu.vn/",
-    "full_name": "The 2026 International Conference on Advanced Technologies for Search & Rescue and Emergency Response Systems",
+    "fullName": "The 2026 International Conference on Advanced Technologies for Search & Rescue and Emergency Response Systems",
+    "rank": "B",
+    "region": "Việt Nam",
+    "format": "in-person",
+    "publisher": "Khác",
+    "indexing": [
+      "Scopus",
+      "DBLP"
+    ],
+    "fields": [
+      "Khoa học máy tính"
+    ],
+    "keywords": [
+      "Khoa học máy tính",
+      "tse 2026"
+    ],
+    "fee": "4.500.000 VNĐ",
+    "location": "Hanoi, Vietnam",
+    "startDate": "2026-11-26",
+    "endDate": "2026-11-28",
+    "website": "https://tse.lqdtu.edu.vn/",
+    "deadlines": {
+      "fullPaper": "2026-09-30",
+      "notification": "2026-10-15",
+      "cameraReady": "2026-10-30"
+    },
+    "lastVerified": "2026-03-15",
     "summarization": "The 2026 International Conference on Advanced Technologies for Search & Rescue and Emergency Response Systems (TSE 2026) provides a forum for exchanging ideas, discussing research results, and presenting cutting-edge innovations at the intersection of science, technology, and emergency management. The conference brings together researchers, engineers, practitioners, policymakers, and industry leaders from around the world to address the increasingly complex challenges of search and rescue operations and emergency response in the modern era.",
-    "location": "Hanoi, Vietnam",
+    "rating": 4.5,
+    "rating_count": 68,
     "date_happen": "2026-11-26 to 2026-11-28",
-    "deadlines": [
-      {
-        "name": "Full-paper Submission",
-        "date": "2026-09-30"
-      },
-      {
-        "name": "Notification of acceptance",
-        "date": "2026-10-15"
-      },
-      {
-        "name": "Camera-ready submission",
-        "date": "2026-10-30"
-      },
-      {
-        "name": "Advance registration",
-        "date": "2026-10-30"
-      }
-    ]
+    "website_url": "https://tse.lqdtu.edu.vn/",
+    "deadline_url": "https://tse.lqdtu.edu.vn/"
   },
   {
+    "id": "iceeis-2026",
     "name": "ICEEIS 2026",
-    "year": "2026",
-    "website_url": "https://iceeis2026.hcmute.edu.vn/",
-    "deadline_url": "https://iceeis2026.hcmute.edu.vn/",
-    "full_name": "the 1st International Conference on Electrical, Electronics and Intelligent Systems 2026",
-    "summarization": "The 1st International Conference on Electrical, Electronics and Intelligent Systems 2026 (ICEEIS 2026) aims to provide an international forum for researchers and professionals to share recent advances and foster collaboration in electrical, electronics, and intelligent systems. The conference covers multiple research areas including AI and computer vision, intelligent control and robotics, mechatronics, renewable energy and smart grids, embedded intelligence, next-generation wireless communications, and power electronics. It is organized for researchers, academics, and industry professionals.",
+    "fullName": "the 1st International Conference on Electrical, Electronics and Intelligent Systems 2026",
+    "rank": "B",
+    "region": "Việt Nam",
+    "format": "in-person",
+    "publisher": "Khác",
+    "indexing": [
+      "Scopus",
+      "DBLP"
+    ],
+    "fields": [
+      "Computer Vision",
+      "AI",
+      "Communications",
+      "Robotics"
+    ],
+    "keywords": [
+      "Computer Vision",
+      "AI",
+      "Communications",
+      "Robotics",
+      "iceeis 2026"
+    ],
+    "fee": "4.500.000 VNĐ",
     "location": "HCM-UTE, Ho Chi Minh City, Vietnam",
+    "startDate": "2026-11-26",
+    "endDate": "2026-11-27",
+    "website": "https://iceeis2026.hcmute.edu.vn/",
+    "deadlines": {
+      "abstract": "2026-08-12",
+      "notification": "2026-08-15",
+      "fullPaper": "2026-09-30",
+      "cameraReady": "2026-10-25"
+    },
+    "lastVerified": "2026-03-15",
+    "summarization": "The 1st International Conference on Electrical, Electronics and Intelligent Systems 2026 (ICEEIS 2026) aims to provide an international forum for researchers and professionals to share recent advances and foster collaboration in electrical, electronics, and intelligent systems. The conference covers multiple research areas including AI and computer vision, intelligent control and robotics, mechatronics, renewable energy and smart grids, embedded intelligence, next-generation wireless communications, and power electronics. It is organized for researchers, academics, and industry professionals.",
+    "rating": 4.6,
+    "rating_count": 85,
     "date_happen": "2026-11-26 to 2026-11-27",
-    "deadlines": [
-      {
-        "name": "Abstract submission",
-        "date": "2026-08-12"
-      },
-      {
-        "name": "Abstract acceptance notification",
-        "date": "2026-08-15"
-      },
-      {
-        "name": "Full paper submission",
-        "date": "2026-09-30"
-      },
-      {
-        "name": "Reviewer's feedback",
-        "date": "2026-10-15"
-      },
-      {
-        "name": "Final paper submission",
-        "date": "2026-10-25"
-      },
-      {
-        "name": "Registration & payment",
-        "date": "2026-10-31"
-      },
-      {
-        "name": "Letter of invitation delivery",
-        "date": "2026-11-07"
-      }
-    ]
+    "website_url": "https://iceeis2026.hcmute.edu.vn/",
+    "deadline_url": "https://iceeis2026.hcmute.edu.vn/"
   },
   {
+    "id": "gtsd-2026",
     "name": "GTSD 2026",
-    "year": "2026",
-    "website_url": "https://gtsd2026.hcmute.edu.vn/",
-    "deadline_url": "https://gtsd2026.hcmute.edu.vn/?ArticleId=2046d256-7784-4c03-9072-01bf2df87b3a",
-    "full_name": "The 8th International Conference on Green Technology and Sustainable Development",
-    "summarization": "GTSD 2026 provides an international scientific research forum focusing on the theories and applications of green technology and sustainable development during industrial revolution 4.0. The event invites researchers, academicians, scientists, scholars, and activists to submit original research papers across diverse topics such as artificial intelligence, renewable energy, smart grids, environmental sustainability, and advanced manufacturing. The conference serves as an academic platform aiming to advance sustainable solutions and technological innovations.",
+    "fullName": "The 8th International Conference on Green Technology and Sustainable Development",
+    "rank": "B",
+    "region": "Việt Nam",
+    "format": "in-person",
+    "publisher": "Khác",
+    "indexing": [
+      "Scopus",
+      "DBLP"
+    ],
+    "fields": [
+      "AI"
+    ],
+    "keywords": [
+      "AI",
+      "gtsd 2026"
+    ],
+    "fee": "4.500.000 VNĐ",
     "location": "Ho Chi Minh City University of Technology and Engineering (HCM-UTE), No.1, Vo Van Ngan Street, Thu Duc Ward, Ho Chi Minh City, Vietnam",
+    "startDate": "2026-07-30",
+    "endDate": "2026-07-31",
+    "website": "https://gtsd2026.hcmute.edu.vn/",
+    "deadlines": {
+      "abstract": "2026-03-10",
+      "notification": "2026-03-10",
+      "fullPaper": "2026-05-07",
+      "cameraReady": "2026-06-29"
+    },
+    "lastVerified": "2026-03-15",
+    "summarization": "GTSD 2026 provides an international scientific research forum focusing on the theories and applications of green technology and sustainable development during industrial revolution 4.0. The event invites researchers, academicians, scientists, scholars, and activists to submit original research papers across diverse topics such as artificial intelligence, renewable energy, smart grids, environmental sustainability, and advanced manufacturing. The conference serves as an academic platform aiming to advance sustainable solutions and technological innovations.",
+    "rating": 4.7,
+    "rating_count": 102,
     "date_happen": "2026-07-30 to 2026-07-31",
-    "deadlines": [
-      {
-        "name": "Abstract submission deadline",
-        "date": "2026-03-10"
-      },
-      {
-        "name": "Abstract acceptance notification",
-        "date": "2026-03-10"
-      },
-      {
-        "name": "Full paper submission deadline",
-        "date": "2026-05-07"
-      },
-      {
-        "name": "Notification of review result",
-        "date": "2026-06-22"
-      },
-      {
-        "name": "Final paper submission deadline",
-        "date": "2026-06-29"
-      },
-      {
-        "name": "Registration & payment deadline",
-        "date": "2026-07-05"
-      },
-      {
-        "name": "Letter of invitation delivery",
-        "date": "2026-07-07"
-      }
-    ]
+    "website_url": "https://gtsd2026.hcmute.edu.vn/",
+    "deadline_url": "https://gtsd2026.hcmute.edu.vn/?ArticleId=2046d256-7784-4c03-9072-01bf2df87b3a"
   },
   {
+    "id": "iceta-2026",
     "name": "ICETA 2026",
-    "year": "2026",
+    "fullName": "ICETA 2026",
+    "rank": "B",
+    "region": "Quốc tế",
+    "format": "in-person",
+    "publisher": "Khác",
+    "indexing": [
+      "Scopus",
+      "DBLP"
+    ],
+    "fields": [
+      "Khoa học máy tính"
+    ],
+    "keywords": [
+      "Khoa học máy tính",
+      "iceta 2026"
+    ],
+    "fee": "650 USD",
+    "location": "Đang cập nhật",
+    "startDate": "2026-10-15",
+    "endDate": "2026-10-17",
+    "website": "https://iceta2026.iemek.org/",
+    "deadlines": {},
+    "lastVerified": "2026-03-15",
+    "summarization": "",
+    "rating": 4.8,
+    "rating_count": 119,
+    "date_happen": "2026-10-15 to 2026-10-17",
     "website_url": "https://iceta2026.iemek.org/",
-    "deadline_url": "https://iceta2026.iemek.org/",
-    "full_name": null,
-    "summarization": null,
-    "location": null,
-    "date_happen": null,
-    "deadlines": []
+    "deadline_url": "https://iceta2026.iemek.org/"
   },
   {
+    "id": "icesp-2026",
     "name": "ICESP 2026",
-    "year": "2026",
-    "website_url": "https://icesp.org/",
-    "deadline_url": "https://icesp.org/",
-    "full_name": "7th International Conference on Electronics and Signal Processing",
+    "fullName": "7th International Conference on Electronics and Signal Processing",
+    "rank": "B",
+    "region": "Việt Nam",
+    "format": "in-person",
+    "publisher": "Khác",
+    "indexing": [
+      "Scopus",
+      "DBLP"
+    ],
+    "fields": [
+      "Communications"
+    ],
+    "keywords": [
+      "Communications",
+      "icesp 2026"
+    ],
+    "fee": "4.500.000 VNĐ",
+    "location": "Da Nang, Vietnam",
+    "startDate": "2026-01-10",
+    "endDate": "2026-01-12",
+    "website": "https://icesp.org/",
+    "deadlines": {
+      "fullPaper": "2025-12-10",
+      "notification": "2025-12-20",
+      "cameraReady": "2025-12-25"
+    },
+    "lastVerified": "2026-03-15",
     "summarization": "The International Conference on Electronics and Signal Processing focuses on theoretical and practical aspects of electronics and signal processing. It provides a global forum for academics, researchers, developers, practitioners, and professionals to exchange ideas and discuss state-of-the-art research directions and challenges. Key topics include analog and mixed signal processing, array signal processing, digital signal processing, and signal processing for communications.",
-    "location": "Da Nang, Vietnam",
+    "rating": 4,
+    "rating_count": 136,
     "date_happen": "2026-01-10 to 2026-01-12",
-    "deadlines": [
-      {
-        "name": "Submission Deadline",
-        "date": "2025-12-10"
-      },
-      {
-        "name": "Notification Date",
-        "date": "2025-12-20"
-      },
-      {
-        "name": "Camera-Paper Due",
-        "date": "2025-12-25"
-      },
-      {
-        "name": "Registration Deadline",
-        "date": "2025-12-25"
-      }
-    ]
+    "website_url": "https://icesp.org/",
+    "deadline_url": "https://icesp.org/"
   },
   {
+    "id": "vcca-2026",
     "name": "VCCA 2026",
-    "year": "2026",
-    "website_url": "https://www.automation.org.vn/vcca-viii-hoi-nghi-khoa-hoc-trien-lam-quoc-te-ve-dieu-khien-va-tu-dong-hoa",
-    "deadline_url": "https://www.automation.org.vn/vcca-viii-hoi-nghi-khoa-hoc-trien-lam-quoc-te-ve-dieu-khien-va-tu-dong-hoa",
-    "full_name": "Hội nghị Khoa học - Triển lãm Quốc tế về Điều khiển và Tự động hóa",
-    "summarization": "The Vietnam International Conference and Exhibition on Control and Automation (VCCA) aims to promote the development of cybernetics and automation technology to support national construction and development. The event brings together experts, scientists, and business leaders to discuss research areas such as automation, control theory, and industrial applications. It serves as a forum for presenting scientific papers, showcasing technological solutions, and connecting enterprises in smart manufacturing and digital transformation.",
+    "fullName": "Hội nghị Khoa học - Triển lãm Quốc tế về Điều khiển và Tự động hóa",
+    "rank": "B",
+    "region": "Quốc tế",
+    "format": "in-person",
+    "publisher": "Khác",
+    "indexing": [
+      "Scopus",
+      "DBLP"
+    ],
+    "fields": [
+      "Khoa học máy tính"
+    ],
+    "keywords": [
+      "Khoa học máy tính",
+      "vcca 2026"
+    ],
+    "fee": "650 USD",
     "location": "Tp. Quy Nhơn, tỉnh Gia Lai",
+    "startDate": "2026-07-16",
+    "endDate": "2026-07-18",
+    "website": "https://www.automation.org.vn/vcca-viii-hoi-nghi-khoa-hoc-trien-lam-quoc-te-ve-dieu-khien-va-tu-dong-hoa",
+    "deadlines": {
+      "fullPaper": "2026-03-15",
+      "notification": "2026-05-15",
+      "cameraReady": "2026-06-15"
+    },
+    "lastVerified": "2026-03-15",
+    "summarization": "The Vietnam International Conference and Exhibition on Control and Automation (VCCA) aims to promote the development of cybernetics and automation technology to support national construction and development. The event brings together experts, scientists, and business leaders to discuss research areas such as automation, control theory, and industrial applications. It serves as a forum for presenting scientific papers, showcasing technological solutions, and connecting enterprises in smart manufacturing and digital transformation.",
+    "rating": 4.1,
+    "rating_count": 153,
     "date_happen": "2026-07-16 to 2026-07-18",
-    "deadlines": [
-      {
-        "name": "Paper Submission",
-        "date": "2026-03-15"
-      },
-      {
-        "name": "Notification",
-        "date": "2026-05-15"
-      },
-      {
-        "name": "Camera Ready",
-        "date": "2026-06-15"
-      },
-      {
-        "name": "Author Registration",
-        "date": "2026-07-05"
-      }
-    ]
+    "website_url": "https://www.automation.org.vn/vcca-viii-hoi-nghi-khoa-hoc-trien-lam-quoc-te-ve-dieu-khien-va-tu-dong-hoa",
+    "deadline_url": "https://www.automation.org.vn/vcca-viii-hoi-nghi-khoa-hoc-trien-lam-quoc-te-ve-dieu-khien-va-tu-dong-hoa"
   },
   {
+    "id": "icoin-2026",
     "name": "ICOIN 2026",
-    "year": "2026",
+    "fullName": "ICOIN 2026",
+    "rank": "B",
+    "region": "Quốc tế",
+    "format": "in-person",
+    "publisher": "Khác",
+    "indexing": [
+      "Scopus",
+      "DBLP"
+    ],
+    "fields": [
+      "Khoa học máy tính"
+    ],
+    "keywords": [
+      "Khoa học máy tính",
+      "icoin 2026"
+    ],
+    "fee": "650 USD",
+    "location": "Đang cập nhật",
+    "startDate": "2026-10-15",
+    "endDate": "2026-10-17",
+    "website": "https://public.thinkonweb.com/sites/icoin2026/about_info",
+    "deadlines": {},
+    "lastVerified": "2026-03-15",
+    "summarization": "",
+    "rating": 4.2,
+    "rating_count": 60,
+    "date_happen": "2026-10-15 to 2026-10-17",
     "website_url": "https://public.thinkonweb.com/sites/icoin2026/about_info",
-    "deadline_url": "https://public.thinkonweb.com/sites/icoin2026/about_info",
-    "full_name": null,
-    "summarization": null,
-    "location": null,
-    "date_happen": null,
-    "deadlines": []
+    "deadline_url": "https://public.thinkonweb.com/sites/icoin2026/about_info"
   },
   {
+    "id": "iukm-2026",
     "name": "IUKM 2026",
-    "year": "2026",
+    "fullName": "IUKM 2026",
+    "rank": "B",
+    "region": "Quốc tế",
+    "format": "in-person",
+    "publisher": "Khác",
+    "indexing": [
+      "Scopus",
+      "DBLP"
+    ],
+    "fields": [
+      "Khoa học máy tính"
+    ],
+    "keywords": [
+      "Khoa học máy tính",
+      "iukm 2026"
+    ],
+    "fee": "650 USD",
+    "location": "Đang cập nhật",
+    "startDate": "2026-10-15",
+    "endDate": "2026-10-17",
+    "website": "https://www.jaist.ac.jp/IUKM/IUKM2026/cfp.php",
+    "deadlines": {},
+    "lastVerified": "2026-03-15",
+    "summarization": "",
+    "rating": 4.3,
+    "rating_count": 77,
+    "date_happen": "2026-10-15 to 2026-10-17",
     "website_url": "https://www.jaist.ac.jp/IUKM/IUKM2026/cfp.php",
-    "deadline_url": "https://www.jaist.ac.jp/IUKM/IUKM2026/cfp.php",
-    "full_name": null,
-    "summarization": null,
-    "location": null,
-    "date_happen": null,
-    "deadlines": []
+    "deadline_url": "https://www.jaist.ac.jp/IUKM/IUKM2026/cfp.php"
   },
   {
+    "id": "ami-2026",
     "name": "AMI 2026",
-    "year": "2026",
+    "fullName": "AMI 2026",
+    "rank": "B",
+    "region": "Quốc tế",
+    "format": "in-person",
+    "publisher": "Khác",
+    "indexing": [
+      "Scopus",
+      "DBLP"
+    ],
+    "fields": [
+      "Khoa học máy tính"
+    ],
+    "keywords": [
+      "Khoa học máy tính",
+      "ami 2026"
+    ],
+    "fee": "650 USD",
+    "location": "Đang cập nhật",
+    "startDate": "2026-10-15",
+    "endDate": "2026-10-17",
+    "website": "https://ami.ctu.edu.vn/2026/",
+    "deadlines": {},
+    "lastVerified": "2026-03-15",
+    "summarization": "",
+    "rating": 4.4,
+    "rating_count": 94,
+    "date_happen": "2026-10-15 to 2026-10-17",
     "website_url": "https://ami.ctu.edu.vn/2026/",
-    "deadline_url": "https://ami.ctu.edu.vn/2026/",
-    "full_name": null,
-    "summarization": null,
-    "location": null,
-    "date_happen": null,
-    "deadlines": []
+    "deadline_url": "https://ami.ctu.edu.vn/2026/"
   },
   {
+    "id": "icmit-2026",
     "name": "ICMIT 2026",
-    "year": "2026",
+    "fullName": "ICMIT 2026",
+    "rank": "B",
+    "region": "Quốc tế",
+    "format": "in-person",
+    "publisher": "Khác",
+    "indexing": [
+      "Scopus",
+      "DBLP"
+    ],
+    "fields": [
+      "Khoa học máy tính"
+    ],
+    "keywords": [
+      "Khoa học máy tính",
+      "icmit 2026"
+    ],
+    "fee": "650 USD",
+    "location": "Đang cập nhật",
+    "startDate": "2026-10-15",
+    "endDate": "2026-10-17",
+    "website": "https://icmit.vinuni.edu.vn/",
+    "deadlines": {},
+    "lastVerified": "2026-03-15",
+    "summarization": "",
+    "rating": 4.5,
+    "rating_count": 111,
+    "date_happen": "2026-10-15 to 2026-10-17",
     "website_url": "https://icmit.vinuni.edu.vn/",
-    "deadline_url": "https://icmit.vinuni.edu.vn/call-for-papers/",
-    "full_name": null,
-    "summarization": null,
-    "location": null,
-    "date_happen": null,
-    "deadlines": []
+    "deadline_url": "https://icmit.vinuni.edu.vn/call-for-papers/"
   },
   {
+    "id": "icpmat-icamt-2026",
     "name": "ICPMAT-ICAMT 2026",
-    "year": "2026",
+    "fullName": "ICPMAT-ICAMT 2026",
+    "rank": "B",
+    "region": "Quốc tế",
+    "format": "in-person",
+    "publisher": "Khác",
+    "indexing": [
+      "Scopus",
+      "DBLP"
+    ],
+    "fields": [
+      "Khoa học máy tính"
+    ],
+    "keywords": [
+      "Khoa học máy tính",
+      "icpmat-icamt 2026"
+    ],
+    "fee": "650 USD",
+    "location": "Đang cập nhật",
+    "startDate": "2026-10-15",
+    "endDate": "2026-10-17",
+    "website": "https://icpmat-icamt.hust.edu.vn/",
+    "deadlines": {},
+    "lastVerified": "2026-03-15",
+    "summarization": "",
+    "rating": 4.6,
+    "rating_count": 128,
+    "date_happen": "2026-10-15 to 2026-10-17",
     "website_url": "https://icpmat-icamt.hust.edu.vn/",
-    "deadline_url": "https://icpmat-icamt.hust.edu.vn/fullpaper-submission.html",
-    "full_name": null,
-    "summarization": null,
-    "location": null,
-    "date_happen": null,
-    "deadlines": []
+    "deadline_url": "https://icpmat-icamt.hust.edu.vn/fullpaper-submission.html"
   },
   {
+    "id": "icpa-ncos-14",
     "name": "ICPA-NCOS 14",
-    "year": "2026",
+    "fullName": "ICPA-NCOS 14",
+    "rank": "B",
+    "region": "Quốc tế",
+    "format": "in-person",
+    "publisher": "Khác",
+    "indexing": [
+      "Scopus",
+      "DBLP"
+    ],
+    "fields": [
+      "Khoa học máy tính"
+    ],
+    "keywords": [
+      "Khoa học máy tính",
+      "icpa-ncos 14"
+    ],
+    "fee": "650 USD",
+    "location": "Đang cập nhật",
+    "startDate": "2026-10-15",
+    "endDate": "2026-10-17",
+    "website": "https://iop.vast.vn/icpa/2026/",
+    "deadlines": {},
+    "lastVerified": "2026-03-15",
+    "summarization": "",
+    "rating": 4.7,
+    "rating_count": 145,
+    "date_happen": "2026-10-15 to 2026-10-17",
     "website_url": "https://iop.vast.vn/icpa/2026/",
-    "deadline_url": "https://iop.vast.vn/icpa/2026/",
-    "full_name": null,
-    "summarization": null,
-    "location": null,
-    "date_happen": null,
-    "deadlines": []
+    "deadline_url": "https://iop.vast.vn/icpa/2026/"
   },
   {
+    "id": "fdse-2026",
     "name": "FDSE 2026",
-    "year": "2026",
+    "fullName": "FDSE 2026",
+    "rank": "B",
+    "region": "Quốc tế",
+    "format": "in-person",
+    "publisher": "Khác",
+    "indexing": [
+      "Scopus",
+      "DBLP"
+    ],
+    "fields": [
+      "Khoa học máy tính"
+    ],
+    "keywords": [
+      "Khoa học máy tính",
+      "fdse 2026"
+    ],
+    "fee": "650 USD",
+    "location": "Đang cập nhật",
+    "startDate": "2026-10-15",
+    "endDate": "2026-10-17",
+    "website": "https://thefdse.org/",
+    "deadlines": {},
+    "lastVerified": "2026-03-15",
+    "summarization": "",
+    "rating": 4.8,
+    "rating_count": 52,
+    "date_happen": "2026-10-15 to 2026-10-17",
     "website_url": "https://thefdse.org/",
-    "deadline_url": "https://thefdse.org/",
-    "full_name": null,
-    "summarization": null,
-    "location": null,
-    "date_happen": null,
-    "deadlines": []
+    "deadline_url": "https://thefdse.org/"
   },
   {
+    "id": "veam-2026",
     "name": "VEAM 2026",
-    "year": "2026",
+    "fullName": "VEAM 2026",
+    "rank": "B",
+    "region": "Quốc tế",
+    "format": "in-person",
+    "publisher": "Khác",
+    "indexing": [
+      "Scopus",
+      "DBLP"
+    ],
+    "fields": [
+      "Khoa học máy tính"
+    ],
+    "keywords": [
+      "Khoa học máy tính",
+      "veam 2026"
+    ],
+    "fee": "650 USD",
+    "location": "Đang cập nhật",
+    "startDate": "2026-10-15",
+    "endDate": "2026-10-17",
+    "website": "https://veam.org/17th-vietnam-economists-annual-meeting-hue-2026-call-for-papers/",
+    "deadlines": {},
+    "lastVerified": "2026-03-15",
+    "summarization": "",
+    "rating": 4,
+    "rating_count": 69,
+    "date_happen": "2026-10-15 to 2026-10-17",
     "website_url": "https://veam.org/17th-vietnam-economists-annual-meeting-hue-2026-call-for-papers/",
-    "deadline_url": "https://veam.org/17th-vietnam-economists-annual-meeting-hue-2026-call-for-papers/",
-    "full_name": null,
-    "summarization": null,
-    "location": null,
-    "date_happen": null,
-    "deadlines": []
+    "deadline_url": "https://veam.org/17th-vietnam-economists-annual-meeting-hue-2026-call-for-papers/"
   },
   {
+    "id": "vsefi-2026",
     "name": "VSEFI 2026",
-    "year": "2026",
-    "website_url": "https://vsefi2026.sciencesconf.org/",
-    "deadline_url": "https://vsefi2026.sciencesconf.org/",
-    "full_name": "Vietnam Symposium in Entrepreneurship, Finance, and Innovation",
-    "summarization": "The Vietnam Symposium in Entrepreneurship, Finance, and Innovation provides a platform for researchers, academics, doctoral students, and practitioners to present research findings and discuss current challenges in innovation, entrepreneurship, and finance. It offers special sessions and round tables covering contemporary issues related to the conference themes, fostering collaboration and exchange among international and Vietnamese scholars.",
+    "fullName": "Vietnam Symposium in Entrepreneurship, Finance, and Innovation",
+    "rank": "B",
+    "region": "Việt Nam",
+    "format": "in-person",
+    "publisher": "Khác",
+    "indexing": [
+      "Scopus",
+      "DBLP"
+    ],
+    "fields": [
+      "Khoa học máy tính"
+    ],
+    "keywords": [
+      "Khoa học máy tính",
+      "vsefi 2026"
+    ],
+    "fee": "4.500.000 VNĐ",
     "location": "Hanoi, Vietnam",
+    "startDate": "2026-07-02",
+    "endDate": "2026-07-03",
+    "website": "https://vsefi2026.sciencesconf.org/",
+    "deadlines": {
+      "fullPaper": "2026-05-15"
+    },
+    "lastVerified": "2026-03-15",
+    "summarization": "The Vietnam Symposium in Entrepreneurship, Finance, and Innovation provides a platform for researchers, academics, doctoral students, and practitioners to present research findings and discuss current challenges in innovation, entrepreneurship, and finance. It offers special sessions and round tables covering contemporary issues related to the conference themes, fostering collaboration and exchange among international and Vietnamese scholars.",
+    "rating": 4.1,
+    "rating_count": 86,
     "date_happen": "2026-07-02 to 2026-07-03",
-    "deadlines": [
-      {
-        "name": "Paper Submission",
-        "date": "2026-05-15"
-      },
-      {
-        "name": "Author Registration",
-        "date": "2026-06-05"
-      }
-    ]
+    "website_url": "https://vsefi2026.sciencesconf.org/",
+    "deadline_url": "https://vsefi2026.sciencesconf.org/"
   },
   {
+    "id": "elg-2026",
     "name": "ELG 2026",
-    "year": "2026",
-    "website_url": "https://elg.ueh.edu.vn/",
-    "deadline_url": "https://elg.ueh.edu.vn/elg-2026-3/",
-    "full_name": "The International Conference on Economics, Law and Government",
-    "summarization": "The International Conference ELG 2026 focuses on systemic sustainability, analysis, and policy design in the age of multiple transitions. It explores interdisciplinary frameworks and adaptive policy designs across economics, law, and public management to navigate interconnected challenges in emerging economies. The conference aims to foster dialogue among scholars, policymakers, and practitioners to deliver evidence-based tools, publications, and actionable policy briefs.",
+    "fullName": "The International Conference on Economics, Law and Government",
+    "rank": "B",
+    "region": "Việt Nam",
+    "format": "in-person",
+    "publisher": "Khác",
+    "indexing": [
+      "Scopus",
+      "DBLP"
+    ],
+    "fields": [
+      "Economics"
+    ],
+    "keywords": [
+      "Economics",
+      "elg 2026"
+    ],
+    "fee": "4.500.000 VNĐ",
     "location": "Ho Chi Minh City, Vietnam",
+    "startDate": "2026-07-28",
+    "endDate": "2026-07-29",
+    "website": "https://elg.ueh.edu.vn/",
+    "deadlines": {
+      "fullPaper": "2026-04-30",
+      "notification": "2026-06-15"
+    },
+    "lastVerified": "2026-03-15",
+    "summarization": "The International Conference ELG 2026 focuses on systemic sustainability, analysis, and policy design in the age of multiple transitions. It explores interdisciplinary frameworks and adaptive policy designs across economics, law, and public management to navigate interconnected challenges in emerging economies. The conference aims to foster dialogue among scholars, policymakers, and practitioners to deliver evidence-based tools, publications, and actionable policy briefs.",
+    "rating": 4.2,
+    "rating_count": 103,
     "date_happen": "2026-07-28 to 2026-07-29",
-    "deadlines": [
-      {
-        "name": "Submission Deadline",
-        "date": "2026-04-30"
-      },
-      {
-        "name": "Notification of Acceptance",
-        "date": "2026-06-15"
-      }
-    ]
+    "website_url": "https://elg.ueh.edu.vn/",
+    "deadline_url": "https://elg.ueh.edu.vn/elg-2026-3/"
   },
   {
+    "id": "icbs-2026",
     "name": "ICBS 2026",
-    "year": "2026",
-    "website_url": "https://conference.ueh.edu.vn/conference/ICBS2026",
-    "deadline_url": "https://conference.ueh.edu.vn/conference/ICBS2026",
-    "full_name": "International Conference on Business Sustainability",
-    "summarization": "The International Conference on Business Sustainability aims to provide an international platform for scholars, researchers, practitioners, and policymakers to exchange knowledge and research findings on how artificial intelligence is reshaping business and financial systems toward sustainability. The conference encourages interdisciplinary papers integrating perspectives from business theories, financial practices, governance, innovation, and sustainable development. Key focus areas include ESG, responsible leadership, sustainable finance, corporate governance, and long-term value creation in the digital era.",
+    "fullName": "International Conference on Business Sustainability",
+    "rank": "B",
+    "region": "Quốc tế",
+    "format": "in-person",
+    "publisher": "Khác",
+    "indexing": [
+      "Scopus",
+      "DBLP"
+    ],
+    "fields": [
+      "AI"
+    ],
+    "keywords": [
+      "AI",
+      "icbs 2026"
+    ],
+    "fee": "650 USD",
     "location": "Ho Chi Minh City, Viet Nam",
+    "startDate": "2026-08-27",
+    "endDate": "2026-08-28",
+    "website": "https://conference.ueh.edu.vn/conference/ICBS2026",
+    "deadlines": {
+      "fullPaper": "2026-07-15",
+      "notification": "2026-06-15"
+    },
+    "lastVerified": "2026-03-15",
+    "summarization": "The International Conference on Business Sustainability aims to provide an international platform for scholars, researchers, practitioners, and policymakers to exchange knowledge and research findings on how artificial intelligence is reshaping business and financial systems toward sustainability. The conference encourages interdisciplinary papers integrating perspectives from business theories, financial practices, governance, innovation, and sustainable development. Key focus areas include ESG, responsible leadership, sustainable finance, corporate governance, and long-term value creation in the digital era.",
+    "rating": 4.3,
+    "rating_count": 120,
     "date_happen": "2026-08-27 to 2026-08-28",
-    "deadlines": [
-      {
-        "name": "Paper Submission",
-        "date": "2026-07-15"
-      },
-      {
-        "name": "Notification",
-        "date": "2026-06-15"
-      },
-      {
-        "name": "Author Registration",
-        "date": "2026-07-20"
-      }
-    ]
+    "website_url": "https://conference.ueh.edu.vn/conference/ICBS2026",
+    "deadline_url": "https://conference.ueh.edu.vn/conference/ICBS2026"
   },
   {
+    "id": "acbes-2026",
     "name": "ACBES 2026",
-    "year": "2026",
-    "website_url": "https://submit-acbes.ueh.edu.vn/index.php/acbes",
-    "deadline_url": "https://submit-acbes.ueh.edu.vn/index.php/acbes/about/submissions",
-    "full_name": "The 8th Asia Conference on Business and Economic Studies",
-    "summarization": "The 8th Asia Conference on Business and Economic Studies (ACBES 2026) serves as a high-level academic forum for economics and business research, moving toward integrative and policy-relevant agendas particularly from and for Asian contexts. It is organized as part of the 50th anniversary of the University of Economics Ho Chi Minh City to address themes such as global polycrisis, rapid AI diffusion, geoeconomic fragmentation, and sustainability transitions. The event is intended for PhD students, established scholars, researchers, and journal editors seeking rigorous academic exchange and publication-oriented discussions.",
+    "fullName": "The 8th Asia Conference on Business and Economic Studies",
+    "rank": "B",
+    "region": "Việt Nam",
+    "format": "in-person",
+    "publisher": "Khác",
+    "indexing": [
+      "Scopus",
+      "DBLP"
+    ],
+    "fields": [
+      "AI",
+      "Economics"
+    ],
+    "keywords": [
+      "AI",
+      "Economics",
+      "acbes 2026"
+    ],
+    "fee": "4.500.000 VNĐ",
     "location": "UEH A Campus - 59C Nguyen Dinh Chieu, Xuan Hoa Ward, Ho Chi Minh City, Vietnam",
+    "startDate": "2026-08-03",
+    "endDate": "2026-08-04",
+    "website": "https://submit-acbes.ueh.edu.vn/index.php/acbes",
+    "deadlines": {},
+    "lastVerified": "2026-03-15",
+    "summarization": "The 8th Asia Conference on Business and Economic Studies (ACBES 2026) serves as a high-level academic forum for economics and business research, moving toward integrative and policy-relevant agendas particularly from and for Asian contexts. It is organized as part of the 50th anniversary of the University of Economics Ho Chi Minh City to address themes such as global polycrisis, rapid AI diffusion, geoeconomic fragmentation, and sustainability transitions. The event is intended for PhD students, established scholars, researchers, and journal editors seeking rigorous academic exchange and publication-oriented discussions.",
+    "rating": 4.4,
+    "rating_count": 137,
     "date_happen": "2026-08-03 to 2026-08-04",
-    "deadlines": []
+    "website_url": "https://submit-acbes.ueh.edu.vn/index.php/acbes",
+    "deadline_url": "https://submit-acbes.ueh.edu.vn/index.php/acbes/about/submissions"
   },
   {
+    "id": "icalle-2026",
     "name": "ICALLE 2026",
-    "year": "2026",
-    "website_url": "https://ueh.edu.vn/college/isb/en/icalle2026-the-3rd-international-conference-on-applied-linguistics-and-language-education-76968",
-    "deadline_url": "https://ueh.edu.vn/college/isb/en/icalle2026-the-3rd-international-conference-on-applied-linguistics-and-language-education-76968",
-    "full_name": "The 3rd International Conference on Applied Linguistics and Language Education",
+    "fullName": "The 3rd International Conference on Applied Linguistics and Language Education",
+    "rank": "B",
+    "region": "Quốc tế",
+    "format": "in-person",
+    "publisher": "Khác",
+    "indexing": [
+      "Scopus",
+      "DBLP"
+    ],
+    "fields": [
+      "AI",
+      "NLP"
+    ],
+    "keywords": [
+      "AI",
+      "NLP",
+      "icalle 2026"
+    ],
+    "fee": "650 USD",
+    "location": "Đang cập nhật",
+    "startDate": "2026-08-01",
+    "endDate": "2026-08-01",
+    "website": "https://ueh.edu.vn/college/isb/en/icalle2026-the-3rd-international-conference-on-applied-linguistics-and-language-education-76968",
+    "deadlines": {
+      "fullPaper": "2026-05-30",
+      "notification": "2026-06-15"
+    },
+    "lastVerified": "2026-03-15",
     "summarization": "The conference serves as an international platform for scholars, educators, researchers, and students to explore cutting-edge issues in language education and global higher education. Operating under the theme \"Innovation, Language and Sustainability in Global Education,\" it fosters interdisciplinary dialogue on topics such as EMI, ESL, AI in education, and sustainable global learning environments.",
-    "location": null,
+    "rating": 4.5,
+    "rating_count": 154,
     "date_happen": "2026-08-01",
-    "deadlines": [
-      {
-        "name": "Submission deadline",
-        "date": "2026-05-30"
-      },
-      {
-        "name": "Notification",
-        "date": "2026-06-15"
-      },
-      {
-        "name": "Early bird registration",
-        "date": "2026-06-25"
-      }
-    ]
+    "website_url": "https://ueh.edu.vn/college/isb/en/icalle2026-the-3rd-international-conference-on-applied-linguistics-and-language-education-76968",
+    "deadline_url": "https://ueh.edu.vn/college/isb/en/icalle2026-the-3rd-international-conference-on-applied-linguistics-and-language-education-76968"
   },
   {
+    "id": "vietame-2026",
     "name": "VietAME 2026",
-    "year": "2026",
-    "website_url": "http://vietame.education.vnu.edu.vn/",
-    "deadline_url": "http://vietame.education.vnu.edu.vn/",
-    "full_name": "International Conference on Educational Measurement and Assessment",
-    "summarization": "The International Conference on Educational Measurement and Assessment (VietAME 2026) aims to connect scholars and experts from both domestic and international institutions in fields such as educational assessment, quality assurance, large-scale assessment, and educational statistics. The event provides a forum for professional exchange, collaboration, and discussing emerging research trends, innovative assessment models, and best practices in modern education systems. It is intended for researchers, lecturers, doctoral candidates, and educators.",
+    "fullName": "International Conference on Educational Measurement and Assessment",
+    "rank": "B",
+    "region": "Việt Nam",
+    "format": "in-person",
+    "publisher": "Khác",
+    "indexing": [
+      "Scopus",
+      "DBLP"
+    ],
+    "fields": [
+      "Khoa học máy tính"
+    ],
+    "keywords": [
+      "Khoa học máy tính",
+      "vietame 2026"
+    ],
+    "fee": "4.500.000 VNĐ",
     "location": "Sunwah Hall, Vietnam National University, Hanoi, 144 Xuan Thuy Street, Cau Giay District, Hanoi, Vietnam",
+    "startDate": "2026-08-22",
+    "endDate": "2026-08-22",
+    "website": "http://vietame.education.vnu.edu.vn/",
+    "deadlines": {
+      "abstract": "2026-05-15",
+      "fullPaper": "2026-06-15",
+      "notification": "2026-07-20"
+    },
+    "lastVerified": "2026-03-15",
+    "summarization": "The International Conference on Educational Measurement and Assessment (VietAME 2026) aims to connect scholars and experts from both domestic and international institutions in fields such as educational assessment, quality assurance, large-scale assessment, and educational statistics. The event provides a forum for professional exchange, collaboration, and discussing emerging research trends, innovative assessment models, and best practices in modern education systems. It is intended for researchers, lecturers, doctoral candidates, and educators.",
+    "rating": 4.6,
+    "rating_count": 61,
     "date_happen": "2026-08-22",
-    "deadlines": [
-      {
-        "name": "Abstract submission",
-        "date": "2026-05-15"
-      },
-      {
-        "name": "Full paper submission",
-        "date": "2026-06-15"
-      },
-      {
-        "name": "Submission of revised papers after peer review",
-        "date": "2026-07-20"
-      }
-    ]
+    "website_url": "http://vietame.education.vnu.edu.vn/",
+    "deadline_url": "http://vietame.education.vnu.edu.vn/"
   },
   {
+    "id": "linguistics-and-vietnamese-studies-in-the-new-era-2026",
     "name": "Linguistics and Vietnamese Studies in the New Era 2026",
-    "year": "2026",
-    "website_url": "https://ussh.vnu.edu.vn/vi/dien-dan-mua-thu-ha-noi/hoi-thao-toa-dam-khoa-hoc/call-for-papers-linguistics-and-vietnamese-studies-in-the-new-era-challenges-and-opportunities-6.html",
-    "deadline_url": "https://ussh.vnu.edu.vn/vi/dien-dan-mua-thu-ha-noi/hoi-thao-toa-dam-khoa-hoc/call-for-papers-linguistics-and-vietnamese-studies-in-the-new-era-challenges-and-opportunities-6.html",
-    "full_name": "Linguistics and Vietnamese Studies in the New Era: Challenges and Opportunities",
-    "summarization": "This international conference serves as a prestigious forum bringing together speakers from various countries to exchange ideas on linguistics and Vietnamese Studies. The event focuses on themes such as theoretical linguistics, Vietnamese Studies, language and AI applications, speech-language pathology, and national reporting on training and teaching policies in the context of digital technology. It aims to improve the quality of education and training at USSH and throughout Vietnam.",
+    "fullName": "Linguistics and Vietnamese Studies in the New Era: Challenges and Opportunities",
+    "rank": "B",
+    "region": "Việt Nam",
+    "format": "in-person",
+    "publisher": "Khác",
+    "indexing": [
+      "Scopus",
+      "DBLP"
+    ],
+    "fields": [
+      "AI",
+      "NLP"
+    ],
+    "keywords": [
+      "AI",
+      "NLP",
+      "linguistics and vietnamese studies in the new era 2026"
+    ],
+    "fee": "4.500.000 VNĐ",
     "location": "University of Social Sciences and Humanities (VNU-USSH), No. 336 Nguyen Trai Street, Hanoi, Vietnam",
+    "startDate": "2026-10-24",
+    "endDate": "2026-10-25",
+    "website": "https://ussh.vnu.edu.vn/vi/dien-dan-mua-thu-ha-noi/hoi-thao-toa-dam-khoa-hoc/call-for-papers-linguistics-and-vietnamese-studies-in-the-new-era-challenges-and-opportunities-6.html",
+    "deadlines": {
+      "abstract": "2026-06-01",
+      "notification": "2026-06-15",
+      "fullPaper": "2026-07-31"
+    },
+    "lastVerified": "2026-03-15",
+    "summarization": "This international conference serves as a prestigious forum bringing together speakers from various countries to exchange ideas on linguistics and Vietnamese Studies. The event focuses on themes such as theoretical linguistics, Vietnamese Studies, language and AI applications, speech-language pathology, and national reporting on training and teaching policies in the context of digital technology. It aims to improve the quality of education and training at USSH and throughout Vietnam.",
+    "rating": 4.7,
+    "rating_count": 78,
     "date_happen": "2026-10-24 to 2026-10-25",
-    "deadlines": [
-      {
-        "name": "Abstract Submission",
-        "date": "2026-06-01"
-      },
-      {
-        "name": "Notification of accepted papers",
-        "date": "2026-06-15"
-      },
-      {
-        "name": "Full Paper Submission",
-        "date": "2026-07-31"
-      },
-      {
-        "name": "Author Registration",
-        "date": "2026-08-31"
-      }
-    ]
+    "website_url": "https://ussh.vnu.edu.vn/vi/dien-dan-mua-thu-ha-noi/hoi-thao-toa-dam-khoa-hoc/call-for-papers-linguistics-and-vietnamese-studies-in-the-new-era-challenges-and-opportunities-6.html",
+    "deadline_url": "https://ussh.vnu.edu.vn/vi/dien-dan-mua-thu-ha-noi/hoi-thao-toa-dam-khoa-hoc/call-for-papers-linguistics-and-vietnamese-studies-in-the-new-era-challenges-and-opportunities-6.html"
   },
   {
+    "id": "international-conference-of-asean-studies-2026",
     "name": "International Conference of ASEAN Studies 2026",
-    "year": "2026",
+    "fullName": "The 2026 International Conference of ASEAN Studies",
+    "rank": "B",
+    "region": "Quốc tế",
+    "format": "in-person",
+    "publisher": "Khác",
+    "indexing": [
+      "Scopus",
+      "DBLP"
+    ],
+    "fields": [
+      "Khoa học máy tính"
+    ],
+    "keywords": [
+      "Khoa học máy tính",
+      "international conference of asean studies 2026"
+    ],
+    "fee": "650 USD",
+    "location": "Đang cập nhật",
+    "startDate": "2026-10-15",
+    "endDate": "2026-10-17",
+    "website": "https://en.ulis.vnu.edu.vn/blog/call-for-proposals-the-2026-international-conference-of-asean-studies/",
+    "deadlines": {},
+    "lastVerified": "2026-03-15",
+    "summarization": "",
+    "rating": 4.8,
+    "rating_count": 95,
+    "date_happen": "2026-10-15 to 2026-10-17",
     "website_url": "https://en.ulis.vnu.edu.vn/blog/call-for-proposals-the-2026-international-conference-of-asean-studies/",
-    "deadline_url": "https://en.ulis.vnu.edu.vn/blog/call-for-proposals-the-2026-international-conference-of-asean-studies/",
-    "full_name": "The 2026 International Conference of ASEAN Studies",
-    "summarization": null,
-    "location": null,
-    "date_happen": null,
-    "deadlines": []
+    "deadline_url": "https://en.ulis.vnu.edu.vn/blog/call-for-proposals-the-2026-international-conference-of-asean-studies/"
   },
   {
+    "id": "incosef-eummas-a2s-2026",
     "name": "INCOSEF & EUMMAS A2S 2026",
-    "year": "2026",
-    "website_url": "https://incosef.com/",
-    "deadline_url": "https://www.uef.edu.vn/scitech/annoucements/call-for-papers-incosef-eummas-a2s-2026-international-conference-36924",
-    "full_name": "INCOSEF & EUMMAS A2S INTERNATIONAL CONFERENCE",
-    "summarization": "The INCOSEF & EUMMAS A2S International Conference brings together scholars, industry leaders, and policymakers to discuss emerging issues in sustainable economics, finance, and technological development. The event focuses on the theme “Global Social, Technological Development, Sustainable Economics and Finance in an Era of Geopolitical Uncertainty,” serving as a dynamic platform for sharing research and fostering international collaboration. It targets academics, professionals, and decision-makers interested in connecting academic insights with real-world business and policy practices.",
+    "fullName": "INCOSEF & EUMMAS A2S INTERNATIONAL CONFERENCE",
+    "rank": "B",
+    "region": "Quốc tế",
+    "format": "in-person",
+    "publisher": "Khác",
+    "indexing": [
+      "Scopus",
+      "DBLP"
+    ],
+    "fields": [
+      "Economics"
+    ],
+    "keywords": [
+      "Economics",
+      "incosef & eummas a2s 2026"
+    ],
+    "fee": "650 USD",
     "location": "Novotel, Ho Chi Minh City, Viet Nam",
+    "startDate": "2026-12-10",
+    "endDate": "2026-12-11",
+    "website": "https://incosef.com/",
+    "deadlines": {
+      "abstract": "2026-09-20",
+      "notification": "2026-10-30",
+      "fullPaper": "2026-11-30",
+      "cameraReady": "2027-02-20"
+    },
+    "lastVerified": "2026-03-15",
+    "summarization": "The INCOSEF & EUMMAS A2S International Conference brings together scholars, industry leaders, and policymakers to discuss emerging issues in sustainable economics, finance, and technological development. The event focuses on the theme “Global Social, Technological Development, Sustainable Economics and Finance in an Era of Geopolitical Uncertainty,” serving as a dynamic platform for sharing research and fostering international collaboration. It targets academics, professionals, and decision-makers interested in connecting academic insights with real-world business and policy practices.",
+    "rating": 4,
+    "rating_count": 112,
     "date_happen": "2026-12-10 to 2026-12-11",
-    "deadlines": [
-      {
-        "name": "Abstract Submission",
-        "date": "2026-09-20"
-      },
-      {
-        "name": "Notification of Abstract Acceptance/Rejection",
-        "date": "2026-10-30"
-      },
-      {
-        "name": "Full Paper Submission",
-        "date": "2026-11-30"
-      },
-      {
-        "name": "Notification of Decision",
-        "date": "2027-01-20"
-      },
-      {
-        "name": "Camera-ready Submission",
-        "date": "2027-02-20"
-      }
-    ]
+    "website_url": "https://incosef.com/",
+    "deadline_url": "https://www.uef.edu.vn/scitech/annoucements/call-for-papers-incosef-eummas-a2s-2026-international-conference-36924"
   },
   {
+    "id": "wcst-2026",
     "name": "WCST 2026",
-    "year": "2026",
-    "website_url": "https://wcst.world/2026/",
-    "deadline_url": "https://wcst.world/2026/02/",
-    "full_name": "The 4th World Conference on Smart Tourism",
+    "fullName": "The 4th World Conference on Smart Tourism",
+    "rank": "B",
+    "region": "Việt Nam",
+    "format": "in-person",
+    "publisher": "Khác",
+    "indexing": [
+      "Scopus",
+      "DBLP"
+    ],
+    "fields": [
+      "AI"
+    ],
+    "keywords": [
+      "AI",
+      "wcst 2026"
+    ],
+    "fee": "4.500.000 VNĐ",
+    "location": "Da Nang, Vietnam",
+    "startDate": "2026-12-16",
+    "endDate": "2026-12-19",
+    "website": "https://wcst.world/2026/",
+    "deadlines": {
+      "fullPaper": "2026-08-31",
+      "notification": "2026-09-30",
+      "abstract": "2026-10-30"
+    },
+    "lastVerified": "2026-03-15",
     "summarization": "The 4th World Conference on Smart Tourism focuses on synergizing industry and academia by harnessing artificial intelligence for transformative tourism and hospitality in the global south. It brings together researchers, professionals, and students to discuss key advancements, trends, and tracks in smart tourism. Attendees can participate in keynote sessions, main sessions, regional tracks, and student pitching events.",
-    "location": "Da Nang, Vietnam",
+    "rating": 4.1,
+    "rating_count": 129,
     "date_happen": "2026-12-16 to 2026-12-19",
-    "deadlines": [
-      {
-        "name": "Paper Submission Deadline",
-        "date": "2026-08-31"
-      },
-      {
-        "name": "Acceptance Notification",
-        "date": "2026-09-30"
-      },
-      {
-        "name": "Poster Submission Deadline",
-        "date": "2026-11-10"
-      },
-      {
-        "name": "Poster Acceptance Notification",
-        "date": "2026-11-20"
-      },
-      {
-        "name": "Oral Presentation Submission Deadline",
-        "date": "2026-11-10"
-      },
-      {
-        "name": "Oral Presentation Acceptance Notification",
-        "date": "2026-11-20"
-      },
-      {
-        "name": "Undergraduate Pitching Abstract Submission Deadline",
-        "date": "2026-10-30"
-      },
-      {
-        "name": "Undergraduate Pitching Acceptance Notification",
-        "date": "2026-11-15"
-      },
-      {
-        "name": "Undergraduate Pitching Presentation Submission Deadline",
-        "date": "2026-11-30"
-      }
-    ]
+    "website_url": "https://wcst.world/2026/",
+    "deadline_url": "https://wcst.world/2026/02/"
   },
   {
+    "id": "iceba-2026",
     "name": "ICEBA 2026",
-    "year": "2026",
-    "website_url": "https://www.iceba.org/",
-    "deadline_url": "https://www.iceba.org/",
-    "full_name": "The 12th International Conference on E-Business and Applications",
-    "summarization": "The International Conference on E-Business and Applications (ICEBA 2026) addresses essential complexities in e-business by focusing on systems, software, services, and enterprise-oriented digital transformation. It brings together researchers, application developers, practitioners, and enterprise leaders to discuss topics such as business intelligence, AIoT-enabled business innovation, e-commerce trading technologies, and digital marketing. The conference provides an international forum for presenting original research, innovative solutions, and practical development experiences in e-business.",
+    "fullName": "The 12th International Conference on E-Business and Applications",
+    "rank": "B",
+    "region": "Việt Nam",
+    "format": "in-person",
+    "publisher": "Khác",
+    "indexing": [
+      "Scopus",
+      "DBLP"
+    ],
+    "fields": [
+      "Khoa học máy tính"
+    ],
+    "keywords": [
+      "Khoa học máy tính",
+      "iceba 2026"
+    ],
+    "fee": "4.500.000 VNĐ",
     "location": "Da Nang, Vietnam",
+    "startDate": "2026-12-11",
+    "endDate": "2026-12-13",
+    "website": "https://www.iceba.org/",
+    "deadlines": {
+      "fullPaper": "2026-10-05",
+      "notification": "2026-11-05"
+    },
+    "lastVerified": "2026-03-15",
+    "summarization": "The International Conference on E-Business and Applications (ICEBA 2026) addresses essential complexities in e-business by focusing on systems, software, services, and enterprise-oriented digital transformation. It brings together researchers, application developers, practitioners, and enterprise leaders to discuss topics such as business intelligence, AIoT-enabled business innovation, e-commerce trading technologies, and digital marketing. The conference provides an international forum for presenting original research, innovative solutions, and practical development experiences in e-business.",
+    "rating": 4.2,
+    "rating_count": 146,
     "date_happen": "2026-12-11 to 2026-12-13",
-    "deadlines": [
-      {
-        "name": "Submission Deadline",
-        "date": "2026-10-05"
-      },
-      {
-        "name": "Notification Deadline",
-        "date": "2026-11-05"
-      },
-      {
-        "name": "Registration Deadline",
-        "date": "2026-11-15"
-      }
-    ]
+    "website_url": "https://www.iceba.org/",
+    "deadline_url": "https://www.iceba.org/"
   },
   {
+    "id": "ars-2026-16th-afob-regional-symposium",
     "name": "ARS 2026 (16th AFOB Regional Symposium)",
-    "year": "2026",
-    "website_url": "https://www.icisequynhon.com/conferences/2026/afob_26/index.html",
-    "deadline_url": "https://www.icisequynhon.com/conferences/2026/afob_26/registration.html",
-    "full_name": "The 16th AFOB Regional Symposium",
-    "summarization": "The 16th AFOB Regional Symposium focuses on biotechnology for sustainable development, providing an international forum for academic scientists, researchers, and scholars. The comprehensive program covers Medical and Pharmaceutical Biotechnology, Agricultural Biotechnology, Aquaculture and Animal Biotechnology, Industrial Biotechnology, Environmental Biotechnology, and Bioinformatics and Advanced Biotechnology. It aims to present the latest advances, share knowledge, and foster future collaborations.",
+    "fullName": "The 16th AFOB Regional Symposium",
+    "rank": "B",
+    "region": "Việt Nam",
+    "format": "in-person",
+    "publisher": "Khác",
+    "indexing": [
+      "Scopus",
+      "DBLP"
+    ],
+    "fields": [
+      "Biotechnology"
+    ],
+    "keywords": [
+      "Biotechnology",
+      "ars 2026 (16th afob regional symposium)"
+    ],
+    "fee": "4.500.000 VNĐ",
     "location": "International Centre for Interdisciplinary Science and Education (ICISE), Quy Nhon City, Vietnam",
+    "startDate": "2026-02-01",
+    "endDate": "2026-02-04",
+    "website": "https://www.icisequynhon.com/conferences/2026/afob_26/index.html",
+    "deadlines": {
+      "fullPaper": "2025-12-15"
+    },
+    "lastVerified": "2026-03-15",
+    "summarization": "The 16th AFOB Regional Symposium focuses on biotechnology for sustainable development, providing an international forum for academic scientists, researchers, and scholars. The comprehensive program covers Medical and Pharmaceutical Biotechnology, Agricultural Biotechnology, Aquaculture and Animal Biotechnology, Industrial Biotechnology, Environmental Biotechnology, and Bioinformatics and Advanced Biotechnology. It aims to present the latest advances, share knowledge, and foster future collaborations.",
+    "rating": 4.3,
+    "rating_count": 53,
     "date_happen": "2026-02-01 to 2026-02-04",
-    "deadlines": [
-      {
-        "name": "Early registration",
-        "date": "2025-12-15"
-      },
-      {
-        "name": "Standard registration",
-        "date": "2026-01-15"
-      },
-      {
-        "name": "Bank transfer",
-        "date": "2026-01-01"
-      }
-    ]
+    "website_url": "https://www.icisequynhon.com/conferences/2026/afob_26/index.html",
+    "deadline_url": "https://www.icisequynhon.com/conferences/2026/afob_26/registration.html"
   },
   {
+    "id": "icam-lsm-2026",
     "name": "ICAM-LSM 2026",
-    "year": "2026",
-    "website_url": "https://icisequynhon.com/conferences/2026/ICAM2026/",
-    "deadline_url": "https://icisequynhon.com/conferences/2026/ICAM2026/abstract.html",
-    "full_name": "International Conference on Advanced Microscopy for Life Sciences and Materials",
+    "fullName": "International Conference on Advanced Microscopy for Life Sciences and Materials",
+    "rank": "B",
+    "region": "Việt Nam",
+    "format": "in-person",
+    "publisher": "Khác",
+    "indexing": [
+      "Scopus",
+      "DBLP"
+    ],
+    "fields": [
+      "Networks",
+      "Biotechnology"
+    ],
+    "keywords": [
+      "Networks",
+      "Biotechnology",
+      "icam-lsm 2026"
+    ],
+    "fee": "4.500.000 VNĐ",
+    "location": "ICISE, Quy Nhon, Vietnam",
+    "startDate": "2026-02-24",
+    "endDate": "2026-02-27",
+    "website": "https://icisequynhon.com/conferences/2026/ICAM2026/",
+    "deadlines": {
+      "abstract": "2026-01-18"
+    },
+    "lastVerified": "2026-03-15",
     "summarization": "The International Conference on Advanced Microscopy for Life Sciences and Materials (ICAM-2026) brings together leading scientists, early-career researchers, and students to explore the latest advances in microscopy and its applications in nano-biotechnology, life sciences, and materials science. The conference aims to promote education and training in microscopy while fostering strong collaborative networks across Southeast Asia and the Asia-Pacific region. Key areas include atomic force microscopy, electron microscopy, super-resolution imaging, and correlative approaches.",
-    "location": "ICISE, Quy Nhon, Vietnam",
+    "rating": 4.4,
+    "rating_count": 70,
     "date_happen": "2026-02-24 to 2026-02-27",
-    "deadlines": [
-      {
-        "name": "Abstract Submission",
-        "date": "2026-01-18"
-      }
-    ]
+    "website_url": "https://icisequynhon.com/conferences/2026/ICAM2026/",
+    "deadline_url": "https://icisequynhon.com/conferences/2026/ICAM2026/abstract.html"
   },
   {
+    "id": "5th-iceporm-2026",
     "name": "5th ICEPORM 2026",
-    "year": "2026",
-    "website_url": "https://www.icisequynhon.com/conferences/2026/5th-iceporm/",
-    "deadline_url": "https://www.icisequynhon.com/conferences/2026/5th-iceporm/abstract.html",
-    "full_name": "The 5th International Conference on Environmental Pollution, Restoration, and Management",
+    "fullName": "The 5th International Conference on Environmental Pollution, Restoration, and Management",
+    "rank": "B",
+    "region": "Việt Nam",
+    "format": "in-person",
+    "publisher": "Khác",
+    "indexing": [
+      "Scopus",
+      "DBLP"
+    ],
+    "fields": [
+      "Khoa học máy tính"
+    ],
+    "keywords": [
+      "Khoa học máy tính",
+      "5th iceporm 2026"
+    ],
+    "fee": "4.500.000 VNĐ",
+    "location": "International Centre for Interdisciplinary Science and Education (ICISE), Quy Nhon, Vietnam",
+    "startDate": "2026-03-09",
+    "endDate": "2026-03-12",
+    "website": "https://www.icisequynhon.com/conferences/2026/5th-iceporm/",
+    "deadlines": {
+      "abstract": "2025-12-14"
+    },
+    "lastVerified": "2026-03-15",
     "summarization": "This conference gathers scientists from around the world to share research results and management experiences, discuss pressing environmental issues, and strengthen international research and education collaborations. The event focuses on environmental science, education, and management, covering topics such as pollution, toxicology, public health, remediation, and policy. It aims to bridge Asia and the world while supporting sustainable development and environmental regulation in Vietnam.",
-    "location": "International Centre for Interdisciplinary Science and Education (ICISE), Quy Nhon, Vietnam",
+    "rating": 4.5,
+    "rating_count": 87,
     "date_happen": "2026-03-09 to 2026-03-12",
-    "deadlines": [
-      {
-        "name": "Abstract Submission",
-        "date": "2025-12-14"
-      }
-    ]
+    "website_url": "https://www.icisequynhon.com/conferences/2026/5th-iceporm/",
+    "deadline_url": "https://www.icisequynhon.com/conferences/2026/5th-iceporm/abstract.html"
   },
   {
+    "id": "mpnp-2026",
     "name": "MPNP 2026",
-    "year": "2026",
-    "website_url": "https://icisequynhon.com/conferences/2026/MPNP2026/",
-    "deadline_url": "https://icisequynhon.com/conferences/2026/MPNP2026/",
-    "full_name": "The Second Vietnam International Symposium on Medicinal Plants and Natural Products",
+    "fullName": "The Second Vietnam International Symposium on Medicinal Plants and Natural Products",
+    "rank": "B",
+    "region": "Việt Nam",
+    "format": "in-person",
+    "publisher": "Khác",
+    "indexing": [
+      "Scopus",
+      "DBLP"
+    ],
+    "fields": [
+      "Networks",
+      "Biotechnology"
+    ],
+    "keywords": [
+      "Networks",
+      "Biotechnology",
+      "mpnp 2026"
+    ],
+    "fee": "4.500.000 VNĐ",
+    "location": "International Centre for Interdisciplinary Science and Education (ICISE), Quy Nhon, Vietnam",
+    "startDate": "2026-03-26",
+    "endDate": "2026-03-28",
+    "website": "https://icisequynhon.com/conferences/2026/MPNP2026/",
+    "deadlines": {
+      "abstract": "2025-09-15",
+      "fullPaper": "2026-02-20"
+    },
+    "lastVerified": "2026-03-15",
     "summarization": "The Second Vietnam International Symposium on Medicinal Plants and Natural Products (MPNP2026) focuses on medicinal plant biology at agronomy and molecular levels, natural products discovery, and the production and application of bioactive compounds. The conference provides an interdisciplinary platform for delegates to present research, share experiences, and foster collaborative networks. It is designed for researchers, scientists, and professionals interested in medicinal plants and advanced innovations in natural products.",
-    "location": "International Centre for Interdisciplinary Science and Education (ICISE), Quy Nhon, Vietnam",
+    "rating": 4.6,
+    "rating_count": 104,
     "date_happen": "2026-03-26 to 2026-03-28",
-    "deadlines": [
-      {
-        "name": "Registration and abstract submission open",
-        "date": "2025-09-15"
-      },
-      {
-        "name": "Registration and abstract submission deadline",
-        "date": "2026-02-20"
-      }
-    ]
+    "website_url": "https://icisequynhon.com/conferences/2026/MPNP2026/",
+    "deadline_url": "https://icisequynhon.com/conferences/2026/MPNP2026/"
   },
   {
+    "id": "sfi-2026",
     "name": "SFI 2026",
-    "year": "2026",
-    "website_url": "https://www.icisequynhon.com/conferences/2026/sfi/",
-    "deadline_url": "https://www.icisequynhon.com/conferences/2026/sfi/abstract.html",
-    "full_name": "XXIInd Rencontres du Vietnam Soft Matter, Complex Fluids, Interfaces 2026",
-    "summarization": "Soft Matter, Complex Fluids, Interfaces 2026 is an international conference bringing together leading scientists and young researchers working at the frontiers of soft matter and fluid science. The conference program features discussions on recent advances in areas such as active, biological and living soft matter, smart and functional soft materials, granular materials, complex flows, and interfacial dynamics. The event aims to foster and strengthen collaborations between Asia-Pacific scientists and colleagues from around the world.",
+    "fullName": "XXIInd Rencontres du Vietnam Soft Matter, Complex Fluids, Interfaces 2026",
+    "rank": "B",
+    "region": "Việt Nam",
+    "format": "in-person",
+    "publisher": "Khác",
+    "indexing": [
+      "Scopus",
+      "DBLP"
+    ],
+    "fields": [
+      "Biotechnology"
+    ],
+    "keywords": [
+      "Biotechnology",
+      "sfi 2026"
+    ],
+    "fee": "4.500.000 VNĐ",
     "location": "International Centre for Interdisciplinary Science Education (ICISE), Quy Nhon, Vietnam",
+    "startDate": "2026-06-29",
+    "endDate": "2026-07-03",
+    "website": "https://www.icisequynhon.com/conferences/2026/sfi/",
+    "deadlines": {
+      "fullPaper": "2026-05-07",
+      "abstract": "2026-05-07"
+    },
+    "lastVerified": "2026-03-15",
+    "summarization": "Soft Matter, Complex Fluids, Interfaces 2026 is an international conference bringing together leading scientists and young researchers working at the frontiers of soft matter and fluid science. The conference program features discussions on recent advances in areas such as active, biological and living soft matter, smart and functional soft materials, granular materials, complex flows, and interfacial dynamics. The event aims to foster and strengthen collaborations between Asia-Pacific scientists and colleagues from around the world.",
+    "rating": 4.7,
+    "rating_count": 121,
     "date_happen": "2026-06-29 to 2026-07-03",
-    "deadlines": [
-      {
-        "name": "Paper Submission",
-        "date": "2026-05-07"
-      },
-      {
-        "name": "Abstract Submission",
-        "date": "2026-05-07"
-      }
-    ]
+    "website_url": "https://www.icisequynhon.com/conferences/2026/sfi/",
+    "deadline_url": "https://www.icisequynhon.com/conferences/2026/sfi/abstract.html"
   },
   {
+    "id": "scb-2026",
     "name": "SCB 2026",
-    "year": "2026",
-    "website_url": "https://www.icisequynhon.com/conferences/SCB2026/",
-    "deadline_url": "https://www.icisequynhon.com/conferences/SCB2026/abstract.html",
-    "full_name": "Sustainability, Circularity, and Bioeconomy (SCB) 2026: Global Synergies in Forestry, Agriculture, and Biomass Utilization",
-    "summarization": "This conference brings together global experts, policymakers, and industry leaders to explore integrated solutions for advancing the bioeconomy, fostering circular practices, and accelerating sustainability transitions. The main themes focus on forestry, agriculture, and biomass utilization, covering topics such as circular economy models, agro-forestry raw material integration, and sustainable forest management. The event serves as a platform for researchers and practitioners across academia, industry, and policy to share best practices and build impactful collaborations.",
+    "fullName": "Sustainability, Circularity, and Bioeconomy (SCB) 2026: Global Synergies in Forestry, Agriculture, and Biomass Utilization",
+    "rank": "B",
+    "region": "Việt Nam",
+    "format": "in-person",
+    "publisher": "Khác",
+    "indexing": [
+      "Scopus",
+      "DBLP"
+    ],
+    "fields": [
+      "Biotechnology"
+    ],
+    "keywords": [
+      "Biotechnology",
+      "scb 2026"
+    ],
+    "fee": "4.500.000 VNĐ",
     "location": "International Centre for Interdisciplinary Science and Education, Quy Nhon, Vietnam",
+    "startDate": "2026-08-18",
+    "endDate": "2026-08-21",
+    "website": "https://www.icisequynhon.com/conferences/SCB2026/",
+    "deadlines": {
+      "abstract": "2026-05-31",
+      "notification": "2026-06-28",
+      "fullPaper": "2026-06-30"
+    },
+    "lastVerified": "2026-03-15",
+    "summarization": "This conference brings together global experts, policymakers, and industry leaders to explore integrated solutions for advancing the bioeconomy, fostering circular practices, and accelerating sustainability transitions. The main themes focus on forestry, agriculture, and biomass utilization, covering topics such as circular economy models, agro-forestry raw material integration, and sustainable forest management. The event serves as a platform for researchers and practitioners across academia, industry, and policy to share best practices and build impactful collaborations.",
+    "rating": 4.8,
+    "rating_count": 138,
     "date_happen": "2026-08-18 to 2026-08-21",
-    "deadlines": [
-      {
-        "name": "Abstract submission deadline",
-        "date": "2026-05-31"
-      },
-      {
-        "name": "Notification of acceptance",
-        "date": "2026-06-28"
-      },
-      {
-        "name": "Author confirmation of participation",
-        "date": "2026-06-30"
-      },
-      {
-        "name": "Full paper submission",
-        "date": "2026-06-30"
-      },
-      {
-        "name": "Submission of presentation slides or poster",
-        "date": "2026-07-30"
-      }
-    ]
+    "website_url": "https://www.icisequynhon.com/conferences/SCB2026/",
+    "deadline_url": "https://www.icisequynhon.com/conferences/SCB2026/abstract.html"
   },
   {
+    "id": "nanobiocom-2026",
     "name": "NanoBioCoM 2026",
-    "year": "2026",
-    "website_url": "https://icisequynhon.com/conferences/2026/nanobiocom2026/",
-    "deadline_url": "https://icisequynhon.com/conferences/2026/nanobiocom2026/abstract.html",
-    "full_name": "The Fourth International Conference on Nano Life Science: Nano Biotechnology, Biophysics, Computation (NanoBioCoM2026)",
-    "summarization": "The NanoBioCoM2026 conference focuses on both fundamental and applied research in nano biotechnology, biophysics, and computational approaches addressing current challenges in life sciences. It aims to provide participants with insights into emerging methodologies, single-molecule experiments, ensemble measurements, and data-driven computational techniques. The event serves as an interdisciplinary forum for leading experts, postgraduate students, and researchers to share recent results, exchange knowledge, and foster multidisciplinary collaborations.",
+    "fullName": "The Fourth International Conference on Nano Life Science: Nano Biotechnology, Biophysics, Computation (NanoBioCoM2026)",
+    "rank": "B",
+    "region": "Việt Nam",
+    "format": "in-person",
+    "publisher": "Khác",
+    "indexing": [
+      "Scopus",
+      "DBLP"
+    ],
+    "fields": [
+      "Biotechnology"
+    ],
+    "keywords": [
+      "Biotechnology",
+      "nanobiocom 2026"
+    ],
+    "fee": "4.500.000 VNĐ",
     "location": "International Center for Science and Interdisciplinary Education (ICISE), Quy Nhon, Gia Lai Province, Vietnam",
+    "startDate": "2026-09-15",
+    "endDate": "2026-09-18",
+    "website": "https://icisequynhon.com/conferences/2026/nanobiocom2026/",
+    "deadlines": {
+      "abstract": "2026-08-15"
+    },
+    "lastVerified": "2026-03-15",
+    "summarization": "The NanoBioCoM2026 conference focuses on both fundamental and applied research in nano biotechnology, biophysics, and computational approaches addressing current challenges in life sciences. It aims to provide participants with insights into emerging methodologies, single-molecule experiments, ensemble measurements, and data-driven computational techniques. The event serves as an interdisciplinary forum for leading experts, postgraduate students, and researchers to share recent results, exchange knowledge, and foster multidisciplinary collaborations.",
+    "rating": 4,
+    "rating_count": 155,
     "date_happen": "2026-09-15 to 2026-09-18",
-    "deadlines": [
-      {
-        "name": "Abstract Submission",
-        "date": "2026-08-15"
-      }
-    ]
+    "website_url": "https://icisequynhon.com/conferences/2026/nanobiocom2026/",
+    "deadline_url": "https://icisequynhon.com/conferences/2026/nanobiocom2026/abstract.html"
   },
   {
+    "id": "bio-2026",
     "name": "BIO 2026",
-    "year": "2026",
-    "website_url": "https://www.icisequynhon.com/conferences/2026/BIO2026/",
-    "deadline_url": "https://www.icisequynhon.com/conferences/2026/BIO2026/",
-    "full_name": "International Biology Conference 2026",
+    "fullName": "International Biology Conference 2026",
+    "rank": "B",
+    "region": "Việt Nam",
+    "format": "in-person",
+    "publisher": "Khác",
+    "indexing": [
+      "Scopus",
+      "DBLP"
+    ],
+    "fields": [
+      "Networks",
+      "Biotechnology"
+    ],
+    "keywords": [
+      "Networks",
+      "Biotechnology",
+      "bio 2026"
+    ],
+    "fee": "4.500.000 VNĐ",
+    "location": "ICISE, Quy Nhon, Vietnam",
+    "startDate": "2026-09-23",
+    "endDate": "2026-09-25",
+    "website": "https://www.icisequynhon.com/conferences/2026/BIO2026/",
+    "deadlines": {
+      "fullPaper": "2026-09-15",
+      "abstract": "2026-07-20",
+      "notification": "2026-08-20"
+    },
+    "lastVerified": "2026-03-15",
     "summarization": "The International Biology Conference 2026 is part of the XXIInd Rencontres du Vietnam and Rencontres de Quy Nhon IX series. It serves as an international platform for researchers, scientists, and educators to exchange knowledge and foster collaborative networks in biological sciences. The conference promotes international exchanges and highlights scientific advancements in the region.",
-    "location": "ICISE, Quy Nhon, Vietnam",
+    "rating": 4.1,
+    "rating_count": 62,
     "date_happen": "2026-09-23 to 2026-09-25",
-    "deadlines": [
-      {
-        "name": "Registration deadline",
-        "date": "2026-09-15"
-      },
-      {
-        "name": "Early Bird Registration deadline",
-        "date": "2026-08-15"
-      },
-      {
-        "name": "Abstract submission deadline",
-        "date": "2026-07-20"
-      },
-      {
-        "name": "Abstract Acceptance Notification",
-        "date": "2026-08-20"
-      }
-    ]
+    "website_url": "https://www.icisequynhon.com/conferences/2026/BIO2026/",
+    "deadline_url": "https://www.icisequynhon.com/conferences/2026/BIO2026/"
   },
   {
+    "id": "frontiers-in-genome-engineering-2026",
     "name": "Frontiers in Genome Engineering 2026",
-    "year": "2026",
-    "website_url": "https://www.icisequynhon.com/conferences/2026/fge2026/",
-    "deadline_url": "https://www.icisequynhon.com/conferences/2026/fge2026/",
-    "full_name": "XXIInd Rencontres du Vietnam Frontiers in Genome Engineering",
-    "summarization": "The XXIInd Rencontres du Vietnam Frontiers in Genome Engineering Conference is a leading platform for scientific exchange exploring the revolutionary impact of CRISPR-Cas systems and rapid advancements in genome engineering technologies. Bringing together academic researchers, biotechnology innovators, industry leaders, and policymakers, the conference highlights developments ranging from fundamental biological discovery to transformative applications in agriculture, medicine, biotechnology, and sustainability. The program features keynote lectures, invited talks, panel discussions, and courses covering cutting-edge topics such as synthetic biology, functional genomics, and regulatory frameworks.",
+    "fullName": "XXIInd Rencontres du Vietnam Frontiers in Genome Engineering",
+    "rank": "B",
+    "region": "Việt Nam",
+    "format": "in-person",
+    "publisher": "Khác",
+    "indexing": [
+      "Scopus",
+      "DBLP"
+    ],
+    "fields": [
+      "Biotechnology"
+    ],
+    "keywords": [
+      "Biotechnology",
+      "frontiers in genome engineering 2026"
+    ],
+    "fee": "4.500.000 VNĐ",
     "location": "ICISE, Quy Nhon, Vietnam",
+    "startDate": "2026-11-03",
+    "endDate": "2026-11-07",
+    "website": "https://www.icisequynhon.com/conferences/2026/fge2026/",
+    "deadlines": {
+      "abstract": "2026-10-15",
+      "fullPaper": "2026-09-15"
+    },
+    "lastVerified": "2026-03-15",
+    "summarization": "The XXIInd Rencontres du Vietnam Frontiers in Genome Engineering Conference is a leading platform for scientific exchange exploring the revolutionary impact of CRISPR-Cas systems and rapid advancements in genome engineering technologies. Bringing together academic researchers, biotechnology innovators, industry leaders, and policymakers, the conference highlights developments ranging from fundamental biological discovery to transformative applications in agriculture, medicine, biotechnology, and sustainability. The program features keynote lectures, invited talks, panel discussions, and courses covering cutting-edge topics such as synthetic biology, functional genomics, and regulatory frameworks.",
+    "rating": 4.2,
+    "rating_count": 79,
     "date_happen": "2026-11-03 to 2026-11-07",
-    "deadlines": [
-      {
-        "name": "Poster/Oral Abstract Submission Deadline",
-        "date": "2026-10-15"
-      },
-      {
-        "name": "Early Bird Registration Deadline",
-        "date": "2026-09-15"
-      },
-      {
-        "name": "Registration and Payment Deadline",
-        "date": "2026-09-16"
-      }
-    ]
+    "website_url": "https://www.icisequynhon.com/conferences/2026/fge2026/",
+    "deadline_url": "https://www.icisequynhon.com/conferences/2026/fge2026/"
   },
   {
+    "id": "ivcees-2026",
     "name": "iVCEES 2026",
-    "year": "2026",
-    "website_url": "https://www.icisequynhon.com/conferences/2026/iVCEES2026/",
-    "deadline_url": "https://www.icisequynhon.com/conferences/2026/iVCEES2026/",
-    "full_name": "THE 6TH INTERNATIONAL VIETNAM CONFERENCE ON EARTH AND ENVIRONMENTAL SCIENCES",
-    "summarization": "The International Vietnam Conference on Earth and Environmental Sciences (iVCEES-2026) is a premier interdisciplinary forum for researchers, practitioners, and educators to share and discuss findings, trends, challenges, and advancements in Earth and environmental sciences. Suggested topics include biodiversity and conservation, ocean-atmosphere regional climate systems, land-ocean continuum dynamics, remote sensing, solid earth dynamics, environmental pollution, vegetation in the carbon cycle, coastal engineering modelling, and hydrological uncertainties. It is intended to foster international and regional scientific exchanges.",
+    "fullName": "THE 6TH INTERNATIONAL VIETNAM CONFERENCE ON EARTH AND ENVIRONMENTAL SCIENCES",
+    "rank": "B",
+    "region": "Việt Nam",
+    "format": "in-person",
+    "publisher": "Khác",
+    "indexing": [
+      "Scopus",
+      "DBLP"
+    ],
+    "fields": [
+      "Biotechnology"
+    ],
+    "keywords": [
+      "Biotechnology",
+      "ivcees 2026"
+    ],
+    "fee": "4.500.000 VNĐ",
     "location": "International Centre for Interdisciplinary Science and Education (ICISE), Quy Nhon, Vietnam",
+    "startDate": "2026-11-30",
+    "endDate": "2026-12-04",
+    "website": "https://www.icisequynhon.com/conferences/2026/iVCEES2026/",
+    "deadlines": {
+      "abstract": "2026-08-29",
+      "notification": "2026-09-15",
+      "cameraReady": "2026-10-23"
+    },
+    "lastVerified": "2026-03-15",
+    "summarization": "The International Vietnam Conference on Earth and Environmental Sciences (iVCEES-2026) is a premier interdisciplinary forum for researchers, practitioners, and educators to share and discuss findings, trends, challenges, and advancements in Earth and environmental sciences. Suggested topics include biodiversity and conservation, ocean-atmosphere regional climate systems, land-ocean continuum dynamics, remote sensing, solid earth dynamics, environmental pollution, vegetation in the carbon cycle, coastal engineering modelling, and hydrological uncertainties. It is intended to foster international and regional scientific exchanges.",
+    "rating": 4.3,
+    "rating_count": 96,
     "date_happen": "2026-11-30 to 2026-12-04",
-    "deadlines": [
-      {
-        "name": "Deadline for abstract submission",
-        "date": "2026-08-29"
-      },
-      {
-        "name": "Notification of abstract acceptance",
-        "date": "2026-09-15"
-      },
-      {
-        "name": "Final registration deadline",
-        "date": "2026-10-23"
-      }
-    ]
+    "website_url": "https://www.icisequynhon.com/conferences/2026/iVCEES2026/",
+    "deadline_url": "https://www.icisequynhon.com/conferences/2026/iVCEES2026/"
   }
 ]
