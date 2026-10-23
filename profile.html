@@ -14,6 +14,7 @@
   <link rel="stylesheet" href="css/profile.css">
 </head>
 <body>
+  <script>try { if (localStorage.getItem('confguide_theme') === 'dark') document.body.classList.add('dark'); } catch (e) {}</script>
 
   <!-- Shared Header -->
   <div id="site-header"></div>
@@ -69,7 +70,7 @@
                   <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                   <polyline points="14 2 14 8 20 8"></polyline>
                 </svg>
-                <span>Theo dõi nộp bài</span>
+                <span>Theo dõi hội nghị</span>
               </a>
             </div>
 
@@ -132,35 +133,6 @@
       <section class="profile-stats-grid" aria-label="Thống kê hoạt động nghiên cứu">
         
         <div class="profile-stat-box">
-          <div class="stat-icon-circle stat-icon-blue">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
-            </svg>
-          </div>
-          <div class="stat-content">
-            <div class="stat-num" id="statSavedNum">0</div>
-            <div class="stat-title">Hội nghị đã lưu</div>
-            <div class="stat-hint">Đang theo dõi mốc nộp</div>
-          </div>
-        </div>
-
-        <div class="profile-stat-box">
-          <div class="stat-icon-circle stat-icon-navy">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-              <polyline points="14 2 14 8 20 8"></polyline>
-              <line x1="16" y1="13" x2="8" y2="13"></line>
-              <line x1="16" y1="17" x2="8" y2="17"></line>
-            </svg>
-          </div>
-          <div class="stat-content">
-            <div class="stat-num" id="statTrackerNum">0</div>
-            <div class="stat-title">Bài báo trong Tracker</div>
-            <div class="stat-hint">Tiến độ chuẩn bị bản thảo</div>
-          </div>
-        </div>
-
-        <div class="profile-stat-box">
           <div class="stat-icon-circle stat-icon-green">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="12" cy="12" r="10"></circle>
@@ -189,66 +161,6 @@
 
       </section>
 
-
-      <!-- ================= 3. DANH SÁCH HỘI NGHỊ ĐÃ LƯU THEO DÕI ================= -->
-      <section class="profile-section-card" aria-label="Danh sách hội nghị đã lưu">
-        
-        <div class="section-card-header">
-          <div>
-            <h2 class="section-card-title">Hội nghị đã lưu theo dõi</h2>
-            <p class="section-card-subtitle">Các hội nghị bạn đã bookmark từ trang Tra cứu hoặc trang Chi tiết để theo dõi hạn chót nộp bài.</p>
-          </div>
-          <div class="section-card-header-actions">
-            <a href="search.html" class="btn btn-secondary" style="font-size: 13px; padding: 7px 14px;">
-              <span>+ Tìm thêm hội nghị</span>
-            </a>
-            <button type="button" class="btn btn-secondary" id="clearAllSavedBtn" style="font-size: 13px; padding: 7px 14px; color: var(--red);">
-              <span>Xóa tất cả</span>
-            </button>
-          </div>
-        </div>
-
-        <div class="profile-page-alert" id="savedListAlert" role="alert" aria-live="polite"></div>
-
-        <!-- Toolbar tìm kiếm trong danh sách đã lưu -->
-        <div class="saved-search-toolbar">
-          <div class="saved-search-input-wrap">
-            <svg class="saved-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-              <circle cx="11" cy="11" r="8"></circle>
-              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-            </svg>
-            <input type="text" id="savedSearchInput" class="saved-search-input" placeholder="Lọc nhanh danh sách đã lưu theo tên hội nghị...">
-          </div>
-        </div>
-
-        <!-- Container danh sách thẻ -->
-        <div class="saved-list-wrapper" id="savedConferencesList">
-          <!-- Render động từ LocalStorage -->
-        </div>
-
-      </section>
-
-
-      <!-- ================= 4. TIẾN ĐỘ NỘP BÀI GẦN ĐÂY (TRACKER OVERVIEW) ================= -->
-      <section class="profile-section-card" aria-label="Tiến độ bài báo trong Tracker">
-        
-        <div class="section-card-header">
-          <div>
-            <h2 class="section-card-title">Tiến độ bài báo đang chuẩn bị (Tracker)</h2>
-            <p class="section-card-subtitle">Tổng hợp trạng thái các bản thảo và bài báo khoa học trong hệ thống theo dõi nộp bài của bạn.</p>
-          </div>
-          <div class="section-card-header-actions">
-            <a href="tracker.html" class="btn btn-primary" style="font-size: 13px; padding: 7px 16px;">
-              <span>Mở bảng Tracker đầy đủ &rarr;</span>
-            </a>
-          </div>
-        </div>
-
-        <div class="tracker-preview-wrapper" id="trackerPreviewContainer">
-          <!-- Render động từ LocalStorage 'confguides' -->
-        </div>
-
-      </section>
 
     </div>
   </main>

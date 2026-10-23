@@ -12,6 +12,7 @@
   <link rel="stylesheet" href="css/detail.css">
 </head>
 <body>
+  <script>try { if (localStorage.getItem('confguide_theme') === 'dark') document.body.classList.add('dark'); } catch (e) {}</script>
   <!-- Shared Header -->
   <div id="site-header"></div>
 
@@ -278,14 +279,14 @@
           </div>
 
           <!-- Community Reviews Box -->
-          <div class="card rate-box clickable" id="openReviews" role="button" tabindex="0" title="Xem tất cả đánh giá từ cộng đồng">
+          <div class="card rate-box clickable" id="openReviews" role="button" tabindex="0" title="Xem nhận xét được lưu trên trình duyệt này">
             <div class="avg">
-              <span>Đánh giá cộng đồng:</span>
-              <strong id="avgScore">4.8</strong> / 5
+              <span>Điểm tham khảo:</span>
+              <strong id="avgScore">—</strong> / 5
             </div>
             <div class="stars-display" id="headerStars"></div>
-            <small id="reviewsCountText">Dựa trên 142 phản hồi từ các tác giả</small>
-            <div class="reviews-cta-hint">Nhấn để xem nhận xét chi tiết &rarr;</div>
+            <small id="reviewsCountText">Chưa có dữ liệu tổng hợp</small>
+            <div class="reviews-cta-hint">Nhấn để xem và gửi nhận xét &rarr;</div>
           </div>
 
           <!-- User Interactive 5-Star Rating -->
@@ -323,19 +324,25 @@
           </svg>
           <span>Quay lại thông tin hội nghị</span>
         </button>
-        <h2 class="rv-page-title" id="rvPageTitle">Đánh giá của cộng đồng</h2>
+        <h2 class="rv-page-title" id="rvPageTitle">Nhận xét hội nghị</h2>
       </div>
 
       <section class="card rv-summary">
         <div class="rv-score">
-          <strong id="rvAvg">4.8</strong>
+          <strong id="rvAvg">—</strong>
           <div class="rv-stars-lg" id="rvStars"></div>
-          <small id="rvTotal">142 đánh giá</small>
+          <small id="rvTotal">Chưa có nhận xét</small>
         </div>
         <div class="rv-bars" id="rvBars"></div>
       </section>
 
-      <h3 class="rv-list-title" id="rvListTitle">Ý kiến từ các tác giả</h3>
+      <h3 class="rv-list-title" id="rvListTitle">Nhận xét lưu trên trình duyệt này</h3>
+      <form class="card review-form" id="reviewForm">
+        <label for="reviewText">Chia sẻ nhận xét của bạn</label>
+        <textarea id="reviewText" rows="4" maxlength="1200" required placeholder="Thông tin hữu ích về trải nghiệm hoặc mức độ phù hợp của hội nghị..."></textarea>
+        <div class="review-form-footer"><small>Nội dung được lưu cục bộ trên trình duyệt hiện tại.</small><button class="btn-primary" type="submit">Gửi nhận xét</button></div>
+        <p id="reviewFormMessage" class="review-form-message" aria-live="polite"></p>
+      </form>
       <div id="rvList"></div>
     </div>
   </div>

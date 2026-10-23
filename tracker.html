@@ -11,15 +11,16 @@
   <link rel="stylesheet" href="css/tracker.css">
 </head>
 <body>
+  <script>try { if (localStorage.getItem('confguide_theme') === 'dark') document.body.classList.add('dark'); } catch (e) {}</script>
   <div id="site-header"></div>
 
   <main>
     <section class="hero">
       <div class="hero-overlay"></div>
       <div class="hero-content">
-        <div class="eyebrow">THEO DÕI NỘP BÀI</div>
-        <h1>Quản lý danh sách nộp bài</h1>
-        <p>Theo dõi hạn chót, tiến độ bài báo và quản lý các hội nghị bạn đang dự định nộp.</p>
+        <div class="eyebrow">THEO DÕI HỘI NGHỊ</div>
+        <h1>Theo dõi hội nghị</h1>
+        <p>Các hội nghị bạn đã lưu từ trang Tra cứu hoặc trang chi tiết sẽ xuất hiện tại đây.</p>
       </div>
       <div class="quote">
         <div>“Good conferences<br>create great research journeys.”</div>
@@ -33,7 +34,7 @@
           <div>Tổng số hội nghị đang theo dõi</div>
           <strong id="totalCount">0</strong>
         </div>
-        <button class="primary-btn" id="addBtn">＋&nbsp; Thêm hội nghị</button>
+        <a class="primary-btn" href="search.html">Tìm hội nghị</a>
       </div>
 
       <div class="table-wrap">
@@ -42,7 +43,7 @@
             <tr>
               <th>Tên hội nghị</th>
               <th>Lĩnh vực</th>
-              <th>Hạn nộp bài</th>
+              <th>Mốc thời gian gần nhất</th>
               <th>Hành động</th>
             </tr>
           </thead>
@@ -54,44 +55,15 @@
     <div class="notice">
       <div class="notice-icon">i</div>
       <div>
-        <div>Bạn có thể thêm/sửa/xóa hội nghị trực tiếp trên trình duyệt.</div>
-        <div>Danh sách được lưu trữ an toàn trong trình duyệt (localStorage) và gắn liền với tài khoản của bạn.</div>
+        <div>Danh sách này đồng bộ với nút “Lưu hội nghị” trong trang Tra cứu và trang chi tiết.</div>
+        <div>Dữ liệu được lưu trên trình duyệt hiện tại; mỗi trình duyệt có danh sách riêng.</div>
       </div>
     </div>
   </main>
 
   <div id="site-footer"></div>
 
-  <div class="modal" id="conferenceModal">
-    <div class="modal-box">
-      <div class="modal-header">
-        <h2 id="modalTitle">Thêm hội nghị</h2>
-        <button class="close-btn" id="closeModal">×</button>
-      </div>
-
-      <form id="conferenceForm">
-        <input type="hidden" id="editId">
-
-        <label for="name">Tên hội nghị</label>
-        <input id="name" required placeholder="Ví dụ: IEEE/CVF Conference on Computer Vision and Pattern Recognition">
-
-        <label for="logo">Logo / Ký hiệu viết tắt</label>
-        <input id="logo" placeholder="Ví dụ: CVPR 2026">
-
-        <label for="fields">Lĩnh vực (ngăn cách bằng dấu phẩy)</label>
-        <input id="fields" required placeholder="Computer Vision, Machine Learning">
-
-        <label for="deadline">Hạn nộp bài</label>
-        <input id="deadline" type="date" required>
-
-        <div class="form-actions">
-          <button type="button" class="cancel-btn" id="cancelBtn">Hủy</button>
-          <button type="submit" class="primary-btn">Lưu hội nghị</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
+  <script src="js/utils.js"></script>
   <script src="js/layout.js"></script>
   <script src="js/tracker.js"></script>
 </body>

@@ -1,216 +1,89 @@
-const STORAGE_KEY = "confguides";
+(function () {
+  'use strict';
 
-const defaultConferences = [
-  {
-    id: 1,
-    name: "ACM Symposium on Applied Computing (ATC 2026)",
-    logo: "ACM<br>ATC",
-    fields: ["computer systems", "distributed computing"],
-    deadline: "2026-09-16"
-  },
-  {
-    id: 2,
-    name: "Conference on Neural Information Processing Systems",
-    logo: "NeurIPS<br>2026",
-    fields: ["machine learning", "deep learning"],
-    deadline: "2026-05-13"
-  },
-  {
-    id: 3,
-    name: "International Conference on Learning Representations",
-    logo: "ICLR<br>2026",
-    fields: ["machine learning", "representation learning"],
-    deadline: "2026-10-22"
-  },
-  {
-    id: 4,
-    name: "The International Symposium on Information and Communication Technology",
-    logo: "SOICT<br>2026",
-    fields: ["information systems", "computer science"],
-    deadline: "2026-09-16"
-  },
-  {
-    id: 5,
-    name: "International Conference on Machine Learning and Pattern Recognition",
-    logo: "MAPR<br>2026",
-    fields: ["machine learning", "pattern recognition"],
-    deadline: "2026-05-15"
+  const tbody = document.getElementById('conferenceBody');
+  const count = document.getElementById('totalCount');
+  if (!tbody) return;
+
+  function read(key, fallback) {
+    try { const value = JSON.parse(localStorage.getItem(key)); return value ?? fallback; }
+    catch (_) { return fallback; }
   }
-];
-
-let conferences = JSON.parse(localStorage.getItem(STORAGE_KEY)) || defaultConferences;
-
-const body = document.getElementById("conferenceBody");
-const totalCount = document.getElementById("totalCount");
-const modal = document.getElementById("conferenceModal");
-const form = document.getElementById("conferenceForm");
-
-function save() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(conferences));
-}
-
-function formatDate(date) {
-  if (!date) return "Chưa cập nhật";
-  const d = new Date(date + "T00:00:00");
-  return d.toLocaleDateString("vi-VN", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric"
-  }).replace("thg ", "Tháng ");
-}
-
-function logoClass(logo) {
-  if (!logo) return "";
-  if (logo.toLowerCase().includes("soict")) return "red";
-  if (logo.toLowerCase().includes("mapr")) return "yellow";
-  return "";
-}
-
-function render() {
-  if (!body) return;
-  if (totalCount) totalCount.textContent = conferences.length;
-
-  if (conferences.length === 0) {
-    body.innerHTML = `
-      <tr>
-        <td colspan="4" style="text-align:center;padding:35px;color:#6d87a9">
-          Chưa có hội nghị nào trong danh sách theo dõi. Nhấn "Thêm hội nghị" để bắt đầu.
-        </td>
-      </tr>`;
-    return;
+  function currentUser() { return read('confguide_current_user', null); }
+  function savedKey() {
+    const user = currentUser();
+    return user && (user.id || user.email) ? `confguide_saved_${user.id || user.email}` : 'confguide_saved_guest';
   }
-
-  body.innerHTML = conferences.map(c => `
-    <tr>
-      <td>
-        <div class="conference-name">
-          <div class="logo-placeholder ${logoClass(c.logo)}">${c.logo || 'CONF'}</div>
-          <div class="name-text">${escapeHtml(c.name)}</div>
-        </div>
-      </td>
-      <td>
-        <div class="tags">
-          ${(c.fields || []).map(f => `<span class="tag">${escapeHtml(f)}</span>`).join("")}
-        </div>
-      </td>
-      <td>
-        <div class="deadline">
-          <span class="calendar">▣</span>
-          <span>${formatDate(c.deadline)}</span>
-        </div>
-      </td>
-      <td>
-        <div class="actions">
-          <button class="action-btn" onclick="editConference(${c.id})">✎ &nbsp; Sửa</button>
-          <button class="action-btn delete" onclick="deleteConference(${c.id})">✕ &nbsp; Xóa</button>
-        </div>
-      </td>
-    </tr>
-  `).join("");
-}
-
-function escapeHtml(value) {
-  if (!value) return "";
-  return String(value)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
-}
-
-function openAddModal() {
-  document.getElementById("modalTitle").textContent = "Thêm hội nghị theo dõi";
-  form.reset();
-  document.getElementById("editId").value = "";
-  modal.classList.add("show");
-  document.getElementById("name").focus();
-}
-
-function editConference(id) {
-  const c = conferences.find(item => item.id === id);
-  if (!c) return;
-
-  document.getElementById("modalTitle").textContent = "Chỉnh sửa hội nghị";
-  document.getElementById("editId").value = c.id;
-  document.getElementById("name").value = c.name;
-  document.getElementById("logo").value = (c.logo || "").replaceAll("<br>", " ");
-  document.getElementById("fields").value = (c.fields || []).join(", ");
-  document.getElementById("deadline").value = c.deadline;
-
-  modal.classList.add("show");
-}
-
-function deleteConference(id) {
-  const c = conferences.find(item => item.id === id);
-  if (!c) return;
-
-  if (confirm(`Bạn có chắc muốn xóa "${c.name}" khỏi danh sách theo dõi không?`)) {
-    conferences = conferences.filter(item => item.id !== id);
-    save();
-    render();
+  function getSaved() {
+    const scoped = read(savedKey(), null);
+    if (Array.isArray(scoped)) return scoped;
+    const legacy = read('confguide_saved', null);
+    if (Array.isArray(legacy)) return legacy;
+    const old = read('savedConferences', []);
+    return Array.isArray(old) ? old : [];
   }
-}
-
-if (form) {
-  form.addEventListener("submit", event => {
-    event.preventDefault();
-
-    const id = document.getElementById("editId").value;
-    const name = document.getElementById("name").value.trim();
-    const logo = document.getElementById("logo").value.trim().replace(/\s+/g, " ");
-    const fields = document.getElementById("fields").value
-      .split(",")
-      .map(x => x.trim())
-      .filter(Boolean);
-    const deadline = document.getElementById("deadline").value;
-
-    if (id) {
-      const index = conferences.findIndex(c => c.id === Number(id));
-      if (index !== -1) {
-        conferences[index] = {
-          ...conferences[index],
-          name,
-          logo: logo.replace(" ", "<br>"),
-          fields,
-          deadline
-        };
-      }
-    } else {
-      conferences.push({
-        id: Date.now(),
-        name,
-        logo: logo.replace(" ", "<br>"),
-        fields,
-        deadline
-      });
+  function setSaved(ids) {
+    try {
+      localStorage.setItem(savedKey(), JSON.stringify(ids));
+    } catch (_) {
+      window.alert('Không thể cập nhật danh sách trong bộ nhớ trình duyệt.');
     }
+  }
+  function esc(value) {
+    return String(value ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  }
+  function allConferences() {
+    return window.ConfGuideTrackerConferences || (window.ConfGuideUtils && window.ConfGuideUtils.FALLBACK_CONFERENCES) || [];
+  }
+  function deadline(conf) {
+    const utils = window.ConfGuideUtils;
+    const next = utils && utils.getNextDeadline ? utils.getNextDeadline(conf) : null;
+    if (!next) return { date: 'Chưa cập nhật', remaining: '' };
+    const date = utils.formatDateVi ? utils.formatDateVi(next.date) : new Date(`${next.date}T00:00:00`).toLocaleDateString('vi-VN');
+    const daysLeft = next.daysLeft === null || next.daysLeft === undefined ? NaN : Number(next.daysLeft);
+    const remaining = Number.isFinite(daysLeft)
+      ? daysLeft >= 0 ? `Còn ${daysLeft} ngày` : `Đã quá hạn ${Math.abs(daysLeft)} ngày`
+      : '';
+    return { date, remaining };
+  }
+  function render() {
+    const ids = getSaved();
+    const conferences = allConferences();
+    const rows = ids.map(id => conferences.find(c => String(c.id) === String(id) || c.name === id) || { id, name: String(id) });
+    if (count) count.textContent = rows.length;
+    if (!rows.length) {
+      tbody.innerHTML = '<tr><td colspan="4" class="tracker-empty">Bạn chưa lưu hội nghị nào. Hãy tìm hội nghị phù hợp và nhấn “Lưu” để theo dõi tại đây.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = rows.map(conf => {
+      const id = String(conf.id);
+      const fields = (conf.fields || []).slice(0, 3).map(f => `<span class="tag">${esc(f)}</span>`).join('');
+      const label = esc(conf.acronym || conf.short_name || conf.name || 'CG');
+      const nearest = deadline(conf);
+      return `<tr>
+        <td><div class="conference-name"><div class="logo-placeholder">${label}</div><div class="name-text"><a href="detail.html?id=${encodeURIComponent(id)}">${esc(conf.name || id)}</a></div></div></td>
+        <td><div class="tags">${fields || '<span class="tag">Chưa phân loại</span>'}</div></td>
+        <td><div class="deadline-cell"><div class="deadline">${esc(nearest.date)}</div>${nearest.remaining ? `<div class="deadline-remaining">${esc(nearest.remaining)}</div>` : ''}</div></td>
+        <td><div class="actions"><button class="action-btn delete" type="button" data-remove="${esc(id)}">Xóa</button></div></td>
+      </tr>`;
+    }).join('');
+    tbody.querySelectorAll('[data-remove]').forEach(button => button.addEventListener('click', () => {
+      const id = button.dataset.remove;
+      setSaved(getSaved().filter(item => String(item) !== id));
+      render();
+    }));
+  }
 
-    save();
-    render();
-    modal.classList.remove("show");
+  render();
+  // Online deployments can enrich the offline fallback with the full dataset.
+  fetch('data/conference_data.json').then(response => response.ok ? response.json() : null).then(data => {
+    if (Array.isArray(data) && data.length) {
+      window.ConfGuideTrackerConferences = data;
+      render();
+    }
+  }).catch(() => {});
+  // Refresh when a same-origin tab updates the saved list.
+  window.addEventListener('storage', event => {
+    if (event.key === savedKey()) render();
   });
-}
-
-const addBtn = document.getElementById("addBtn");
-const closeBtn = document.getElementById("closeModal");
-const cancelBtn = document.getElementById("cancelBtn");
-
-if (addBtn) addBtn.addEventListener("click", openAddModal);
-if (closeBtn) closeBtn.addEventListener("click", () => modal.classList.remove("show"));
-if (cancelBtn) cancelBtn.addEventListener("click", () => modal.classList.remove("show"));
-
-if (modal) {
-  modal.addEventListener("click", event => {
-    if (event.target === modal) modal.classList.remove("show");
-  });
-}
-
-document.addEventListener("keydown", event => {
-  if (event.key === "Escape" && modal) modal.classList.remove("show");
-});
-
-window.editConference = editConference;
-window.deleteConference = deleteConference;
-
-render();
+})();

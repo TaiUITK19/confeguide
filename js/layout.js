@@ -20,7 +20,8 @@
 
   // 1. Đồng bộ Theme ngay khi script chạy (tránh giật giao diện / FOUC)
   function initTheme() {
-    const savedTheme = localStorage.getItem('confguide_theme') || 'light';
+    let savedTheme = 'light';
+    try { savedTheme = localStorage.getItem('confguide_theme') || 'light'; } catch (e) {}
     if (savedTheme === 'dark') {
       document.body ? document.body.classList.add('dark') : document.documentElement.classList.add('dark');
     } else {
@@ -53,7 +54,7 @@
 
   // 4. Auth Guard cho các trang cần đăng nhập
   function checkAuthGuard(currentPage) {
-    const protectedPages = ['profile.html', 'tracker.html', 'logs.html'];
+    const protectedPages = ['profile.html', 'logs.html'];
     if (protectedPages.includes(currentPage)) {
       const user = getCurrentUser();
       if (!user) {
@@ -288,7 +289,7 @@
                   <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
                 </button>
                 <div class="faq-answer-panel">
-                  Truy cập trang "Theo dõi nộp bài" (tracker.html), nhấn "Thêm hội nghị" để lưu tên bài, tác giả, hội nghị và hạn nộp. Dữ liệu được lưu an toàn trong trình duyệt của bạn.
+                  Nhấn "Lưu lại" ở trang Tra cứu hoặc trang chi tiết để đưa hội nghị vào trang Theo dõi hội nghị. Danh sách được lưu trong trình duyệt hiện tại.
                 </div>
               </div>
             </div>
@@ -360,9 +361,12 @@
     const isHome = currentPage === 'index.html' || currentPage === '';
     const isSearch = currentPage === 'search.html' || currentPage === 'detail.html' || currentPage === 'chitiet.html';
     const isTracker = currentPage === 'tracker.html' || currentPage === 'logs.html';
+    const isAbout = currentPage === 'about.html';
     const isProfile = currentPage === 'profile.html';
 
-    const isDark = document.body.classList.contains('dark') || localStorage.getItem('confguide_theme') === 'dark';
+    let storedTheme = 'light';
+    try { storedTheme = localStorage.getItem('confguide_theme') || 'light'; } catch (e) {}
+    const isDark = document.body.classList.contains('dark') || storedTheme === 'dark';
 
     const sunSvg = `
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -397,8 +401,8 @@
       <nav class="main-nav" aria-label="Điều hướng chính">
         <a href="index.html" class="nav-link ${isHome ? 'active' : ''}">Trang chủ</a>
         <a href="search.html" class="nav-link ${isSearch ? 'active' : ''}">Tra cứu</a>
-        <a href="tracker.html" class="nav-link ${isTracker ? 'active' : ''}">Theo dõi nộp bài</a>
-        <a href="profile.html" class="nav-link ${isProfile ? 'active' : ''}">Hồ sơ</a>
+        <a href="tracker.html" class="nav-link ${isTracker ? 'active' : ''}">Theo dõi hội nghị</a>
+        <a href="about.html" class="nav-link ${isAbout ? 'active' : ''}">Về chúng tôi</a>
       </nav>
     `;
 
@@ -412,8 +416,8 @@
       <div class="mobile-nav-drawer" id="mobileNavDrawer">
         <a href="index.html" class="nav-link ${isHome ? 'active' : ''}">Trang chủ</a>
         <a href="search.html" class="nav-link ${isSearch ? 'active' : ''}">Tra cứu</a>
-        <a href="tracker.html" class="nav-link ${isTracker ? 'active' : ''}">Theo dõi nộp bài</a>
-        <a href="profile.html" class="nav-link ${isProfile ? 'active' : ''}">Hồ sơ</a>
+        <a href="tracker.html" class="nav-link ${isTracker ? 'active' : ''}">Theo dõi hội nghị</a>
+        <a href="about.html" class="nav-link ${isAbout ? 'active' : ''}">Về chúng tôi</a>
         ${user ? `
           <div style="height: 1px; background: var(--border); margin: 8px 0;"></div>
           <a href="profile.html" class="nav-link">Trang cá nhân</a>
@@ -450,7 +454,7 @@
     if (themeBtn) {
       themeBtn.addEventListener('click', function () {
         const currentlyDark = document.body.classList.toggle('dark');
-        localStorage.setItem('confguide_theme', currentlyDark ? 'dark' : 'light');
+        try { localStorage.setItem('confguide_theme', currentlyDark ? 'dark' : 'light'); } catch (e) {}
         themeBtn.innerHTML = currentlyDark ? sunSvg : moonSvg;
       });
     }
@@ -458,6 +462,14 @@
     // Gắn sự kiện Mobile Menu Toggle
     const mobileBtn = document.getElementById('mobileMenuBtn');
     const mobileDrawer = document.getElementById('mobileNavDrawer');
+    headerContainer.querySelectorAll('a[href]').forEach(link => {
+      link.addEventListener('click', event => {
+        const target = new URL(link.href, window.location.href);
+        if (target.pathname.toLowerCase() !== window.location.pathname.toLowerCase()) return;
+        event.preventDefault();
+        if (mobileDrawer) mobileDrawer.classList.remove('open');
+      });
+    });
     if (mobileBtn && mobileDrawer) {
       mobileBtn.addEventListener('click', function (e) {
         e.stopPropagation();
@@ -900,7 +912,7 @@
                 <ul class="footer-links-primary">
                   <li><a href="index.html">TRANG CHỦ</a></li>
                   <li><a href="search.html">TRA CỨU</a></li>
-                  <li><a href="tracker.html">THEO DÕI NỘP BÀI</a></li>
+                  <li><a href="tracker.html">THEO DÕI HỘI NGHỊ</a></li>
                   <li><a href="profile.html">HỒ SƠ</a></li>
                 </ul>
 

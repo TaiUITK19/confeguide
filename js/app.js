@@ -145,6 +145,8 @@
 
   let rawConferences = [];
   let filteredConferences = [];
+  const PAGE_SIZE = 8;
+  let currentPage = 1;
 
   // Helper lấy storage key của user hiện tại
   function getSavedStorageKey() {
@@ -335,6 +337,7 @@
   // Lọc dữ liệu theo bộ lọc
   function applyFiltering() {
     const filters = getFiltersFromUi();
+    currentPage = 1;
     syncUrl(filters);
     renderActiveChips(filters);
 
@@ -564,15 +567,21 @@
 
     if (list.length === 0) {
       container.innerHTML = '';
+      const pagination = document.getElementById('pagination');
+      if (pagination) pagination.innerHTML = '';
       if (emptyState) emptyState.classList.remove('hidden');
       return;
     }
 
     if (emptyState) emptyState.classList.add('hidden');
 
+    const pageCount = Math.ceil(list.length / PAGE_SIZE);
+    currentPage = Math.min(Math.max(1, currentPage), pageCount);
+    const pageItems = list.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+
     const savedIds = getSavedList();
 
-    container.innerHTML = list.map(conf => {
+    container.innerHTML = pageItems.map(conf => {
       const utils = window.ConfGuideUtils;
       const nextDl = utils ? utils.getNextDeadline(conf) : null;
 
@@ -667,6 +676,50 @@
         toggleSaveConference(confId, btn);
       });
     });
+
+    renderPagination(list.length);
+  }
+
+  function renderPagination(total) {
+    const host = document.getElementById('pagination');
+    if (!host) return;
+    const pageCount = Math.ceil(total / PAGE_SIZE);
+    if (pageCount <= 1) {
+      host.innerHTML = '';
+      return;
+    }
+
+    host.innerHTML = `
+      <button type="button" class="pagination-button" data-page-step="-1" ${currentPage === 1 ? 'disabled' : ''} aria-label="Trang trước">‹</button>
+      <label class="pagination-jump">Trang
+        <input id="pageJump" type="number" inputmode="numeric" min="1" max="${pageCount}" value="${currentPage}" aria-label="Chuyển đến trang">
+        <span>/ ${pageCount}</span>
+      </label>
+      <button type="button" class="pagination-button" data-page-step="1" ${currentPage === pageCount ? 'disabled' : ''} aria-label="Trang sau">›</button>
+      <span class="pagination-total">${total} hội nghị</span>
+    `;
+
+    host.querySelectorAll('[data-page-step]').forEach(button => {
+      button.addEventListener('click', () => goToPage(currentPage + Number(button.dataset.pageStep)));
+    });
+    const pageInput = document.getElementById('pageJump');
+    const commitPage = () => goToPage(pageInput.value);
+    pageInput.addEventListener('change', commitPage);
+    pageInput.addEventListener('keydown', event => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        commitPage();
+      }
+    });
+  }
+
+  function goToPage(value) {
+    const requested = Number.parseInt(value, 10);
+    const pageCount = Math.ceil(filteredConferences.length / PAGE_SIZE);
+    if (!Number.isFinite(requested) || pageCount < 1) return;
+    currentPage = Math.min(pageCount, Math.max(1, requested));
+    sortAndRender(document.getElementById('sortSelect')?.value || 'relevance');
+    document.getElementById('pagination')?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
   }
 
   // Xử lý bookmark
