@@ -702,8 +702,6 @@
     renderUserProfile();
     initEditProfileModal();
     initAvatarUpload();
-    initSavedSection();
-    renderTrackerPreview();
   }
 
   if (document.readyState === 'loading') {
@@ -716,8 +714,6 @@
   window.ConfGuideProfile = {
     refresh: function () {
       renderUserProfile();
-      renderSavedConferences();
-      renderTrackerPreview();
     }
   };
 })();

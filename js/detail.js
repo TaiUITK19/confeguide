@@ -488,12 +488,16 @@
 
     // Community Ratings
     const avgScoreEl = document.getElementById('avgScore');
-    if (avgScoreEl) avgScoreEl.textContent = conf.rating || '4.8';
+    if (avgScoreEl) avgScoreEl.textContent = conf.rating ? Number(conf.rating).toFixed(1) : '—';
 
     const countTextEl = document.getElementById('reviewsCountText');
-    if (countTextEl) countTextEl.textContent = `Dựa trên ${conf.rating_count || 142} phản hồi từ các tác giả`;
+    if (countTextEl) countTextEl.textContent = conf.rating_count ? `Số liệu tham khảo trong dữ liệu (${conf.rating_count})` : 'Chưa có dữ liệu tổng hợp';
 
-    renderStarScore(conf.rating || 4.8);
+    if (conf.rating) renderStarScore(conf.rating);
+    else {
+      const starBox = document.getElementById('headerStars');
+      if (starBox) starBox.replaceChildren();
+    }
   }
 
   // Render Tiến trình 4 mốc Timeline chuẩn AoE
@@ -681,7 +685,8 @@
 
     starsBox.innerHTML = '';
     const userRatingKey = `confguide_rating_${conf.id}`;
-    let userRating = Number(localStorage.getItem(userRatingKey)) || 0;
+    let userRating = 0;
+    try { userRating = Number(localStorage.getItem(userRatingKey)) || 0; } catch (_) {}
 
     for (let i = 1; i <= 5; i++) {
       const b = document.createElement('button');
@@ -692,7 +697,7 @@
       b.addEventListener('mouseenter', () => paint(i));
       b.addEventListener('click', () => {
         userRating = (userRating === i) ? 0 : i;
-        localStorage.setItem(userRatingKey, userRating);
+        try { localStorage.setItem(userRatingKey, userRating); } catch (_) {}
         paint(userRating);
         rateMsg.textContent = userRating ? `Bạn đã chấm ${userRating}/5 sao. Cảm ơn bạn!` : '';
       });
@@ -799,20 +804,33 @@
 
     // Render nội dung trang review
     const rvPageTitle = document.getElementById('rvPageTitle');
-    if (rvPageTitle) rvPageTitle.textContent = `Đánh giá cộng đồng · ${conf.name}`;
-
-    const rvAvg = document.getElementById('rvAvg');
-    if (rvAvg) rvAvg.textContent = conf.rating || '4.8';
-
-    const rvTotal = document.getElementById('rvTotal');
-    if (rvTotal) rvTotal.textContent = `${conf.rating_count || 142} đánh giá`;
+    if (rvPageTitle) rvPageTitle.textContent = `Nhận xét hội nghị · ${conf.name}`;
 
     renderReviewsList(conf);
+    const reviewForm = document.getElementById('reviewForm');
+    const reviewText = document.getElementById('reviewText');
+    const message = document.getElementById('reviewFormMessage');
+    if (reviewForm && reviewText) reviewForm.addEventListener('submit', event => {
+      event.preventDefault();
+      const text = reviewText.value.trim();
+      if (!text) { reviewText.focus(); return; }
+      const key = `confguide_reviews_${conf.id}`;
+      try {
+        const saved = JSON.parse(localStorage.getItem(key) || '[]');
+        const user = window.ConfGuideLayout?.getCurrentUser?.();
+        saved.unshift({ id: `${Date.now()}-${Math.random().toString(36).slice(2)}`, author: user?.name || user?.username || 'Người dùng ConfGuide', text, createdAt: new Date().toISOString() });
+        localStorage.setItem(key, JSON.stringify(saved));
+        reviewText.value = '';
+        if (message) message.textContent = 'Đã lưu nhận xét trên trình duyệt này.';
+        renderReviewsList(conf);
+      } catch (_) {
+        if (message) message.textContent = 'Không thể lưu nhận xét. Vui lòng kiểm tra bộ nhớ trình duyệt.';
+      }
+    });
   }
 
   function renderReviewsList(conf) {
     const rvList = document.getElementById('rvList');
-    const rvBars = document.getElementById('rvBars');
     const rvStars = document.getElementById('rvStars');
     if (!rvList) return;
 
@@ -823,75 +841,21 @@
       `).join('');
     }
 
-    // 5 Thanh phân bố sao với class đúng chuẩn CSS
-    if (rvBars) {
-      rvBars.innerHTML = `
-        <div class="bar-row">
-          <span class="bar-label">5 sao</span>
-          <div class="bar-track"><div class="bar-fill" style="width: 78%"></div></div>
-          <span class="bar-pct">78%</span>
-        </div>
-        <div class="bar-row">
-          <span class="bar-label">4 sao</span>
-          <div class="bar-track"><div class="bar-fill" style="width: 16%"></div></div>
-          <span class="bar-pct">16%</span>
-        </div>
-        <div class="bar-row">
-          <span class="bar-label">3 sao</span>
-          <div class="bar-track"><div class="bar-fill" style="width: 4%"></div></div>
-          <span class="bar-pct">4%</span>
-        </div>
-        <div class="bar-row">
-          <span class="bar-label">2 sao</span>
-          <div class="bar-track"><div class="bar-fill" style="width: 1%"></div></div>
-          <span class="bar-pct">1%</span>
-        </div>
-        <div class="bar-row">
-          <span class="bar-label">1 sao</span>
-          <div class="bar-track"><div class="bar-fill" style="width: 1%"></div></div>
-          <span class="bar-pct">1%</span>
-        </div>
-      `;
-    }
-
-    // Danh sách mẫu nhận xét thực tế
-    const mockReviews = [
-      {
-        author: "TS. Nguyễn Minh Khoa",
-        affiliation: "Đại học Quốc gia TP.HCM",
-        score: 5,
-        date: "12/01/2026",
-        text: `Quy trình review của ${conf.name} cực kỳ chuyên nghiệp và công tâm. Feedback từ các reviewers rất chi tiết, có chiều sâu học thuật cao, giúp bài báo hoàn thiện đáng kể trước bản Camera-ready.`
-      },
-      {
-        author: "NCS. Trần Hoàng Nam",
-        affiliation: "Trường ĐH Công nghệ Thông tin (UIT)",
-        score: 5,
-        date: "05/01/2026",
-        text: `Hội nghị danh giá Rank ${conf.rank || 'A*'} với tỷ lệ chấp nhận cạnh tranh cao. Đạt được bài công bố tại đây là cột mốc lớn trong sự nghiệp nghiên cứu học thuật của nhóm tác giả.`
-      },
-      {
-        author: "ThS. Lê Thúy Hằng",
-        affiliation: "Trường ĐH Bách Khoa ĐHQG-HCM",
-        score: 4,
-        date: "22/12/2025",
-        text: `Hạn rebuttal tương đối gấp, tuy nhiên chất lượng các phiên thuyết trình keynote và workshop chuyên đề thì không thể chê vào đâu được.`
-      }
-    ];
-
-    rvList.innerHTML = mockReviews.map(r => `
+    const escape = value => String(value ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    let reviews = [];
+    try { const parsed = JSON.parse(localStorage.getItem(`confguide_reviews_${conf.id}`) || '[]'); reviews = Array.isArray(parsed) ? parsed : []; } catch (_) {}
+    const rvAvg = document.getElementById('rvAvg');
+    const rvTotal = document.getElementById('rvTotal');
+    const rvBars = document.getElementById('rvBars');
+    if (rvAvg) rvAvg.textContent = conf.rating ? Number(conf.rating).toFixed(1) : '—';
+    if (rvTotal) rvTotal.textContent = `${reviews.length} nhận xét trên trình duyệt này`;
+    if (rvBars) rvBars.textContent = 'Điểm tham khảo từ dữ liệu hội nghị; nhận xét bên dưới chỉ lưu cục bộ.';
+    rvList.innerHTML = reviews.length ? reviews.map(item => `
       <article class="card rv-card">
-        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 10px; flex-wrap: wrap; gap: 8px;">
-          <div>
-            <strong style="font-size: 15px; color: var(--navy); display:block;">${r.author}</strong>
-            <span style="font-size: 12.5px; color: var(--text-muted);">${r.affiliation}</span>
-          </div>
-          <span style="font-size: 12.5px; color: var(--text-muted);">${r.date}</span>
-        </div>
-        <div style="color: var(--gold); font-size: 16px; margin-bottom: 8px; letter-spacing: 2px;">${'★'.repeat(r.score)}</div>
-        <p style="font-size: 14px; color: var(--text); line-height: 1.65; margin: 0;">${r.text}</p>
-      </article>
-    `).join('');
+        <strong>${escape(item.author || 'Người dùng ConfGuide')}</strong>
+        <small>${escape(item.createdAt ? new Date(item.createdAt).toLocaleString('vi-VN') : '')}</small>
+        <p>${escape(item.text)}</p>
+      </article>`).join('') : '<p class="card rv-card">Chưa có nhận xét nào được lưu trên trình duyệt này. Bạn có thể gửi nhận xét đầu tiên.</p>';
   }
 
   // Khởi chạy khi DOM sẵn sàng

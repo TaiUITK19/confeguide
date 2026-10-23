@@ -611,6 +611,57 @@ body.dark .btn-card-save.saved {
   font-size: 14px;
 }
 
+.search-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 58px;
+  margin: 20px 0 8px;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.pagination-button {
+  width: 38px;
+  height: 38px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.pagination-button:hover:not(:disabled) {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.pagination-button:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+}
+
+.pagination-jump { display: inline-flex; align-items: center; gap: 7px; }
+.pagination-jump input {
+  width: 58px;
+  height: 38px;
+  padding: 0 8px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+  text-align: center;
+}
+.pagination-jump input:focus-visible, .pagination-button:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--primary) 35%, transparent);
+  outline-offset: 2px;
+}
+.pagination-total { margin-left: 6px; }
+body.dark .pagination-button, body.dark .pagination-jump input { background: var(--surface); color: var(--text); border-color: var(--border-strong); }
+
 /* Toast */
 .toast {
   position: fixed;
@@ -662,4 +713,9 @@ body.dark .btn-card-save.saved {
   .card-buttons-group {
     flex-direction: row;
   }
+}
+
+@media (max-width: 520px) {
+  .search-pagination { gap: 8px; flex-wrap: wrap; }
+  .pagination-total { flex-basis: 100%; text-align: center; margin-left: 0; }
 }

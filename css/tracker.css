@@ -120,6 +120,9 @@
 }
 
 .primary-btn {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
   border: 0;
   border-radius: var(--radius-sm);
   background: var(--primary);
@@ -236,6 +239,9 @@ th:nth-child(4) { width: 20%; }
   font-size: 13.5px;
 }
 
+.deadline-cell { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
+.deadline-remaining { color: var(--red); font-size: 12px; font-weight: 600; line-height: 1.35; }
+
 .calendar {
   color: var(--primary);
 }
@@ -243,6 +249,13 @@ th:nth-child(4) { width: 20%; }
 .actions {
   display: flex;
   gap: 8px;
+}
+
+.tracker-empty {
+  padding: 35px !important;
+  text-align: center;
+  color: var(--text-muted);
+  line-height: 1.6;
 }
 
 .action-btn {

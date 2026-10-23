@@ -14,6 +14,7 @@
 </head>
 
 <body>
+  <script>try { if (localStorage.getItem('confguide_theme') === 'dark') document.body.classList.add('dark'); } catch (e) {}</script>
   <!-- Shared Header -->
   <div id="site-header"></div>
 
@@ -208,6 +209,8 @@
 
           <!-- Conference Cards List -->
           <div id="conferenceList" class="conference-list"></div>
+
+          <nav id="pagination" class="search-pagination" aria-label="Phân trang kết quả"></nav>
 
           <!-- Empty State -->
           <div id="emptyState" class="empty-state hidden">
