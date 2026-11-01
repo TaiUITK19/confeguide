@@ -1,0 +1,1028 @@
+/* =========================================================
+   ConfGuide — About Us Stylesheet (css/about.css)
+   Chuẩn hóa Design Tokens, Tương thích Dark Mode, Responsive
+   Tuân thủ quy tắc màu 60:30:10 và WCAG AA
+   ========================================================= */
+
+/* --- Container & General Section Pad --- */
+.about-main {
+  width: 100%;
+  padding-bottom: 64px;
+}
+
+.about-section {
+  padding: 64px 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.about-section:nth-child(even) {
+  background-color: var(--bg-secondary);
+}
+
+.about-section:nth-child(odd) {
+  background-color: var(--bg-primary);
+}
+
+/* Tiêu đề chung cho từng section */
+.about-section-head {
+  text-align: center;
+  max-width: 760px;
+  margin: 0 auto 40px;
+}
+
+.about-section-head h2 {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--navy);
+  margin-top: 8px;
+  margin-bottom: 12px;
+  letter-spacing: -0.4px;
+}
+
+.about-section-head p {
+  font-size: 15.5px;
+  color: var(--text-muted);
+  line-height: 1.65;
+}
+
+/* ================= 1. HERO & SỨ MỆNH ================= */
+.about-hero-section {
+  padding: 56px 0 48px;
+  background: var(--bg-hero);
+  border-bottom: 1px solid var(--border);
+}
+
+.about-hero-content {
+  text-align: center;
+  max-width: 860px;
+  margin: 0 auto 40px;
+}
+
+.about-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 14px;
+  border-radius: var(--radius-pill);
+  background: var(--primary-soft);
+  color: var(--primary);
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+  border: 1px solid rgba(18, 104, 201, 0.2);
+}
+
+.about-hero-title {
+  font-size: 36px;
+  font-weight: 800;
+  color: var(--navy);
+  line-height: 1.25;
+  margin-bottom: 18px;
+  letter-spacing: -0.6px;
+}
+
+.about-hero-desc {
+  font-size: 16.5px;
+  color: var(--text-muted);
+  line-height: 1.7;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* Khối bối cảnh thực tế & Sứ mệnh */
+.about-context-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 32px 36px;
+  box-shadow: var(--shadow-sm);
+  margin-top: 24px;
+}
+
+.about-context-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--navy);
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.about-context-title svg {
+  color: var(--primary);
+}
+
+.about-challenges-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+  margin-bottom: 28px;
+}
+
+.about-challenge-item {
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.about-challenge-num {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--primary-soft);
+  color: var(--primary);
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+.about-challenge-title {
+  font-size: 15.5px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+
+.about-challenge-desc {
+  font-size: 14px;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+.about-mission-box {
+  background: linear-gradient(135deg, rgba(18, 104, 201, 0.08) 0%, rgba(11, 31, 107, 0.04) 100%);
+  border-left: 4px solid var(--primary);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  padding: 18px 24px;
+}
+
+.about-mission-box strong {
+  display: block;
+  font-size: 14.5px;
+  font-weight: 700;
+  color: var(--primary);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.about-mission-box p {
+  font-size: 15px;
+  color: var(--text);
+  line-height: 1.65;
+  margin: 0;
+}
+
+/* ================= 2. GIÁ TRỊ CỐT LÕI (3 CỘT) ================= */
+.about-values-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+}
+
+.about-value-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 28px 26px;
+  box-shadow: var(--shadow-sm);
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.about-value-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--primary);
+  box-shadow: var(--shadow-md);
+}
+
+.about-value-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: var(--primary-soft);
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 18px;
+  flex-shrink: 0;
+}
+
+.about-value-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--navy);
+  margin-bottom: 10px;
+  line-height: 1.35;
+}
+
+.about-value-desc {
+  font-size: 14px;
+  color: var(--text-muted);
+  line-height: 1.65;
+  margin: 0;
+}
+
+/* ================= 3. MINH BẠCH DỮ LIỆU & KIẾN TRÚC KỸ THUẬT (2 CỘT) ================= */
+.about-tech-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 28px;
+  align-items: stretch;
+}
+
+.about-col-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 30px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+}
+
+.about-col-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--navy);
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.about-col-title svg {
+  color: var(--primary);
+}
+
+.about-items-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  flex: 1;
+}
+
+.about-item-row {
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  transition: border-color 140ms ease;
+}
+
+.about-item-row:hover {
+  border-color: var(--border-strong);
+}
+
+.about-item-name {
+  font-size: 14.5px;
+  font-weight: 700;
+  color: var(--navy);
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.about-item-name .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--primary);
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.about-item-purpose {
+  font-size: 13.5px;
+  color: var(--text-muted);
+  line-height: 1.55;
+  margin: 0;
+}
+
+.about-update-frequency {
+  margin-top: 20px;
+  padding: 12px 16px;
+  border-radius: var(--radius-sm);
+  background: var(--primary-soft);
+  border: 1px dashed var(--border-strong);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13.5px;
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.about-update-frequency svg {
+  flex-shrink: 0;
+}
+
+/* ================= 4. ĐỘI NGŨ THỰC HIỆN VÀ CỐ VẤN ================= */
+/* Khối Cố vấn chuyên môn */
+.about-advisor-card {
+  max-width: 640px;
+  margin: 0 auto 36px;
+  background: linear-gradient(135deg, var(--surface) 0%, var(--surface-alt) 100%);
+  border: 1.5px solid var(--border-strong);
+  border-radius: var(--radius);
+  padding: 24px 28px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.about-advisor-badge-box {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #1268c9, #0b1f6b);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(18, 104, 201, 0.25);
+}
+
+.about-advisor-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.about-advisor-tag {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: var(--radius-pill);
+  background: var(--primary-soft);
+  color: var(--primary);
+  font-size: 11.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.about-advisor-name {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--navy);
+  margin-bottom: 2px;
+}
+
+.about-advisor-dept {
+  font-size: 13.5px;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+/* Lưới 5 thành viên (Căn giữa hàng cuối) */
+.about-members-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 20px;
+  max-width: 1060px;
+  margin: 0 auto;
+}
+
+.about-member-card {
+  flex: 0 1 calc((100% - 40px) / 3);
+  max-width: calc((100% - 40px) / 3);
+  min-width: 280px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  box-shadow: var(--shadow-sm);
+  box-sizing: border-box;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.about-member-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--primary);
+  box-shadow: var(--shadow-md);
+}
+
+.about-member-initials {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #1268c9, #0b1f6b);
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 14px;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 10px rgba(18, 104, 201, 0.2);
+}
+
+.about-member-name {
+  font-size: 16.5px;
+  font-weight: 700;
+  color: var(--navy);
+  margin-bottom: 6px;
+}
+
+.about-member-role {
+  display: inline-block;
+  padding: 3px 12px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-muted);
+  color: var(--primary);
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.about-member-mssv {
+  font-size: 13px;
+  color: var(--text-muted);
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* ================= 5. LỘ TRÌNH PHÁT TRIỂN (TIMELINE 2 GIAI ĐOẠN) ================= */
+.about-roadmap-container {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 28px;
+  position: relative;
+}
+
+.about-milestone-card {
+  border-radius: var(--radius);
+  padding: 32px 28px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  transition: transform 180ms ease;
+}
+
+/* Giai đoạn Hiện tại (Nổi bật) */
+.about-milestone-card.milestone-current {
+  background: var(--surface);
+  border: 2px solid var(--primary);
+  box-shadow: var(--shadow-md);
+}
+
+/* Giai đoạn Tương lai (Nhạt hơn, phân biệt rõ) */
+.about-milestone-card.milestone-future {
+  background: var(--surface-alt);
+  border: 1.5px dashed var(--border-strong);
+  box-shadow: var(--shadow-sm);
+  opacity: 0.92;
+}
+
+.about-milestone-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.about-milestone-badge {
+  padding: 4px 12px;
+  border-radius: var(--radius-pill);
+  font-size: 12.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.milestone-current .about-milestone-badge {
+  background: #ecfdf5;
+  color: #059669;
+  border: 1px solid #a7f3d0;
+}
+
+.milestone-future .about-milestone-badge {
+  background: var(--surface-muted);
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+}
+
+.about-milestone-title {
+  font-size: 19px;
+  font-weight: 800;
+  color: var(--navy);
+  margin-bottom: 16px;
+  line-height: 1.35;
+}
+
+.about-milestone-features {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.about-milestone-features li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 14px;
+  color: var(--text);
+  line-height: 1.55;
+}
+
+.about-milestone-features li svg {
+  color: var(--primary);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.milestone-future .about-milestone-features li svg {
+  color: var(--text-dim);
+}
+
+/* ================= 6. MÃ NGUỒN VÀ ĐÓNG GÓP CỘNG ĐỒNG ================= */
+.about-community-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 44px 36px;
+  text-align: center;
+  box-shadow: var(--shadow-sm);
+  max-width: 860px;
+  margin: 0 auto;
+}
+
+.about-community-card p {
+  font-size: 16px;
+  color: var(--text-muted);
+  line-height: 1.7;
+  max-width: 720px;
+  margin: 0 auto 28px;
+}
+
+.about-community-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.btn-github {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 24px;
+  border-radius: var(--radius-sm);
+  background: #182230;
+  color: #ffffff !important;
+  font-weight: 600;
+  font-size: 14.5px;
+  transition: all 180ms ease;
+  text-decoration: none;
+}
+
+.btn-github:hover {
+  background: #0f1722;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+}
+
+.btn-github svg {
+  fill: currentColor;
+}
+
+.btn-propose {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 24px;
+  border-radius: var(--radius-sm);
+  background: var(--primary);
+  color: #ffffff !important;
+  font-weight: 600;
+  font-size: 14.5px;
+  border: none;
+  cursor: pointer;
+  transition: all 180ms ease;
+}
+
+.btn-propose:hover {
+  background: var(--primary-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(18, 104, 201, 0.3);
+}
+
+/* ================= MODAL ĐỀ XUẤT HỘI NGHỊ MỚI ================= */
+.about-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(11, 31, 107, 0.45);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  box-sizing: border-box;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 200ms ease, visibility 200ms ease;
+}
+
+.about-modal-backdrop.open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.about-modal-dialog {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  width: 100%;
+  max-width: 560px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-lg);
+  padding: 32px;
+  box-sizing: border-box;
+  position: relative;
+  transform: scale(0.96) translateY(10px);
+  transition: transform 200ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.about-modal-backdrop.open .about-modal-dialog {
+  transform: scale(1) translateY(0);
+}
+
+.about-modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.about-modal-title {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--navy);
+  margin: 0 0 4px;
+}
+
+.about-modal-sub {
+  font-size: 13.5px;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.about-modal-close-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 140ms ease;
+  flex-shrink: 0;
+}
+
+.about-modal-close-btn:hover {
+  background: var(--surface-muted);
+  color: var(--text);
+}
+
+.about-modal-close-btn:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* Form Fields */
+.about-form-group {
+  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+.about-form-label {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.about-form-label .req {
+  color: var(--red);
+}
+
+.about-form-input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 14px;
+  box-sizing: border-box;
+  transition: border-color 140ms ease, box-shadow 140ms ease;
+}
+
+.about-form-input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(18, 104, 201, 0.15);
+}
+
+.about-form-input.invalid {
+  border-color: var(--red);
+  background: rgba(224, 49, 49, 0.03);
+}
+
+.about-field-error {
+  font-size: 12px;
+  color: var(--red);
+  margin-top: 4px;
+  min-height: 16px;
+  display: none;
+}
+
+.about-field-error.show {
+  display: block;
+}
+
+.about-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.about-btn-cancel {
+  padding: 9px 18px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 140ms ease;
+}
+
+.about-btn-cancel:hover {
+  background: var(--surface-muted);
+}
+
+.about-btn-submit {
+  padding: 9px 22px;
+  border-radius: var(--radius-sm);
+  border: none;
+  background: var(--primary);
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 140ms ease;
+}
+
+.about-btn-submit:hover {
+  background: var(--primary-dark);
+}
+
+.about-btn-submit:focus-visible,
+.about-btn-cancel:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* Success Box inside modal */
+.about-success-box {
+  padding: 24px;
+  border-radius: var(--radius-sm);
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  text-align: center;
+  display: none;
+}
+
+.about-success-box.show {
+  display: block;
+}
+
+.about-success-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #10b981;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 12px;
+}
+
+.about-success-title {
+  font-size: 16.5px;
+  font-weight: 700;
+  color: #065f46;
+  margin-bottom: 8px;
+}
+
+.about-success-desc {
+  font-size: 14px;
+  color: #047857;
+  line-height: 1.6;
+  margin-bottom: 18px;
+}
+
+/* ================= DARK MODE OVERRIDES ================= */
+body.dark .about-hero-section {
+  background: var(--bg-hero);
+  border-bottom-color: var(--border);
+}
+
+body.dark .about-eyebrow {
+  background: var(--primary-soft);
+  color: #93c5fd;
+  border-color: rgba(147, 197, 253, 0.25);
+}
+
+body.dark .about-challenge-item,
+body.dark .about-item-row {
+  background: var(--surface-alt);
+  border-color: var(--border);
+}
+
+body.dark .about-mission-box {
+  background: rgba(18, 104, 201, 0.12);
+  border-left-color: var(--primary);
+}
+
+body.dark .about-update-frequency {
+  background: rgba(18, 104, 201, 0.15);
+  border-color: var(--border-strong);
+  color: #93c5fd;
+}
+
+body.dark .about-advisor-card {
+  background: var(--surface);
+  border-color: var(--border-strong);
+}
+
+body.dark .milestone-current .about-milestone-badge {
+  background: rgba(16, 185, 129, 0.18);
+  color: #34d399;
+  border-color: rgba(16, 185, 129, 0.35);
+}
+
+body.dark .milestone-future .about-milestone-badge {
+  background: rgba(100, 116, 139, 0.2);
+  color: #94a3b8;
+  border-color: rgba(100, 116, 139, 0.35);
+}
+
+body.dark .about-modal-backdrop {
+  background: rgba(0, 0, 0, 0.65);
+}
+
+body.dark .about-success-box {
+  background: rgba(16, 185, 129, 0.12);
+  border-color: rgba(16, 185, 129, 0.3);
+}
+
+body.dark .about-success-title {
+  color: #34d399;
+}
+
+body.dark .about-success-desc {
+  color: #a7f3d0;
+}
+
+/* ================= RESPONSIVE ================= */
+@media (max-width: 1099px) {
+  .nav-link {
+    padding: 8px 10px;
+    font-size: 13.5px;
+  }
+  .main-nav {
+    gap: 4px;
+  }
+  .header-actions {
+    gap: 8px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .about-hero-title {
+    font-size: 32px;
+  }
+  .about-challenges-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+  }
+  .about-member-card {
+    flex: 0 1 calc((100% - 20px) / 2);
+    max-width: calc((100% - 20px) / 2);
+  }
+}
+
+@media (max-width: 640px) {
+  .site-header .auth-buttons-group {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .about-section {
+    padding: 48px 0;
+  }
+  .about-hero-title {
+    font-size: 28px;
+  }
+  .about-challenges-grid {
+    grid-template-columns: 1fr;
+  }
+  .about-values-grid {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+  .about-tech-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  .about-roadmap-container {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  .about-advisor-card {
+    flex-direction: column;
+    text-align: center;
+    padding: 24px 20px;
+  }
+  .about-member-card {
+    flex: 0 1 100%;
+    max-width: 100%;
+  }
+  .about-community-card {
+    padding: 32px 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .about-hero-title {
+    font-size: 24px;
+  }
+  .about-context-card {
+    padding: 24px 18px;
+  }
+  .about-modal-dialog {
+    padding: 24px 18px;
+  }
+  .about-community-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+  .btn-github,
+  .btn-propose {
+    width: 100%;
+    justify-content: center;
+  }
+}

@@ -336,6 +336,7 @@ body.dark .site-header {
   border-bottom: 1px solid var(--border);
   padding: 64px 0 56px;
   overflow: hidden;
+  scroll-margin-top: 80px;
 }
 
 .hero-inner {
@@ -437,10 +438,6 @@ body.dark .site-header {
   color: var(--text);
 }
 
-.search-box input::placeholder {
-  color: var(--text-dim);
-}
-
 .search-box button {
   padding: 10px 22px;
   border-radius: 8px;
@@ -514,7 +511,9 @@ body.dark .site-header {
 
 /* ================= Features Section ================= */
 .features-section {
-  background: var(--bg-primary);
+  background: var(--bg-secondary);
+  border-top: 1px solid var(--border);
+  scroll-margin-top: 80px;
 }
 
 .features-grid {
@@ -683,6 +682,7 @@ body.dark .site-header {
 /* ================= Conference List Section ================= */
 .conference-section {
   background: var(--bg-primary);
+  scroll-margin-top: 80px;
 }
 
 .conf-toolbar {

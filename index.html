@@ -57,7 +57,7 @@
                 <circle cx="11" cy="11" r="8"/>
                 <line x1="21" y1="21" x2="16.65" y2="16.65"/>
               </svg>
-              <input id="searchInput" type="search" placeholder="Tìm kiếm theo tên hội nghị, chủ đề (CVPR, Machine Learning, SOICT...)" autocomplete="off" aria-label="Tìm kiếm hội nghị">
+              <input id="searchInput" type="search" autocomplete="off" aria-label="Tìm kiếm hội nghị">
               <button class="btn-primary" type="submit">Tìm kiếm</button>
             </form>
 
@@ -88,7 +88,53 @@
       </div>
     </section>
 
-    <!-- 2. FEATURES SECTION -->
+    <!-- 2. CONFERENCE LIST SECTION (Gateway - Max 6 upcoming cards) -->
+    <section class="section-pad conference-section" id="conferences">
+      <div class="container">
+        <div class="section-head">
+          <span class="eyebrow">Danh mục học thuật</span>
+          <h2>Hội nghị khoa học sắp diễn ra</h2>
+          <p>Khám phá các kỳ hội nghị quốc tế và trong nước sắp mở đợt nộp bài hoặc đang chuẩn bị diễn ra.</p>
+        </div>
+
+        <!-- Toolbar: Tabs & Status -->
+        <div class="conf-toolbar">
+          <div class="filter-tabs" role="tablist" aria-label="Bộ lọc khu vực hội nghị">
+            <button class="tab-btn active" type="button" role="tab" data-filter="all">Tất cả</button>
+            <button class="tab-btn" type="button" role="tab" data-filter="Việt Nam">Việt Nam</button>
+            <button class="tab-btn" type="button" role="tab" data-filter="Quốc tế">Quốc tế</button>
+          </div>
+          <div class="results-status" id="resultsCount">Đang tải dữ liệu hội nghị...</div>
+        </div>
+
+        <!-- Conference Cards Grid (Max 6 upcoming) -->
+        <div class="conference-grid" id="conferenceGrid"></div>
+
+        <!-- Empty search state -->
+        <div class="empty-box card-surface" id="emptyState" hidden>
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="11" cy="11" r="8"/>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            <line x1="8" y1="11" x2="14" y2="11"/>
+          </svg>
+          <h3>Không tìm thấy hội nghị phù hợp</h3>
+          <p>Vui lòng thử chuyển sang tab "Tất cả" hoặc truy cập trang Tra cứu.</p>
+        </div>
+
+        <!-- Xem tất cả Button -->
+        <div style="text-align: center; margin-top: 40px;">
+          <a href="search.html" class="btn btn-primary" id="btnViewAll" style="display: inline-flex; align-items: center; gap: 8px; padding: 12px 28px; font-size: 15px;">
+            <span>Xem tất cả hội nghị trên hệ thống</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. FEATURES SECTION -->
     <section class="section-pad features-section" id="features">
       <div class="container">
         <div class="section-head">
@@ -165,52 +211,6 @@
               </li>
             </ul>
           </article>
-        </div>
-      </div>
-    </section>
-
-    <!-- 3. CONFERENCE LIST SECTION (Gateway - Max 6 upcoming cards) -->
-    <section class="section-pad conference-section" id="conferences">
-      <div class="container">
-        <div class="section-head">
-          <span class="eyebrow">Danh mục học thuật</span>
-          <h2>Hội nghị khoa học sắp diễn ra</h2>
-          <p>Khám phá các kỳ hội nghị quốc tế và trong nước sắp mở đợt nộp bài hoặc đang chuẩn bị diễn ra.</p>
-        </div>
-
-        <!-- Toolbar: Tabs & Status -->
-        <div class="conf-toolbar">
-          <div class="filter-tabs" role="tablist" aria-label="Bộ lọc khu vực hội nghị">
-            <button class="tab-btn active" type="button" role="tab" data-filter="all">Tất cả</button>
-            <button class="tab-btn" type="button" role="tab" data-filter="Việt Nam">Việt Nam</button>
-            <button class="tab-btn" type="button" role="tab" data-filter="Quốc tế">Quốc tế</button>
-          </div>
-          <div class="results-status" id="resultsCount">Đang tải dữ liệu hội nghị...</div>
-        </div>
-
-        <!-- Conference Cards Grid (Max 6 upcoming) -->
-        <div class="conference-grid" id="conferenceGrid"></div>
-
-        <!-- Empty search state -->
-        <div class="empty-box card-surface" id="emptyState" hidden>
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <circle cx="11" cy="11" r="8"/>
-            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-            <line x1="8" y1="11" x2="14" y2="11"/>
-          </svg>
-          <h3>Không tìm thấy hội nghị phù hợp</h3>
-          <p>Vui lòng thử chuyển sang tab "Tất cả" hoặc truy cập trang Tra cứu.</p>
-        </div>
-
-        <!-- Xem tất cả Button -->
-        <div style="text-align: center; margin-top: 40px;">
-          <a href="search.html" class="btn btn-primary" id="btnViewAll" style="display: inline-flex; align-items: center; gap: 8px; padding: 12px 28px; font-size: 15px;">
-            <span>Xem tất cả hội nghị trên hệ thống</span>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="5" y1="12" x2="19" y2="12"></line>
-              <polyline points="12 5 19 12 12 19"></polyline>
-            </svg>
-          </a>
         </div>
       </div>
     </section>

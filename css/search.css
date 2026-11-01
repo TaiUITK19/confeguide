@@ -74,10 +74,6 @@
   min-width: 0;
 }
 
-.search-box input::placeholder {
-  color: var(--text-dim);
-}
-
 .search-box button {
   background: var(--primary);
   color: #ffffff;
@@ -580,14 +576,26 @@ body.dark .btn-card-save.saved {
   background: #252213;
 }
 
+/* Hidden Utility */
+[hidden],
+.hidden {
+  display: none !important;
+}
+
 /* Empty State */
 .empty-state {
   text-align: center;
-  padding: 60px 20px;
+  padding: 44px 20px;
   background: var(--surface);
   border: 1px dashed var(--border-strong);
   border-radius: var(--radius);
   color: var(--text-muted);
+  margin: 0 0 24px 0;
+}
+
+.empty-state[hidden],
+.empty-state.hidden {
+  display: none !important;
 }
 
 .empty-state svg {
@@ -601,6 +609,12 @@ body.dark .btn-card-save.saved {
   margin-bottom: 8px;
 }
 
+.empty-state p {
+  max-width: 480px;
+  margin: 0 auto;
+  line-height: 1.5;
+}
+
 .btn-reset-empty {
   margin-top: 18px;
   padding: 9px 20px;
@@ -609,6 +623,40 @@ body.dark .btn-card-save.saved {
   border-radius: var(--radius-sm);
   font-weight: 600;
   font-size: 14px;
+  cursor: pointer;
+  border: none;
+  transition: background-color 150ms ease;
+}
+
+.btn-reset-empty:hover {
+  background: var(--primary-dark);
+}
+
+/* Dedicated Error State */
+.search-error-state {
+  border: 1px solid rgba(224, 49, 49, 0.4);
+  background: rgba(224, 49, 49, 0.04);
+}
+
+.search-error-state svg {
+  color: var(--red);
+}
+
+.search-error-state h3 {
+  color: var(--red);
+}
+
+body.dark .search-error-state {
+  border-color: rgba(255, 107, 107, 0.35);
+  background: rgba(224, 49, 49, 0.08);
+}
+
+.conference-list[hidden],
+.conference-list.hidden,
+.conference-list:empty {
+  display: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
 }
 
 .search-pagination {
@@ -620,6 +668,14 @@ body.dark .btn-card-save.saved {
   margin: 20px 0 8px;
   color: var(--text-muted);
   font-size: 13px;
+}
+
+.search-pagination[hidden],
+.search-pagination.hidden {
+  display: none !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
 }
 
 .pagination-button {

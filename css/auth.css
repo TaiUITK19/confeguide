@@ -39,7 +39,6 @@
 .form-field { margin-bottom: 17px; }
 .form-field label { display: block; margin-bottom: 7px; color: #253c60; font-size: 13px; font-weight: 600; }
 .form-field input { width: 100%; height: 46px; padding: 0 13px; color: var(--text); background: #fff; border: 1px solid #ccd8e6; border-radius: 8px; outline: none; font-size: 14px; transition: border-color .15s, box-shadow .15s; }
-.form-field input::placeholder { color: #94a2b5; }
 .form-field input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(18,104,201,.13); }
 .form-field input[aria-invalid="true"] { border-color: #c43d45; }
 .password-wrap { position: relative; }

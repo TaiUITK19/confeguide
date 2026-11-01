@@ -198,16 +198,16 @@
               <form id="globalPasswordForm" novalidate>
                 <div class="modal-form-group">
                   <label for="globalCurrentPass">Mật khẩu hiện tại</label>
-                  <input type="password" id="globalCurrentPass" class="modal-input" placeholder="••••••••" required>
+                  <input type="password" id="globalCurrentPass" class="modal-input" required>
                 </div>
                 <div class="modal-form-grid-2">
                   <div class="modal-form-group">
                     <label for="globalNewPass">Mật khẩu mới (tối thiểu 6 ký tự)</label>
-                    <input type="password" id="globalNewPass" class="modal-input" placeholder="••••••••" required minlength="6">
+                    <input type="password" id="globalNewPass" class="modal-input" required minlength="6">
                   </div>
                   <div class="modal-form-group">
                     <label for="globalConfirmPass">Xác nhận mật khẩu mới</label>
-                    <input type="password" id="globalConfirmPass" class="modal-input" placeholder="••••••••" required minlength="6">
+                    <input type="password" id="globalConfirmPass" class="modal-input" required minlength="6">
                   </div>
                 </div>
                 <button type="submit" class="btn btn-primary" style="font-size: 13.5px; padding: 8px 16px; margin-top: 6px;">Cập nhật mật khẩu</button>
@@ -327,16 +327,16 @@
                 </div>
                 <div class="modal-form-group">
                   <label for="globalReportConf">Hội nghị liên quan (nếu có)</label>
-                  <input type="text" id="globalReportConf" class="modal-input" placeholder="Ví dụ: CVPR 2026, ICML...">
+                  <input type="text" id="globalReportConf" class="modal-input">
                 </div>
               </div>
               <div class="modal-form-group">
                 <label for="globalReportTitle">Tiêu đề tóm tắt</label>
-                <input type="text" id="globalReportTitle" class="modal-input" placeholder="Tóm tắt ngắn gọn sự cố..." required minlength="5">
+                <input type="text" id="globalReportTitle" class="modal-input" required minlength="5">
               </div>
               <div class="modal-form-group">
                 <label for="globalReportDesc">Mô tả chi tiết</label>
-                <textarea id="globalReportDesc" class="modal-input" rows="3" placeholder="Chi tiết lỗi hoặc dẫn chứng website chính thức..." required minlength="10"></textarea>
+                <textarea id="globalReportDesc" class="modal-input" rows="3" required minlength="10"></textarea>
               </div>
               <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 14px;">
                 <button type="button" class="btn btn-secondary layout-modal-cancel-btn">Hủy</button>
@@ -981,7 +981,6 @@
                     id="footerFeedbackInput"
                     class="footer-feedback-textarea"
                     rows="1"
-                    placeholder="Viết góp ý của bạn..."
                     aria-label="Nội dung góp ý"
                     maxlength="500"
                   ></textarea>

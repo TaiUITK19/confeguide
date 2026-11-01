@@ -58,20 +58,6 @@
                 </svg>
                 <span>Chỉnh sửa hồ sơ</span>
               </button>
-              <a href="search.html" class="btn btn-secondary">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                  <circle cx="11" cy="11" r="8"></circle>
-                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                </svg>
-                <span>Tra cứu hội nghị</span>
-              </a>
-              <a href="tracker.html" class="btn btn-secondary">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                  <polyline points="14 2 14 8 20 8"></polyline>
-                </svg>
-                <span>Theo dõi hội nghị</span>
-              </a>
             </div>
 
           </div>
@@ -89,14 +75,6 @@
                   <polyline points="22,6 12,13 2,6"></polyline>
                 </svg>
                 <span id="profileEmailDisplay">user@confguide.vn</span>
-              </div>
-
-              <div class="profile-meta-chip" id="profileUsernameChip">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                  <circle cx="12" cy="7" r="4"></circle>
-                </svg>
-                <span id="profileUsernameDisplay">@user</span>
               </div>
 
               <a href="#" target="_blank" rel="noopener noreferrer" class="profile-meta-chip profile-scholar-chip" id="profileScholarLink" style="display: none;">
@@ -207,45 +185,39 @@
           <div class="modal-form-grid-2">
             <div class="modal-form-group">
               <label for="editFullName">Họ và tên <span style="color: var(--red);">*</span></label>
-              <input type="text" id="editFullName" class="modal-input" placeholder="Nguyễn Văn A" required>
+              <input type="text" id="editFullName" class="modal-input" required>
             </div>
-            <div class="modal-form-group">
-              <label for="editUsername">Tên đăng nhập</label>
-              <input type="text" id="editUsername" class="modal-input" readonly style="background: var(--surface-muted); cursor: not-allowed;" title="Tên đăng nhập không thể thay đổi">
-            </div>
-          </div>
-
-          <div class="modal-form-grid-2">
             <div class="modal-form-group">
               <label for="editEmail">Email liên hệ <span style="color: var(--red);">*</span></label>
-              <input type="email" id="editEmail" class="modal-input" placeholder="user@gmail.com" required>
-            </div>
-            <div class="modal-form-group">
-              <label for="editTitle">Chức danh / Học vị</label>
-              <input type="text" id="editTitle" class="modal-input" placeholder="Nghiên cứu sinh / Giảng viên / Thạc sĩ">
+              <input type="email" id="editEmail" class="modal-input" required>
             </div>
           </div>
 
           <div class="modal-form-grid-2">
             <div class="modal-form-group">
-              <label for="editAffiliation">Đơn vị công tác / Trường / Viện</label>
-              <input type="text" id="editAffiliation" class="modal-input" placeholder="Đại học Công nghệ Thông tin - ĐHQG-HCM">
+              <label for="editTitle">Chức danh / Học vị</label>
+              <input type="text" id="editTitle" class="modal-input">
             </div>
             <div class="modal-form-group">
-              <label for="editScholar">Liên kết Google Scholar / ORCID</label>
-              <input type="url" id="editScholar" class="modal-input" placeholder="https://scholar.google.com/citations?user=...">
+              <label for="editAffiliation">Đơn vị công tác / Trường / Viện</label>
+              <input type="text" id="editAffiliation" class="modal-input">
             </div>
           </div>
 
           <div class="modal-form-group">
+            <label for="editScholar">Liên kết Google Scholar / ORCID</label>
+            <input type="url" id="editScholar" class="modal-input">
+          </div>
+
+          <div class="modal-form-group">
             <label for="editFields">Lĩnh vực nghiên cứu chính</label>
-            <input type="text" id="editFields" class="modal-input" placeholder="Trí tuệ nhân tạo, Thị giác máy tính, Xử lý ngôn ngữ tự nhiên...">
+            <input type="text" id="editFields" class="modal-input">
             <span class="modal-hint">Ngăn cách các lĩnh vực nghiên cứu bằng dấu phẩy (,).</span>
           </div>
 
           <div class="modal-form-group">
             <label for="editBio">Giới thiệu bản thân &amp; Hướng nghiên cứu</label>
-            <textarea id="editBio" class="modal-input" rows="3" placeholder="Giới thiệu tóm tắt hướng nghiên cứu và các đề tài quan tâm..."></textarea>
+            <textarea id="editBio" class="modal-input" rows="3"></textarea>
           </div>
 
           <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border);">
