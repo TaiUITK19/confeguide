@@ -722,26 +722,40 @@
     if (!grid) return;
 
     const utils = window.ConfGuideUtils;
-    const relatedList = allConferences.filter(c => c.id !== current.id).slice(0, 3);
+    const curFields = Array.isArray(current.fields) ? current.fields : [];
+
+    let relatedList = allConferences.filter(c => c.id !== current.id);
+    // Ưu tiên các hội nghị có cùng chủ đề/lĩnh vực nghiên cứu
+    relatedList.sort((a, b) => {
+      const aMatch = (a.fields || []).filter(f => curFields.includes(f)).length;
+      const bMatch = (b.fields || []).filter(f => curFields.includes(f)).length;
+      return bMatch - aMatch;
+    });
+    relatedList = relatedList.slice(0, 3);
 
     grid.innerHTML = relatedList.map(item => {
       const nextDl = utils ? utils.getNextDeadline(item) : null;
       let daysText = 'Sắp tới';
+      let isClosed = false;
       if (nextDl) {
-        daysText = nextDl.isPassed ? 'Đã đóng' : `Còn ${Math.max(0, nextDl.daysLeft)}d`;
+        isClosed = !!nextDl.isPassed;
+        daysText = isClosed ? 'Đã đóng' : `Còn ${Math.max(0, nextDl.daysLeft)}d`;
       }
       const tags = (item.fields || ['AI']).slice(0, 2);
       const rankBadge = item.rank || 'A*';
 
       return `
-        <article class="rc" data-id="${item.id}">
+        <article class="rc" data-id="${item.id}" tabindex="0" role="link" aria-label="Xem chi tiết hội nghị ${item.name}">
           <div class="thumb">
             <b>${item.name.replace(' ', '<br>')}</b>
           </div>
           <div class="body">
-            <h5>${item.name}</h5>
+            <div class="rc-top">
+              <h5 title="${item.name}">${item.name}</h5>
+              <span class="days ${isClosed ? 'closed' : ''}">${daysText}</span>
+            </div>
             <div class="full" title="${item.fullName || item.name}">${item.fullName || item.name}</div>
-            <div class="tg">${tags.map(t => `<span>${t}</span>`).join('')}</div>
+            <div class="tg">${tags.map(t => `<span title="${t}">${t}</span>`).join('')}</div>
             <div class="bottom">
               <a href="detail.html?id=${item.id}" class="save-sm">
                 Xem chi tiết &rarr;
@@ -749,10 +763,31 @@
               <span class="rank">${rankBadge}</span>
             </div>
           </div>
-          <span class="days">${daysText}</span>
         </article>
       `;
     }).join('');
+
+    // Click vào bất kỳ vị trí nào trên thẻ (hoặc nút Xem chi tiết) đều điều hướng sang trang chi tiết
+    grid.querySelectorAll('.rc').forEach(card => {
+      const confId = card.getAttribute('data-id');
+      const goToDetail = () => {
+        if (confId) {
+          window.location.href = `detail.html?id=${encodeURIComponent(confId)}`;
+        }
+      };
+
+      card.addEventListener('click', function (e) {
+        if (e.target.closest('a')) return;
+        goToDetail();
+      });
+
+      card.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          goToDetail();
+        }
+      });
+    });
   }
 
   // Điều hướng và trang Review

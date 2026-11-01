@@ -843,10 +843,6 @@ body.dark .footer-col-title {
   box-sizing: border-box;
 }
 
-.footer-feedback-textarea::placeholder {
-  color: var(--text-dim);
-}
-
 .footer-feedback-btn {
   width: 36px;
   height: 36px;
@@ -925,11 +921,23 @@ body.dark .footer-col-title {
 }
 
 @media (max-width: 768px) {
+  .container {
+    width: min(var(--container), calc(100% - 32px));
+  }
   .main-nav {
     display: none;
   }
   .hamburger-btn {
     display: inline-flex;
+  }
+  .nav-wrap {
+    gap: 10px;
+  }
+  .header-actions {
+    gap: 8px;
+  }
+  .brand-copy small {
+    display: none;
   }
 }
 
@@ -1410,6 +1418,12 @@ body.dark .modal-alert.error {
 
 .modal-contact-banner a:hover {
   text-decoration: underline;
+}
+
+/* Global Hidden Utility */
+[hidden],
+.hidden {
+  display: none !important;
 }
 
 

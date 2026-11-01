@@ -702,9 +702,26 @@ body.dark .status-review {
     padding: 0 18px 24px;
   }
   .profile-hero-top-row {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 14px;
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 12px;
+    width: 100%;
+  }
+  .profile-avatar-outer {
+    width: 88px;
+    height: 88px;
+  }
+  .profile-avatar-display {
+    font-size: 36px;
+  }
+  .profile-hero-actions {
+    margin-bottom: 6px;
+  }
+  .profile-hero-actions .btn {
+    padding: 8px 14px;
+    font-size: 13px;
+    white-space: nowrap;
   }
   .profile-stats-grid {
     grid-template-columns: 1fr;

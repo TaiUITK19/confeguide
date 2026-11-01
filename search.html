@@ -31,7 +31,7 @@
             <circle cx="11" cy="11" r="8"/>
             <line x1="21" y1="21" x2="16.65" y2="16.65"/>
           </svg>
-          <input id="searchInput" type="search" placeholder="Tìm kiếm theo tên hội nghị, viết tắt (CVPR, ATC), lĩnh vực (AI, NLP)..." autocomplete="off" aria-label="Nhập từ khóa">
+          <input id="searchInput" type="search" autocomplete="off" aria-label="Nhập từ khóa">
           <button type="submit">Tìm kiếm</button>
         </form>
 
@@ -210,10 +210,8 @@
           <!-- Conference Cards List -->
           <div id="conferenceList" class="conference-list"></div>
 
-          <nav id="pagination" class="search-pagination" aria-label="Phân trang kết quả"></nav>
-
-          <!-- Empty State -->
-          <div id="emptyState" class="empty-state hidden">
+          <!-- Empty State (Chỉ hiện khi đã lọc và kết quả = 0) -->
+          <div id="emptyState" class="empty-state hidden" hidden>
             <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
               <circle cx="11" cy="11" r="8"/>
               <line x1="21" y1="21" x2="16.65" y2="16.65"/>
@@ -223,6 +221,20 @@
             <p>Hãy thử thay đổi từ khóa tìm kiếm hoặc bấm đặt lại bộ lọc để xem toàn bộ danh sách.</p>
             <button type="button" class="btn-reset-empty" id="btnResetFromEmpty">Đặt lại bộ lọc</button>
           </div>
+
+          <!-- Error State (Chỉ hiện khi nạp dữ liệu thất bại) -->
+          <div id="searchErrorState" class="empty-state search-error-state hidden" hidden>
+            <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            <h3>Không thể nạp dữ liệu hội nghị</h3>
+            <p id="searchErrorMessage">Đã có lỗi xảy ra khi nạp dữ liệu. Vui lòng tải lại trang hoặc kiểm tra kết nối mạng.</p>
+            <button type="button" class="btn-reset-empty" id="btnRetryLoad">Tải lại dữ liệu</button>
+          </div>
+
+          <nav id="pagination" class="search-pagination hidden" aria-label="Phân trang kết quả" hidden></nav>
         </section>
 
       </div>
