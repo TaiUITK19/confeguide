@@ -1,10 +1,3 @@
-/**
- * ConfGuide — About Page Logic (js/about.js)
- * Tải dữ liệu động từ data/about.json (có fallback khi chạy qua file:///)
- * Quản lý Modal Đề xuất Hội nghị mới chuẩn Accessibility (Focus trap, phím Esc, khóa cuộn)
- * Xác thực Form inline và lưu trữ localStorage an toàn
- */
-
 (function () {
   'use strict';
 
