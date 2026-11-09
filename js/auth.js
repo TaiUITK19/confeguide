@@ -3,7 +3,6 @@
    Hỗ trợ xác thực thật, SHA-256 Hashing, và Seed 20 tài khoản
    ========================================================= */
 
-const AUTH_API_BASE_URL = "";
 const REMEMBERED_EMAIL_KEY = "confGuideRememberedEmail";
 const USERS_STORAGE_KEY = "confguide_users";
 const CURRENT_USER_KEY = "confguide_current_user";
@@ -69,7 +68,14 @@ async function loadAndSeedUsers() {
     sourceList = SEED_USERS;
   }
 
-  const existingUsers = JSON.parse(localStorage.getItem(USERS_STORAGE_KEY) || "[]");
+  let existingUsers = [];
+  try {
+    const storedUsers = JSON.parse(localStorage.getItem(USERS_STORAGE_KEY) || "[]");
+    existingUsers = Array.isArray(storedUsers) ? storedUsers : [];
+  } catch (error) {
+    console.warn("Không thể đọc dữ liệu tài khoản đã lưu:", error);
+  }
+
   let hasChanges = false;
 
   sourceList.forEach(seedUser => {
@@ -90,34 +96,10 @@ async function loadAndSeedUsers() {
   }
 }
 
-// Xử lý gửi API đăng ký (nếu có backend)
-async function registerUser(name, email, password) {
-  if (!AUTH_API_BASE_URL) return null;
-  let response;
-  try {
-    response = await fetch(`${AUTH_API_BASE_URL}/api/auth/register`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "Accept": "application/json" },
-      body: JSON.stringify({ name, email, password })
-    });
-  } catch {
-    throw new Error("Không thể kết nối đến máy chủ. Vui lòng thử lại sau.");
-  }
-  let result = {};
-  try { result = await response.json(); } catch { /* Ignore */ }
-  if (!response.ok) {
-    if (response.status === 409 || result.code === "EMAIL_ALREADY_EXISTS") throw new Error("Email này đã được sử dụng.");
-    if (response.status >= 500) throw new Error("Máy chủ đang gặp sự cố. Vui lòng thử lại sau.");
-    if (response.status === 400 || response.status === 422) throw new Error("Thông tin đăng ký chưa hợp lệ. Vui lòng kiểm tra lại các trường.");
-    throw new Error("Không thể tạo tài khoản lúc này. Vui lòng thử lại.");
-  }
-  return result;
-}
-
 // Khởi tạo các trang Login và Register
 function initializeAuthPage() {
   // Đảm bảo dữ liệu tài khoản đã được nạp
-  loadAndSeedUsers();
+  const usersReady = loadAndSeedUsers();
 
   /* ================= TRANG ĐĂNG NHẬP (login.html) ================= */
   const loginForm = document.getElementById("loginForm");
@@ -184,6 +166,8 @@ function initializeAuthPage() {
       submitButton.setAttribute("aria-busy", "true");
       submitButton.querySelector(".button-label").textContent = "Đang kiểm tra...";
 
+      await usersReady;
+
       const identifier = emailInput.value.trim().toLowerCase();
       const rawPassword = passwordInput.value;
       const hashedInput = await hashPassword(rawPassword);
@@ -226,7 +210,19 @@ function initializeAuthPage() {
 
         setTimeout(() => {
           const redirectParam = new URLSearchParams(window.location.search).get("redirect");
-          const targetUrl = redirectParam ? decodeURIComponent(redirectParam) : "index.html";
+          let targetUrl = "index.html";
+
+          if (redirectParam) {
+            try {
+              const redirectUrl = new URL(redirectParam, window.location.href);
+              if (redirectUrl.origin === window.location.origin) {
+                targetUrl = redirectUrl.href;
+              }
+            } catch {
+              // Giữ trang mặc định nếu URL chuyển hướng không hợp lệ.
+            }
+          }
+
           window.location.assign(targetUrl);
         }, 500);
       } else {
@@ -238,24 +234,6 @@ function initializeAuthPage() {
         submitButton.querySelector(".button-label").textContent = "Đăng nhập";
       }
     });
-
-    const googleBtn = document.getElementById("googleLogin");
-    if (googleBtn) {
-      googleBtn.addEventListener("click", () => {
-        message.className = "form-message";
-        message.style.color = "#1268c9";
-        message.textContent = "Gợi ý: Bạn có thể đăng nhập thử bằng user1@gmail.com (Mật khẩu: User1@2026 hoặc user1@).";
-      });
-    }
-
-    const forgotBtn = document.getElementById("forgotPassword");
-    if (forgotBtn) {
-      forgotBtn.addEventListener("click", () => {
-        message.className = "form-message";
-        message.style.color = "#555";
-        message.textContent = "Mật khẩu thử nghiệm là User1@2026 (hoặc user1@) tương ứng cho tài khoản user1 đến user20.";
-      });
-    }
 
     const notice = sessionStorage.getItem("confGuideRegistrationNotice");
     if (notice) {
@@ -365,6 +343,8 @@ function initializeAuthPage() {
       submitButton.querySelector(".button-label").textContent = "Đang tạo tài khoản...";
 
       try {
+        await usersReady;
+
         const emailTrimmed = emailField.value.trim().toLowerCase();
         const users = JSON.parse(localStorage.getItem(USERS_STORAGE_KEY) || "[]");
 
@@ -373,27 +353,22 @@ function initializeAuthPage() {
           throw new Error("Email này đã được sử dụng. Vui lòng chọn email khác.");
         }
 
-        if (AUTH_API_BASE_URL) {
-          await registerUser(nameField.value.trim(), emailTrimmed, passwordField.value);
-        } else {
-          // Lưu vào database người dùng cục bộ
-          const hashed = await hashPassword(passwordField.value);
-          const rawUsername = emailTrimmed.split("@")[0].replace(/[^a-zA-Z0-9_]/g, "");
-          const newUser = {
-            id: `usr_${Date.now()}`,
-            username: rawUsername || `user_${users.length + 1}`,
-            email: emailField.value.trim(),
-            name: nameField.value.trim(),
-            role: "user",
-            passwordHash: hashed,
-            createdAt: new Date().toISOString()
-          };
-          users.push(newUser);
-          localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(users));
-        }
+        const hashed = await hashPassword(passwordField.value);
+        const rawUsername = emailTrimmed.split("@")[0].replace(/[^a-zA-Z0-9_]/g, "");
+        const newUser = {
+          id: `usr_${Date.now()}`,
+          username: rawUsername || `user_${users.length + 1}`,
+          email: emailField.value.trim(),
+          name: nameField.value.trim(),
+          role: "user",
+          passwordHash: hashed,
+          createdAt: new Date().toISOString()
+        };
+        users.push(newUser);
+        localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(users));
 
         sessionStorage.setItem("confGuideRegistrationNotice", "Tài khoản đã được tạo thành công! Bạn có thể đăng nhập ngay bây giờ.");
-        await navigateAuthPage("login.html");
+        window.location.assign("login.html");
       } catch (error) {
         message.className = "form-message";
         message.style.color = "#d93838";
@@ -409,71 +384,4 @@ function initializeAuthPage() {
   }
 }
 
-// Chuyển đổi mềm giữa login và register
-async function navigateAuthPage(target, { replace = false } = {}) {
-  const url = new URL(target, window.location.href);
-  if (url.origin !== window.location.origin || !/\/(?:login|register)\.html$/.test(url.pathname)) return;
-  const activeLink = document.querySelector(".auth-nav-link.active");
-  const activePath = activeLink ? new URL(activeLink.href, window.location.href).pathname : "";
-  if (url.pathname === activePath && !url.search && !url.hash) return;
-  const response = await fetch(url.href);
-  if (!response.ok) throw new Error("Không tải được trang tài khoản.");
-  const html = await response.text();
-  const nextDocument = new DOMParser().parseFromString(html, "text/html");
-  const nextCard = nextDocument.querySelector("main.auth-main .login-card");
-  const currentCard = document.querySelector("main.auth-main .login-card");
-  if (!nextCard || !currentCard) throw new Error("Không tìm thấy khung tài khoản.");
-
-  currentCard.replaceWith(document.importNode(nextCard, true));
-  document.title = nextDocument.title;
-  document.querySelectorAll(".auth-nav-link").forEach(link => {
-    const active = new URL(link.href, window.location.href).pathname === url.pathname;
-    link.classList.toggle("active", active);
-    if (active) link.setAttribute("aria-current", "page");
-    else link.removeAttribute("aria-current");
-  });
-  if (replace) history.replaceState({ authPage: true }, "", url.href);
-  else history.pushState({ authPage: true }, "", url.href);
-  initializeAuthPage();
-}
-
 initializeAuthPage();
-
-document.addEventListener("click", event => {
-  const link = event.target.closest("a[href]");
-  if (!link || !link.matches(".auth-nav-link, .register-prompt a")) return;
-  const url = new URL(link.href, window.location.href);
-  if (!/\/(?:login|register)\.html$/.test(url.pathname)) return;
-  event.preventDefault();
-  navigateAuthPage(url.href).catch(() => {
-    const message = document.querySelector("#formMessage, #registerMessage");
-    if (message) message.textContent = "Không thể chuyển trang lúc này. Hãy mở ConfGuide qua Live Server rồi thử lại.";
-  });
-});
-
-window.addEventListener("popstate", () => {
-  if (/\/(?:login|register)\.html$/.test(window.location.pathname)) {
-    navigateAuthPage(window.location.href, { replace: true }).catch(() => {
-      const activeLink = document.querySelector(".auth-nav-link.active");
-      if (activeLink) history.replaceState({ authPage: true }, "", activeLink.href);
-      const message = document.querySelector("#formMessage, #registerMessage");
-      if (message) message.textContent = "Không thể chuyển trang lúc này. Hãy mở ConfGuide qua Live Server rồi thử lại.";
-    });
-  }
-});
-
-// Đồng bộ Dark mode
-const themeToggle = document.getElementById("themeToggle");
-if (themeToggle) {
-  function syncThemeButton() { themeToggle.setAttribute("aria-pressed", String(document.body.classList.contains("dark"))); }
-  if (localStorage.getItem("darkMode") === "true" || localStorage.getItem("confguide_theme") === "dark") {
-    document.body.classList.add("dark");
-  }
-  syncThemeButton();
-  themeToggle.addEventListener("click", () => {
-    const isDark = document.body.classList.toggle("dark");
-    localStorage.setItem("darkMode", String(isDark));
-    localStorage.setItem("confguide_theme", isDark ? "dark" : "light");
-    syncThemeButton();
-  });
-}
