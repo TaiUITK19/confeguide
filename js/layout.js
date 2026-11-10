@@ -54,7 +54,7 @@
 
   // 4. Auth Guard cho các trang cần đăng nhập
   function checkAuthGuard(currentPage) {
-    const protectedPages = ['profile.html', 'logs.html'];
+    const protectedPages = ['profile.html'];
     if (protectedPages.includes(currentPage)) {
       const user = getCurrentUser();
       if (!user) {
@@ -359,7 +359,7 @@
 
     // Xác định active menu
     const isHome = currentPage === 'index.html' || currentPage === '';
-    const isSearch = currentPage === 'search.html' || currentPage === 'detail.html' || currentPage === 'chitiet.html';
+    const isSearch = currentPage === 'search.html' || currentPage === 'detail.html';
     const isTracker = currentPage === 'tracker.html' || currentPage === 'logs.html';
     const isAbout = currentPage === 'about.html';
     const isProfile = currentPage === 'profile.html';
@@ -1000,7 +1000,21 @@
     initFooterFeedback();
   }
 
-  // 10. Khởi chạy khi DOM sẵn sàng (Ưu tiên render đồng bộ ngay lập tức để chống giật)
+  // 10. Khởi tạo biểu mẫu Liên hệ (nếu có trên trang contact.html)
+  function initContactForm() {
+    const form = document.getElementById('contactForm');
+    const msg = document.getElementById('formMsg');
+    if (form && msg && !form.dataset.initialized) {
+      form.dataset.initialized = 'true';
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        msg.textContent = 'Cảm ơn bạn! Thông điệp của bạn đã được gửi thành công đến nhóm ConfGuide.';
+        form.reset();
+      });
+    }
+  }
+
+  // 11. Khởi chạy khi DOM sẵn sàng (Ưu tiên render đồng bộ ngay lập tức để chống giật)
   let layoutInitialized = false;
   function initLayout() {
     if (layoutInitialized) return;
@@ -1009,6 +1023,7 @@
     initTheme();
     renderHeader(page);
     renderFooter(page);
+    initContactForm();
     layoutInitialized = true;
   }
 

@@ -234,6 +234,74 @@
     } catch (e) {}
   }
 
+  // Fallback utility an toàn khi chạy độc lập không có utils.js
+  const DEFAULT_UTILS = {
+    daysLeft: function (d) {
+      if (!d) return null;
+      const target = new Date(String(d).split('T')[0] + 'T23:59:59');
+      const now = new Date();
+      now.setHours(0, 0, 0, 0);
+      return Math.ceil((target.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    },
+    getNextDeadline: function (conf) {
+      if (!conf || !conf.deadlines) return null;
+      const dls = conf.deadlines;
+      const candidates = [];
+      const defs = [
+        { key: 'abstract', name: 'Tóm tắt (Abstract)', shortName: 'Nộp Abstract' },
+        { key: 'fullPaper', name: 'Bài hoàn chỉnh (Full paper)', shortName: 'Nộp Full Paper' },
+        { key: 'notification', name: 'Thông báo kết quả (Notification)', shortName: 'Thông báo' },
+        { key: 'cameraReady', name: 'Bản in hoàn thiện (Camera-ready)', shortName: 'Camera-Ready' }
+      ];
+      if (Array.isArray(dls)) {
+        dls.forEach(d => {
+          const left = d.date ? DEFAULT_UTILS.daysLeft(d.date) : null;
+          candidates.push({ key: d.name, name: d.name, shortName: d.name, date: d.date, daysLeft: left, isPassed: left !== null && left < 0 });
+        });
+      } else if (typeof dls === 'object') {
+        defs.forEach(m => {
+          const dVal = dls[m.key];
+          if (dVal) {
+            const left = DEFAULT_UTILS.daysLeft(dVal);
+            candidates.push({ key: m.key, name: m.name, shortName: m.shortName, date: dVal, daysLeft: left, isPassed: left !== null && left < 0 });
+          }
+        });
+      }
+      if (candidates.length === 0) return null;
+      candidates.sort((a, b) => String(a.date).localeCompare(String(b.date)));
+      return candidates.find(c => !c.isPassed) || candidates[candidates.length - 1];
+    },
+    getStatus: function (conf) {
+      return { code: 'open', label: 'Đang mở nộp bài', badgeClass: 'status-open' };
+    },
+    formatDateVi: function (d) {
+      if (!d) return 'Chưa công bố';
+      const clean = String(d).split('T')[0];
+      const parts = clean.split('-');
+      return parts.length === 3 ? `${parts[2]}/${parts[1]}/${parts[0]}` : d;
+    },
+    formatRangeVi: function (s, e) {
+      return s ? (e && s !== e ? `${DEFAULT_UTILS.formatDateVi(s)} – ${DEFAULT_UTILS.formatDateVi(e)}` : DEFAULT_UTILS.formatDateVi(s)) : '2026';
+    },
+    getAoETimeRemaining: function (d) {
+      const left = DEFAULT_UTILS.daysLeft(d);
+      return { days: Math.max(0, left || 0), hours: 0, minutes: 0, seconds: 0, isPassed: (left !== null && left < 0) };
+    },
+    getGoogleCalendarUrl: function () { return '#'; },
+    createIcsContent: function () { return ''; },
+    downloadIcsFile: function () {},
+    MILESTONE_DEFINITIONS: [
+      { key: 'abstract', name: 'Tóm tắt (Abstract)', shortName: 'Nộp Abstract' },
+      { key: 'fullPaper', name: 'Bài hoàn chỉnh (Full paper)', shortName: 'Nộp Full Paper' },
+      { key: 'notification', name: 'Thông báo kết quả (Notification)', shortName: 'Thông báo' },
+      { key: 'cameraReady', name: 'Bản in hoàn thiện (Camera-ready)', shortName: 'Camera-Ready' }
+    ]
+  };
+
+  function getDetailUtils() {
+    return window.ConfGuideUtils || DEFAULT_UTILS;
+  }
+
   // Tải dữ liệu hội nghị theo tham số ID
   async function loadConferenceDetail() {
     const urlParams = new URLSearchParams(window.location.search);
@@ -274,23 +342,7 @@
   function populateData(conf) {
     if (!conf) return;
 
-    const utils = window.ConfGuideUtils || {
-      daysLeft: () => null,
-      getNextDeadline: () => null,
-      getStatus: () => ({ label: 'Đang mở nộp bài', badgeClass: 'status-open' }),
-      formatDateVi: (d) => d || '',
-      formatRangeVi: (s, e) => s ? `${s} – ${e}` : '',
-      getAoETimeRemaining: () => ({ days: 0, hours: 0, minutes: 0, seconds: 0, isPassed: true }),
-      getGoogleCalendarUrl: () => '#',
-      createIcsContent: () => '',
-      downloadIcsFile: () => {},
-      MILESTONE_DEFINITIONS: [
-        { key: 'abstract', name: 'Tóm tắt (Abstract)', shortName: 'Nộp Abstract' },
-        { key: 'fullPaper', name: 'Bài hoàn chỉnh (Full paper)', shortName: 'Nộp Full Paper' },
-        { key: 'notification', name: 'Thông báo kết quả (Notification)', shortName: 'Thông báo' },
-        { key: 'cameraReady', name: 'Bản in hoàn thiện (Camera-ready)', shortName: 'Camera-Ready' }
-      ]
-    };
+    const utils = getDetailUtils();
 
     document.title = `${conf.name} - ConfGuide`;
 
@@ -505,7 +557,7 @@
     const track = document.getElementById('timelineTrack');
     if (!track || !conf) return;
 
-    const utils = window.ConfGuideUtils;
+    const utils = getDetailUtils();
     const deadlines = conf.deadlines || {};
     const next = utils.getNextDeadline(conf);
 
@@ -649,7 +701,7 @@
     if (!btn || !conf) return;
 
     btn.onclick = function () {
-      const utils = window.ConfGuideUtils;
+      const utils = getDetailUtils();
       if (!utils || !utils.createIcsContent || !utils.downloadIcsFile) return;
 
       const deadlines = conf.deadlines || {};
@@ -721,7 +773,7 @@
     const grid = document.getElementById('relGrid');
     if (!grid) return;
 
-    const utils = window.ConfGuideUtils;
+    const utils = getDetailUtils();
     const curFields = Array.isArray(current.fields) ? current.fields : [];
 
     let relatedList = allConferences.filter(c => c.id !== current.id);
