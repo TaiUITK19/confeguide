@@ -1426,4 +1426,134 @@ body.dark .modal-alert.error {
   display: none !important;
 }
 
+/* ================= 11. KHỐI BỐ CỤC DÙNG CHUNG (COMMON LAYOUT) ================= */
+.card-surface {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  transition: transform 200ms cubic-bezier(0.4, 0, 0.2, 1),
+              border-color 200ms cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-surface:hover,
+.card-surface:focus-within {
+  border-color: var(--primary);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.section-pad {
+  padding: 64px 0;
+}
+
+.section-head {
+  text-align: center;
+  max-width: 680px;
+  margin: 0 auto 48px;
+}
+
+.section-head .eyebrow {
+  display: inline-block;
+  color: var(--primary);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.section-head h2 {
+  font-size: 32px;
+  line-height: 1.25;
+  color: var(--text);
+  margin-bottom: 12px;
+  font-weight: 700;
+}
+
+.section-head p {
+  color: var(--text-muted);
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+/* ================= 12. TRANG ĐIỀU KHOẢN & CHÍNH SÁCH (POLICY PAGES) ================= */
+.policy-container {
+  max-width: 900px;
+}
+
+.policy-header {
+  text-align: left;
+  margin: 0 0 40px;
+  max-width: 100%;
+}
+
+.policy-header h1 {
+  font-size: 32px;
+  line-height: 1.25;
+  color: var(--text);
+  margin-bottom: 12px;
+  font-weight: 700;
+}
+
+.policy-card {
+  padding: 40px;
+  border-radius: var(--radius);
+  line-height: 1.8;
+  color: var(--text);
+}
+
+.policy-section {
+  margin-bottom: 32px;
+}
+
+.policy-section:last-child {
+  margin-bottom: 0;
+}
+
+.policy-section h2 {
+  font-size: 20px;
+  color: var(--navy);
+  margin-bottom: 12px;
+  font-weight: 700;
+}
+
+.policy-section p {
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+
+.policy-section p:last-child {
+  margin-bottom: 0;
+}
+
+.policy-list {
+  color: var(--text-muted);
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.policy-card a {
+  color: var(--primary);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.policy-card a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 640px) {
+  .policy-card {
+    padding: 24px 20px;
+  }
+  .policy-header h1 {
+    font-size: 26px;
+  }
+}
+
+
 
