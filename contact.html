@@ -6,12 +6,13 @@
   <meta name="description" content="Liên hệ và đóng góp dữ liệu hội nghị khoa học cho nền tảng ConfGuide.">
   <title>Liên hệ &amp; Đóng góp | ConfGuide</title>
   
+  <link rel="icon" type="image/svg+xml" href="images/logo.svg">
+  
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   
   <link rel="stylesheet" href="css/base.css">
-  <link rel="stylesheet" href="css/home.css">
 </head>
 <body>
   <script>try { if (localStorage.getItem('confguide_theme') === 'dark') document.body.classList.add('dark'); } catch (e) {}</script>
@@ -102,17 +103,5 @@
 
   <!-- Scripts -->
   <script src="js/layout.js"></script>
-  <script>
-    // Form submission feedback
-    const form = document.getElementById("contactForm");
-    const msg = document.getElementById("formMsg");
-    if (form && msg) {
-      form.addEventListener("submit", (e) => {
-        e.preventDefault();
-        msg.textContent = "Cảm ơn bạn! Thông điệp của bạn đã được gửi thành công đến nhóm ConfGuide.";
-        form.reset();
-      });
-    }
-  </script>
 </body>
 </html>
