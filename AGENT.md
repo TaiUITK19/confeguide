@@ -19,8 +19,8 @@ Tài liệu hướng dẫn kỹ thuật dành cho AI Agents và Lập trình vi�
 ### 2.1. Các Trang HTML (HTML Pages - 11 trang)
 | File | Mục đích | Script & Style đi kèm |
 |---|---|---|
-| [`index.html`](file:///d:/IE104/doangithub/confeguide/index.html) | Trang chủ & Cổng điều hướng tìm kiếm (Search Gateway, 6 hội nghị tiêu biểu) | `css/base.css`, `css/home.css`, `js/layout.js`, `js/script.js` |
-| [`search.html`](file:///d:/IE104/doangithub/confeguide/search.html) | Tra cứu nâng cao: bộ lọc accordion đa chiều, đồng bộ URL parameters, chip tags | `css/base.css`, `css/search.css`, `js/layout.js`, `js/app.js` |
+| [`index.html`](file:///d:/IE104/doangithub/confeguide/index.html) | Trang chủ & Cổng điều hướng tìm kiếm (Search Gateway tập trung thị trường Việt Nam, 6 hội nghị tiêu biểu) | `css/base.css`, `css/home.css`, `js/layout.js`, `js/script.js` |
+| [`search.html`](file:///d:/IE104/doangithub/confeguide/search.html) | Tra cứu nâng cao: bộ lọc accordion đa chiều (Rank CORE, Hình thức, Lĩnh vực, NXB, Trạng thái, Deadline), đồng bộ URL parameters, chip tags | `css/base.css`, `css/search.css`, `js/layout.js`, `js/app.js` |
 | [`detail.html`](file:///d:/IE104/doangithub/confeguide/detail.html) | Chi tiết hội nghị theo `?id=<slug>`, timeline mốc hạn AoE, đánh giá cộng đồng | `css/base.css`, `css/detail.css`, `js/layout.js`, `js/detail.js` |
 | [`tracker.html`](file:///d:/IE104/doangithub/confeguide/tracker.html) | Theo dõi nộp bài: quản lý danh sách hội nghị đã lưu trong trình duyệt | `css/base.css`, `css/tracker.css`, `js/layout.js`, `js/tracker.js` |
 | [`profile.html`](file:///d:/IE104/doangithub/confeguide/profile.html) | Hồ sơ cá nhân: thông tin nghiên cứu, modal chỉnh sửa, avatar | `css/base.css`, `css/profile.css`, `js/layout.js`, `js/profile.js` |
@@ -47,8 +47,8 @@ Tài liệu hướng dẫn kỹ thuật dành cho AI Agents và Lập trình vi�
 | File | Mục đích |
 |---|---|
 | [`js/layout.js`](file:///d:/IE104/doangithub/confeguide/js/layout.js) | **[DÙNG CHUNG]** Render Header & Footer động vào `<div id="site-header"></div>` và `<div id="site-footer"></div>`. Đồng bộ `confguide_theme` (sáng/tối), quản lý session đăng nhập, auth guard, xử lý form liên hệ `#contactForm`. |
-| [`js/script.js`](file:///d:/IE104/doangithub/confeguide/js/script.js) | **[MODULE]** Logic trang chủ: gateway redirect sang `search.html?q=...`, hiển thị tối đa 6 cards hội nghị sắp tới. |
-| [`js/app.js`](file:///d:/IE104/doangithub/confeguide/js/app.js) | **[MODULE]** Logic tra cứu: accordion filters, đồng bộ 2 chiều URL parameters (`history.replaceState`), active filter chips, bookmark user-scoped. |
+| [`js/script.js`](file:///d:/IE104/doangithub/confeguide/js/script.js) | **[MODULE]** Logic trang chủ: gateway redirect sang `search.html?q=...`, hiển thị tối đa 6 cards hội nghị tiêu biểu. |
+| [`js/app.js`](file:///d:/IE104/doangithub/confeguide/js/app.js) | **[MODULE]** Logic tra cứu: accordion filters (tập trung thị trường Việt Nam, bỏ lọc khu vực), đồng bộ 2 chiều URL parameters (`history.replaceState`), active filter chips, bookmark user-scoped. |
 | [`js/detail.js`](file:///d:/IE104/doangithub/confeguide/js/detail.js) | **[MODULE]** Logic chi tiết hội nghị: đọc `?id=<slug>`, hiển thị dữ liệu động, rating, nút bookmark, timeline 4 mốc với fallback an toàn. |
 | [`js/tracker.js`](file:///d:/IE104/doangithub/confeguide/js/tracker.js) | **[MODULE]** Logic CRUD theo dõi nộp bài qua LocalStorage theo user. |
 | [`js/profile.js`](file:///d:/IE104/doangithub/confeguide/js/profile.js) | **[MODULE]** Logic hồ sơ cá nhân: chỉnh sửa thông tin, cập nhật avatar, đồng bộ LocalStorage. |

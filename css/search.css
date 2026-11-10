@@ -89,37 +89,6 @@
   background: var(--primary-dark);
 }
 
-.examples {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 14px;
-  font-size: 13.5px;
-  color: var(--text-muted);
-}
-
-.examples strong {
-  color: var(--text);
-}
-
-.keyword {
-  border: 1px solid var(--border);
-  background: var(--surface);
-  color: var(--text-muted);
-  border-radius: var(--radius-pill);
-  padding: 4px 12px;
-  font-size: 12.5px;
-  transition: all 150ms ease;
-}
-
-.keyword:hover {
-  border-color: var(--primary);
-  color: var(--primary);
-  background: var(--primary-soft);
-}
-
 /* ================= RESULTS & SIDEBAR LAYOUT ================= */
 .results-section {
   padding: 36px 0 64px;

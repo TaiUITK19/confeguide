@@ -231,7 +231,6 @@
     return {
       q: params.get('q') || '',
       rank: params.getAll('rank'),
-      region: params.getAll('region'),
       mode: params.getAll('mode'),
       fields: params.getAll('fields'),
       publisher: params.getAll('publisher'),
@@ -262,13 +261,13 @@
 
     // Checkbox groups
     const setCheckboxes = (name, values) => {
+      if (!Array.isArray(values)) return;
       document.querySelectorAll(`input[name="${name}"]`).forEach(cb => {
         cb.checked = values.includes(cb.value);
       });
     };
 
     setCheckboxes('rank', params.rank);
-    setCheckboxes('region', params.region);
     setCheckboxes('mode', params.mode);
     setCheckboxes('fields', params.fields);
     setCheckboxes('publisher', params.publisher);
@@ -282,7 +281,6 @@
     return {
       q: (document.getElementById('searchInput')?.value || '').trim(),
       rank: getChecked('rank'),
-      region: getChecked('region'),
       mode: getChecked('mode'),
       fields: getChecked('fields'),
       publisher: getChecked('publisher'),
@@ -300,7 +298,6 @@
     return Boolean(
       (filters.q && filters.q.trim().length > 0) ||
       (Array.isArray(filters.rank) && filters.rank.length > 0) ||
-      (Array.isArray(filters.region) && filters.region.length > 0) ||
       (Array.isArray(filters.mode) && filters.mode.length > 0) ||
       (Array.isArray(filters.fields) && filters.fields.length > 0) ||
       (Array.isArray(filters.publisher) && filters.publisher.length > 0) ||
@@ -316,7 +313,6 @@
     const params = new URLSearchParams();
     if (filters.q) params.set('q', filters.q);
     filters.rank.forEach(v => params.append('rank', v));
-    filters.region.forEach(v => params.append('region', v));
     filters.mode.forEach(v => params.append('mode', v));
     filters.fields.forEach(v => params.append('fields', v));
     filters.publisher.forEach(v => params.append('publisher', v));
@@ -385,18 +381,7 @@
         if (!matchedRank) return false;
       }
 
-      // 3. Region
-      if (filters.region.length > 0) {
-        const loc = (conf.location || '').toLowerCase();
-        const isVN = loc.includes('việt nam') || loc.includes('vietnam');
-        const wantsVN = filters.region.includes('vietnam');
-        const wantsIntl = filters.region.includes('international');
-
-        if (wantsVN && !wantsIntl && !isVN) return false;
-        if (wantsIntl && !wantsVN && isVN) return false;
-      }
-
-      // 4. Mode / Hình thức
+      // 3. Mode / Hình thức
       if (filters.mode.length > 0) {
         const confMode = (conf.mode || 'Trực tiếp').toLowerCase();
         const matchMode = filters.mode.some(m => confMode.includes(m.toLowerCase()));
@@ -489,9 +474,6 @@
     }
     filters.rank.forEach(val => {
       chips.push({ label: `Rank: ${val}`, clear: () => uncheck('rank', val) });
-    });
-    filters.region.forEach(val => {
-      chips.push({ label: `Khu vực: ${val === 'vietnam' ? 'Việt Nam' : 'Quốc tế'}`, clear: () => uncheck('region', val) });
     });
     filters.mode.forEach(val => {
       chips.push({ label: `Hình thức: ${val}`, clear: () => uncheck('mode', val) });
@@ -905,16 +887,6 @@
         applyFiltering();
       });
     }
-
-    // Từ khóa gợi ý
-    document.querySelectorAll('.keyword').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const keyword = btn.dataset.keyword;
-        const searchInput = document.getElementById('searchInput');
-        if (searchInput) searchInput.value = keyword;
-        applyFiltering();
-      });
-    });
 
     // Nút áp dụng bộ lọc
     const applyBtn = document.getElementById('applyFiltersBtn');

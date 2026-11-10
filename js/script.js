@@ -126,7 +126,6 @@
   ];
 
   let allConferences = [];
-  let currentTab = 'all';
 
   // 1. Khởi tạo điều hướng tìm kiếm
   function initSearchGateway() {
@@ -140,17 +139,6 @@
         window.location.href = query ? `search.html?q=${encodeURIComponent(query)}` : 'search.html';
       });
     }
-
-    // Gợi ý từ khóa
-    const chips = document.querySelectorAll('.chip-keyword');
-    chips.forEach(chip => {
-      chip.addEventListener('click', function () {
-        const keyword = this.getAttribute('data-keyword');
-        if (keyword) {
-          window.location.href = `search.html?q=${encodeURIComponent(keyword)}`;
-        }
-      });
-    });
   }
 
   // 2. Tải dữ liệu hội nghị
@@ -211,16 +199,8 @@
       `;
     }
 
-    // Lọc hội nghị tương lai / sắp diễn ra (ẩn hội nghị đã kết thúc từ năm trước trừ khi cần)
-    let filtered = allConferences.filter(c => {
-      // Xác định khu vực theo tab
-      const isVN = (c.location || '').toLowerCase().includes('việt nam') || (c.location || '').toLowerCase().includes('vietnam');
-      if (currentTab === 'Việt Nam' && !isVN) return false;
-      if (currentTab === 'Quốc tế' && isVN) return false;
-
-      // Ưu tiên các hội nghị chưa diễn ra
-      return true;
-    });
+    // Hiển thị tất cả hội nghị tiêu biểu, ưu tiên năm mới nhất và rank cao
+    let filtered = allConferences.slice();
 
     // Sắp xếp ưu tiên hội nghị 2026 và rank cao
     filtered.sort((a, b) => {
@@ -299,23 +279,9 @@
     }).join('');
   }
 
-  // 5. Gắn sự kiện chuyển tab
-  function initTabs() {
-    const tabButtons = document.querySelectorAll('.filter-tabs .tab-btn');
-    tabButtons.forEach(btn => {
-      btn.addEventListener('click', function () {
-        tabButtons.forEach(b => b.classList.remove('active'));
-        this.classList.add('active');
-        currentTab = this.getAttribute('data-filter') || 'all';
-        renderFeaturedConferences();
-      });
-    });
-  }
-
   // Khởi chạy khi DOM sẵn sàng
   document.addEventListener('DOMContentLoaded', function () {
     initSearchGateway();
-    initTabs();
     loadData();
   });
 })();
