@@ -25,7 +25,7 @@ Các trang được liệt kê theo cấu trúc mã nguồn; chức năng cụ t
 | --- | --- | --- |
 | Trang chủ | `index.html` | Giới thiệu và truy cập các nội dung chính |
 | Tìm kiếm | `search.html` | Tra cứu thông tin hội nghị |
-| Chi tiết hội nghị | `detail.html`, `chitiet.html` | Hiển thị thông tin chi tiết hội nghị |
+| Chi tiết hội nghị | `detail.html` | Hiển thị thông tin chi tiết hội nghị |
 | Theo dõi hội nghị | `tracker.html` | Theo dõi các hội nghị quan tâm |
 | Đăng nhập | `login.html` | Giao diện đăng nhập |
 | Đăng ký | `register.html` | Giao diện đăng ký tài khoản |
@@ -66,26 +66,19 @@ confeguide/
 │   ├── main.py
 │   └── users.json
 ├── images/
-│   ├── acl.svg
-│   ├── cvpr.svg
-│   ├── hero-bg.svg
-│   ├── iclr.svg
-│   ├── kdd.svg
-│   ├── logo.svg
-│   ├── neurips.svg
-│   └── security.svg
+│   └── logo.svg
 ├── js/
 │   ├── about.js
 │   ├── app.js
 │   ├── auth.js
 │   ├── detail.js
 │   ├── layout.js
+│   ├── profile.js
 │   ├── script.js
 │   └── tracker.js
 ├── .gitignore
 ├── about.html
 ├── AGENT.md
-├── chitiet.html
 ├── contact.html
 ├── detail.html
 ├── index.html
