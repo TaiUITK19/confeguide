@@ -5,28 +5,25 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="ConfGuide — Nền tảng tra cứu, đánh giá uy tín và gợi ý hội nghị khoa học hàng đầu theo chủ đề nghiên cứu.">
   <title>ConfGuide — Tra cứu & Khuyến nghị Hội nghị Khoa học</title>
-  
+
   <link rel="icon" type="image/svg+xml" href="images/logo.svg">
-  
-  <!-- Font Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  
-  <!-- Shared base styles + Home styles -->
   <link rel="stylesheet" href="css/base.css">
   <link rel="stylesheet" href="css/home.css">
 </head>
 <body>
-  <script>try { if (localStorage.getItem('confguide_theme') === 'dark') document.body.classList.add('dark'); } catch (e) {}</script>
-
-  <!-- Shared Header Container -->
+  <script>
+    try {
+      if (localStorage.getItem('confguide_theme') === 'dark') {
+        document.body.classList.add('dark');
+      }
+    } catch (e) {}
+  </script>
   <div id="site-header"></div>
-
-  <!-- Main Content -->
   <main id="mainContent">
-
-    <!-- 1. HERO SECTION -->
+    <!-- Giới thiệu -->
     <section class="hero-section" id="home">
       <div class="container hero-inner">
         <div class="hero-content">
@@ -34,15 +31,14 @@
             <span aria-hidden="true"></span>
             Nền tảng hỗ trợ công bố khoa học hàng đầu
           </div>
-          
+
           <h1>Khám phá &amp; Chọn đúng Hội nghị Khoa học <span>Cho Công trình Của Bạn</span></h1>
-          
+
           <p class="hero-desc">
             Tra cứu nhanh chóng, đánh giá uy tín và theo dõi thời hạn nộp bài (Call for Papers) chuẩn xác từ các hội nghị quốc tế và trong nước. Đưa kết quả nghiên cứu của bạn đến đúng cộng đồng học thuật toàn cầu.
           </p>
 
           <div class="hero-actions">
-            <!-- CTA Chính duy nhất -->
             <a class="btn btn-primary" href="search.html">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <circle cx="11" cy="11" r="8"/>
@@ -51,8 +47,6 @@
               Khám phá hội nghị ngay
             </a>
           </div>
-
-          <!-- Quick Search Bar (Redirects to search.html?q=...) -->
           <div class="hero-search-wrap">
             <form class="search-box" id="searchForm" role="search">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -62,8 +56,6 @@
               <input id="searchInput" type="search" autocomplete="off" aria-label="Tìm kiếm hội nghị">
               <button class="btn-primary" type="submit">Tìm kiếm</button>
             </form>
-
-            <!-- Suggestion keyword chips -->
             <div class="hero-suggestions">
               <span>Gợi ý chủ đề:</span>
               <button type="button" class="chip-keyword" data-keyword="computer vision">Computer Vision</button>
@@ -73,8 +65,6 @@
             </div>
           </div>
         </div>
-
-        <!-- Hero Quote Card -->
         <aside class="hero-card card-surface" aria-label="Danh ngôn học thuật">
           <div class="quote-icon" aria-hidden="true">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
@@ -89,7 +79,7 @@
       </div>
     </section>
 
-    <!-- 2. CONFERENCE LIST SECTION (Gateway - Max 6 upcoming cards) -->
+    <!-- Danh sách hội nghị -->
     <section class="section-pad conference-section" id="conferences">
       <div class="container">
         <div class="section-head">
@@ -97,11 +87,7 @@
           <h2>Hội nghị khoa học sắp diễn ra</h2>
           <p>Khám phá các kỳ hội nghị quốc tế và trong nước sắp mở đợt nộp bài hoặc đang chuẩn bị diễn ra.</p>
         </div>
-
-        <!-- Conference Cards Grid (Max 6 upcoming) -->
         <div class="conference-grid" id="conferenceGrid"></div>
-
-        <!-- Empty search state -->
         <div class="empty-box card-surface" id="emptyState" hidden>
           <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <circle cx="11" cy="11" r="8"/>
@@ -111,8 +97,6 @@
           <h3>Không tìm thấy hội nghị phù hợp</h3>
           <p>Vui lòng thử chuyển sang tab "Tất cả" hoặc truy cập trang Tra cứu.</p>
         </div>
-
-        <!-- Xem tất cả Button -->
         <div style="text-align: center; margin-top: 40px;">
           <a href="search.html" class="btn btn-primary" id="btnViewAll" style="display: inline-flex; align-items: center; gap: 8px; padding: 12px 28px; font-size: 15px;">
             <span>Xem tất cả hội nghị trên hệ thống</span>
@@ -125,7 +109,7 @@
       </div>
     </section>
 
-    <!-- 3. FEATURES SECTION -->
+    <!-- Tính năng -->
     <section class="section-pad features-section" id="features">
       <div class="container">
         <div class="section-head">
@@ -135,7 +119,6 @@
         </div>
 
         <div class="features-grid">
-          <!-- Feature Card 1 -->
           <article class="feature-card card-surface">
             <div class="feature-icon-box" aria-hidden="true">
               <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
@@ -153,8 +136,6 @@
               </li>
             </ul>
           </article>
-
-          <!-- Feature Card 2 -->
           <article class="feature-card card-surface">
             <div class="feature-icon-box" aria-hidden="true">
               <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
@@ -175,8 +156,6 @@
               </li>
             </ul>
           </article>
-
-          <!-- Feature Card 3 -->
           <article class="feature-card card-surface">
             <div class="feature-icon-box" aria-hidden="true">
               <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
@@ -201,13 +180,8 @@
         </div>
       </div>
     </section>
-
   </main>
-
-  <!-- Shared Footer Container -->
   <div id="site-footer"></div>
-
-  <!-- Scripts -->
   <script src="js/layout.js"></script>
   <script src="js/script.js"></script>
 </body>

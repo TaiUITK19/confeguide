@@ -4,22 +4,25 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ConfGuide - Tra cứu hội nghị khoa học</title>
-  
   <link rel="icon" type="image/svg+xml" href="images/logo.svg">
-  
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  
   <link rel="stylesheet" href="css/base.css">
   <link rel="stylesheet" href="css/search.css">
 </head>
-
 <body>
-  <script>try { if (localStorage.getItem('confguide_theme') === 'dark') document.body.classList.add('dark'); } catch (e) {}</script>
+  <script>
+    try {
+      if (localStorage.getItem('confguide_theme') === 'dark') {
+        document.body.classList.add('dark');
+      }
+    } catch (e) {
+      // Bỏ qua nếu trình duyệt không cho phép truy cập localStorage.
+    }
+  </script>
   <!-- Shared Header -->
   <div id="site-header"></div>
-
   <main>
     <!-- Search Hero -->
     <section class="hero" id="searchHero">
@@ -27,7 +30,6 @@
       <div class="container hero-content">
         <h1>Tra cứu Hội nghị Khoa học Chuyên sâu</h1>
         <p>Tìm kiếm và lọc theo phân hạng CORE, lĩnh vực nghiên cứu, hạn nộp bài và chỉ mục quốc tế.</p>
-
         <form class="search-box" id="searchForm" role="search">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <circle cx="11" cy="11" r="8"/>
@@ -36,7 +38,6 @@
           <input id="searchInput" type="search" autocomplete="off" aria-label="Nhập từ khóa">
           <button type="submit">Tìm kiếm</button>
         </form>
-
         <div class="examples">
           <strong>Gợi ý nhanh:</strong>
           <button type="button" class="keyword" data-keyword="computer vision">Computer Vision</button>
@@ -47,12 +48,10 @@
         </div>
       </div>
     </section>
-
-    <!-- Main Results & Filter Section -->
+    <!-- Kết quả tìm kiếm và bộ lọc -->
     <section class="results-section">
       <div class="container results-layout">
-
-        <!-- Collapsible Filters Sidebar -->
+        <!-- Bộ lọc -->
         <aside class="filters" id="filtersSidebar">
           <div class="filter-header-bar">
             <div class="filter-title">
@@ -65,8 +64,7 @@
               Đặt lại
             </button>
           </div>
-
-          <!-- Filter Group 1: Xếp hạng (Rank) -->
+          <!-- Xếp hạng (Rank) -->
           <div class="filter-accordion open" data-group="rank">
             <button type="button" class="accordion-head" aria-expanded="true">
               <span>XẾP HẠNG (CORE RANK)</span>
@@ -79,8 +77,7 @@
               <label class="check-row"><input type="checkbox" name="rank" value="C"> <span>Rank C / Khác</span></label>
             </div>
           </div>
-
-          <!-- Filter Group 3: Hình thức tổ chức (Mode) -->
+          <!-- Hình thức tổ chức (Mode) -->
           <div class="filter-accordion open" data-group="mode">
             <button type="button" class="accordion-head" aria-expanded="true">
               <span>HÌNH THỨC THAM GIA</span>
@@ -92,8 +89,7 @@
               <label class="check-row"><input type="checkbox" name="mode" value="Hybrid"> <span>Kết hợp (Hybrid)</span></label>
             </div>
           </div>
-
-          <!-- Filter Group 4: Lĩnh vực nghiên cứu (Dynamic Fields) -->
+          <!-- Lĩnh vực nghiên cứu (Dynamic Fields) -->
           <div class="filter-accordion open" data-group="fields">
             <button type="button" class="accordion-head" aria-expanded="true">
               <span>LĨNH VỰC NGHIÊN CỨU</span>
@@ -103,8 +99,7 @@
               <!-- Rendered dynamically by js/app.js -->
             </div>
           </div>
-
-          <!-- Filter Group 5: Nhà xuất bản & Chỉ mục -->
+          <!-- Nhà xuất bản & Chỉ mục -->
           <div class="filter-accordion" data-group="publisher">
             <button type="button" class="accordion-head" aria-expanded="false">
               <span>NHÀ XUẤT BẢN &amp; CHỈ MỤC</span>
@@ -119,8 +114,7 @@
               <label class="check-row"><input type="checkbox" name="publisher" value="dblp"> <span>Chỉ mục DBLP</span></label>
             </div>
           </div>
-
-          <!-- Filter Group 6: Trạng thái nộp bài -->
+          <!-- Trạng thái nộp bài -->
           <div class="filter-accordion" data-group="status">
             <button type="button" class="accordion-head" aria-expanded="false">
               <span>TRẠNG THÁI NỘP BÀI</span>
@@ -132,8 +126,7 @@
               <label class="check-row"><input type="checkbox" name="status" value="closed"> <span>Đã đóng đợt nộp</span></label>
             </div>
           </div>
-
-          <!-- Filter Group 7: Khoảng thời gian Deadline -->
+          <!-- Khoảng thời gian Deadline -->
           <div class="filter-accordion" data-group="dates">
             <button type="button" class="accordion-head" aria-expanded="false">
               <span>HẠN NỘP BÀI (DEADLINE)</span>
@@ -152,8 +145,7 @@
               </div>
             </div>
           </div>
-
-          <!-- Filter Group 8: Tùy chọn hội nghị đã diễn ra -->
+          <!-- Tùy chọn hội nghị đã diễn ra -->
           <div class="filter-accordion open" data-group="past">
             <button type="button" class="accordion-head" aria-expanded="true">
               <span>TÙY CHỌN HIỂN THỊ</span>
@@ -166,7 +158,6 @@
               </label>
             </div>
           </div>
-
           <button class="apply-btn" id="applyFiltersBtn">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
               <polyline points="20 6 9 17 4 12"/>
@@ -174,8 +165,7 @@
             <span>Áp dụng bộ lọc</span>
           </button>
         </aside>
-
-        <!-- Results Main Area -->
+        <!-- Danh sách kết quả -->
         <section class="results">
           <!-- Active Filter Chips Area -->
           <div class="active-chips-bar" id="activeChipsBar" style="display: none;">
@@ -183,7 +173,6 @@
             <div class="chips-container" id="activeChipsContainer"></div>
             <button type="button" class="btn-clear-chips" id="btnClearAllChips">Xóa tất cả</button>
           </div>
-
           <!-- Header status + sorting -->
           <div class="results-head">
             <div>Tìm thấy <strong id="resultCount">0</strong> hội nghị phù hợp</div>
@@ -195,10 +184,8 @@
               <option value="name">Tên hội nghị A–Z</option>
             </select>
           </div>
-
           <!-- Conference Cards List -->
           <div id="conferenceList" class="conference-list"></div>
-
           <!-- Empty State (Chỉ hiện khi đã lọc và kết quả = 0) -->
           <div id="emptyState" class="empty-state hidden" hidden>
             <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
@@ -210,7 +197,6 @@
             <p>Hãy thử thay đổi từ khóa tìm kiếm hoặc bấm đặt lại bộ lọc để xem toàn bộ danh sách.</p>
             <button type="button" class="btn-reset-empty" id="btnResetFromEmpty">Đặt lại bộ lọc</button>
           </div>
-
           <!-- Error State (Chỉ hiện khi nạp dữ liệu thất bại) -->
           <div id="searchErrorState" class="empty-state search-error-state hidden" hidden>
             <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
@@ -222,21 +208,16 @@
             <p id="searchErrorMessage">Đã có lỗi xảy ra khi nạp dữ liệu. Vui lòng tải lại trang hoặc kiểm tra kết nối mạng.</p>
             <button type="button" class="btn-reset-empty" id="btnRetryLoad">Tải lại dữ liệu</button>
           </div>
-
           <nav id="pagination" class="search-pagination hidden" aria-label="Phân trang kết quả" hidden></nav>
         </section>
-
       </div>
     </section>
   </main>
-
   <!-- Shared Footer -->
   <div id="site-footer"></div>
-
   <!-- Toast notification -->
   <div class="toast" id="toast"></div>
-
-  <!-- Scripts -->
+  <!-- JavaScript -->
   <script src="js/layout.js"></script>
   <script src="js/app.js"></script>
 </body>

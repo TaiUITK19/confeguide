@@ -1,134 +1,8 @@
-/**
- * ConfGuide — Home Gateway Script (js/script.js)
- * Điều hướng tìm kiếm sang search.html, hiển thị tối đa 6 hội nghị sắp tới
- * Hoạt động tốt trên cả giao thức file:/// với cơ chế fallback dự phòng
- */
-
 (function () {
-  'use strict';
-
-  // Dữ liệu dự phòng phong phú cho file:/// khi trình duyệt chặn fetch cục bộ
-  const FALLBACK_CONFERENCES = [
-    {
-      "id": "cvpr-2026",
-      "name": "CVPR 2026",
-      "year": "2026",
-      "full_name": "IEEE/CVF Conference on Computer Vision and Pattern Recognition",
-      "summarization": "Hội nghị quốc tế uy tín số 1 thế giới về thị giác máy tính và nhận dạng mẫu.",
-      "location": "Vancouver, Canada",
-      "date_happen": "2026-06-14 to 2026-06-19",
-      "rank": "A*",
-      "rating": 4.8,
-      "rating_count": 142,
-      "publisher": "IEEE / CVF",
-      "mode": "Trực tiếp",
-      "fields": ["computer vision", "deep learning", "multimodal ai"],
-      "deadlines": [
-        { "name": "Paper Submission", "date": "2026-01-15" },
-        { "name": "Author Notification", "date": "2026-03-25" }
-      ]
-    },
-    {
-      "id": "neurips-2026",
-      "name": "NeurIPS 2026",
-      "year": "2026",
-      "full_name": "Conference on Neural Information Processing Systems",
-      "summarization": "Hội nghị học máy và khoa học thần kinh tính toán hàng đầu thế giới.",
-      "location": "Sydney, Australia",
-      "date_happen": "2026-12-06 to 2026-12-12",
-      "rank": "A*",
-      "rating": 4.9,
-      "rating_count": 210,
-      "publisher": "NeurIPS Foundation",
-      "mode": "Trực tiếp",
-      "fields": ["machine learning", "deep learning", "ai"],
-      "deadlines": [
-        { "name": "Abstract Submission", "date": "2026-05-15" },
-        { "name": "Full Paper Submission", "date": "2026-05-22" }
-      ]
-    },
-    {
-      "id": "iclr-2026",
-      "name": "ICLR 2026",
-      "year": "2026",
-      "full_name": "International Conference on Learning Representations",
-      "summarization": "Hội nghị hàng đầu về biểu diễn học và học sâu, quy tụ các công trình đột phá về AI.",
-      "location": "Singapore",
-      "date_happen": "2026-04-26 to 2026-04-30",
-      "rank": "A*",
-      "rating": 4.8,
-      "rating_count": 135,
-      "publisher": "ICLR",
-      "mode": "Hybrid",
-      "fields": ["deep learning", "representation learning", "ai"],
-      "deadlines": [
-        { "name": "Paper Submission", "date": "2025-10-22" },
-        { "name": "Author Notification", "date": "2026-01-22" }
-      ]
-    },
-    {
-      "id": "atc-2026",
-      "name": "ATC 2026",
-      "year": "2026",
-      "full_name": "International Conference on Advanced Technologies for Communications",
-      "summarization": "Hội nghị quốc tế thường niên về công nghệ truyền thông và viễn thông tại Việt Nam.",
-      "location": "Quy Nhơn, Việt Nam",
-      "date_happen": "2026-10-15 to 2026-10-17",
-      "rank": "B",
-      "rating": 4.2,
-      "rating_count": 45,
-      "publisher": "IEEE ComSoc / REV",
-      "mode": "Trực tiếp",
-      "fields": ["communications", "wireless networks", "iot"],
-      "deadlines": [
-        { "name": "Paper Submission", "date": "2026-05-30" },
-        { "name": "Author Notification", "date": "2026-07-30" }
-      ]
-    },
-    {
-      "id": "soict-2026",
-      "name": "SOICT 2026",
-      "year": "2026",
-      "full_name": "The 15th International Symposium on Information and Communication Technology",
-      "summarization": "Hội thảo quốc tế về CNTT quy tụ các hướng nghiên cứu hiện đại: AI, An ninh mạng, Big Data.",
-      "location": "TP. Hồ Chí Minh, Việt Nam",
-      "date_happen": "2026-12-04 to 2026-12-05",
-      "rank": "B",
-      "rating": 4.3,
-      "rating_count": 52,
-      "publisher": "ACM / Springer",
-      "mode": "Trực tiếp",
-      "fields": ["ai foundations", "big data", "cyber security"],
-      "deadlines": [
-        { "name": "Full Paper Submission", "date": "2026-09-25" },
-        { "name": "Author Notification", "date": "2026-10-12" }
-      ]
-    },
-    {
-      "id": "mapr-2026",
-      "name": "MAPR 2026",
-      "year": "2026",
-      "full_name": "International Conference on Multimedia Analysis and Pattern Recognition",
-      "summarization": "Hội nghị quốc tế chuyên sâu về Phân tích Đa phương tiện và Nhận dạng Mẫu do UIT chủ trì.",
-      "location": "Đà Nẵng, Việt Nam",
-      "date_happen": "2026-10-08 to 2026-10-09",
-      "rank": "B",
-      "rating": 4.4,
-      "rating_count": 48,
-      "publisher": "IEEE",
-      "mode": "Trực tiếp",
-      "fields": ["multimedia", "pattern recognition", "computer vision"],
-      "deadlines": [
-        { "name": "Paper Submission", "date": "2026-06-15" },
-        { "name": "Author Notification", "date": "2026-08-10" }
-      ]
-    }
-  ];
-
   let allConferences = [];
   let currentTab = 'all';
 
-  // 1. Khởi tạo điều hướng tìm kiếm
+  // Tìm kiếm hội nghị
   function initSearchGateway() {
     const searchForm = document.getElementById('searchForm');
     const searchInput = document.getElementById('searchInput');
@@ -137,7 +11,9 @@
       searchForm.addEventListener('submit', function (e) {
         e.preventDefault();
         const query = searchInput.value.trim();
-        window.location.href = query ? `search.html?q=${encodeURIComponent(query)}` : 'search.html';
+        window.location.href = query
+          ? `search.html?q=${encodeURIComponent(query)}`
+          : 'search.html';
       });
     }
 
@@ -153,13 +29,17 @@
     });
   }
 
-  // 2. Tải dữ liệu hội nghị
+  // Tải dữ liệu hội nghị
   async function loadData() {
     try {
       const response = await fetch('data/conference_data.json');
-      if (!response.ok) throw new Error('Network error');
+      if (!response.ok) {
+        throw new Error('Network error');
+      }
       const data = await response.json();
-      allConferences = Array.isArray(data) && data.length > 0 ? data : FALLBACK_CONFERENCES;
+      allConferences = Array.isArray(data) && data.length > 0
+        ? data
+        : FALLBACK_CONFERENCES;
     } catch (e) {
       console.warn('Fetch local json blocked or failed, using fallback dataset:', e);
       allConferences = FALLBACK_CONFERENCES;
@@ -168,14 +48,18 @@
     renderFeaturedConferences();
   }
 
-  // 3. Tính toán deadline gần nhất & số ngày còn lại
+  // Xử lý thời hạn nộp bài
   function getNearestDeadline(deadlines) {
-    if (!deadlines || !Array.isArray(deadlines) || deadlines.length === 0) return null;
+    if (!deadlines || !Array.isArray(deadlines) || deadlines.length === 0) {
+      return null;
+    }
     return deadlines[0];
   }
 
   function calculateDaysLeft(dateStr) {
-    if (!dateStr) return null;
+    if (!dateStr) {
+      return null;
+    }
     const target = new Date(dateStr + 'T23:59:59');
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -184,7 +68,9 @@
   }
 
   function formatDateVi(dateStr) {
-    if (!dateStr) return 'Chưa cập nhật';
+    if (!dateStr) {
+      return 'Chưa cập nhật';
+    }
     const parts = dateStr.split('-');
     if (parts.length === 3) {
       return `${parts[2]}/${parts[1]}/${parts[0]}`;
@@ -192,14 +78,16 @@
     return dateStr;
   }
 
-  // 4. Render danh sách tối đa 6 hội nghị sắp tới
+  // Hiển thị tối đa 6 hội nghị
   function renderFeaturedConferences() {
     const grid = document.getElementById('conferenceGrid');
     const emptyState = document.getElementById('emptyState');
     const resultsStatus = document.getElementById('resultsCount');
     const btnViewAll = document.getElementById('btnViewAll');
 
-    if (!grid) return;
+    if (!grid) {
+      return;
+    }
 
     if (btnViewAll) {
       btnViewAll.innerHTML = `
@@ -211,26 +99,31 @@
       `;
     }
 
-    // Lọc hội nghị tương lai / sắp diễn ra (ẩn hội nghị đã kết thúc từ năm trước trừ khi cần)
+    // Lọc hội nghị theo khu vực
     let filtered = allConferences.filter(c => {
-      // Xác định khu vực theo tab
-      const isVN = (c.location || '').toLowerCase().includes('việt nam') || (c.location || '').toLowerCase().includes('vietnam');
-      if (currentTab === 'Việt Nam' && !isVN) return false;
-      if (currentTab === 'Quốc tế' && isVN) return false;
+      const isVN = (c.location || '').toLowerCase().includes('việt nam') ||
+        (c.location || '').toLowerCase().includes('vietnam');
+      if (currentTab === 'Việt Nam' && !isVN) {
+        return false;
+      }
+      if (currentTab === 'Quốc tế' && isVN) {
+        return false;
+      }
 
-      // Ưu tiên các hội nghị chưa diễn ra
       return true;
     });
 
-    // Sắp xếp ưu tiên hội nghị 2026 và rank cao
+    // Sắp xếp theo năm và điểm đánh giá
     filtered.sort((a, b) => {
       const yearA = parseInt(a.year || '2026', 10);
       const yearB = parseInt(b.year || '2026', 10);
-      if (yearB !== yearA) return yearB - yearA;
+      if (yearB !== yearA) {
+        return yearB - yearA;
+      }
       return (b.rating || 0) - (a.rating || 0);
     });
 
-    // Chỉ lấy tối đa 6 cards cho Landing Gateway
+    // Lấy tối đa 6 hội nghị
     const displayItems = filtered.slice(0, 6);
 
     if (resultsStatus) {
@@ -239,11 +132,15 @@
 
     if (displayItems.length === 0) {
       grid.innerHTML = '';
-      if (emptyState) emptyState.hidden = false;
+      if (emptyState) {
+        emptyState.hidden = false;
+      }
       return;
     }
 
-    if (emptyState) emptyState.hidden = true;
+    if (emptyState) {
+      emptyState.hidden = true;
+    }
 
     grid.innerHTML = displayItems.map(item => {
       const utils = window.ConfGuideUtils;
@@ -258,7 +155,9 @@
         }
       }
 
-      const confId = item.id || encodeURIComponent(item.name.toLowerCase().replace(/[^a-z0-9]+/g, '-'));
+      const confId = item.id || encodeURIComponent(
+        item.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')
+      );
       const rankBadge = item.rank ? `Rank ${item.rank}` : 'Rank A';
 
       return `
@@ -299,7 +198,7 @@
     }).join('');
   }
 
-  // 5. Gắn sự kiện chuyển tab
+  // Chuyển tab hội nghị
   function initTabs() {
     const tabButtons = document.querySelectorAll('.filter-tabs .tab-btn');
     tabButtons.forEach(btn => {
