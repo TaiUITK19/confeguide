@@ -1,13 +1,8 @@
-/* =========================================================
-   ConfGuide — Search Page Stylesheet (css/search.css)
-   Bộ lọc nâng cao dạng Accordion | Đồng bộ tokens 60:30:10
-   ========================================================= */
 
 :root {
   --shadow-search: 0 4px 18px rgba(27, 67, 112, 0.06);
 }
 
-/* ================= HERO SEARCH ================= */
 .hero {
   position: relative;
   background: var(--bg-hero);
@@ -120,7 +115,7 @@
   background: var(--primary-soft);
 }
 
-/* ================= RESULTS & SIDEBAR LAYOUT ================= */
+/* Results & Sidebar Layout */
 .results-section {
   padding: 36px 0 64px;
 }
@@ -132,7 +127,7 @@
   align-items: start;
 }
 
-/* ================= SIDEBAR ACCORDIONS ================= */
+/* Sidebar Accordions */
 .filters {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -287,7 +282,7 @@
   color: #ffffff;
 }
 
-/* ================= RESULTS COLUMN ================= */
+/* Results Column */
 /* Active Chips Bar */
 .active-chips-bar {
   display: flex;
@@ -700,7 +695,11 @@ body.dark .search-error-state {
   cursor: not-allowed;
 }
 
-.pagination-jump { display: inline-flex; align-items: center; gap: 7px; }
+.pagination-jump {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
 .pagination-jump input {
   width: 58px;
   height: 38px;
@@ -715,8 +714,14 @@ body.dark .search-error-state {
   outline: 3px solid color-mix(in srgb, var(--primary) 35%, transparent);
   outline-offset: 2px;
 }
-.pagination-total { margin-left: 6px; }
-body.dark .pagination-button, body.dark .pagination-jump input { background: var(--surface); color: var(--text); border-color: var(--border-strong); }
+.pagination-total {
+  margin-left: 6px;
+}
+body.dark .pagination-button, body.dark .pagination-jump input {
+  background: var(--surface);
+  color: var(--text);
+  border-color: var(--border-strong);
+}
 
 /* Toast */
 .toast {
@@ -772,6 +777,13 @@ body.dark .pagination-button, body.dark .pagination-jump input { background: var
 }
 
 @media (max-width: 520px) {
-  .search-pagination { gap: 8px; flex-wrap: wrap; }
-  .pagination-total { flex-basis: 100%; text-align: center; margin-left: 0; }
+  .search-pagination {
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .pagination-total {
+    flex-basis: 100%;
+    text-align: center;
+    margin-left: 0;
+  }
 }
