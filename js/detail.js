@@ -1,954 +1,553 @@
 /**
- * ConfGuide - Unified Conference Detail Script (js/detail.js)
- * Tải dữ liệu động theo tham số ?id=<slug> từ conference_data.json
- * Đồng bộ Bookmark, đếm ngược múi giờ AoE, xuất Google Calendar & .ics
- * Hoạt động trơn tru trên cả web server lẫn giao thức file:///
+ * ConfGuide - Trang chi tiết hội nghị.
+ * JavaScript thuần; sử dụng các ID/CSS class sẵn có trong detail.html.
+ * Dữ liệu dự phòng nằm riêng tại js/detail-fallback.js (tạo bằng công cụ cài đặt).
  */
-
-(function () {
+(() => {
   'use strict';
 
-  const STAR_PATH = "M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4 6.1 20.5l1.2-6.5L2.5 9.4l6.6-.9z";
-
-  // Dữ liệu dự phòng chuẩn hóa 17 trường tương thích 100% với conference_data.json
-  const FALLBACK_CONFERENCES = [
-    {
-      "id": "cvpr-2026",
-      "name": "CVPR 2026",
-      "fullName": "IEEE/CVF Conference on Computer Vision and Pattern Recognition",
-      "rank": "A*",
-      "region": "Quốc tế",
-      "format": "in-person",
-      "publisher": "IEEE / CVF",
-      "indexing": ["Scopus", "DBLP", "IEEE Xplore"],
-      "fields": ["computer vision", "deep learning", "multimodal ai", "pattern recognition"],
-      "keywords": ["computer vision", "deep learning", "cvpr 2026"],
-      "fee": "850 USD",
-      "location": "Vancouver, Canada",
-      "startDate": "2026-06-14",
-      "endDate": "2026-06-19",
-      "website": "https://cvpr.thecvf.com/",
-      "deadlines": {
-        "abstract": "2026-01-08",
-        "fullPaper": "2026-01-15",
-        "notification": "2026-03-25",
-        "cameraReady": "2026-04-18"
-      },
-      "lastVerified": "2026-03-15",
-      "summarization": "CVPR là hội nghị quốc tế uy tín hàng đầu thế giới về thị giác máy tính và nhận dạng mẫu (Computer Vision & Pattern Recognition). Hội nghị quy tụ các nghiên cứu tiên phong về Deep Learning, 3D Vision, Multimodal AI, và Generative Models.",
-      "rating": 4.8,
-      "rating_count": 142
-    },
-    {
-      "id": "neurips-2026",
-      "name": "NeurIPS 2026",
-      "fullName": "Conference on Neural Information Processing Systems",
-      "rank": "A*",
-      "region": "Quốc tế",
-      "format": "in-person",
-      "publisher": "NeurIPS Foundation",
-      "indexing": ["Scopus", "DBLP"],
-      "fields": ["machine learning", "deep learning", "ai foundations", "reinforcement learning"],
-      "keywords": ["neurips", "machine learning", "deep learning"],
-      "fee": "900 USD",
-      "location": "Sydney, Australia",
-      "startDate": "2026-12-07",
-      "endDate": "2026-12-13",
-      "website": "https://neurips.cc/",
-      "deadlines": {
-        "abstract": "2026-05-15",
-        "fullPaper": "2026-05-22",
-        "notification": "2026-09-20",
-        "cameraReady": "2026-10-15"
-      },
-      "lastVerified": "2026-03-15",
-      "summarization": "Hội nghị học máy và khoa học thần kinh tính toán số 1 thế giới, nơi khởi nguồn của các mô hình nền tảng, AI an toàn và thuật toán tối ưu hóa hiện đại.",
-      "rating": 4.9,
-      "rating_count": 210
-    },
-    {
-      "id": "iclr-2026",
-      "name": "ICLR 2026",
-      "fullName": "International Conference on Learning Representations",
-      "rank": "A*",
-      "region": "Quốc tế",
-      "format": "hybrid",
-      "publisher": "OpenReview / ICLR Foundation",
-      "indexing": ["Scopus", "DBLP"],
-      "fields": ["representation learning", "deep learning", "generative models", "transformers"],
-      "keywords": ["iclr", "representation learning", "deep learning"],
-      "fee": "750 USD",
-      "location": "Singapore",
-      "startDate": "2026-04-26",
-      "endDate": "2026-04-30",
-      "website": "https://iclr.cc/",
-      "deadlines": {
-        "abstract": "2025-09-21",
-        "fullPaper": "2025-09-28",
-        "notification": "2026-01-22",
-        "cameraReady": "2026-02-15"
-      },
-      "lastVerified": "2026-03-15",
-      "summarization": "Diễn đàn hàng đầu thế giới về biểu diễn học, mạng nơ-ron sâu và các kiến trúc mô hình ngôn ngữ lớn (Transformers).",
-      "rating": 4.8,
-      "rating_count": 135
-    },
-    {
-      "id": "acl-2026",
-      "name": "ACL 2026",
-      "fullName": "Annual Meeting of the Association for Computational Linguistics",
-      "rank": "A*",
-      "region": "Quốc tế",
-      "format": "hybrid",
-      "publisher": "ACL",
-      "indexing": ["Scopus", "DBLP", "ACL Anthology"],
-      "fields": ["nlp", "language models", "computational linguistics", "llm"],
-      "keywords": ["nlp", "natural language processing", "llm", "acl"],
-      "fee": "780 USD",
-      "location": "Vienna, Austria",
-      "startDate": "2026-07-05",
-      "endDate": "2026-07-10",
-      "website": "https://2026.aclweb.org/",
-      "deadlines": {
-        "abstract": "2026-02-10",
-        "fullPaper": "2026-02-18",
-        "notification": "2026-05-15",
-        "cameraReady": "2026-06-08"
-      },
-      "lastVerified": "2026-03-15",
-      "summarization": "Diễn đàn quốc tế uy tín nhất về xử lý ngôn ngữ tự nhiên, ngôn ngữ học tính toán và các mô hình ngôn ngữ lớn.",
-      "rating": 4.7,
-      "rating_count": 98
-    },
-    {
-      "id": "atc-2026",
-      "name": "ATC 2026",
-      "fullName": "International Conference on Advanced Technologies for Communications",
-      "rank": "B",
-      "region": "Việt Nam",
-      "format": "in-person",
-      "publisher": "IEEE ComSoc / REV",
-      "indexing": ["Scopus", "IEEE Xplore"],
-      "fields": ["communications", "wireless networks", "iot", "antenna"],
-      "keywords": ["atc", "viễn thông", "wireless", "iot", "việt nam"],
-      "fee": "4.500.000 VNĐ",
-      "location": "Quy Nhơn, Việt Nam",
-      "startDate": "2026-10-15",
-      "endDate": "2026-10-17",
-      "website": "https://atc-conf.org/",
-      "deadlines": {
-        "abstract": "2026-05-15",
-        "fullPaper": "2026-05-30",
-        "notification": "2026-07-30",
-        "cameraReady": "2026-08-15"
-      },
-      "lastVerified": "2026-03-15",
-      "summarization": "Hội nghị quốc tế thường niên về công nghệ truyền thông và viễn thông tại Việt Nam do Hội Vô tuyến Điện tử (REV) đồng tổ chức.",
-      "rating": 4.2,
-      "rating_count": 45
-    },
-    {
-      "id": "soict-2026",
-      "name": "SOICT 2026",
-      "fullName": "The 15th International Symposium on Information and Communication Technology",
-      "rank": "B",
-      "region": "Việt Nam",
-      "format": "in-person",
-      "publisher": "ACM / Springer",
-      "indexing": ["Scopus", "DBLP", "ACM Digital Library"],
-      "fields": ["ai foundations", "big data", "cyber security", "multimedia"],
-      "keywords": ["soict", "hust", "cntt", "cyber security", "việt nam"],
-      "fee": "5.000.000 VNĐ",
-      "location": "TP. Hồ Chí Minh, Việt Nam",
-      "startDate": "2026-12-04",
-      "endDate": "2026-12-05",
-      "website": "https://soict.org/",
-      "deadlines": {
-        "abstract": "2026-09-20",
-        "fullPaper": "2026-09-25",
-        "notification": "2026-10-12",
-        "cameraReady": "2026-10-23"
-      },
-      "lastVerified": "2026-03-15",
-      "summarization": "Hội thảo quốc tế về CNTT quy tụ các hướng nghiên cứu hiện đại: Trí tuệ nhân tạo, An ninh mạng, Big Data.",
-      "rating": 4.3,
-      "rating_count": 52
-    },
-    {
-      "id": "mapr-2026",
-      "name": "MAPR 2026",
-      "fullName": "International Conference on Multimedia Analysis and Pattern Recognition",
-      "rank": "B",
-      "region": "Việt Nam",
-      "format": "in-person",
-      "publisher": "IEEE",
-      "indexing": ["Scopus", "IEEE Xplore"],
-      "fields": ["multimedia", "pattern recognition", "computer vision", "healthcare ai"],
-      "keywords": ["mapr", "uit", "pattern recognition", "multimedia", "đà nẵng"],
-      "fee": "4.500.000 VNĐ",
-      "location": "Đà Nẵng, Việt Nam",
-      "startDate": "2026-10-08",
-      "endDate": "2026-10-09",
-      "website": "https://mapr.uit.edu.vn/",
-      "deadlines": {
-        "abstract": "2026-06-01",
-        "fullPaper": "2026-06-15",
-        "notification": "2026-08-10",
-        "cameraReady": "2026-08-25"
-      },
-      "lastVerified": "2026-03-15",
-      "summarization": "Hội nghị quốc tế chuyên sâu về Phân tích Đa phương tiện và Nhận dạng Mẫu do Trường Đại học Công nghệ Thông tin (ĐHQG-HCM) chủ trì.",
-      "rating": 4.4,
-      "rating_count": 48
-    }
+  const $ = id => document.getElementById(id);
+  const DAY = 86_400_000;
+  const STAR_PATH = 'M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4 6.1 20.5l1.2-6.5L2.5 9.4l6.6-.9z';
+  const FORMAT_LABELS = {
+    'in-person': 'Trực tiếp (In-person)',
+    online: 'Trực tuyến (Online)',
+    hybrid: 'Kết hợp (Hybrid)'
+  };
+  const MILESTONES = [
+    { key: 'abstract', name: 'Tóm tắt (Abstract)', shortName: 'Nộp Abstract' },
+    { key: 'fullPaper', name: 'Bài hoàn chỉnh (Full paper)', shortName: 'Nộp Full Paper' },
+    { key: 'notification', name: 'Thông báo kết quả (Notification)', shortName: 'Thông báo' },
+    { key: 'cameraReady', name: 'Bản in hoàn thiện (Camera-ready)', shortName: 'Camera-Ready' }
   ];
 
-  let currentConference = null;
-  let allConferences = [];
+  let conferences = [];
+  let conference = null;
+  let clockTimer = null; // Một timer cập nhật toàn bộ đồng hồ, tránh nhiều setInterval.
 
-  // Helper lấy storage key cho Bookmark theo session người dùng
-  function getSavedStorageKey() {
+  // ---------- Trợ giúp: dữ liệu và DOM ----------
+  function text(id, value) {
+    const element = $(id);
+    if (element) element.textContent = value == null ? '' : String(value);
+  }
+
+  function escapeHtml(value) {
+    return String(value ?? '').replace(/[&<>"']/g, char => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    })[char]);
+  }
+
+  function readJson(key, fallback) {
     try {
-      const userStr = localStorage.getItem('confguide_current_user');
-      const user = userStr ? JSON.parse(userStr) : null;
-      return user && user.id ? `confguide_saved_${user.id}` : 'confguide_saved_guest';
-    } catch (e) {
-      return 'confguide_saved_guest';
+      const value = JSON.parse(localStorage.getItem(key));
+      return value ?? fallback;
+    } catch (_) {
+      return fallback;
     }
   }
 
-  function getSavedList() {
+  function writeJson(key, value) {
     try {
-      const key = getSavedStorageKey();
-      const val = localStorage.getItem(key);
-      return val ? JSON.parse(val) : [];
-    } catch (e) {
-      return [];
+      localStorage.setItem(key, JSON.stringify(value));
+      return true;
+    } catch (_) {
+      return false;
     }
   }
 
-  function setSavedList(list) {
-    try {
-      const key = getSavedStorageKey();
-      localStorage.setItem(key, JSON.stringify(list));
-    } catch (e) {}
+  function formatDate(value) {
+    if (!value) return 'Chưa công bố';
+    const match = String(value).match(/^(\d{4})-(\d{2})-(\d{2})/);
+    return match ? `${match[3]}/${match[2]}/${match[1]}` : String(value);
   }
 
-  // Fallback utility an toàn khi chạy độc lập không có utils.js
-  const DEFAULT_UTILS = {
-    daysLeft: function (d) {
-      if (!d) return null;
-      const target = new Date(String(d).split('T')[0] + 'T23:59:59');
-      const now = new Date();
-      now.setHours(0, 0, 0, 0);
-      return Math.ceil((target.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-    },
-    getNextDeadline: function (conf) {
-      if (!conf || !conf.deadlines) return null;
-      const dls = conf.deadlines;
-      const candidates = [];
-      const defs = [
-        { key: 'abstract', name: 'Tóm tắt (Abstract)', shortName: 'Nộp Abstract' },
-        { key: 'fullPaper', name: 'Bài hoàn chỉnh (Full paper)', shortName: 'Nộp Full Paper' },
-        { key: 'notification', name: 'Thông báo kết quả (Notification)', shortName: 'Thông báo' },
-        { key: 'cameraReady', name: 'Bản in hoàn thiện (Camera-ready)', shortName: 'Camera-Ready' }
-      ];
-      if (Array.isArray(dls)) {
-        dls.forEach(d => {
-          const left = d.date ? DEFAULT_UTILS.daysLeft(d.date) : null;
-          candidates.push({ key: d.name, name: d.name, shortName: d.name, date: d.date, daysLeft: left, isPassed: left !== null && left < 0 });
-        });
-      } else if (typeof dls === 'object') {
-        defs.forEach(m => {
-          const dVal = dls[m.key];
-          if (dVal) {
-            const left = DEFAULT_UTILS.daysLeft(dVal);
-            candidates.push({ key: m.key, name: m.name, shortName: m.shortName, date: dVal, daysLeft: left, isPassed: left !== null && left < 0 });
-          }
-        });
+  function formatRange(start, end) {
+    if (!start) return 'Chưa công bố';
+    return end && end !== start ? `${formatDate(start)} – ${formatDate(end)}` : formatDate(start);
+  }
+
+  function slug(value) {
+    return String(value || '').toLowerCase().trim()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd')
+      .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  }
+
+  // Ngày AoE kết thúc lúc 23:59:59 ở UTC-12 (tức 11:59:59 UTC ngày kế tiếp).
+  function aoeDeadline(date) {
+    const day = String(date || '').match(/^\d{4}-\d{2}-\d{2}/)?.[0];
+    if (!day) return null;
+    const timestamp = Date.parse(`${day}T23:59:59-12:00`);
+    return Number.isNaN(timestamp) ? null : timestamp;
+  }
+
+  function timeLeft(date) {
+    const deadline = aoeDeadline(date);
+    if (deadline === null) return null;
+    const remaining = Math.max(0, deadline - Date.now());
+    return {
+      passed: deadline < Date.now(),
+      days: Math.floor(remaining / DAY),
+      hours: Math.floor(remaining % DAY / 3_600_000),
+      minutes: Math.floor(remaining % 3_600_000 / 60_000),
+      seconds: Math.floor(remaining % 60_000 / 1000),
+      daysLeft: Math.ceil((deadline - Date.now()) / DAY)
+    };
+  }
+
+  // Hỗ trợ cả dữ liệu chuẩn (deadlines dạng object) và dữ liệu crawl (dạng array).
+  function normalizeDeadlines(deadlines) {
+    if (Array.isArray(deadlines)) {
+      return deadlines.filter(item => item?.name && item?.date)
+        .map((item, index) => ({
+          key: `entry-${index}`, name: item.name, shortName: item.name, date: item.date
+        }));
+    }
+    return MILESTONES.filter(item => deadlines?.[item.key]).map(item => ({
+      ...item, date: deadlines[item.key]
+    }));
+  }
+
+  function normalizeConference(item) {
+    const deadlines = normalizeDeadlines(item.deadlines);
+    return {
+      ...item,
+      id: item.id || slug(item.name),
+      fullName: item.fullName || item.full_name || item.name,
+      website: item.website || item.website_url || '',
+      startDate: item.startDate || item.start_date || '',
+      endDate: item.endDate || item.end_date || '',
+      fields: Array.isArray(item.fields) ? item.fields : (Array.isArray(item.tags) ? item.tags : []),
+      indexing: item.indexing || [],
+      milestones: deadlines
+    };
+  }
+
+  function getNextDeadline(item) {
+    const events = [...item.milestones].sort((a, b) => a.date.localeCompare(b.date));
+    return events.find(event => !timeLeft(event.date)?.passed) || events.at(-1) || null;
+  }
+
+  // ---------- Xuất lịch Google Calendar và iCalendar ----------
+  function calendarEvent(item, milestone) {
+    return {
+      title: `[ConfGuide] ${item.name} - Hạn ${milestone.shortName}`,
+      description: `Hạn ${milestone.name} của hội nghị ${item.fullName} (AoE UTC-12).\nWebsite: ${item.website}`,
+      location: item.location || '',
+      date: milestone.date
+    };
+  }
+
+  function googleCalendarUrl(event) {
+    const start = aoeDeadline(event.date);
+    if (start === null) return '#';
+    const iso = value => new Date(value).toISOString().replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z');
+    const params = new URLSearchParams({
+      action: 'TEMPLATE',
+      text: event.title,
+      details: event.description,
+      location: event.location,
+      dates: `${iso(start)}/${iso(start + 60_000)}`
+    });
+    return `https://calendar.google.com/calendar/render?${params}`;
+  }
+
+  function openCalendar(item, milestone) {
+    const url = googleCalendarUrl(calendarEvent(item, milestone));
+    if (url !== '#') window.open(url, '_blank', 'noopener,noreferrer');
+  }
+
+  function escapeIcs(value) {
+    return String(value ?? '').replace(/\\/g, '\\\\').replace(/\r?\n/g, '\\n')
+      .replace(/,/g, '\\,').replace(/;/g, '\\;');
+  }
+
+  function createIcs(events) {
+    const iso = timestamp => new Date(timestamp).toISOString().replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z');
+    const lines = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//ConfGuide//Conference Deadlines//VI', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH'];
+    events.forEach((event, index) => {
+      const start = aoeDeadline(event.date);
+      if (start === null) return;
+      lines.push(
+        'BEGIN:VEVENT',
+        `UID:${start}-${index}@confguide.local`,
+        `DTSTAMP:${iso(Date.now())}`,
+        `DTSTART:${iso(start)}`,
+        `DTEND:${iso(start + 60_000)}`,
+        `SUMMARY:${escapeIcs(event.title)}`,
+        `DESCRIPTION:${escapeIcs(event.description)}`,
+        `LOCATION:${escapeIcs(event.location)}`,
+        'END:VEVENT'
+      );
+    });
+    lines.push('END:VCALENDAR');
+    return lines.join('\r\n') + '\r\n';
+  }
+
+  function downloadIcs(filename, events) {
+    if (!events.length) {
+      alert('Hội nghị này chưa có mốc thời gian cụ thể để xuất lịch.');
+      return;
+    }
+    const blob = new Blob([createIcs(events)], { type: 'text/calendar;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    // Trì hoãn để trình duyệt có thời gian tiếp nhận thao tác tải xuống.
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
+  // ---------- Kết xuất hội nghị ----------
+  function renderOverview(item) {
+    document.title = `${item.name} - ConfGuide`;
+    const next = getNextDeadline(item);
+    const passed = next ? timeLeft(next.date)?.passed : true;
+    const end = item.endDate ? Date.parse(`${item.endDate}T23:59:59`) : NaN;
+    let status = { label: 'Đang mở nộp bài', className: 'status-open' };
+    if (!Number.isNaN(end) && Date.now() > end) status = { label: 'Đã diễn ra', className: 'status-ended' };
+    else if (!next || passed) status = { label: 'Đã đóng nhận bài', className: 'status-closed' };
+    else if (timeLeft(next.date).daysLeft <= 7) status = { label: 'Sắp hết hạn', className: 'status-urgent' };
+
+    const badge = $('detailStatusBadge');
+    if (badge) { badge.textContent = status.label; badge.className = `status-badge ${status.className}`; }
+    const fmt = FORMAT_LABELS[item.format] || item.mode || 'Trực tiếp';
+    const dateRange = formatRange(item.startDate, item.endDate);
+    const description = item.summarization || 'Hội nghị khoa học uy tín dành cho cộng đồng nghiên cứu.';
+    const values = {
+      detailRankBadge: `Rank ${item.rank || 'A*'}`,
+      detailRegionPill: item.region || 'Quốc tế', detailTitle: item.name,
+      detailFullName: item.fullName, detailDesc: description,
+      detailLocation: item.location || 'Chưa cập nhật', detailDate: dateRange,
+      detailFormat: fmt, detailFee: item.fee || 'Đang cập nhật',
+      infoLocation: item.location || 'Chưa cập nhật', infoFormat: fmt,
+      infoRegion: item.region || 'Quốc tế', infoDate: dateRange,
+      infoPublisher: item.publisher || 'Chưa cập nhật',
+      infoIndexing: Array.isArray(item.indexing) ? item.indexing.join(', ') : item.indexing,
+      infoFee: item.fee || 'Chưa cập nhật', infoFields: item.fields.join(', '),
+      infoRank: item.rank || 'A*', infoVerified: formatDate(item.lastVerified),
+      avgScore: item.rating ? Number(item.rating).toFixed(1) : '—',
+      reviewsCountText: item.rating_count ? `Số liệu tham khảo trong dữ liệu (${item.rating_count})` : 'Chưa có dữ liệu tổng hợp'
+    };
+    Object.entries(values).forEach(([id, value]) => text(id, value));
+
+    const tags = $('detailTags');
+    if (tags) {
+      tags.replaceChildren(...(item.fields.length ? item.fields : ['Khoa học máy tính']).map(value => {
+        const span = document.createElement('span');
+        span.className = 'tag'; span.textContent = value;
+        return span;
+      }));
+    }
+
+    const overview = $('detailOverviewText');
+    if (overview) overview.innerHTML = `<p>${escapeHtml(description)}</p>
+      <p>Hội nghị được tổ chức tại <strong>${escapeHtml(item.location || 'địa điểm cập nhật')}</strong>, quy tụ các nhà khoa học, giảng viên và sinh viên nghiên cứu hàng đầu. Diễn đàn thảo luận về các công trình nghiên cứu tiên tiến, tạo cơ hội hợp tác và công bố quốc tế.</p>`;
+
+    const deadlineInfo = $('infoDeadlines');
+    if (deadlineInfo) deadlineInfo.innerHTML = item.milestones.length
+      ? item.milestones.map(m => `<div class="detail-deadline-line"><strong>${escapeHtml(m.name)}:</strong> ${formatDate(m.date)} (AoE)</div>`).join('')
+      : 'Chưa công bố';
+
+    const website = $('webBtn');
+    if (website) {
+      const validUrl = /^https?:\/\//i.test(item.website);
+      website.href = validUrl ? item.website : '#';
+      website.classList.toggle('is-disabled', !validUrl);
+      website.setAttribute('aria-disabled', String(!validUrl));
+    }
+    renderStars('headerStars', item.rating, 18);
+    renderCountdown(item);
+    renderTimeline(item);
+  }
+
+  function renderCountdown(item) {
+    const next = getNextDeadline(item);
+    const remaining = next && timeLeft(next.date);
+    const google = $('btnCalGoogle');
+    const ics = $('btnCalIcs');
+    const available = Boolean(remaining && !remaining.passed);
+    if (google) google.hidden = !available;
+    if (ics) ics.hidden = !available;
+    if (!next) {
+      text('detailNextMilestoneName', 'Đang cập nhật mốc');
+      text('detailCountdownDays', 'Chưa công bố');
+      text('detailDeadlineExact', 'Ban tổ chức chưa công bố ngày cụ thể');
+      text('heroLiveTickerText', 'Chưa có mốc thời gian');
+    } else if (!available) {
+      text('detailNextMilestoneName', 'Đã hết hạn nộp bài');
+      text('detailCountdownDays', 'Đã đóng đợt nộp');
+      text('detailDeadlineExact', 'Hội nghị đã hoàn thành nhận bài');
+      text('heroLiveTickerText', 'Đã kết thúc nhận bài');
+    } else {
+      text('detailNextMilestoneName', next.name);
+      text('detailDeadlineExact', `${formatDate(next.date)} (AoE 23:59)`);
+    }
+    if (google) google.onclick = available ? () => openCalendar(item, next) : null;
+    if (ics) ics.onclick = available ? () => downloadIcs(`${item.id}-${next.key}.ics`, [calendarEvent(item, next)]) : null;
+    const all = $('btnExportAllIcs');
+    if (all) all.onclick = () => downloadIcs(`${item.id}-all-deadlines.ics`, item.milestones.map(m => calendarEvent(item, m)));
+    updateClocks();
+  }
+
+  function renderTimeline(item) {
+    const track = $('timelineTrack');
+    if (!track) return;
+    const next = getNextDeadline(item);
+    const activeKey = next && !timeLeft(next.date)?.passed ? next.key : null;
+    track.innerHTML = item.milestones.length ? item.milestones.map((event, index) => {
+      const remaining = timeLeft(event.date);
+      const passed = remaining?.passed;
+      const active = event.key === activeKey;
+      const className = passed ? 'step-passed' : active ? 'step-active' : 'step-upcoming';
+      const status = passed ? `Đã qua (${formatDate(event.date)})` : `Còn ${remaining?.daysLeft ?? 0} ngày`;
+      return `<div class="timeline-step ${className}">
+        <div class="step-badge-num">${passed ? '✓' : index + 1}</div>
+        <div class="step-name">${escapeHtml(event.name)}</div>
+        <div class="step-date">${formatDate(event.date)} (AoE)</div>
+        <div class="step-status-tag">${escapeHtml(status)}</div>
+        ${active ? `<div class="live-clock" id="liveClock-${escapeHtml(event.key)}"></div>` : ''}
+        ${!passed ? `<button type="button" class="step-cal-mini-btn" data-mkey="${escapeHtml(event.key)}" title="Thêm mốc này vào Google Calendar">+ Thêm vào lịch</button>` : ''}
+      </div>`;
+    }).join('') : '<p>Chưa có thông tin các mốc thời gian.</p>';
+
+    // Event delegation: chỉ một listener cho toàn bộ nút trong timeline.
+    track.onclick = event => {
+      const button = event.target.closest('.step-cal-mini-btn');
+      if (!button) return;
+      const milestone = item.milestones.find(m => m.key === button.dataset.mkey);
+      if (milestone) openCalendar(item, milestone);
+    };
+    updateClocks();
+  }
+
+  function updateClocks() {
+    if (!conference) return;
+    const next = getNextDeadline(conference);
+    const remain = next && timeLeft(next.date);
+    if (!remain || remain.passed) return;
+    text('detailCountdownDays', `Còn ${Math.max(0, remain.daysLeft)} ngày`);
+    text('heroLiveTickerText', `${remain.days} ngày ${remain.hours}h ${remain.minutes}m ${remain.seconds}s`);
+    text(`liveClock-${next.key}`, `Đếm ngược: ${remain.days}d ${remain.hours}h ${remain.minutes}m ${remain.seconds}s`);
+  }
+
+  // ---------- Lưu hội nghị và đánh giá sao ----------
+  function bookmarkKey() {
+    const user = readJson('confguide_current_user', null);
+    return user?.id ? `confguide_saved_${user.id}` : 'confguide_saved_guest';
+  }
+
+  function setupBookmark(item) {
+    const button = $('saveBtn');
+    if (!button) return;
+    const key = bookmarkKey();
+    const saved = () => {
+      const value = readJson(key, []);
+      return Array.isArray(value) ? value : [];
+    };
+    const paint = () => {
+      const active = saved().includes(item.id);
+      button.classList.toggle('on', active);
+      button.setAttribute('aria-pressed', String(active));
+      text('saveText', active ? 'Đã lưu hội nghị' : 'Lưu hội nghị này');
+      button.querySelector('svg')?.setAttribute('fill', active ? 'var(--gold)' : 'none');
+    };
+    button.onclick = () => {
+      const values = saved();
+      const next = values.includes(item.id) ? values.filter(id => id !== item.id) : [...values, item.id];
+      if (writeJson(key, next)) paint();
+      else alert('Không thể lưu hội nghị. Vui lòng kiểm tra bộ nhớ trình duyệt.');
+    };
+    paint();
+  }
+
+  function starSvg(size, active = true) {
+    return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="${active ? 'var(--gold)' : 'none'}" stroke="var(--gold)" stroke-width="1.5" aria-hidden="true"><path d="${STAR_PATH}"/></svg>`;
+  }
+
+  function renderStars(id, rating, size) {
+    const box = $(id);
+    if (!box) return;
+    box.innerHTML = rating ? Array.from({ length: 5 }, (_, i) => starSvg(size, i < Math.round(rating))).join('') : '';
+  }
+
+  function setupUserRating(item) {
+    const box = $('stars');
+    if (!box) return;
+    const key = `confguide_rating_${item.id}`;
+    let rating = Number(readJson(key, 0)) || 0;
+    const paint = value => [...box.children].forEach((button, i) => button.classList.toggle('lit', i < value));
+    box.replaceChildren();
+    for (let i = 1; i <= 5; i++) {
+      const button = document.createElement('button');
+      button.type = 'button'; button.className = 'star-btn';
+      button.setAttribute('aria-label', `${i} sao`);
+      button.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${STAR_PATH}"/></svg><span>${i}</span>`;
+      button.addEventListener('mouseenter', () => paint(i));
+      button.addEventListener('focus', () => paint(i));
+      button.addEventListener('click', () => {
+        rating = rating === i ? 0 : i;
+        writeJson(key, rating);
+        paint(rating);
+        text('rateMsg', rating ? `Bạn đã chấm ${rating}/5 sao. Cảm ơn bạn!` : '');
+      });
+      box.appendChild(button);
+    }
+    box.addEventListener('mouseleave', () => paint(rating));
+    box.addEventListener('focusout', event => { if (!box.contains(event.relatedTarget)) paint(rating); });
+    paint(rating);
+    if (rating) text('rateMsg', `Bạn đã chấm ${rating}/5 sao.`);
+  }
+
+  // ---------- Hội nghị liên quan ----------
+  function renderRelated(item) {
+    const grid = $('relGrid');
+    if (!grid) return;
+    const currentFields = new Set(item.fields);
+    const related = conferences.filter(conf => conf.id !== item.id)
+      .sort((a, b) => b.fields.filter(field => currentFields.has(field)).length
+        - a.fields.filter(field => currentFields.has(field)).length).slice(0, 3);
+    grid.innerHTML = related.map(conf => {
+      const next = getNextDeadline(conf);
+      const remaining = next && timeLeft(next.date);
+      const closed = remaining?.passed;
+      const daysLabel = !remaining ? 'Sắp tới' : closed ? 'Đã đóng' : `Còn ${Math.max(0, remaining.daysLeft)}d`;
+      const name = escapeHtml(conf.name);
+      const url = `detail.html?id=${encodeURIComponent(conf.id)}`;
+      return `<article class="rc" data-id="${escapeHtml(conf.id)}" tabindex="0" role="link" aria-label="Xem chi tiết hội nghị ${name}">
+        <div class="thumb"><b>${name.replace(/ /, '<br>')}</b></div>
+        <div class="body"><div class="rc-top"><h5 title="${name}">${name}</h5>
+          <span class="days ${closed ? 'closed' : ''}">${daysLabel}</span></div>
+          <div class="full" title="${escapeHtml(conf.fullName)}">${escapeHtml(conf.fullName)}</div>
+          <div class="tg">${conf.fields.slice(0, 2).map(field => `<span title="${escapeHtml(field)}">${escapeHtml(field)}</span>`).join('')}</div>
+          <div class="bottom"><a href="${url}" class="save-sm">Xem chi tiết &rarr;</a><span class="rank">${escapeHtml(conf.rank || 'A*')}</span></div>
+        </div>
+      </article>`;
+    }).join('');
+    grid.onclick = event => {
+      if (event.target.closest('a')) return;
+      const card = event.target.closest('.rc');
+      if (card) location.href = `detail.html?id=${encodeURIComponent(card.dataset.id)}`;
+    };
+    grid.onkeydown = event => {
+      const card = event.target.closest('.rc');
+      if (card && event.target === card && (event.key === 'Enter' || event.key === ' ')) {
+        event.preventDefault();
+        location.href = `detail.html?id=${encodeURIComponent(card.dataset.id)}`;
       }
-      if (candidates.length === 0) return null;
-      candidates.sort((a, b) => String(a.date).localeCompare(String(b.date)));
-      return candidates.find(c => !c.isPassed) || candidates[candidates.length - 1];
-    },
-    getStatus: function (conf) {
-      return { code: 'open', label: 'Đang mở nộp bài', badgeClass: 'status-open' };
-    },
-    formatDateVi: function (d) {
-      if (!d) return 'Chưa công bố';
-      const clean = String(d).split('T')[0];
-      const parts = clean.split('-');
-      return parts.length === 3 ? `${parts[2]}/${parts[1]}/${parts[0]}` : d;
-    },
-    formatRangeVi: function (s, e) {
-      return s ? (e && s !== e ? `${DEFAULT_UTILS.formatDateVi(s)} – ${DEFAULT_UTILS.formatDateVi(e)}` : DEFAULT_UTILS.formatDateVi(s)) : '2026';
-    },
-    getAoETimeRemaining: function (d) {
-      const left = DEFAULT_UTILS.daysLeft(d);
-      return { days: Math.max(0, left || 0), hours: 0, minutes: 0, seconds: 0, isPassed: (left !== null && left < 0) };
-    },
-    getGoogleCalendarUrl: function () { return '#'; },
-    createIcsContent: function () { return ''; },
-    downloadIcsFile: function () {},
-    MILESTONE_DEFINITIONS: [
-      { key: 'abstract', name: 'Tóm tắt (Abstract)', shortName: 'Nộp Abstract' },
-      { key: 'fullPaper', name: 'Bài hoàn chỉnh (Full paper)', shortName: 'Nộp Full Paper' },
-      { key: 'notification', name: 'Thông báo kết quả (Notification)', shortName: 'Thông báo' },
-      { key: 'cameraReady', name: 'Bản in hoàn thiện (Camera-ready)', shortName: 'Camera-Ready' }
-    ]
-  };
-
-  function getDetailUtils() {
-    return window.ConfGuideUtils || DEFAULT_UTILS;
+    };
   }
 
-  // Tải dữ liệu hội nghị theo tham số ID
-  async function loadConferenceDetail() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const confId = (urlParams.get('id') || 'cvpr-2026').trim();
+  // ---------- Trang nhận xét: điều hướng bằng #danh-gia ----------
+  function reviewKey(item) { return `confguide_reviews_${item.id}`; }
 
-    // Nạp dữ liệu fallback trước
-    const utilsFallback = (window.ConfGuideUtils && window.ConfGuideUtils.FALLBACK_CONFERENCES) || FALLBACK_CONFERENCES;
-    allConferences = utilsFallback;
+  function renderReviews(item) {
+    const list = $('rvList');
+    if (!list) return;
+    const saved = readJson(reviewKey(item), []);
+    const reviews = Array.isArray(saved) ? saved : [];
+    renderStars('rvStars', 5, 22);
+    text('rvAvg', item.rating ? Number(item.rating).toFixed(1) : '—');
+    text('rvTotal', `${reviews.length} nhận xét trên trình duyệt này`);
+    text('rvBars', 'Điểm tham khảo từ dữ liệu hội nghị; nhận xét bên dưới chỉ lưu cục bộ.');
+    list.innerHTML = reviews.length ? reviews.map(review => {
+      const date = review.createdAt ? new Date(review.createdAt) : null;
+      const created = date && !Number.isNaN(date.valueOf()) ? date.toLocaleString('vi-VN') : '';
+      return `<article class="card rv-card">
+        <strong>${escapeHtml(review.author || 'Người dùng ConfGuide')}</strong>
+        <small>${escapeHtml(created)}</small><p>${escapeHtml(review.text)}</p>
+      </article>`;
+    }).join('') : '<p class="card rv-card">Chưa có nhận xét nào được lưu trên trình duyệt này. Bạn có thể gửi nhận xét đầu tiên.</p>';
+  }
 
+  function setupReviews(item) {
+    const detail = $('viewDetail');
+    const reviews = $('viewReviews');
+    const back = $('backBtn');
+    const open = $('openReviews');
+    if (!detail || !reviews || !back || !open) return;
+    const route = () => {
+      const isReview = location.hash === '#danh-gia';
+      detail.hidden = isReview;
+      reviews.hidden = !isReview;
+      window.scrollTo(0, 0);
+    };
+    window.addEventListener('hashchange', route);
+    route(); // Hỗ trợ truy cập trực tiếp detail.html?id=...#danh-gia.
+
+    const openReviews = () => { location.hash = '#danh-gia'; };
+    open.addEventListener('click', openReviews);
+    open.addEventListener('keydown', event => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault(); openReviews();
+      }
+    });
+    $('backToDetailBtn')?.addEventListener('click', () => { location.hash = ''; });
+    back.addEventListener('click', () => {
+      if (location.hash === '#danh-gia') location.hash = '';
+      else if (history.length > 1 && (document.referrer || history.state !== null)) history.back();
+      else location.assign('search.html');
+    });
+    text('rvPageTitle', `Nhận xét hội nghị · ${item.name}`);
+    renderReviews(item);
+
+    $('reviewForm')?.addEventListener('submit', event => {
+      event.preventDefault();
+      const textarea = $('reviewText');
+      const value = textarea?.value.trim();
+      if (!value) { textarea?.focus(); return; }
+      const user = window.ConfGuideLayout?.getCurrentUser?.() || readJson('confguide_current_user', null);
+      const previous = readJson(reviewKey(item), []);
+      const saved = Array.isArray(previous) ? previous : [];
+      saved.unshift({
+        id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+        author: user?.name || user?.fullName || user?.username || 'Người dùng ConfGuide',
+        text: value, createdAt: new Date().toISOString()
+      });
+      if (writeJson(reviewKey(item), saved)) {
+        textarea.value = '';
+        text('reviewFormMessage', 'Đã lưu nhận xét trên trình duyệt này.');
+        renderReviews(item);
+      } else {
+        text('reviewFormMessage', 'Không thể lưu nhận xét. Vui lòng kiểm tra bộ nhớ trình duyệt.');
+      }
+    });
+  }
+
+  // ---------- Khởi tạo ----------
+  async function init() {
+    const requestedId = (new URLSearchParams(location.search).get('id') || 'cvpr-2026').trim();
+    const fallback = window.ConfGuideFallbackConferences || [];
+    let data = fallback;
     try {
       const response = await fetch('data/conference_data.json');
-      if (response.ok) {
-        const data = await response.json();
-        if (Array.isArray(data) && data.length > 0) {
-          allConferences = data;
-        }
-      }
-    } catch (e) {
-      // Khi mở qua file:///, trình duyệt chặn fetch cục bộ -> dùng allConferences từ fallback
-      console.info('Giao thức file:/// chặn fetch json, sử dụng bộ dữ liệu dự phòng chuẩn hóa.');
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const parsed = await response.json();
+      if (Array.isArray(parsed) && parsed.length) data = parsed;
+    } catch (_) {
+      // file:// thường chặn fetch JSON, nên giữ dữ liệu dự phòng có sẵn.
+      console.info('Không tải được conference_data.json; sử dụng dữ liệu dự phòng.');
     }
-
-    // Tìm kiếm theo id slug hoặc normalized name
-    currentConference = allConferences.find(c => c.id === confId) ||
-      allConferences.find(c => c.id === confId.toLowerCase()) ||
-      allConferences.find(c => (c.name || '').toLowerCase().replace(/[^a-z0-9]+/g, '-') === confId.toLowerCase()) ||
-      allConferences[0];
-
-    populateData(currentConference);
-    renderRelatedConferences(currentConference);
-    setupReviews(currentConference);
-    setupSaveButton(currentConference);
-    setupUserStarRating(currentConference);
-    setupExportAllIcsButton(currentConference);
+    conferences = data.filter(item => item && item.name).map(normalizeConference);
+    conference = conferences.find(item => item.id === requestedId)
+      || conferences.find(item => item.id.toLowerCase() === requestedId.toLowerCase())
+      || conferences.find(item => slug(item.name) === slug(requestedId))
+      || conferences[0];
+    if (!conference) {
+      text('detailDesc', 'Không có dữ liệu hội nghị. Hãy tải trang bằng máy chủ web hoặc kiểm tra file dữ liệu.');
+      return;
+    }
+    renderOverview(conference);
+    renderRelated(conference);
+    setupBookmark(conference);
+    setupUserRating(conference);
+    setupReviews(conference);
+    clockTimer = setInterval(updateClocks, 1000);
+    window.addEventListener('pagehide', () => clearInterval(clockTimer), { once: true });
   }
 
-  // Đổ dữ liệu vào giao diện chi tiết
-  function populateData(conf) {
-    if (!conf) return;
-
-    const utils = getDetailUtils();
-
-    document.title = `${conf.name} - ConfGuide`;
-
-    // 1. Navigation Bar: Status & Rank Badges
-    const statusObj = utils.getStatus(conf);
-    const statusBadge = document.getElementById('detailStatusBadge');
-    if (statusBadge) {
-      statusBadge.textContent = statusObj.label;
-      statusBadge.className = `status-badge ${statusObj.badgeClass}`;
-    }
-
-    const rankBadge = document.getElementById('detailRankBadge');
-    if (rankBadge) {
-      rankBadge.textContent = `Rank ${conf.rank || 'A*'}`;
-    }
-
-    // 2. Hero Content
-    const regionPill = document.getElementById('detailRegionPill');
-    if (regionPill) regionPill.textContent = conf.region || 'Quốc tế';
-
-    const titleEl = document.getElementById('detailTitle');
-    if (titleEl) titleEl.textContent = conf.name;
-
-    const fullEl = document.getElementById('detailFullName');
-    if (fullEl) fullEl.textContent = conf.fullName || conf.full_name || conf.name;
-
-    const descEl = document.getElementById('detailDesc');
-    if (descEl) descEl.textContent = conf.summarization || 'Hội nghị khoa học uy tín dành cho cộng đồng nghiên cứu.';
-
-    const tagsContainer = document.getElementById('detailTags');
-    if (tagsContainer) {
-      const tags = conf.fields || conf.tags || ['Khoa học máy tính'];
-      tagsContainer.innerHTML = tags.map(t => `<span class="tag">${t}</span>`).join('');
-    }
-
-    // Hero Meta Grid
-    const locEl = document.getElementById('detailLocation');
-    if (locEl) locEl.textContent = conf.location || 'Chưa cập nhật';
-
-    const dateEl = document.getElementById('detailDate');
-    if (dateEl) {
-      dateEl.textContent = utils.formatRangeVi(conf.startDate, conf.endDate) || conf.date_happen || 'Năm 2026';
-    }
-
-    const fmtMap = {
-      'in-person': 'Trực tiếp (In-person)',
-      'online': 'Trực tuyến (Online)',
-      'hybrid': 'Kết hợp (Hybrid)'
-    };
-    const formatEl = document.getElementById('detailFormat');
-    if (formatEl) formatEl.textContent = fmtMap[conf.format] || conf.mode || 'Trực tiếp';
-
-    const feeEl = document.getElementById('detailFee');
-    if (feeEl) feeEl.textContent = conf.fee || 'Đang cập nhật';
-
-    // 3. Hero Countdown Card (Right Side)
-    const nextMilestone = utils.getNextDeadline(conf);
-    const nextNameEl = document.getElementById('detailNextMilestoneName');
-    const countdownDaysEl = document.getElementById('detailCountdownDays');
-    const deadlineExactEl = document.getElementById('detailDeadlineExact');
-    const liveTickerText = document.getElementById('heroLiveTickerText');
-    const btnCalGoogle = document.getElementById('btnCalGoogle');
-    const btnCalIcs = document.getElementById('btnCalIcs');
-
-    if (nextMilestone && !nextMilestone.isPassed) {
-      if (nextNameEl) nextNameEl.textContent = nextMilestone.name;
-      const leftDays = utils.daysLeft(nextMilestone.date);
-      if (countdownDaysEl) {
-        countdownDaysEl.textContent = `Còn ${Math.max(0, leftDays)} ngày`;
-      }
-      if (deadlineExactEl) {
-        deadlineExactEl.textContent = `${utils.formatDateVi(nextMilestone.date)} (AoE 23:59)`;
-      }
-
-      // Live Ticker
-      const updateTicker = () => {
-        const rem = utils.getAoETimeRemaining(nextMilestone.date);
-        if (liveTickerText && rem) {
-          liveTickerText.textContent = `${rem.days} ngày ${rem.hours}h ${rem.minutes}m ${rem.seconds}s`;
-        }
-      };
-      updateTicker();
-      if (window._heroTickerInterval) clearInterval(window._heroTickerInterval);
-      window._heroTickerInterval = setInterval(updateTicker, 1000);
-
-      // Thêm vào Google Calendar & Tải .ics cho mốc tiếp theo
-      if (btnCalGoogle) {
-        btnCalGoogle.onclick = function () {
-          const calTitle = `[ConfGuide] ${conf.name} - Hạn ${nextMilestone.shortName}`;
-          const calDesc = `Hạn nộp ${nextMilestone.name} cho hội nghị ${conf.fullName || conf.name} theo chuẩn múi giờ AoE (UTC-12).\\nWebsite: ${conf.website || conf.website_url || ''}`;
-          const calUrl = utils.getGoogleCalendarUrl(calTitle, calDesc, conf.location, nextMilestone.date);
-          window.open(calUrl, '_blank');
-        };
-      }
-
-      if (btnCalIcs) {
-        btnCalIcs.onclick = function () {
-          const calTitle = `[ConfGuide] ${conf.name} - Hạn ${nextMilestone.shortName}`;
-          const calDesc = `Hạn nộp ${nextMilestone.name} cho hội nghị ${conf.fullName || conf.name} (AoE UTC-12). Website: ${conf.website || conf.website_url || ''}`;
-          const icsContent = utils.createIcsContent([{
-            title: calTitle,
-            description: calDesc,
-            location: conf.location,
-            date: nextMilestone.date
-          }]);
-          utils.downloadIcsFile(`${conf.id}-${nextMilestone.key}.ics`, icsContent);
-        };
-      }
-    } else if (nextMilestone && nextMilestone.isPassed) {
-      if (nextNameEl) nextNameEl.textContent = 'Đã hết hạn nộp bài';
-      if (countdownDaysEl) countdownDaysEl.textContent = 'Đã đóng đợt nộp';
-      if (deadlineExactEl) deadlineExactEl.textContent = 'Hội nghị đã hoàn thành nhận bài';
-      if (liveTickerText) liveTickerText.textContent = 'Đã kết thúc nhận bài';
-      if (btnCalGoogle) btnCalGoogle.style.display = 'none';
-      if (btnCalIcs) btnCalIcs.style.display = 'none';
-    } else {
-      if (nextNameEl) nextNameEl.textContent = 'Đang cập nhật mốc';
-      if (countdownDaysEl) countdownDaysEl.textContent = 'Chưa công bố';
-      if (deadlineExactEl) deadlineExactEl.textContent = 'Ban tổ chức chưa công bố ngày cụ thể';
-      if (liveTickerText) liveTickerText.textContent = 'Chưa có mốc thời gian';
-      if (btnCalGoogle) btnCalGoogle.style.display = 'none';
-      if (btnCalIcs) btnCalIcs.style.display = 'none';
-    }
-
-    // 4. Render 4-Milestone Timeline
-    renderTimeline(conf);
-
-    // 5. Overview Description Card
-    const overviewEl = document.getElementById('detailOverviewText');
-    if (overviewEl) {
-      overviewEl.innerHTML = `
-        <p>${conf.summarization || conf.fullName || conf.full_name || 'Hội nghị khoa học uy tín.'}</p>
-        <p>Hội nghị được tổ chức tại <strong>${conf.location || 'địa điểm cập nhật'}</strong>, quy tụ các nhà khoa học, giảng viên và sinh viên nghiên cứu hàng đầu. Diễn đàn thảo luận về các công trình nghiên cứu tiên tiến, tạo cơ hội hợp tác và công bố quốc tế.</p>
-      `;
-    }
-
-    // Specifications
-    const infoLoc = document.getElementById('infoLocation');
-    if (infoLoc) infoLoc.textContent = conf.location || 'Chưa cập nhật';
-
-    const infoFormat = document.getElementById('infoFormat');
-    if (infoFormat) infoFormat.textContent = fmtMap[conf.format] || conf.mode || 'Trực tiếp';
-
-    const infoRegion = document.getElementById('infoRegion');
-    if (infoRegion) infoRegion.textContent = conf.region || 'Quốc tế';
-
-    const infoDate = document.getElementById('infoDate');
-    if (infoDate) infoDate.textContent = utils.formatRangeVi(conf.startDate, conf.endDate) || conf.date_happen || 'Năm 2026';
-
-    const infoPub = document.getElementById('infoPublisher');
-    if (infoPub) infoPub.textContent = conf.publisher || 'IEEE / ACM / Springer';
-
-    const infoIndexing = document.getElementById('infoIndexing');
-    if (infoIndexing) {
-      const idxList = conf.indexing || ['Scopus', 'DBLP'];
-      infoIndexing.textContent = Array.isArray(idxList) ? idxList.join(', ') : idxList;
-    }
-
-    const infoFee = document.getElementById('infoFee');
-    if (infoFee) infoFee.textContent = conf.fee || 'Miễn phí';
-
-    const infoFields = document.getElementById('infoFields');
-    if (infoFields) infoFields.textContent = (conf.fields || []).join(', ');
-
-    const infoRank = document.getElementById('infoRank');
-    if (infoRank) infoRank.textContent = conf.rank || 'A*';
-
-    const infoVerified = document.getElementById('infoVerified');
-    if (infoVerified) infoVerified.textContent = utils.formatDateVi(conf.lastVerified || '2026-03-15');
-
-    const infoDeadlines = document.getElementById('infoDeadlines');
-    if (infoDeadlines && conf.deadlines) {
-      if (typeof conf.deadlines === 'object' && !Array.isArray(conf.deadlines)) {
-        infoDeadlines.innerHTML = utils.MILESTONE_DEFINITIONS.map(m => {
-          const dVal = conf.deadlines[m.key];
-          return dVal ? `<div style="margin-bottom: 4px;"><strong>${m.name}:</strong> ${utils.formatDateVi(dVal)} (AoE)</div>` : '';
-        }).filter(Boolean).join('');
-      } else if (Array.isArray(conf.deadlines)) {
-        infoDeadlines.innerHTML = conf.deadlines.map(d => `
-          <div style="margin-bottom: 4px;"><strong>${d.name}:</strong> ${utils.formatDateVi(d.date)}</div>
-        `).join('');
-      }
-    }
-
-    // Official Web link
-    const webBtn = document.getElementById('webBtn');
-    if (webBtn) {
-      const targetWeb = conf.website || conf.website_url || '#';
-      webBtn.href = targetWeb;
-      if (!conf.website && !conf.website_url) {
-        webBtn.style.opacity = '0.5';
-        webBtn.style.pointerEvents = 'none';
-      }
-    }
-
-    // Community Ratings
-    const avgScoreEl = document.getElementById('avgScore');
-    if (avgScoreEl) avgScoreEl.textContent = conf.rating ? Number(conf.rating).toFixed(1) : '—';
-
-    const countTextEl = document.getElementById('reviewsCountText');
-    if (countTextEl) countTextEl.textContent = conf.rating_count ? `Số liệu tham khảo trong dữ liệu (${conf.rating_count})` : 'Chưa có dữ liệu tổng hợp';
-
-    if (conf.rating) renderStarScore(conf.rating);
-    else {
-      const starBox = document.getElementById('headerStars');
-      if (starBox) starBox.replaceChildren();
-    }
-  }
-
-  // Render Tiến trình 4 mốc Timeline chuẩn AoE
-  function renderTimeline(conf) {
-    const track = document.getElementById('timelineTrack');
-    if (!track || !conf) return;
-
-    const utils = getDetailUtils();
-    const deadlines = conf.deadlines || {};
-    const next = utils.getNextDeadline(conf);
-
-    track.innerHTML = utils.MILESTONE_DEFINITIONS.map((m, idx) => {
-      const dateVal = deadlines[m.key];
-      const left = dateVal ? utils.daysLeft(dateVal) : null;
-      const isPassed = left !== null && left < 0;
-      const isActive = next && next.key === m.key && !next.isPassed;
-
-      let stepClass = 'timeline-step';
-      let statusText = '';
-      let countdownLive = '';
-      let addCalBtn = '';
-
-      if (!dateVal) {
-        stepClass += ' step-upcoming';
-        statusText = 'Không áp dụng';
-      } else if (isPassed) {
-        stepClass += ' step-passed';
-        statusText = `Đã qua (${utils.formatDateVi(dateVal)})`;
-      } else if (isActive) {
-        stepClass += ' step-active';
-        const timeParts = utils.getAoETimeRemaining(dateVal);
-        statusText = `Còn ${left} ngày`;
-        countdownLive = `
-          <div class="live-clock" id="liveClock-${m.key}" style="font-size: 11.5px; color: var(--primary); font-weight: 700; margin-top: 6px;">
-            Đếm ngược: ${timeParts.days}d ${timeParts.hours}h ${timeParts.minutes}m ${timeParts.seconds}s
-          </div>
-        `;
-        addCalBtn = `
-          <button type="button" class="step-cal-mini-btn" data-mkey="${m.key}" title="Thêm mốc này vào Google Calendar">
-            + Thêm vào lịch
-          </button>
-        `;
-      } else {
-        stepClass += ' step-upcoming';
-        statusText = `Còn ${left} ngày`;
-        addCalBtn = `
-          <button type="button" class="step-cal-mini-btn" data-mkey="${m.key}" title="Thêm mốc này vào Google Calendar">
-            + Thêm vào lịch
-          </button>
-        `;
-      }
-
-      return `
-        <div class="${stepClass}">
-          <div class="step-badge-num">${isPassed ? '✓' : (idx + 1)}</div>
-          <div class="step-name">${m.name}</div>
-          <div class="step-date">${dateVal ? utils.formatDateVi(dateVal) + ' (AoE)' : 'Chưa công bố'}</div>
-          <div class="step-status-tag">${statusText}</div>
-          ${countdownLive}
-          ${addCalBtn}
-        </div>
-      `;
-    }).join('');
-
-    // Gắn sự kiện thêm vào lịch cho các nút con trong timeline
-    track.querySelectorAll('.step-cal-mini-btn').forEach(btn => {
-      btn.addEventListener('click', function () {
-        const mkey = this.getAttribute('data-mkey');
-        const mDef = utils.MILESTONE_DEFINITIONS.find(m => m.key === mkey);
-        const mDate = deadlines[mkey];
-        if (mDef && mDate) {
-          const calTitle = `[ConfGuide] ${conf.name} - Hạn ${mDef.shortName}`;
-          const calDesc = `Hạn nộp ${mDef.name} cho hội nghị ${conf.fullName || conf.name} (AoE UTC-12).\\nWebsite: ${conf.website || conf.website_url || ''}`;
-          const calUrl = utils.getGoogleCalendarUrl(calTitle, calDesc, conf.location, mDate);
-          window.open(calUrl, '_blank');
-        }
-      });
-    });
-
-    // Thiết lập Interval cập nhật thời gian thực cho step active
-    if (window._timelineInterval) clearInterval(window._timelineInterval);
-    if (next && !next.isPassed && deadlines[next.key]) {
-      const targetDate = deadlines[next.key];
-      window._timelineInterval = setInterval(() => {
-        const clockEl = document.getElementById(`liveClock-${next.key}`);
-        const rem = utils.getAoETimeRemaining(targetDate);
-        if (clockEl && rem) {
-          clockEl.textContent = `Đếm ngược: ${rem.days}d ${rem.hours}h ${rem.minutes}m ${rem.seconds}s`;
-        }
-      }, 1000);
-    }
-  }
-
-  // Render các ngôi sao hiển thị điểm số
-  function renderStarScore(score) {
-    const starBox = document.getElementById('headerStars');
-    if (!starBox) return;
-
-    let html = '';
-    for (let i = 1; i <= 5; i++) {
-      const isLit = i <= Math.round(score);
-      html += `
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="${isLit ? 'var(--gold)' : 'none'}" stroke="var(--gold)" stroke-width="1.5">
-          <path d="${STAR_PATH}"/>
-        </svg>
-      `;
-    }
-    starBox.innerHTML = html;
-  }
-
-  // Setup nút Lưu hội nghị (Bookmark)
-  function setupSaveButton(conf) {
-    const saveBtn = document.getElementById('saveBtn');
-    const saveText = document.getElementById('saveText');
-    if (!saveBtn || !saveText) return;
-
-    const confId = conf.id || 'conf';
-    let savedList = getSavedList();
-    const isSaved = savedList.includes(confId);
-
-    updateSaveUi(isSaved);
-
-    saveBtn.onclick = function () {
-      let currentList = getSavedList();
-      const nowSaved = currentList.includes(confId);
-      if (nowSaved) {
-        currentList = currentList.filter(id => id !== confId);
-        setSavedList(currentList);
-        updateSaveUi(false);
-      } else {
-        currentList.push(confId);
-        setSavedList(currentList);
-        updateSaveUi(true);
-      }
-    };
-
-    function updateSaveUi(saved) {
-      saveBtn.classList.toggle('on', saved);
-      saveBtn.setAttribute('aria-pressed', saved);
-      saveText.textContent = saved ? 'Đã lưu hội nghị' : 'Lưu hội nghị này';
-      const svg = saveBtn.querySelector ? saveBtn.querySelector('svg') : null;
-      if (svg) svg.setAttribute('fill', saved ? 'var(--gold)' : 'none');
-    }
-  }
-
-  // Setup Xuất toàn bộ 4 mốc lịch ra file .ics
-  function setupExportAllIcsButton(conf) {
-    const btn = document.getElementById('btnExportAllIcs');
-    if (!btn || !conf) return;
-
-    btn.onclick = function () {
-      const utils = getDetailUtils();
-      if (!utils || !utils.createIcsContent || !utils.downloadIcsFile) return;
-
-      const deadlines = conf.deadlines || {};
-      const events = [];
-
-      utils.MILESTONE_DEFINITIONS.forEach(m => {
-        const dVal = deadlines[m.key];
-        if (dVal) {
-          events.push({
-            title: `[ConfGuide] ${conf.name} - ${m.name}`,
-            description: `Hạn mốc ${m.name} của hội nghị ${conf.fullName || conf.name} theo chuẩn AoE.\\nWebsite: ${conf.website || conf.website_url || ''}`,
-            location: conf.location || '',
-            date: dVal
-          });
-        }
-      });
-
-      if (events.length === 0) {
-        alert('Hội nghị này chưa có mốc thời gian cụ thể để xuất lịch.');
-        return;
-      }
-
-      const icsContent = utils.createIcsContent(events);
-      utils.downloadIcsFile(`${conf.id}-all-deadlines.ics`, icsContent);
-    };
-  }
-
-  // Setup hệ thống chấm sao người dùng
-  function setupUserStarRating(conf) {
-    const starsBox = document.getElementById('stars');
-    const rateMsg = document.getElementById('rateMsg');
-    if (!starsBox || !rateMsg) return;
-
-    starsBox.innerHTML = '';
-    const userRatingKey = `confguide_rating_${conf.id}`;
-    let userRating = 0;
-    try { userRating = Number(localStorage.getItem(userRatingKey)) || 0; } catch (_) {}
-
-    for (let i = 1; i <= 5; i++) {
-      const b = document.createElement('button');
-      b.className = 'star-btn';
-      b.setAttribute('aria-label', `${i} sao`);
-      b.innerHTML = `<svg viewBox="0 0 24 24"><path d="${STAR_PATH}"/></svg><span>${i}</span>`;
-      
-      b.addEventListener('mouseenter', () => paint(i));
-      b.addEventListener('click', () => {
-        userRating = (userRating === i) ? 0 : i;
-        try { localStorage.setItem(userRatingKey, userRating); } catch (_) {}
-        paint(userRating);
-        rateMsg.textContent = userRating ? `Bạn đã chấm ${userRating}/5 sao. Cảm ơn bạn!` : '';
-      });
-      starsBox.appendChild(b);
-    }
-
-    starsBox.addEventListener('mouseleave', () => paint(userRating));
-
-    function paint(n) {
-      [...starsBox.children].forEach((btn, idx) => {
-        btn.classList.toggle('lit', idx < n);
-      });
-    }
-
-    paint(userRating);
-    if (userRating) rateMsg.textContent = `Bạn đã chấm ${userRating}/5 sao.`;
-  }
-
-  // Render Hội nghị liên quan
-  function renderRelatedConferences(current) {
-    const grid = document.getElementById('relGrid');
-    if (!grid) return;
-
-    const utils = getDetailUtils();
-    const curFields = Array.isArray(current.fields) ? current.fields : [];
-
-    let relatedList = allConferences.filter(c => c.id !== current.id);
-    // Ưu tiên các hội nghị có cùng chủ đề/lĩnh vực nghiên cứu
-    relatedList.sort((a, b) => {
-      const aMatch = (a.fields || []).filter(f => curFields.includes(f)).length;
-      const bMatch = (b.fields || []).filter(f => curFields.includes(f)).length;
-      return bMatch - aMatch;
-    });
-    relatedList = relatedList.slice(0, 3);
-
-    grid.innerHTML = relatedList.map(item => {
-      const nextDl = utils ? utils.getNextDeadline(item) : null;
-      let daysText = 'Sắp tới';
-      let isClosed = false;
-      if (nextDl) {
-        isClosed = !!nextDl.isPassed;
-        daysText = isClosed ? 'Đã đóng' : `Còn ${Math.max(0, nextDl.daysLeft)}d`;
-      }
-      const tags = (item.fields || ['AI']).slice(0, 2);
-      const rankBadge = item.rank || 'A*';
-
-      return `
-        <article class="rc" data-id="${item.id}" tabindex="0" role="link" aria-label="Xem chi tiết hội nghị ${item.name}">
-          <div class="thumb">
-            <b>${item.name.replace(' ', '<br>')}</b>
-          </div>
-          <div class="body">
-            <div class="rc-top">
-              <h5 title="${item.name}">${item.name}</h5>
-              <span class="days ${isClosed ? 'closed' : ''}">${daysText}</span>
-            </div>
-            <div class="full" title="${item.fullName || item.name}">${item.fullName || item.name}</div>
-            <div class="tg">${tags.map(t => `<span title="${t}">${t}</span>`).join('')}</div>
-            <div class="bottom">
-              <a href="detail.html?id=${item.id}" class="save-sm">
-                Xem chi tiết &rarr;
-              </a>
-              <span class="rank">${rankBadge}</span>
-            </div>
-          </div>
-        </article>
-      `;
-    }).join('');
-
-    // Click vào bất kỳ vị trí nào trên thẻ (hoặc nút Xem chi tiết) đều điều hướng sang trang chi tiết
-    grid.querySelectorAll('.rc').forEach(card => {
-      const confId = card.getAttribute('data-id');
-      const goToDetail = () => {
-        if (confId) {
-          window.location.href = `detail.html?id=${encodeURIComponent(confId)}`;
-        }
-      };
-
-      card.addEventListener('click', function (e) {
-        if (e.target.closest('a')) return;
-        goToDetail();
-      });
-
-      card.addEventListener('keydown', function (e) {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          goToDetail();
-        }
-      });
-    });
-  }
-
-  // Điều hướng và trang Review
-  function setupReviews(conf) {
-    const viewDetail = document.getElementById('viewDetail');
-    const viewReviews = document.getElementById('viewReviews');
-    const openBox = document.getElementById('openReviews');
-    const backBtn = document.getElementById('backBtn');
-    const backToDetailBtn = document.getElementById('backToDetailBtn');
-
-    if (!viewDetail || !viewReviews || !openBox || !backBtn) return;
-
-    function route() {
-      const isRv = location.hash === '#danh-gia';
-      viewDetail.hidden = isRv;
-      viewReviews.hidden = !isRv;
-      window.scrollTo(0, 0);
-    }
-
-    window.addEventListener('hashchange', route);
-
-    openBox.addEventListener('click', () => {
-      location.hash = '#danh-gia';
-    });
-
-    openBox.addEventListener('keydown', e => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        location.hash = '#danh-gia';
-      }
-    });
-
-    if (backToDetailBtn) {
-      backToDetailBtn.addEventListener('click', () => {
-        location.hash = '';
-      });
-    }
-
-    // Nút Back thông minh (hoạt động tốt trên cả file:///)
-    backBtn.addEventListener('click', () => {
-      if (location.hash === '#danh-gia') {
-        location.hash = '';
-      } else if (window.history.length > 1 && (document.referrer || window.history.state !== null)) {
-        window.history.back();
-      } else {
-        window.location.assign('search.html');
-      }
-    });
-
-    // Render nội dung trang review
-    const rvPageTitle = document.getElementById('rvPageTitle');
-    if (rvPageTitle) rvPageTitle.textContent = `Nhận xét hội nghị · ${conf.name}`;
-
-    renderReviewsList(conf);
-    const reviewForm = document.getElementById('reviewForm');
-    const reviewText = document.getElementById('reviewText');
-    const message = document.getElementById('reviewFormMessage');
-    if (reviewForm && reviewText) reviewForm.addEventListener('submit', event => {
-      event.preventDefault();
-      const text = reviewText.value.trim();
-      if (!text) { reviewText.focus(); return; }
-      const key = `confguide_reviews_${conf.id}`;
-      try {
-        const saved = JSON.parse(localStorage.getItem(key) || '[]');
-        const user = window.ConfGuideLayout?.getCurrentUser?.();
-        saved.unshift({ id: `${Date.now()}-${Math.random().toString(36).slice(2)}`, author: user?.name || user?.username || 'Người dùng ConfGuide', text, createdAt: new Date().toISOString() });
-        localStorage.setItem(key, JSON.stringify(saved));
-        reviewText.value = '';
-        if (message) message.textContent = 'Đã lưu nhận xét trên trình duyệt này.';
-        renderReviewsList(conf);
-      } catch (_) {
-        if (message) message.textContent = 'Không thể lưu nhận xét. Vui lòng kiểm tra bộ nhớ trình duyệt.';
-      }
-    });
-  }
-
-  function renderReviewsList(conf) {
-    const rvList = document.getElementById('rvList');
-    const rvStars = document.getElementById('rvStars');
-    if (!rvList) return;
-
-    // Stars lớn
-    if (rvStars) {
-      rvStars.innerHTML = [1, 2, 3, 4, 5].map(i => `
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="var(--gold)"><path d="${STAR_PATH}"/></svg>
-      `).join('');
-    }
-
-    const escape = value => String(value ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-    let reviews = [];
-    try { const parsed = JSON.parse(localStorage.getItem(`confguide_reviews_${conf.id}`) || '[]'); reviews = Array.isArray(parsed) ? parsed : []; } catch (_) {}
-    const rvAvg = document.getElementById('rvAvg');
-    const rvTotal = document.getElementById('rvTotal');
-    const rvBars = document.getElementById('rvBars');
-    if (rvAvg) rvAvg.textContent = conf.rating ? Number(conf.rating).toFixed(1) : '—';
-    if (rvTotal) rvTotal.textContent = `${reviews.length} nhận xét trên trình duyệt này`;
-    if (rvBars) rvBars.textContent = 'Điểm tham khảo từ dữ liệu hội nghị; nhận xét bên dưới chỉ lưu cục bộ.';
-    rvList.innerHTML = reviews.length ? reviews.map(item => `
-      <article class="card rv-card">
-        <strong>${escape(item.author || 'Người dùng ConfGuide')}</strong>
-        <small>${escape(item.createdAt ? new Date(item.createdAt).toLocaleString('vi-VN') : '')}</small>
-        <p>${escape(item.text)}</p>
-      </article>`).join('') : '<p class="card rv-card">Chưa có nhận xét nào được lưu trên trình duyệt này. Bạn có thể gửi nhận xét đầu tiên.</p>';
-  }
-
-  // Khởi chạy khi DOM sẵn sàng
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', loadConferenceDetail);
-  } else {
-    loadConferenceDetail();
-  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, { once: true });
+  else init();
 })();
