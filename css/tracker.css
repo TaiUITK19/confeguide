@@ -184,7 +184,7 @@ th:nth-child(4) { width: 20%; }
   gap: 16px;
 }
 
-.logo-placeholder {
+.logo-badge {
   width: 68px;
   height: 46px;
   border-radius: var(--radius-sm);
@@ -199,12 +199,12 @@ th:nth-child(4) { width: 20%; }
   flex: 0 0 auto;
 }
 
-.logo-placeholder.red {
+.logo-badge.red {
   color: var(--red);
   background: rgba(224, 49, 49, 0.1);
 }
 
-.logo-placeholder.yellow {
+.logo-badge.yellow {
   color: #b45309;
   background: rgba(245, 179, 1, 0.15);
 }
@@ -453,7 +453,7 @@ body.dark .stat-box strong {
   color: var(--navy);
 }
 
-body.dark .logo-placeholder {
+body.dark .logo-badge {
   background: var(--surface-muted);
   color: var(--navy);
 }

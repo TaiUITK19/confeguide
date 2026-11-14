@@ -1,154 +1,12 @@
-/**
- * ConfGuide - Advanced Search Application Script (js/app.js)
- * Bộ lọc đa chiều, đồng bộ URL parameters, chip tags hoạt động, bookmark theo người dùng
- */
-
 (function () {
-  'use strict';
-
-  // Fallback dataset đầy đủ nếu chạy bằng file:/// và fetch bị chặn
-  const FALLBACK_CONFERENCES = [
-    {
-      "id": "cvpr-2026",
-      "name": "CVPR 2026",
-      "year": "2026",
-      "full_name": "IEEE/CVF Conference on Computer Vision and Pattern Recognition",
-      "summarization": "Hội nghị quốc tế uy tín số 1 thế giới về thị giác máy tính và nhận dạng mẫu.",
-      "location": "Vancouver, Canada",
-      "date_happen": "2026-06-14 to 2026-06-19",
-      "rank": "A*",
-      "rating": 4.8,
-      "rating_count": 142,
-      "publisher": "IEEE / CVF",
-      "mode": "Trực tiếp",
-      "fields": ["computer vision", "deep learning", "multimodal ai"],
-      "deadlines": [
-        { "name": "Paper Submission", "date": "2026-01-15" },
-        { "name": "Author Notification", "date": "2026-03-25" }
-      ]
-    },
-    {
-      "id": "neurips-2026",
-      "name": "NeurIPS 2026",
-      "year": "2026",
-      "full_name": "Conference on Neural Information Processing Systems",
-      "summarization": "Hội nghị học máy và khoa học thần kinh tính toán hàng đầu thế giới.",
-      "location": "Sydney, Australia",
-      "date_happen": "2026-12-06 to 2026-12-12",
-      "rank": "A*",
-      "rating": 4.9,
-      "rating_count": 210,
-      "publisher": "NeurIPS Foundation",
-      "mode": "Trực tiếp",
-      "fields": ["machine learning", "deep learning", "ai"],
-      "deadlines": [
-        { "name": "Abstract Submission", "date": "2026-05-15" },
-        { "name": "Full Paper Submission", "date": "2026-05-22" }
-      ]
-    },
-    {
-      "id": "iclr-2026",
-      "name": "ICLR 2026",
-      "year": "2026",
-      "full_name": "International Conference on Learning Representations",
-      "summarization": "Hội nghị hàng đầu về biểu diễn học và học sâu, quy tụ các công trình đột phá về AI.",
-      "location": "Singapore",
-      "date_happen": "2026-04-26 to 2026-04-30",
-      "rank": "A*",
-      "rating": 4.8,
-      "rating_count": 135,
-      "publisher": "ICLR",
-      "mode": "Hybrid",
-      "fields": ["deep learning", "representation learning", "ai"],
-      "deadlines": [
-        { "name": "Paper Submission", "date": "2025-10-22" },
-        { "name": "Author Notification", "date": "2026-01-22" }
-      ]
-    },
-    {
-      "id": "acl-2026",
-      "name": "ACL 2026",
-      "year": "2026",
-      "full_name": "Annual Meeting of the Association for Computational Linguistics",
-      "summarization": "Diễn đàn quốc tế uy tín nhất về xử lý ngôn ngữ tự nhiên (NLP) và mô hình ngôn ngữ lớn (LLM).",
-      "location": "Vienna, Austria",
-      "date_happen": "2026-07-05 to 2026-07-10",
-      "rank": "A*",
-      "rating": 4.7,
-      "rating_count": 98,
-      "publisher": "ACL",
-      "mode": "Hybrid",
-      "fields": ["nlp", "language models", "computational linguistics"],
-      "deadlines": [
-        { "name": "Paper Submission", "date": "2026-02-18" },
-        { "name": "Author Notification", "date": "2026-05-15" }
-      ]
-    },
-    {
-      "id": "atc-2026",
-      "name": "ATC 2026",
-      "year": "2026",
-      "full_name": "International Conference on Advanced Technologies for Communications",
-      "summarization": "Hội nghị quốc tế thường niên về công nghệ truyền thông và viễn thông tại Việt Nam.",
-      "location": "Quy Nhơn, Việt Nam",
-      "date_happen": "2026-10-15 to 2026-10-17",
-      "rank": "B",
-      "rating": 4.2,
-      "rating_count": 45,
-      "publisher": "IEEE ComSoc / REV",
-      "mode": "Trực tiếp",
-      "fields": ["communications", "wireless networks", "iot"],
-      "deadlines": [
-        { "name": "Paper Submission", "date": "2026-05-30" },
-        { "name": "Author Notification", "date": "2026-07-30" }
-      ]
-    },
-    {
-      "id": "soict-2026",
-      "name": "SOICT 2026",
-      "year": "2026",
-      "full_name": "The 15th International Symposium on Information and Communication Technology",
-      "summarization": "Hội thảo quốc tế về CNTT quy tụ các hướng nghiên cứu hiện đại: AI, An ninh mạng, Big Data.",
-      "location": "TP. Hồ Chí Minh, Việt Nam",
-      "date_happen": "2026-12-04 to 2026-12-05",
-      "rank": "B",
-      "rating": 4.3,
-      "rating_count": 52,
-      "publisher": "ACM / Springer",
-      "mode": "Trực tiếp",
-      "fields": ["ai foundations", "big data", "cyber security"],
-      "deadlines": [
-        { "name": "Full Paper Submission", "date": "2026-09-25" },
-        { "name": "Author Notification", "date": "2026-10-12" }
-      ]
-    },
-    {
-      "id": "mapr-2026",
-      "name": "MAPR 2026",
-      "year": "2026",
-      "full_name": "International Conference on Multimedia Analysis and Pattern Recognition",
-      "summarization": "Hội nghị quốc tế chuyên sâu về Phân tích Đa phương tiện và Nhận dạng Mẫu do UIT chủ trì.",
-      "location": "Đà Nẵng, Việt Nam",
-      "date_happen": "2026-10-08 to 2026-10-09",
-      "rank": "B",
-      "rating": 4.4,
-      "rating_count": 48,
-      "publisher": "IEEE",
-      "mode": "Trực tiếp",
-      "fields": ["multimedia", "pattern recognition", "computer vision"],
-      "deadlines": [
-        { "name": "Paper Submission", "date": "2026-06-15" },
-        { "name": "Author Notification", "date": "2026-08-10" }
-      ]
-    }
-  ];
-
   let rawConferences = [];
   let filteredConferences = [];
   const PAGE_SIZE = 8;
   let currentPage = 1;
+  let isDataLoaded = false;
+  let dataLoadError = null;
 
-  // Helper lấy storage key của user hiện tại
+  // Lấy khóa lưu hội nghị của người dùng
   function getSavedStorageKey() {
     try {
       const userStr = localStorage.getItem('confguide_current_user');
@@ -190,7 +48,7 @@
     });
   }
 
-  // Render các lĩnh vực động vào sidebar
+  // Hiển thị các lĩnh vực trong bộ lọc
   function populateDynamicFields(data) {
     const container = document.getElementById('dynamicFieldsContainer');
     if (!container) return;
@@ -223,7 +81,7 @@
     }).join('');
   }
 
-  // Đọc params từ URL
+  // Đọc bộ lọc từ URL
   function getUrlParams() {
     const params = new URLSearchParams(window.location.search);
     return {
@@ -241,7 +99,7 @@
     };
   }
 
-  // Đồng bộ trạng thái UI từ params
+  // Cập nhật giao diện theo URL
   function setUiFromParams(params) {
     const searchInput = document.getElementById('searchInput');
     if (searchInput) searchInput.value = params.q;
@@ -273,9 +131,10 @@
     setCheckboxes('status', params.status);
   }
 
-  // Thu thập filter từ UI
+  // Lấy bộ lọc từ giao diện
   function getFiltersFromUi() {
-    const getChecked = name => [...document.querySelectorAll(`input[name="${name}"]:checked`)].map(cb => cb.value);
+    const getChecked = name =>
+      [...document.querySelectorAll(`input[name="${name}"]:checked`)].map(cb => cb.value);
 
     return {
       q: (document.getElementById('searchInput')?.value || '').trim(),
@@ -292,7 +151,24 @@
     };
   }
 
-  // Đồng bộ URL với state hiện tại
+  // Kiểm tra người dùng có đang áp dụng bất kỳ bộ lọc nào hay không
+  function hasActiveFilters(filters) {
+    if (!filters) return false;
+    return Boolean(
+      (filters.q && filters.q.trim().length > 0) ||
+      (Array.isArray(filters.rank) && filters.rank.length > 0) ||
+      (Array.isArray(filters.region) && filters.region.length > 0) ||
+      (Array.isArray(filters.mode) && filters.mode.length > 0) ||
+      (Array.isArray(filters.fields) && filters.fields.length > 0) ||
+      (Array.isArray(filters.publisher) && filters.publisher.length > 0) ||
+      (Array.isArray(filters.status) && filters.status.length > 0) ||
+      (filters.from && filters.from.trim().length > 0) ||
+      (filters.to && filters.to.trim().length > 0) ||
+      Boolean(filters.past)
+    );
+  }
+
+  // Cập nhật URL theo bộ lọc
   function syncUrl(filters) {
     const params = new URLSearchParams();
     if (filters.q) params.set('q', filters.q);
@@ -308,11 +184,12 @@
     if (filters.sort && filters.sort !== 'relevance') params.set('sort', filters.sort);
 
     const queryString = params.toString();
-    const newRelativePathQuery = window.location.pathname + (queryString ? '?' + queryString : '');
+    const newRelativePathQuery = window.location.pathname +
+      (queryString ? '?' + queryString : '');
     window.history.replaceState(null, '', newRelativePathQuery);
   }
 
-  // Đếm ngược deadline & ngày
+  // Xử lý ngày và hạn nộp bài
   function getNearestDeadline(deadlines) {
     if (!deadlines || !Array.isArray(deadlines) || deadlines.length === 0) return null;
     return deadlines[0];
@@ -380,21 +257,25 @@
       // 4. Mode / Hình thức
       if (filters.mode.length > 0) {
         const confMode = (conf.mode || 'Trực tiếp').toLowerCase();
-        const matchMode = filters.mode.some(m => confMode.includes(m.toLowerCase()));
+        const matchMode = filters.mode.some(m =>
+          confMode.includes(m.toLowerCase()));
         if (!matchMode) return false;
       }
 
       // 5. Fields
       if (filters.fields.length > 0) {
         const confFields = (conf.fields || []).map(f => f.toLowerCase());
-        const matchField = filters.fields.some(f => confFields.includes(f.toLowerCase()));
+        const matchField = filters.fields.some(f =>
+          confFields.includes(f.toLowerCase()));
         if (!matchField) return false;
       }
 
       // 6. Publisher & Index
       if (filters.publisher.length > 0) {
-        const pubText = [conf.publisher, conf.full_name, conf.summarization].filter(Boolean).join(' ').toLowerCase();
-        const matchPub = filters.publisher.some(p => pubText.includes(p.toLowerCase()));
+        const pubText = [conf.publisher, conf.full_name, conf.summarization]
+          .filter(Boolean).join(' ').toLowerCase();
+        const matchPub = filters.publisher.some(p =>
+          pubText.includes(p.toLowerCase()));
         if (!matchPub) return false;
       }
 
@@ -428,14 +309,13 @@
       return true;
     });
 
-    sortAndRender(filters.sort);
+    sortConferences(filters.sort);
+    renderSearchResults();
   }
 
-  // Sắp xếp và Render danh sách kết quả
-  function sortAndRender(sortType) {
-    const list = [...filteredConferences];
-
-    list.sort((a, b) => {
+  // Sắp xếp danh sách kết quả theo tiêu chí
+  function sortConferences(sortType) {
+    filteredConferences.sort((a, b) => {
       if (sortType === 'deadline') {
         const deadA = getNearestDeadline(a.deadlines)?.date || '9999-99-99';
         const deadB = getNearestDeadline(b.deadlines)?.date || '9999-99-99';
@@ -456,11 +336,9 @@
       const scoreB = (rankOrder[b.rank] || 1) * 10 + (b.rating || 0);
       return scoreB - scoreA;
     });
-
-    renderConferenceCards(list);
   }
 
-  // Render các active chips
+  // Hiển thị các bộ lọc đang chọn
   function renderActiveChips(filters) {
     const chipsBar = document.getElementById('activeChipsBar');
     const container = document.getElementById('activeChipsContainer');
@@ -556,139 +434,227 @@
     applyFiltering();
   }
 
-  // Render danh sách thẻ hội nghị
-  function renderConferenceCards(list) {
+  // Tạo HTML cho một hội nghị
+  function renderCardMarkup(conf, savedIds) {
+    const utils = window.ConfGuideUtils;
+    const nextDl = utils ? utils.getNextDeadline(conf) : null;
+
+    let countdownClass = 'deadline-countdown';
+    let countdownText = 'Chưa công bố';
+    let deadlineHeader = 'Hạn nộp bài';
+
+    if (nextDl) {
+      deadlineHeader = `Mốc tiếp theo: ${nextDl.shortName}`;
+      if (!nextDl.isPassed) {
+        countdownText = `Còn ${nextDl.daysLeft} ngày`;
+        if (nextDl.daysLeft <= 14) {
+          countdownClass += ' urgent';
+        }
+      } else {
+        countdownText = 'Đã qua đợt nộp';
+      }
+    }
+
+    const confId = conf.id || encodeURIComponent(
+      conf.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')
+    );
+    const isSaved = savedIds.includes(confId);
+
+    let rankClass = 'rank-c';
+    if (conf.rank === 'A*') rankClass = 'rank-a-star';
+    else if (conf.rank === 'A') rankClass = 'rank-a';
+    else if (conf.rank === 'B') rankClass = 'rank-b';
+
+    const fieldsTags = (conf.fields || []).slice(0, 4).map(f => `
+      <span class="tag-field">${f}</span>
+    `).join('');
+
+    return `
+      <article class="search-conf-card" data-id="${confId}">
+        <div class="card-main-col">
+          <div class="card-title-row">
+            <h3>${conf.name}</h3>
+            <span class="card-rank-badge ${rankClass}">Rank ${conf.rank || 'C'}</span>
+            <span class="tag-field">${conf.format || conf.mode || 'Trực tiếp'}</span>
+          </div>
+
+          <div class="card-full-name">${conf.fullName || conf.full_name || conf.name}</div>
+
+          <div class="card-meta-row">
+            <span class="card-meta-item">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a8 8 0 0 0-8 8c0 5.25 8 12 8 12s8-6.75 8-12a8 8 0 0 0-8-8z"/><circle cx="12" cy="10" r="3"/></svg>
+              <span>${conf.location || 'Chưa cập nhật'}</span>
+            </span>
+            <span class="card-meta-item">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+              <span>${utils ? utils.formatRangeVi(conf.startDate, conf.endDate) : (conf.date_happen || '2026')}</span>
+            </span>
+            ${conf.rating ? `
+              <span class="card-meta-item">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="#f5b301" stroke="#f5b301" stroke-width="1"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                <span>${conf.rating} / 5</span>
+              </span>
+            ` : ''}
+          </div>
+
+          <div class="card-tags">
+            ${fieldsTags}
+          </div>
+        </div>
+
+        <div class="card-action-col">
+          <div class="deadline-indicator">
+            <span class="deadline-label">${deadlineHeader}</span>
+            <span class="deadline-val">${nextDl ? utils.formatDateVi(nextDl.date) : 'Đang cập nhật'}</span>
+            <span class="${countdownClass}">${countdownText}</span>
+          </div>
+
+          <div class="card-buttons-group">
+            <a href="detail.html?id=${confId}" class="btn-card-detail">
+              Xem chi tiết &rarr;
+            </a>
+            <button type="button" class="btn-card-save ${isSaved ? 'saved' : ''}" data-save-id="${confId}">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="${isSaved ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+              </svg>
+              <span>${isSaved ? 'Đã lưu' : 'Lưu lại'}</span>
+            </button>
+          </div>
+        </div>
+      </article>
+    `;
+  }
+
+  // Hiển thị kết quả tra cứu
+  function renderSearchResults() {
     const container = document.getElementById('conferenceList');
     const resultCount = document.getElementById('resultCount');
     const emptyState = document.getElementById('emptyState');
-    if (!container) return;
+    const errorState = document.getElementById('searchErrorState');
+    const pagination = document.getElementById('pagination');
 
-    if (resultCount) resultCount.textContent = list.length;
-
-    if (list.length === 0) {
-      container.innerHTML = '';
-      const pagination = document.getElementById('pagination');
-      if (pagination) pagination.innerHTML = '';
-      if (emptyState) emptyState.classList.remove('hidden');
-      return;
-    }
-
-    if (emptyState) emptyState.classList.add('hidden');
-
-    const pageCount = Math.ceil(list.length / PAGE_SIZE);
-    currentPage = Math.min(Math.max(1, currentPage), pageCount);
-    const pageItems = list.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
-
-    const savedIds = getSavedList();
-
-    container.innerHTML = pageItems.map(conf => {
-      const utils = window.ConfGuideUtils;
-      const nextDl = utils ? utils.getNextDeadline(conf) : null;
-
-      let countdownClass = 'deadline-countdown';
-      let countdownText = 'Chưa công bố';
-      let deadlineHeader = 'Hạn nộp bài';
-
-      if (nextDl) {
-        deadlineHeader = `Mốc tiếp theo: ${nextDl.shortName}`;
-        if (!nextDl.isPassed) {
-          countdownText = `Còn ${nextDl.daysLeft} ngày`;
-          if (nextDl.daysLeft <= 14) {
-            countdownClass += ' urgent';
-          }
-        } else {
-          countdownText = 'Đã qua đợt nộp';
-        }
+      // Chưa tải được dữ liệu
+    if (!isDataLoaded) {
+      if (emptyState) {
+        emptyState.hidden = true;
+        emptyState.classList.add('hidden');
+      }
+      if (container) {
+        container.innerHTML = '';
+        container.hidden = true;
+        container.classList.add('hidden');
+      }
+      if (pagination) {
+        pagination.innerHTML = '';
+        pagination.hidden = true;
+        pagination.classList.add('hidden');
+      }
+      if (resultCount) {
+        resultCount.textContent = '0';
       }
 
-      const confId = conf.id || encodeURIComponent(conf.name.toLowerCase().replace(/[^a-z0-9]+/g, '-'));
-      const isSaved = savedIds.includes(confId);
-
-      let rankClass = 'rank-c';
-      if (conf.rank === 'A*') rankClass = 'rank-a-star';
-      else if (conf.rank === 'A') rankClass = 'rank-a';
-      else if (conf.rank === 'B') rankClass = 'rank-b';
-
-      const fieldsTags = (conf.fields || []).slice(0, 4).map(f => `
-        <span class="tag-field">${f}</span>
-      `).join('');
-
-      return `
-        <article class="search-conf-card" data-id="${confId}">
-          <div class="card-main-col">
-            <div class="card-title-row">
-              <h3>${conf.name}</h3>
-              <span class="card-rank-badge ${rankClass}">Rank ${conf.rank || 'C'}</span>
-              <span class="tag-field">${conf.format || conf.mode || 'Trực tiếp'}</span>
-            </div>
-
-            <div class="card-full-name">${conf.fullName || conf.full_name || conf.name}</div>
-
-            <div class="card-meta-row">
-              <span class="card-meta-item">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a8 8 0 0 0-8 8c0 5.25 8 12 8 12s8-6.75 8-12a8 8 0 0 0-8-8z"/><circle cx="12" cy="10" r="3"/></svg>
-                <span>${conf.location || 'Chưa cập nhật'}</span>
-              </span>
-              <span class="card-meta-item">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
-                <span>${utils ? utils.formatRangeVi(conf.startDate, conf.endDate) : (conf.date_happen || '2026')}</span>
-              </span>
-              ${conf.rating ? `
-                <span class="card-meta-item">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="#f5b301" stroke="#f5b301" stroke-width="1"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-                  <span>${conf.rating} / 5</span>
-                </span>
-              ` : ''}
-            </div>
-
-            <div class="card-tags">
-              ${fieldsTags}
-            </div>
-          </div>
-
-          <div class="card-action-col">
-            <div class="deadline-indicator">
-              <span class="deadline-label">${deadlineHeader}</span>
-              <span class="deadline-val">${nextDl ? utils.formatDateVi(nextDl.date) : 'Đang cập nhật'}</span>
-              <span class="${countdownClass}">${countdownText}</span>
-            </div>
-
-            <div class="card-buttons-group">
-              <a href="detail.html?id=${confId}" class="btn-card-detail">
-                Xem chi tiết &rarr;
-              </a>
-              <button type="button" class="btn-card-save ${isSaved ? 'saved' : ''}" data-save-id="${confId}">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="${isSaved ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2">
-                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-                </svg>
-                <span>${isSaved ? 'Đã lưu' : 'Lưu lại'}</span>
-              </button>
-            </div>
-          </div>
-        </article>
-      `;
-    }).join('');
-
-    // Gắn sự kiện nút Lưu bookmark
-    container.querySelectorAll('.btn-card-save').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const confId = btn.dataset.saveId;
-        toggleSaveConference(confId, btn);
-      });
-    });
-
-    renderPagination(list.length);
-  }
-
-  function renderPagination(total) {
-    const host = document.getElementById('pagination');
-    if (!host) return;
-    const pageCount = Math.ceil(total / PAGE_SIZE);
-    if (pageCount <= 1) {
-      host.innerHTML = '';
+      if (errorState) {
+        if (dataLoadError) {
+          errorState.hidden = false;
+          errorState.classList.remove('hidden');
+        } else {
+          errorState.hidden = true;
+          errorState.classList.add('hidden');
+        }
+      }
       return;
     }
 
+      // Ẩn thông báo lỗi khi dữ liệu đã tải xong
+    if (errorState) {
+      errorState.hidden = true;
+      errorState.classList.add('hidden');
+    }
+
+    const filters = getFiltersFromUi();
+    const hasFilters = hasActiveFilters(filters);
+    const total = filteredConferences.length;
+
+    if (resultCount) {
+      resultCount.textContent = total;
+    }
+
+      // Không có kết quả
+    if (total === 0) {
+      // Ẩn danh sách kết quả
+      if (container) {
+        container.innerHTML = '';
+        container.hidden = true;
+        container.classList.add('hidden');
+      }
+      // Ẩn thanh phân trang
+      if (pagination) {
+        pagination.innerHTML = '';
+        pagination.hidden = true;
+        pagination.classList.add('hidden');
+      }
+
+          // Chỉ hiển thị khi đang lọc mà không có kết quả
+
+      if (emptyState) {
+        if (hasFilters) {
+          emptyState.hidden = false;
+          emptyState.classList.remove('hidden');
+        } else {
+          emptyState.hidden = true;
+          emptyState.classList.add('hidden');
+        }
+      }
+      return;
+    }
+
+      // Có kết quả
+      // Ẩn thông báo không có kết quả
+    if (emptyState) {
+      emptyState.hidden = true;
+      emptyState.classList.add('hidden');
+    }
+
+    // Hiển thị danh sách thẻ kết quả
+    if (container) {
+      container.hidden = false;
+      container.classList.remove('hidden');
+
+      const pageCount = Math.ceil(total / PAGE_SIZE);
+      currentPage = Math.min(Math.max(1, currentPage), pageCount);
+      const pageItems = filteredConferences.slice(
+        (currentPage - 1) * PAGE_SIZE,
+        currentPage * PAGE_SIZE
+      );
+      const savedIds = getSavedList();
+
+      container.innerHTML = pageItems.map(conf => renderCardMarkup(conf, savedIds)).join('');
+
+      // Gắn sự kiện nút Lưu bookmark
+      container.querySelectorAll('.btn-card-save').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const confId = btn.dataset.saveId;
+          toggleSaveConference(confId, btn);
+        });
+      });
+    }
+
+    // Phân trang kết quả
+    if (pagination) {
+      const pageCount = Math.ceil(total / PAGE_SIZE);
+      if (pageCount <= 1) {
+        pagination.innerHTML = '';
+        pagination.hidden = true;
+        pagination.classList.add('hidden');
+      } else {
+        pagination.hidden = false;
+        pagination.classList.remove('hidden');
+        renderPaginationControls(pagination, total, pageCount);
+      }
+    }
+  }
+
+  function renderPaginationControls(host, total, pageCount) {
     host.innerHTML = `
       <button type="button" class="pagination-button" data-page-step="-1" ${currentPage === 1 ? 'disabled' : ''} aria-label="Trang trước">‹</button>
       <label class="pagination-jump">Trang
@@ -703,14 +669,16 @@
       button.addEventListener('click', () => goToPage(currentPage + Number(button.dataset.pageStep)));
     });
     const pageInput = document.getElementById('pageJump');
-    const commitPage = () => goToPage(pageInput.value);
-    pageInput.addEventListener('change', commitPage);
-    pageInput.addEventListener('keydown', event => {
-      if (event.key === 'Enter') {
-        event.preventDefault();
-        commitPage();
-      }
-    });
+    if (pageInput) {
+      const commitPage = () => goToPage(pageInput.value);
+      pageInput.addEventListener('change', commitPage);
+      pageInput.addEventListener('keydown', event => {
+        if (event.key === 'Enter') {
+          event.preventDefault();
+          commitPage();
+        }
+      });
+    }
   }
 
   function goToPage(value) {
@@ -718,8 +686,11 @@
     const pageCount = Math.ceil(filteredConferences.length / PAGE_SIZE);
     if (!Number.isFinite(requested) || pageCount < 1) return;
     currentPage = Math.min(pageCount, Math.max(1, requested));
-    sortAndRender(document.getElementById('sortSelect')?.value || 'relevance');
-    document.getElementById('pagination')?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    renderSearchResults();
+    document.getElementById('conferenceList')?.scrollIntoView({
+      block: 'nearest',
+      behavior: 'smooth'
+    });
   }
 
   // Xử lý bookmark
@@ -759,14 +730,32 @@
 
   // Tải dữ liệu chính
   async function loadData() {
+    isDataLoaded = false;
+    dataLoadError = null;
+    renderSearchResults();
+
     try {
       const response = await fetch('data/conference_data.json');
-      if (!response.ok) throw new Error('HTTP error');
+      if (!response.ok) throw new Error('HTTP error ' + response.status);
       const data = await response.json();
-      rawConferences = Array.isArray(data) && data.length > 0 ? data : FALLBACK_CONFERENCES;
+      if (!Array.isArray(data) || data.length === 0) {
+        throw new Error('Dữ liệu trống');
+      }
+      rawConferences = data;
+      isDataLoaded = true;
     } catch (e) {
-      console.warn('Fetch data failed, using fallback dataset:', e);
-      rawConferences = FALLBACK_CONFERENCES;
+      console.warn('Fetch data failed, checking fallback dataset:', e);
+      if (Array.isArray(FALLBACK_CONFERENCES) && FALLBACK_CONFERENCES.length > 0) {
+        rawConferences = FALLBACK_CONFERENCES;
+        isDataLoaded = true;
+      } else {
+        dataLoadError = 'Không thể nạp dữ liệu hội nghị. Vui lòng tải lại trang hoặc kiểm tra kết nối mạng.';
+        isDataLoaded = false;
+        const errMsg = document.getElementById('searchErrorMessage');
+        if (errMsg) errMsg.textContent = dataLoadError;
+        renderSearchResults();
+        return;
+      }
     }
 
     populateDynamicFields(rawConferences);
@@ -777,7 +766,7 @@
     applyFiltering();
   }
 
-  // Gắn các sự kiện form & bộ lọc
+  // Gắn sự kiện tìm kiếm và bộ lọc
   function initEvents() {
     const searchForm = document.getElementById('searchForm');
     if (searchForm) {
@@ -811,6 +800,10 @@
     const emptyResetBtn = document.getElementById('btnResetFromEmpty');
     if (emptyResetBtn) emptyResetBtn.addEventListener('click', resetAllFilters);
 
+    // Nút retry khi tải dữ liệu thất bại
+    const retryBtn = document.getElementById('btnRetryLoad');
+    if (retryBtn) retryBtn.addEventListener('click', loadData);
+
     // Sort select
     const sortSelect = document.getElementById('sortSelect');
     if (sortSelect) {
@@ -819,7 +812,7 @@
       });
     }
 
-    // Tự động re-filter khi tick/untick checkbox hoặc thay đổi ngày
+      // Lọc lại khi thay đổi checkbox hoặc ngày
     const sidebar = document.getElementById('filtersSidebar');
     if (sidebar) {
       sidebar.addEventListener('change', e => {

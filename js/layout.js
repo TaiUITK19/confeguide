@@ -54,7 +54,7 @@
 
   // 4. Auth Guard cho các trang cần đăng nhập
   function checkAuthGuard(currentPage) {
-    const protectedPages = ['profile.html', 'logs.html'];
+    const protectedPages = ['profile.html'];
     if (protectedPages.includes(currentPage)) {
       const user = getCurrentUser();
       if (!user) {
@@ -198,16 +198,16 @@
               <form id="globalPasswordForm" novalidate>
                 <div class="modal-form-group">
                   <label for="globalCurrentPass">Mật khẩu hiện tại</label>
-                  <input type="password" id="globalCurrentPass" class="modal-input" placeholder="••••••••" required>
+                  <input type="password" id="globalCurrentPass" class="modal-input" required>
                 </div>
                 <div class="modal-form-grid-2">
                   <div class="modal-form-group">
                     <label for="globalNewPass">Mật khẩu mới (tối thiểu 6 ký tự)</label>
-                    <input type="password" id="globalNewPass" class="modal-input" placeholder="••••••••" required minlength="6">
+                    <input type="password" id="globalNewPass" class="modal-input" required minlength="6">
                   </div>
                   <div class="modal-form-group">
                     <label for="globalConfirmPass">Xác nhận mật khẩu mới</label>
-                    <input type="password" id="globalConfirmPass" class="modal-input" placeholder="••••••••" required minlength="6">
+                    <input type="password" id="globalConfirmPass" class="modal-input" required minlength="6">
                   </div>
                 </div>
                 <button type="submit" class="btn btn-primary" style="font-size: 13.5px; padding: 8px 16px; margin-top: 6px;">Cập nhật mật khẩu</button>
@@ -327,16 +327,16 @@
                 </div>
                 <div class="modal-form-group">
                   <label for="globalReportConf">Hội nghị liên quan (nếu có)</label>
-                  <input type="text" id="globalReportConf" class="modal-input" placeholder="Ví dụ: CVPR 2026, ICML...">
+                  <input type="text" id="globalReportConf" class="modal-input">
                 </div>
               </div>
               <div class="modal-form-group">
                 <label for="globalReportTitle">Tiêu đề tóm tắt</label>
-                <input type="text" id="globalReportTitle" class="modal-input" placeholder="Tóm tắt ngắn gọn sự cố..." required minlength="5">
+                <input type="text" id="globalReportTitle" class="modal-input" required minlength="5">
               </div>
               <div class="modal-form-group">
                 <label for="globalReportDesc">Mô tả chi tiết</label>
-                <textarea id="globalReportDesc" class="modal-input" rows="3" placeholder="Chi tiết lỗi hoặc dẫn chứng website chính thức..." required minlength="10"></textarea>
+                <textarea id="globalReportDesc" class="modal-input" rows="3" required minlength="10"></textarea>
               </div>
               <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 14px;">
                 <button type="button" class="btn btn-secondary layout-modal-cancel-btn">Hủy</button>
@@ -359,7 +359,7 @@
 
     // Xác định active menu
     const isHome = currentPage === 'index.html' || currentPage === '';
-    const isSearch = currentPage === 'search.html' || currentPage === 'detail.html' || currentPage === 'chitiet.html';
+    const isSearch = currentPage === 'search.html' || currentPage === 'detail.html';
     const isTracker = currentPage === 'tracker.html' || currentPage === 'logs.html';
     const isAbout = currentPage === 'about.html';
     const isProfile = currentPage === 'profile.html';
@@ -981,7 +981,6 @@
                     id="footerFeedbackInput"
                     class="footer-feedback-textarea"
                     rows="1"
-                    placeholder="Viết góp ý của bạn..."
                     aria-label="Nội dung góp ý"
                     maxlength="500"
                   ></textarea>
@@ -1001,7 +1000,21 @@
     initFooterFeedback();
   }
 
-  // 10. Khởi chạy khi DOM sẵn sàng (Ưu tiên render đồng bộ ngay lập tức để chống giật)
+  // 10. Khởi tạo biểu mẫu Liên hệ (nếu có trên trang contact.html)
+  function initContactForm() {
+    const form = document.getElementById('contactForm');
+    const msg = document.getElementById('formMsg');
+    if (form && msg && !form.dataset.initialized) {
+      form.dataset.initialized = 'true';
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        msg.textContent = 'Cảm ơn bạn! Thông điệp của bạn đã được gửi thành công đến nhóm ConfGuide.';
+        form.reset();
+      });
+    }
+  }
+
+  // 11. Khởi chạy khi DOM sẵn sàng (Ưu tiên render đồng bộ ngay lập tức để chống giật)
   let layoutInitialized = false;
   function initLayout() {
     if (layoutInitialized) return;
@@ -1010,6 +1023,7 @@
     initTheme();
     renderHeader(page);
     renderFooter(page);
+    initContactForm();
     layoutInitialized = true;
   }
 

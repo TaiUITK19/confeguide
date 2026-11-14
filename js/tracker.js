@@ -61,7 +61,7 @@
       const label = esc(conf.acronym || conf.short_name || conf.name || 'CG');
       const nearest = deadline(conf);
       return `<tr>
-        <td><div class="conference-name"><div class="logo-placeholder">${label}</div><div class="name-text"><a href="detail.html?id=${encodeURIComponent(id)}">${esc(conf.name || id)}</a></div></div></td>
+        <td><div class="conference-name"><div class="logo-badge">${label}</div><div class="name-text"><a href="detail.html?id=${encodeURIComponent(id)}">${esc(conf.name || id)}</a></div></div></td>
         <td><div class="tags">${fields || '<span class="tag">Chưa phân loại</span>'}</div></td>
         <td><div class="deadline-cell"><div class="deadline">${esc(nearest.date)}</div>${nearest.remaining ? `<div class="deadline-remaining">${esc(nearest.remaining)}</div>` : ''}</div></td>
         <td><div class="actions"><button class="action-btn delete" type="button" data-remove="${esc(id)}">Xóa</button></div></td>

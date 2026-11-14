@@ -3,15 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Giới thiệu nền tảng ConfGuide — Đồ án môn học IE104 Thiết kế giao diện người dùng, Trường ĐH Công nghệ Thông tin (ĐHQG-HCM).">
-  <title>Giới thiệu đề tài | ConfGuide</title>
+  <meta name="description" content="Về chúng tôi — Nền tảng tra cứu và theo dõi hội nghị khoa học ConfGuide. Đồ án môn học IE104, Trường Đại học Công nghệ Thông tin (ĐHQG-HCM).">
+  <title>Về chúng tôi - ConfGuide</title>
+  
+  <link rel="icon" type="image/svg+xml" href="images/logo.svg">
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   
   <link rel="stylesheet" href="css/base.css">
-  <link rel="stylesheet" href="css/home.css">
+  <link rel="stylesheet" href="css/about.css">
 </head>
 <body>
   <script>try { if (localStorage.getItem('confguide_theme') === 'dark') document.body.classList.add('dark'); } catch (e) {}</script>
@@ -19,74 +21,177 @@
   <!-- Shared Header -->
   <div id="site-header"></div>
 
-  <!-- Main Content -->
-  <main class="section-pad">
-    <div class="container">
-      
-      <div class="section-head">
-        <span class="eyebrow">ĐỒ ÁN MÔN HỌC IE104</span>
-        <h1>Giới thiệu Nền tảng ConfGuide</h1>
-        <p>Hệ thống hỗ trợ tra cứu, đánh giá uy tín và khuyến nghị hội nghị khoa học theo hướng nghiên cứu dành cho sinh viên và nhà khoa học.</p>
-      </div>
-
-      <!-- Overview Cards -->
-      <div class="features-grid" style="margin-bottom: 48px;">
-        <article class="feature-card card-surface">
-          <div class="feature-icon-box" aria-hidden="true">
-            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
-              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
-            </svg>
-          </div>
-          <h3>Mục tiêu Đề tài</h3>
-          <p>Giải quyết khó khăn lớn nhất của sinh viên và nghiên cứu sinh khi công bố bài báo: mất nhiều thời gian tìm kiếm hội nghị phù hợp, khó nắm bắt hạn nộp bài (deadline) và phân định xếp hạng uy tín CORE / Scopus.</p>
-        </article>
-
-        <article class="feature-card card-surface">
-          <div class="feature-icon-box" aria-hidden="true">
-            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <rect x="2" y="3" width="20" height="14" rx="2"/>
-              <line x1="8" y1="21" x2="16" y2="21"/>
-              <line x1="12" y1="17" x2="12" y2="21"/>
-            </svg>
-          </div>
-          <h3>Công nghệ Sử dụng</h3>
-          <p>Xây dựng với kiến trúc Semantic HTML5, CSS Variables tuân thủ quy tắc màu 60:30:10, chuẩn tiếp cận WCAG AA, Vanilla JavaScript hiệu năng cao, chạy độc lập không phụ thuộc build tool.</p>
-        </article>
-
-        <article class="feature-card card-surface">
-          <div class="feature-icon-box" aria-hidden="true">
-            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-              <circle cx="9" cy="7" r="4"/>
-              <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-              <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-            </svg>
-          </div>
-          <h3>Đơn vị Phát triển</h3>
-          <p>Được nghiên cứu và triển khai bởi nhóm sinh viên K19 - Khoa Kỹ thuật Phần mềm, Trường Đại học Công nghệ Thông tin (ĐHQG-HCM) dưới sự hướng dẫn của giảng viên bộ môn IE104.</p>
-        </article>
-      </div>
-
-      <!-- Detailed Info Card -->
-      <section class="card-surface" style="padding: 40px; margin-bottom: 48px;">
-        <h2 style="font-size: 24px; color: var(--text); margin-bottom: 16px;">Sứ mệnh của ConfGuide</h2>
-        <p style="color: var(--text-muted); line-height: 1.8; margin-bottom: 20px;">
-          Tại Việt Nam, số lượng công bố quốc tế của sinh viên và giảng viên đang ngày càng tăng trưởng mạnh mẽ. Tuy nhiên, việc lựa chọn đúng diễn đàn học thuật (phù hợp với chủ đề bài báo, đúng tầm vóc, và kịp tiến độ tốt nghiệp) vẫn là thách thức lớn. ConfGuide ra đời với sứ mệnh trở thành "người bạn đồng hành học thuật tin cậy", cung cấp thông tin minh bạch, cập nhật liên tục và giao diện tương tác thân thiện nhất.
-        </p>
-        <div style="display: flex; gap: 16px; flex-wrap: wrap;">
-          <a class="btn btn-primary" href="search.html">Tra cứu hội nghị ngay</a>
-          <a class="btn btn-secondary" href="contact.html">Liên hệ nhóm tác giả</a>
+  <!-- Main Content (6 Sections) -->
+  <main id="mainContent" class="about-main">
+    
+    <!-- 1. Hero và sứ mệnh -->
+    <section class="about-hero-section" aria-labelledby="aboutHeroTitle">
+      <div class="container">
+        <div class="about-hero-content">
+          <span class="about-eyebrow" id="aboutEyebrow">VỀ CHÚNG TÔI</span>
+          <h1 class="about-hero-title" id="aboutHeroTitle">Nền tảng Tra cứu &amp; Theo dõi Hội nghị Khoa học</h1>
+          <p class="about-hero-desc" id="aboutHeroDesc">Đang tải thông tin nền tảng ConfGuide...</p>
         </div>
-      </section>
 
-    </div>
+        <div class="about-context-card">
+          <h2 class="about-context-title" id="aboutContextTitle">Bối cảnh thực tế &amp; Sứ mệnh</h2>
+          <div class="about-challenges-grid" id="aboutChallengesGrid"></div>
+          <div class="about-mission-box" id="aboutMissionBox"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. Giá trị cốt lõi (Lưới 3 cột) -->
+    <section class="about-section" id="coreValuesSection" aria-labelledby="coreValuesHeading">
+      <div class="container">
+        <div class="about-section-head">
+          <span class="about-eyebrow">GIÁ TRỊ NỀN TẢNG</span>
+          <h2 id="coreValuesHeading">Giá trị Cốt lõi của ConfGuide</h2>
+          <p>Tối ưu hóa hành trình công bố khoa học qua ba trụ cột tính năng trọng yếu.</p>
+        </div>
+        <div class="about-values-grid" id="aboutValuesGrid"></div>
+      </div>
+    </section>
+
+    <!-- 3. Minh bạch dữ liệu và kiến trúc kỹ thuật (2 cột) -->
+    <section class="about-section" id="transparencySection" aria-labelledby="transparencyHeading">
+      <div class="container">
+        <div class="about-section-head">
+          <span class="about-eyebrow">TIÊU CHUẨN HỌC THUẬT</span>
+          <h2 id="transparencyHeading">Minh bạch Dữ liệu &amp; Kiến trúc Kỹ thuật</h2>
+          <p>Nguồn gốc học thuật được xác thực cùng nền tảng công nghệ web thuần tối ưu hiệu năng.</p>
+        </div>
+        <div class="about-tech-grid">
+          <div class="about-col-card" id="aboutDataSourcesCol"></div>
+          <div class="about-col-card" id="aboutTechStackCol"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. Đội ngũ thực hiện và cố vấn -->
+    <section class="about-section" id="teamSection" aria-labelledby="teamHeading">
+      <div class="container">
+        <div class="about-section-head">
+          <span class="about-eyebrow">CON NGƯỜI</span>
+          <h2 id="teamHeading">Đội ngũ Thực hiện &amp; Cố vấn Chuyên môn</h2>
+          <p>Dự án được xây dựng dưới sự định hướng học thuật và nỗ lực của các thành viên.</p>
+        </div>
+        <div id="aboutAdvisorWrap"></div>
+        <div class="about-members-wrap" id="aboutMembersWrap"></div>
+      </div>
+    </section>
+
+    <!-- 5. Lộ trình phát triển (Timeline 2 giai đoạn) -->
+    <section class="about-section" id="roadmapSection" aria-labelledby="roadmapHeading">
+      <div class="container">
+        <div class="about-section-head">
+          <span class="about-eyebrow">TIẾN TRÌNH</span>
+          <h2 id="roadmapHeading">Lộ trình Phát triển Nền tảng</h2>
+          <p>Hai giai đoạn phát triển từ phiên bản thử nghiệm MVP đến hệ thống học thuật thông minh.</p>
+        </div>
+        <div class="about-roadmap-container" id="aboutRoadmapContainer"></div>
+      </div>
+    </section>
+
+    <!-- 6. Mã nguồn và đóng góp cộng đồng -->
+    <section class="about-section" id="communitySection" aria-labelledby="communityHeading">
+      <div class="container">
+        <div class="about-community-card">
+          <span class="about-eyebrow">KẾT NỐI HỌC THUẬT</span>
+          <h2 id="communityHeading" style="font-size: 26px; font-weight: 800; color: var(--navy); margin-bottom: 14px;">Mã nguồn &amp; Đóng góp Cộng đồng</h2>
+          <p id="aboutCommunityCta">ConfGuide là một dự án học thuật mở. Chúng tôi luôn trân trọng mọi đóng góp về mã nguồn, đề xuất cải tiến trải nghiệm và thông tin các hội nghị khoa học mới từ cộng đồng nghiên cứu.</p>
+          <div class="about-community-actions">
+            <a href="#" target="_blank" rel="noopener noreferrer" class="btn-github" id="aboutGithubBtn">
+              <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+              </svg>
+              <span>GitHub Repository</span>
+            </a>
+            <button type="button" class="btn-propose" id="openProposalModalBtn">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+              <span>Đề xuất hội nghị mới</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
   </main>
+
+  <!-- Modal Đề xuất Hội nghị mới (Accessible Dialog) -->
+  <div class="about-modal-backdrop" id="aboutProposalModal" role="dialog" aria-modal="true" aria-labelledby="propModalTitle" hidden>
+    <div class="about-modal-dialog" id="aboutModalDialog">
+      <div class="about-modal-header">
+        <div>
+          <h2 class="about-modal-title" id="propModalTitle">Đề xuất Hội nghị Mới</h2>
+          <p class="about-modal-sub">Chia sẻ thông tin hội nghị khoa học uy tín để bổ sung vào hệ thống ConfGuide.</p>
+        </div>
+        <button type="button" class="about-modal-close-btn" id="aboutModalCloseBtn" aria-label="Đóng cửa sổ đề xuất">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Form đề xuất -->
+      <form id="proposalForm" novalidate>
+        <div class="about-form-group">
+          <label for="propName" class="about-form-label">Tên hội nghị <span class="req" aria-hidden="true">*</span></label>
+          <input type="text" id="propName" class="about-form-input" required minlength="2">
+          <span class="about-field-error" id="propNameError" role="alert"></span>
+        </div>
+
+        <div class="about-form-group">
+          <label for="propUrl" class="about-form-label">Website chính thức <span class="req" aria-hidden="true">*</span></label>
+          <input type="url" id="propUrl" class="about-form-input" required>
+          <span class="about-field-error" id="propUrlError" role="alert"></span>
+        </div>
+
+        <div class="about-form-group">
+          <label for="propField" class="about-form-label">Lĩnh vực / Chủ đề nghiên cứu</label>
+          <input type="text" id="propField" class="about-form-input">
+        </div>
+
+        <div class="about-form-group">
+          <label for="propDeadline" class="about-form-label">Hạn nộp bài (nếu biết)</label>
+          <input type="date" id="propDeadline" class="about-form-input">
+        </div>
+
+        <div class="about-form-group">
+          <label for="propEmail" class="about-form-label">Email liên hệ (không bắt buộc)</label>
+          <input type="email" id="propEmail" class="about-form-input">
+          <span class="about-field-error" id="propEmailError" role="alert"></span>
+        </div>
+
+        <div class="about-modal-footer">
+          <button type="button" class="about-btn-cancel" id="aboutModalCancelBtn">Hủy</button>
+          <button type="submit" class="about-btn-submit">Gửi đề xuất</button>
+        </div>
+      </form>
+
+      <!-- Hộp thông báo cảm ơn khi gửi thành công -->
+      <div class="about-success-box" id="proposalSuccessBox">
+        <div class="about-success-icon" aria-hidden="true">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+        </div>
+        <h3 class="about-success-title">Cảm ơn bạn đã đóng góp!</h3>
+        <p class="about-success-desc">Đề xuất đã được lưu tạm trên trình duyệt của bạn (phiên bản demo chưa kết nối máy chủ). Cảm ơn bạn đã đóng góp thông tin cho cộng đồng!</p>
+        <button type="button" class="about-btn-submit" id="proposalSuccessCloseBtn">Đóng</button>
+      </div>
+    </div>
+  </div>
 
   <!-- Shared Footer -->
   <div id="site-footer"></div>
 
   <!-- Scripts -->
   <script src="js/layout.js"></script>
+  <script src="js/about.js"></script>
 </body>
 </html>

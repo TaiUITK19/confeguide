@@ -1,13 +1,8 @@
-/* =========================================================
-   ConfGuide — Search Page Stylesheet (css/search.css)
-   Bộ lọc nâng cao dạng Accordion | Đồng bộ tokens 60:30:10
-   ========================================================= */
 
 :root {
   --shadow-search: 0 4px 18px rgba(27, 67, 112, 0.06);
 }
 
-/* ================= HERO SEARCH ================= */
 .hero {
   position: relative;
   background: var(--bg-hero);
@@ -74,10 +69,6 @@
   min-width: 0;
 }
 
-.search-box input::placeholder {
-  color: var(--text-dim);
-}
-
 .search-box button {
   background: var(--primary);
   color: #ffffff;
@@ -124,7 +115,7 @@
   background: var(--primary-soft);
 }
 
-/* ================= RESULTS & SIDEBAR LAYOUT ================= */
+/* Results & Sidebar Layout */
 .results-section {
   padding: 36px 0 64px;
 }
@@ -136,7 +127,7 @@
   align-items: start;
 }
 
-/* ================= SIDEBAR ACCORDIONS ================= */
+/* Sidebar Accordions */
 .filters {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -291,7 +282,7 @@
   color: #ffffff;
 }
 
-/* ================= RESULTS COLUMN ================= */
+/* Results Column */
 /* Active Chips Bar */
 .active-chips-bar {
   display: flex;
@@ -580,14 +571,26 @@ body.dark .btn-card-save.saved {
   background: #252213;
 }
 
+/* Hidden Utility */
+[hidden],
+.hidden {
+  display: none !important;
+}
+
 /* Empty State */
 .empty-state {
   text-align: center;
-  padding: 60px 20px;
+  padding: 44px 20px;
   background: var(--surface);
   border: 1px dashed var(--border-strong);
   border-radius: var(--radius);
   color: var(--text-muted);
+  margin: 0 0 24px 0;
+}
+
+.empty-state[hidden],
+.empty-state.hidden {
+  display: none !important;
 }
 
 .empty-state svg {
@@ -601,6 +604,12 @@ body.dark .btn-card-save.saved {
   margin-bottom: 8px;
 }
 
+.empty-state p {
+  max-width: 480px;
+  margin: 0 auto;
+  line-height: 1.5;
+}
+
 .btn-reset-empty {
   margin-top: 18px;
   padding: 9px 20px;
@@ -609,6 +618,40 @@ body.dark .btn-card-save.saved {
   border-radius: var(--radius-sm);
   font-weight: 600;
   font-size: 14px;
+  cursor: pointer;
+  border: none;
+  transition: background-color 150ms ease;
+}
+
+.btn-reset-empty:hover {
+  background: var(--primary-dark);
+}
+
+/* Dedicated Error State */
+.search-error-state {
+  border: 1px solid rgba(224, 49, 49, 0.4);
+  background: rgba(224, 49, 49, 0.04);
+}
+
+.search-error-state svg {
+  color: var(--red);
+}
+
+.search-error-state h3 {
+  color: var(--red);
+}
+
+body.dark .search-error-state {
+  border-color: rgba(255, 107, 107, 0.35);
+  background: rgba(224, 49, 49, 0.08);
+}
+
+.conference-list[hidden],
+.conference-list.hidden,
+.conference-list:empty {
+  display: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
 }
 
 .search-pagination {
@@ -620,6 +663,14 @@ body.dark .btn-card-save.saved {
   margin: 20px 0 8px;
   color: var(--text-muted);
   font-size: 13px;
+}
+
+.search-pagination[hidden],
+.search-pagination.hidden {
+  display: none !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
 }
 
 .pagination-button {
@@ -644,7 +695,11 @@ body.dark .btn-card-save.saved {
   cursor: not-allowed;
 }
 
-.pagination-jump { display: inline-flex; align-items: center; gap: 7px; }
+.pagination-jump {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
 .pagination-jump input {
   width: 58px;
   height: 38px;
@@ -659,8 +714,14 @@ body.dark .btn-card-save.saved {
   outline: 3px solid color-mix(in srgb, var(--primary) 35%, transparent);
   outline-offset: 2px;
 }
-.pagination-total { margin-left: 6px; }
-body.dark .pagination-button, body.dark .pagination-jump input { background: var(--surface); color: var(--text); border-color: var(--border-strong); }
+.pagination-total {
+  margin-left: 6px;
+}
+body.dark .pagination-button, body.dark .pagination-jump input {
+  background: var(--surface);
+  color: var(--text);
+  border-color: var(--border-strong);
+}
 
 /* Toast */
 .toast {
@@ -716,6 +777,13 @@ body.dark .pagination-button, body.dark .pagination-jump input { background: var
 }
 
 @media (max-width: 520px) {
-  .search-pagination { gap: 8px; flex-wrap: wrap; }
-  .pagination-total { flex-basis: 100%; text-align: center; margin-left: 0; }
+  .search-pagination {
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .pagination-total {
+    flex-basis: 100%;
+    text-align: center;
+    margin-left: 0;
+  }
 }

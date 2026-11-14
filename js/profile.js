@@ -82,13 +82,12 @@
   function renderUserProfile() {
     currentUser = getCurrentUser() || currentUser;
 
-    const fullName = currentUser.fullName || currentUser.name || currentUser.username || DEFAULT_USER_DATA.fullName;
+    const fullName = currentUser.fullName || currentUser.name || DEFAULT_USER_DATA.fullName;
     const initial = fullName.trim().charAt(0).toUpperCase() || 'U';
     const academicTitle = currentUser.academicTitle || DEFAULT_USER_DATA.academicTitle;
     const affiliation = currentUser.affiliation || DEFAULT_USER_DATA.affiliation;
     const headline = `${academicTitle} • ${affiliation}`;
     const email = currentUser.email || DEFAULT_USER_DATA.email;
-    const username = currentUser.username || 'user';
     const bio = currentUser.bio || DEFAULT_USER_DATA.bio;
     const scholarUrl = currentUser.scholarUrl || '';
     const fieldsRaw = currentUser.fieldsOfInterest || DEFAULT_USER_DATA.fieldsOfInterest;
@@ -121,9 +120,6 @@
     const emailEl = document.getElementById('profileEmailDisplay');
     if (emailEl) emailEl.textContent = email;
 
-    const usernameEl = document.getElementById('profileUsernameDisplay');
-    if (usernameEl) usernameEl.textContent = `@${username}`;
-
     // Google Scholar / ORCID
     const scholarLink = document.getElementById('profileScholarLink');
     if (scholarLink) {
@@ -155,9 +151,6 @@
     // Điền dữ liệu vào form chỉnh sửa modal
     const editFullName = document.getElementById('editFullName');
     if (editFullName) editFullName.value = fullName;
-
-    const editUsername = document.getElementById('editUsername');
-    if (editUsername) editUsername.value = username;
 
     const editEmail = document.getElementById('editEmail');
     if (editEmail) editEmail.value = email;
@@ -548,7 +541,7 @@
               Khám phá danh sách hội nghị khoa học công nghệ, bấm biểu tượng lưu để theo dõi thời gian nộp bài tại đây.
             </p>
             <a href="search.html" class="btn btn-primary" style="font-size: 13.5px; padding: 8px 18px;">
-              <span>Tra cứu hội nghị ngay &rarr;</span>
+              <span>Khám phá danh mục hội nghị &rarr;</span>
             </a>
           </div>
         `;
