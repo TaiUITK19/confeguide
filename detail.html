@@ -102,13 +102,13 @@
           </div>
 
           <div class="deadline-countdown-display">
-            <span class="countdown-days" id="detailCountdownDays">Đang tính...</span>
+            <span class="countdown-days" id="detailCountdownDays" aria-live="polite">Đang tính...</span>
             <span class="countdown-exact" id="detailDeadlineExact">(Giờ AoE UTC-12)</span>
           </div>
 
           <div class="live-ticker-box" id="heroLiveTickerBox">
             <span class="ticker-pulse" aria-hidden="true"></span>
-            <span class="ticker-text" id="heroLiveTickerText">Đang đồng bộ đồng hồ AoE...</span>
+            <span class="ticker-text" id="heroLiveTickerText" aria-live="off">Đang đồng bộ đồng hồ AoE...</span>
           </div>
 
           <div class="calendar-btn-group">
@@ -354,6 +354,8 @@
 
   <!-- Scripts -->
   <script src="js/layout.js"></script>
+  <!-- Hội nghị dự phòng được tách khỏi code tương tác. -->
+  <script src="js/detail-fallback.js"></script>
   <script src="js/detail.js"></script>
 </body>
 </html>

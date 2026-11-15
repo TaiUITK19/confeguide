@@ -1255,3 +1255,15 @@ body.dark .review-form textarea { background: var(--surface); color: var(--text)
     gap: 20px;
   }
 }
+
+/* Các lớp được dùng bởi mã JS sau refactor (không thay đổi giao diện gốc). */
+.detail-deadline-line { margin-bottom: 4px; }
+.live-clock {
+  margin-top: 6px;
+  color: var(--primary);
+  font-size: 11.5px;
+  font-weight: 700;
+}
+#webBtn.is-disabled { opacity: 0.5; pointer-events: none; }
+#btnCalGoogle[hidden], #btnCalIcs[hidden],
+#viewDetail[hidden], #viewReviews[hidden] { display: none !important; }
