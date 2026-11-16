@@ -1,16 +1,12 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Liên hệ và đóng góp dữ liệu hội nghị khoa học cho nền tảng ConfGuide.">
   <title>Liên hệ &amp; Đóng góp | ConfGuide</title>
   
   <link rel="icon" type="image/svg+xml" href="images/logo.svg">
-  
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   
   <link rel="stylesheet" href="css/base.css">
 </head>
@@ -30,26 +26,28 @@
         <p>Gửi đề xuất thêm hội nghị khoa học mới, phản hồi tính năng hoặc trao đổi hợp tác học thuật cùng chúng tôi.</p>
       </div>
 
-      <div style="display: grid; grid-template-columns: 3fr 2fr; gap: 36px; align-items: start;">
+      <div class="contact-grid">
         
         <!-- Form liên hệ -->
-        <section class="card-surface" style="padding: 36px;">
-          <h2 style="font-size: 20px; color: var(--text); margin-bottom: 20px;">Gửi thông điệp / Đóng góp dữ liệu</h2>
+        <section class="card-surface contact-form-card">
+          <h2 class="contact-form-card__title">Gửi thông điệp / Đóng góp dữ liệu</h2>
           
-          <form id="contactForm" style="display: flex; flex-direction: column; gap: 18px;">
-            <div>
-              <label for="fullName" style="display: block; font-size: 14px; font-weight: 600; margin-bottom: 6px;">Họ và tên *</label>
-              <input id="fullName" type="text" required style="width: 100%; padding: 12px 14px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface); color: var(--text);">
+          <form id="contactForm" class="contact-form" novalidate>
+            <div class="contact-field">
+              <label for="fullName" class="contact-field__label">Họ và tên *</label>
+              <input id="fullName" class="contact-field__control" type="text" required minlength="2" aria-describedby="contactFullNameError">
+              <p class="field-error js-field-error" id="contactFullNameError" aria-live="polite"></p>
             </div>
 
-            <div>
-              <label for="email" style="display: block; font-size: 14px; font-weight: 600; margin-bottom: 6px;">Email học thuật / cá nhân *</label>
-              <input id="email" type="email" required style="width: 100%; padding: 12px 14px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface); color: var(--text);">
+            <div class="contact-field">
+              <label for="email" class="contact-field__label">Email học thuật / cá nhân *</label>
+              <input id="email" class="contact-field__control" type="email" required aria-describedby="contactEmailError">
+              <p class="field-error js-field-error" id="contactEmailError" aria-live="polite"></p>
             </div>
 
-            <div>
-              <label for="topic" style="display: block; font-size: 14px; font-weight: 600; margin-bottom: 6px;">Chủ đề liên hệ</label>
-              <select id="topic" style="width: 100%; padding: 12px 14px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface); color: var(--text);">
+            <div class="contact-field">
+              <label for="topic" class="contact-field__label">Chủ đề liên hệ</label>
+              <select id="topic" class="contact-field__control">
                 <option value="suggest">Đề xuất thêm hội nghị khoa học mới</option>
                 <option value="bug">Báo cáo sai lệch thời hạn nộp bài (deadline)</option>
                 <option value="feature">Góp ý nâng cấp giao diện / tính năng</option>
@@ -57,37 +55,38 @@
               </select>
             </div>
 
-            <div>
-              <label for="message" style="display: block; font-size: 14px; font-weight: 600; margin-bottom: 6px;">Nội dung tin nhắn *</label>
-              <textarea id="message" rows="5" required style="width: 100%; padding: 12px 14px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface); color: var(--text);"></textarea>
+            <div class="contact-field">
+              <label for="message" class="contact-field__label">Nội dung tin nhắn *</label>
+              <textarea id="message" class="contact-field__control" rows="5" required minlength="10" aria-describedby="contactMessageError"></textarea>
+              <p class="field-error js-field-error" id="contactMessageError" aria-live="polite"></p>
             </div>
 
-            <button class="btn btn-primary" type="submit" style="align-self: flex-start; padding: 12px 28px;">
+            <button class="btn btn-primary contact-form__submit" type="submit">
               Gửi thông điệp
             </button>
-            <div id="formMsg" style="font-size: 14px; color: var(--green); font-weight: 600;"></div>
+            <div id="formMsg" class="contact-form__msg" role="status" aria-live="polite"></div>
           </form>
         </section>
 
         <!-- Thông tin liên hệ trực tiếp -->
-        <aside style="display: flex; flex-direction: column; gap: 24px;">
-          <div class="card-surface" style="padding: 30px;">
-            <h3 style="font-size: 18px; color: var(--text); margin-bottom: 16px;">Văn phòng Đồ án</h3>
-            <p style="font-size: 14.5px; color: var(--text-muted); line-height: 1.6; margin-bottom: 14px;">
+        <aside class="contact-sidebar" aria-label="Thông tin liên hệ và quy trình kiểm duyệt">
+          <div class="card-surface contact-info-card">
+            <h2 class="contact-info-card__title">Văn phòng Đồ án</h2>
+            <p class="contact-info-card__text">
               <strong>Địa chỉ:</strong> Trường Đại học Công nghệ Thông tin — ĐHQG-HCM<br>
               Khu phố 6, Phường Linh Trung, Thành phố Thủ Đức, TP. Hồ Chí Minh
             </p>
-            <p style="font-size: 14.5px; color: var(--text-muted); line-height: 1.6; margin-bottom: 14px;">
+            <p class="contact-info-card__text">
               <strong>Email:</strong> support@confguide.uit.edu.vn
             </p>
-            <p style="font-size: 14.5px; color: var(--text-muted); line-height: 1.6;">
+            <p class="contact-info-card__text contact-info-card__text--last">
               <strong>Môn học:</strong> IE104 — Thiết kế Giao diện Người dùng
             </p>
           </div>
 
-          <div class="card-surface" style="padding: 30px; background: var(--primary-soft); border-color: rgba(18, 104, 201, 0.2);">
-            <h3 style="font-size: 17px; color: var(--navy); margin-bottom: 10px;">Quy trình kiểm duyệt hội nghị</h3>
-            <p style="font-size: 14px; color: var(--text); line-height: 1.5;">
+          <div class="card-surface contact-highlight-card">
+            <h2 class="contact-highlight-card__title">Quy trình kiểm duyệt hội nghị</h2>
+            <p class="contact-highlight-card__desc">
               Mọi hội nghị được đề xuất sẽ được nhóm quản trị kiểm tra tính chính danh (CFP, nhà xuất bản IEEE/ACM/Springer, chỉ số CORE Ranking) và cập nhật lên hệ thống trong vòng 24 - 48 giờ.
             </p>
           </div>

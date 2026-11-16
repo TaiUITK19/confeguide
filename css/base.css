@@ -34,8 +34,8 @@
 
   /* --- Chữ (Tương phản WCAG AA >= 4.5:1) --- */
   --text: #10264a;
-  --text-muted: #667795;
-  --text-dim: #8ba0bd;
+  --text-muted: #526380;
+  --text-dim: #586b86;
   --font-base: "Inter", system-ui, -apple-system, sans-serif;
 }
 
@@ -56,7 +56,7 @@ body.dark {
   --navy: #8ec2ff;
   --text: #f0f4fa;
   --text-muted: #9ab0ce;
-  --text-dim: #6d84a3;
+  --text-dim: #8ea4c2;
 }
 
 /* ================= Global Reset & Typography ================= */
@@ -1553,6 +1553,394 @@ body.dark .modal-alert.error {
   .policy-header h1 {
     font-size: 26px;
   }
+}
+
+/* ================= 13. TRẠNG THÁI TRUY CẬP, PHẢN HỒI & TRANG LIÊN HỆ ================= */
+/* Khung focus rõ ràng khi điều hướng bằng bàn phím */
+:focus-visible {
+  outline: 3px solid rgba(18, 104, 201, 0.45);
+  outline-offset: 2px;
+}
+
+/* Ẩn phần tử về mặt hiển thị nhưng giữ cho trình đọc màn hình */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Tiện ích ẩn/hiện đồng bộ qua class thay cho inline style */
+.is-hidden {
+  display: none !important;
+}
+
+body.modal-open {
+  overflow: hidden;
+}
+
+/* Biến thể nút nhỏ và nút báo lỗi */
+.btn--compact-sm {
+  padding: 5px 12px;
+  font-size: 12.5px;
+}
+
+.btn--danger-text {
+  color: var(--red);
+}
+
+/* Thông báo lỗi kiểm tra biểu mẫu hiển thị dưới từng ô nhập */
+.field-error {
+  margin: 4px 0 0;
+  font-size: 12.5px;
+  line-height: 1.4;
+  color: #b52d37;
+}
+
+.field-error:empty {
+  display: none;
+}
+
+body.dark .field-error {
+  color: #fca5a5;
+}
+
+/* Thành phần phụ trong modal dùng chung */
+.help-email-note {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.modal-actions-end {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+/* Thành phần bổ sung cho menu di động và chân trang */
+.mobile-menu-divider {
+  border-top: 1px solid var(--border);
+  margin: 8px 0;
+}
+
+.mobile-menu-btn {
+  text-align: left;
+  width: 100%;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.mobile-menu-btn--danger {
+  color: var(--red);
+}
+
+.footer-links-secondary button {
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--text-muted);
+  transition: all 150ms ease;
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.footer-links-secondary button:hover {
+  color: var(--primary);
+  transform: translateX(2px);
+}
+
+.footer-chat-link {
+  width: 100%;
+  font-family: inherit;
+}
+
+.footer-chat-status {
+  margin: 8px 0 0;
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 1.45;
+  color: var(--primary);
+}
+
+.footer-chat-status--error {
+  color: #b52d37;
+}
+
+/* Trạng thái tải dữ liệu dùng chung */
+.loading-state-box {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-muted);
+  font-size: 14.5px;
+  font-weight: 500;
+}
+
+/* --- Trang Liên hệ (BEM) --- */
+.contact-grid {
+  display: grid;
+  grid-template-columns: 3fr 2fr;
+  gap: 32px;
+  align-items: start;
+}
+
+.contact-form-card {
+  padding: 36px;
+}
+
+.contact-form-card__title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 20px;
+}
+
+.contact-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.contact-field__label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+
+.contact-field__control {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-alt);
+  color: var(--text);
+  font-size: 14px;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.contact-field__control:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(18, 104, 201, 0.15);
+}
+
+.contact-field__control--textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+.contact-form__submit {
+  width: 100%;
+}
+
+.contact-form__msg {
+  font-size: 14px;
+  font-weight: 600;
+  text-align: center;
+  min-height: 20px;
+}
+
+.contact-form__msg--success {
+  color: #047857;
+}
+
+.contact-form__msg--error {
+  color: #b52d37;
+}
+
+body.dark .contact-form__msg--success {
+  color: #6ee7b7;
+}
+
+body.dark .contact-form__msg--error {
+  color: #fca5a5;
+}
+
+.contact-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.contact-info-card {
+  padding: 28px;
+}
+
+.contact-info-card__title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 16px;
+}
+
+.contact-info-card__text {
+  font-size: 14px;
+  color: var(--text-muted);
+  line-height: 1.7;
+  margin-bottom: 12px;
+}
+
+.contact-info-card__text--last {
+  margin-bottom: 0;
+}
+
+.contact-highlight-card {
+  padding: 28px;
+  background: var(--primary-soft);
+  border-color: var(--border-strong);
+}
+
+.contact-highlight-card__title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--primary);
+  margin-bottom: 8px;
+}
+
+.contact-highlight-card__desc {
+  font-size: 13.5px;
+  color: var(--text);
+  line-height: 1.6;
+}
+
+@media (max-width: 900px) {
+  .contact-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  .contact-form-card {
+    padding: 24px 20px;
+  }
+}
+
+/* --- Thông báo nổi (Toast) & Hộp xác nhận dùng chung --- */
+.cg-toast-container {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 3000;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: min(380px, calc(100vw - 32px));
+  pointer-events: none;
+}
+
+.cg-toast {
+  background: var(--navy);
+  color: #ffffff;
+  border-radius: var(--radius-sm);
+  padding: 12px 18px;
+  font-size: 13.5px;
+  font-weight: 600;
+  line-height: 1.45;
+  box-shadow: var(--shadow-lg);
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 200ms ease, transform 200ms ease;
+}
+
+.cg-toast.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.cg-toast--success {
+  background: #047857;
+}
+
+.cg-toast--error {
+  background: #b91c1c;
+}
+
+body.dark .cg-toast {
+  background: #1e3a5f;
+  border: 1px solid var(--border-strong);
+}
+
+.cg-confirm-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 2600;
+  background: rgba(11, 31, 107, 0.48);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.cg-confirm-dialog {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  max-width: 440px;
+  width: 100%;
+  padding: 24px;
+}
+
+.cg-confirm-title {
+  margin: 0 0 8px;
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.cg-confirm-message {
+  margin: 0 0 20px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text-muted);
+}
+
+.cg-confirm-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+/* ================= BIỂU TRƯNG / AVATAR HỘI NGHỊ DÙNG CHUNG ================= */
+/* Khối avatar chữ (monogram) đồng bộ theo thiết kế trang chủ, thuần CSS/HTML, không tải ảnh mạng */
+.conf-badge-logo {
+  width: 52px;
+  height: 52px;
+  border-radius: 10px;
+  background: linear-gradient(140deg, #e6f0fc, #d5e6fb);
+  color: var(--primary);
+  font-weight: 800;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 1px solid rgba(18, 104, 201, 0.15);
+  line-height: 1;
+  user-select: none;
+  box-sizing: border-box;
+}
+
+body.dark .conf-badge-logo {
+  background: #1c3358;
+  color: #7ab3f5;
+  border-color: #2b4877;
 }
 
 

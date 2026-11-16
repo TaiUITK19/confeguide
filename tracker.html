@@ -1,19 +1,16 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Theo dõi tiến độ nộp bài và các mốc deadline của hội nghị khoa học quan tâm.">
   <title>Theo dõi hội nghị - ConfGuide</title>
   
   <link rel="icon" type="image/svg+xml" href="images/logo.svg">
   
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  
   <link rel="stylesheet" href="css/base.css">
   <link rel="stylesheet" href="css/tracker.css">
+  <link rel="stylesheet" href="css/compare.css">
 </head>
 <body>
   <script>try { if (localStorage.getItem('confguide_theme') === 'dark') document.body.classList.add('dark'); } catch (e) {}</script>
@@ -43,7 +40,7 @@
       </div>
 
       <div class="table-wrap">
-        <table>
+        <table class="tracker-table">
           <thead>
             <tr>
               <th>Tên hội nghị</th>
@@ -58,7 +55,7 @@
     </section>
 
     <div class="notice">
-      <div class="notice-icon">i</div>
+      <div class="notice-icon" aria-hidden="true">i</div>
       <div>
         <div>Danh sách này đồng bộ với nút “Lưu hội nghị” trong trang Tra cứu và trang chi tiết.</div>
         <div>Dữ liệu được lưu trên trình duyệt hiện tại; mỗi trình duyệt có danh sách riêng.</div>
@@ -69,6 +66,7 @@
   <div id="site-footer"></div>
 
   <script src="js/layout.js"></script>
+  <script src="js/compare.js"></script>
   <script src="js/tracker.js"></script>
 </body>
 </html>

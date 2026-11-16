@@ -1,3 +1,8 @@
+/* =========================================================
+   ConfGuide — About Stylesheet (about.css)
+   Trang Giới thiệu dự án | Lộ trình phát triển | Modal đề xuất
+   ========================================================= */
+
 .about-main {
   width: 100%;
   padding-bottom: 64px;
@@ -512,8 +517,16 @@
 
 .milestone-current .about-milestone-badge {
   background: #ecfdf5;
-  color: #059669;
+  color: #047857;
   border: 1px solid #a7f3d0;
+}
+
+body.about-modal-open {
+  overflow: hidden;
+}
+
+.about-community-title {
+  margin-top: 12px;
 }
 
 .milestone-future .about-milestone-badge {
@@ -930,19 +943,6 @@ body.dark .about-success-desc {
 }
 
 /* ================= RESPONSIVE ================= */
-@media (max-width: 1099px) {
-  .nav-link {
-    padding: 8px 10px;
-    font-size: 13.5px;
-  }
-  .main-nav {
-    gap: 4px;
-  }
-  .header-actions {
-    gap: 8px;
-  }
-}
-
 @media (max-width: 1024px) {
   .about-hero-title {
     font-size: 32px;
@@ -954,12 +954,6 @@ body.dark .about-success-desc {
   .about-member-card {
     flex: 0 1 calc((100% - 20px) / 2);
     max-width: calc((100% - 20px) / 2);
-  }
-}
-
-@media (max-width: 640px) {
-  .site-header .auth-buttons-group {
-    display: none;
   }
 }
 

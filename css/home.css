@@ -1,4 +1,5 @@
 /* =========================================================
+<<<<<<< Updated upstream
    ConfGuide — Landing Page Module (home.css)
    Tokens, Reset, Header/Footer & Layout inherited from base.css
    ========================================================= */
@@ -64,47 +65,47 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
+=======
+   ConfGuide — Home Stylesheet (home.css)
+   Kiểu dáng riêng cho trang chủ | Kế thừa tokens và layout từ base.css
+   ========================================================= */
+
+/* Nút CTA trang chủ kế thừa .btn từ base.css */
+.hero-actions .btn,
+.featured-cta-wrap .btn {
+>>>>>>> Stashed changes
   padding: 12px 24px;
-  border-radius: var(--radius-sm);
-  font-weight: 600;
   font-size: 15px;
-  transition: all 180ms ease;
-  white-space: nowrap;
 }
 
-.btn-primary {
-  background: var(--primary);
-  color: #ffffff !important;
+.hero-actions .btn-primary,
+.featured-cta-wrap .btn-primary {
   box-shadow: 0 4px 14px rgba(18, 104, 201, 0.25);
 }
 
-.btn-primary:hover,
-.btn-primary:focus-visible {
-  background: var(--primary-dark);
+.hero-actions .btn-primary:hover,
+.hero-actions .btn-primary:focus-visible,
+.featured-cta-wrap .btn-primary:hover,
+.featured-cta-wrap .btn-primary:focus-visible {
   transform: translateY(-1px);
   box-shadow: 0 6px 18px rgba(18, 104, 201, 0.35);
 }
 
-.btn-secondary {
-  background: var(--surface);
-  color: var(--text) !important;
-  border: 1px solid var(--border);
-}
-
-.btn-secondary:hover,
-.btn-secondary:focus-visible {
+.hero-actions .btn-secondary:hover,
+.hero-actions .btn-secondary:focus-visible {
   background: var(--primary-soft);
-  color: var(--primary) !important;
+  color: var(--primary);
   border-color: var(--primary);
 }
 
-.btn-accent {
-  background: var(--navy);
-  color: #ffffff !important;
+.featured-cta-wrap {
+  margin-top: 32px;
+  text-align: center;
 }
 
-.btn-accent:hover {
-  opacity: 0.92;
+.featured-cta-wrap .btn-view-all {
+  padding: 13px 28px;
+  font-size: 15px;
 }
 
 /* ================= Hero Section ================= */
@@ -360,6 +361,7 @@
   flex-shrink: 0;
 }
 
+<<<<<<< Updated upstream
 /* ================= Pricing Section ================= */
 .pricing-section {
   background: var(--bg-secondary);
@@ -458,6 +460,9 @@
 }
 
 /* ================= Conference List Section ================= */
+=======
+/* Danh sách hội nghị */
+>>>>>>> Stashed changes
 .conference-section {
   background: var(--bg-primary);
   scroll-margin-top: 80px;
@@ -528,26 +533,7 @@
   margin-bottom: 14px;
 }
 
-.conf-badge-logo {
-  width: 52px;
-  height: 52px;
-  border-radius: 10px;
-  background: linear-gradient(140deg, #e6f0fc, #d5e6fb);
-  color: var(--primary);
-  font-weight: 800;
-  font-size: 14px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  border: 1px solid rgba(18, 104, 201, 0.15);
-}
-
-body.dark .conf-badge-logo {
-  background: #1c3358;
-  color: #7ab3f5;
-  border-color: #2b4877;
-}
+/* .conf-badge-logo dùng chung từ css/base.css */
 
 .conf-title-wrap {
   flex: 1;
@@ -607,9 +593,17 @@ body.dark .conf-badge-logo {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
   gap: 12px;
   padding-top: 16px;
   border-top: 1px solid var(--border);
+}
+
+.conf-card-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 .conf-deadline-badge {
@@ -621,8 +615,12 @@ body.dark .conf-badge-logo {
 
 .conf-deadline-badge strong {
   font-size: 13px;
-  color: #d9480f;
+  color: #c2410c;
   font-weight: 700;
+}
+
+body.dark .conf-deadline-badge strong {
+  color: #fdba74;
 }
 
 .btn-detail {
@@ -665,6 +663,7 @@ body.dark .conf-badge-logo {
   font-size: 15px;
 }
 
+<<<<<<< Updated upstream
 /* =========================================================
    CONFERENCE DETAIL VIEW (Hiện ra khi nhấn "Xem chi tiết")
    ========================================================= */
@@ -1122,12 +1121,12 @@ body.dark .btn-save-conf.saved {
 /* Footer dùng chung được quản lý tập trung và đồng bộ tại css/base.css */
 
 /* ================= Responsive Breakpoints ================= */
+=======
+/* Giao diện responsive trang chủ */
+>>>>>>> Stashed changes
 @media (max-width: 1280px) {
   .hero-inner {
     grid-template-columns: 1fr 300px;
-  }
-  .related-grid {
-    grid-template-columns: repeat(3, 1fr);
   }
 }
 
@@ -1139,28 +1138,21 @@ body.dark .btn-save-conf.saved {
     display: none;
   }
   .features-grid,
-  .pricing-grid,
   .conference-grid {
     grid-template-columns: repeat(2, 1fr);
-  }
-  .detail-layout {
-    grid-template-columns: 1fr;
-  }
-  .related-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  .footer-top {
-    grid-template-columns: 1fr 1fr;
   }
 }
 
 @media (max-width: 768px) {
+<<<<<<< Updated upstream
   .container {
     width: calc(100% - 32px);
   }
   .main-nav {
     display: none; /* Mobile menu navigation */
   }
+=======
+>>>>>>> Stashed changes
   .hero-content h1 {
     font-size: 34px;
   }
@@ -1168,26 +1160,14 @@ body.dark .btn-save-conf.saved {
     font-size: 15px;
   }
   .features-grid,
-  .pricing-grid,
-  .conference-grid,
-  .related-grid {
+  .conference-grid {
     grid-template-columns: 1fr;
-  }
-  .info-row {
-    grid-template-columns: 28px 140px 1fr;
-    font-size: 13.5px;
   }
 }
 
 @media (max-width: 640px) {
   .hero-content h1 {
     font-size: 28px;
-  }
-  .detail-hero h1 {
-    font-size: 28px;
-  }
-  .detail-sky-svg {
-    display: none;
   }
   .search-box {
     flex-direction: column;
@@ -1201,11 +1181,20 @@ body.dark .btn-save-conf.saved {
   .search-box button {
     width: 100%;
   }
-  .info-row {
-    grid-template-columns: 1fr;
-    gap: 4px;
+}
+
+@media (max-width: 430px) {
+  .hero-section {
+    padding: 44px 0 40px;
   }
-  .info-icon {
-    display: none;
+  .hero-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .hero-actions .btn {
+    width: 100%;
+  }
+  .conf-card {
+    padding: 18px 16px;
   }
 }

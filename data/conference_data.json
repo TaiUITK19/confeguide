@@ -2,6 +2,7 @@
   {
     "name": "SOICT 2026",
     "year": "2026",
+    "rank": "B",
     "website_url": "https://soict.org/",
     "deadline_url": "https://soict.org/submission/",
     "full_name": "The 15th International Symposium on Information and Communication Technology",
@@ -40,6 +41,7 @@
     "id": "rivf-2026",
     "name": "RIVF 2026",
     "year": "2026",
+    "rank": "B",
     "website_url": "https://rivf2026.org/",
     "deadline_url": "https://rivf2026.org/call-for-papers.html",
     "full_name": "The 20th International Conference on Computing and Communication Technologies",
@@ -74,6 +76,7 @@
     "id": "aicon-2026",
     "name": "AICON 2026",
     "year": "2026",
+    "rank": "B",
     "website_url": "https://aicon-conf.eai-conferences.org/2026/",
     "deadline_url": "https://aicon-conf.eai-conferences.org/2026/call-for-paper/",
     "full_name": "6th EAI International Conference on Artificial Intelligence for Communications and Networks",
@@ -132,6 +135,7 @@
     "id": "iceeis-2026",
     "name": "ICEEIS 2026",
     "year": "2026",
+    "rank": "C",
     "website_url": "https://iceeis2026.hcmute.edu.vn/",
     "deadline_url": "https://iceeis2026.hcmute.edu.vn/",
     "full_name": "1st International Conference on Electrical, Electronics and Intelligent Systems 2026",
@@ -181,8 +185,8 @@
   {
     "id": "ami-2026",
     "name": "AMI 2026",
-    "fullName": "AMI 2026",
     "rank": "B",
+    "fullName": "AMI 2026",
     "region": "Quốc tế",
     "format": "in-person",
     "publisher": "Khác",
@@ -198,28 +202,10 @@
       "ami 2026"
     ],
     "fee": "650 USD",
-    "location": "Đang cập nhật",
+    "location": "Can Tho City",
     "startDate": "2026-10-15",
     "endDate": "2026-10-17",
     "website": "https://ami.ctu.edu.vn/2026/",
-    "deadlines": {},
-    "lastVerified": "2026-03-15",
-    "summarization": "",
-    "rating": 4.4,
-    "rating_count": 94,
-    "date_happen": "2026-10-15 to 2026-10-17",
-    "website_url": "https://ami.ctu.edu.vn/2026/",
-    "deadline_url": "https://ami.ctu.edu.vn/2026/",
-    "full_name": "The 1st International Conference on Autonomous Machine Intelligence",
-    "summarization": "The International Conference on Autonomous Machine Intelligence (AMI 2026) is an international forum dedicated to the study of autonomous, self-supervised, and predictive learning systems. The conference aims to bring together researchers and practitioners to advance the foundations and applications of next-generation intelligent systems capable of learning and acting with minimal human supervision, focusing on emerging paradigms such as world models, energy-based models, and joint embedding predictive architectures.",
-    "location": "Can Tho City",
-    "country": "Vietnam",
-    "is_it_related": true,
-    "date_happen": "2026-12-17 to 2026-12-19",
-    "start_date": "2026-12-17",
-    "end_date": "2026-12-19",
-    "image_url": "https://ami.ctu.edu.vn/2026/bg1.jpeg",
-    "logo_url": "https://ami.ctu.edu.vn/2026/favicon.ico?favicon.2nw-hdzt1sj6p.ico",
     "deadlines": [
       {
         "name": "Paper Submission Deadline",
@@ -234,6 +220,20 @@
         "date": "2026-10-08"
       }
     ],
+    "lastVerified": "2026-03-15",
+    "summarization": "The International Conference on Autonomous Machine Intelligence (AMI 2026) is an international forum dedicated to the study of autonomous, self-supervised, and predictive learning systems. The conference aims to bring together researchers and practitioners to advance the foundations and applications of next-generation intelligent systems capable of learning and acting with minimal human supervision, focusing on emerging paradigms such as world models, energy-based models, and joint embedding predictive architectures.",
+    "rating": 4.4,
+    "rating_count": 94,
+    "date_happen": "2026-12-17 to 2026-12-19",
+    "website_url": "https://ami.ctu.edu.vn/2026/",
+    "deadline_url": "https://ami.ctu.edu.vn/2026/",
+    "full_name": "The 1st International Conference on Autonomous Machine Intelligence",
+    "country": "Vietnam",
+    "is_it_related": true,
+    "start_date": "2026-12-17",
+    "end_date": "2026-12-19",
+    "image_url": "https://ami.ctu.edu.vn/2026/bg1.jpeg",
+    "logo_url": "https://ami.ctu.edu.vn/2026/favicon.ico?favicon.2nw-hdzt1sj6p.ico",
     "crawled_at": "2026-11-09T17:31:18+00:00",
     "status": "complete",
     "errors": []
@@ -241,6 +241,7 @@
   {
     "name": "ICEBA 2026",
     "year": "2026",
+    "rank": "C",
     "website_url": "https://www.iceba.org/",
     "deadline_url": "https://www.iceba.org/",
     "full_name": "The 12th International Conference on E-Business and Applications",
@@ -274,6 +275,7 @@
   {
     "name": "REV-ECIT 2026",
     "year": "2026",
+    "rank": "C",
     "website_url": "https://rev-ecit.vn/vi",
     "deadline_url": "https://rev-ecit.vn/vi",
     "full_name": "Hội nghị Quốc gia lần thứ XXIX về Điện tử, Truyền thông và Công nghệ Thông tin",
@@ -307,6 +309,7 @@
   {
     "name": "AICI 2027",
     "year": "2027",
+    "rank": "B",
     "website_url": "https://aici2027.thanglong.edu.vn/",
     "deadline_url": "https://aici2027.thanglong.edu.vn/important-dates/",
     "full_name": "The Eighth International Conference on Artificial Intelligence and Computational Intelligence",
@@ -340,6 +343,7 @@
   {
     "name": "ICIIT 2027",
     "year": "2027",
+    "rank": "B",
     "website_url": "https://www.iciit.org/",
     "deadline_url": "https://www.iciit.org/date.html",
     "full_name": "2027 12th International Conference on Intelligent Information Technology",
@@ -377,6 +381,7 @@
   {
     "name": "ICCIES 2027",
     "year": "2027",
+    "rank": "C",
     "website_url": "https://iccies.tdtu.edu.vn/2027/",
     "deadline_url": "https://iccies.tdtu.edu.vn/2027/",
     "full_name": "The 3rd International Conference on Computational Intelligence in Engineering Science",
@@ -399,6 +404,7 @@
   {
     "name": "AAMAS 2027",
     "year": "2027",
+    "rank": "A*",
     "website_url": "https://warwick.ac.uk/fac/sci/dcs/aamas2027/",
     "deadline_url": "https://warwick.ac.uk/fac/sci/dcs/aamas2027/",
     "full_name": "The 26th International Conference on Autonomous Agents and Multiagent Systems (AAMAS 2027)",
@@ -528,6 +534,7 @@
   {
     "name": "MobiSys 2027",
     "year": "2027",
+    "rank": "A",
     "website_url": "https://www.sigmobile.org/mobisys/2027/",
     "deadline_url": "https://www.sigmobile.org/mobisys/2027/",
     "full_name": "The 25th ACM International Conference on Mobile Systems, Applications, and Services",
@@ -577,6 +584,7 @@
   {
     "name": "EASE 2027",
     "year": "2027",
+    "rank": "A",
     "website_url": "https://conf.researchr.org/home/ease-2027",
     "deadline_url": "https://conf.researchr.org/home/ease-2027",
     "full_name": "International Conference on Evaluation and Assessment in Software Engineering",
@@ -642,6 +650,7 @@
   {
     "name": "WCST 2026",
     "year": "2026",
+    "rank": "C",
     "website_url": "https://wcst.world/2026/",
     "deadline_url": "https://wcst.world/2026/02/",
     "full_name": "4th World Conference on Smart Tourism",
@@ -701,6 +710,7 @@
   {
     "name": "TSE 2026",
     "year": "2026",
+    "rank": "C",
     "website_url": "https://tse.lqdtu.edu.vn/",
     "deadline_url": "https://tse.lqdtu.edu.vn/",
     "full_name": "2026 International Conference on Advanced Technologies for Search & Rescue and Emergency Response Systems",
@@ -738,6 +748,7 @@
   {
     "name": "SIMC 2026",
     "year": "2026",
+    "rank": "C",
     "website_url": "https://www.simc-conf.org/",
     "deadline_url": "https://www.simc-conf.org/call-for-papers",
     "full_name": "The First International Conference on Semantic Intelligence in Massive Computing (SIMC)",
@@ -760,6 +771,7 @@
   {
     "name": "CSoNet 2026",
     "year": "2026",
+    "rank": "B",
     "website_url": "https://csonet-conf.github.io/csonet26/",
     "deadline_url": "https://csonet-conf.github.io/csonet26/index.php/call-for-papers/index.html",
     "full_name": "The 15th International Conference on Computational Science and Network Intelligence",
@@ -805,6 +817,7 @@
   {
     "name": "ICTA 2026",
     "year": "2026",
+    "rank": "C",
     "website_url": "https://icta-conf.com/",
     "deadline_url": "https://dhhp.edu.vn/post/hoi-thao-khoa-hoc-quoc-te-ve-cac-van-de-tien-tien-trong-cong-nghe-thong-tin-va-truyen-thong-international-conference-on-advances-in-information-and-communication-technology-icta-2026-62742.html",
     "full_name": "The 5th International Conference on Advances in Information and Communication Technology (ICTA 2026)",
@@ -838,6 +851,7 @@
   {
     "name": "ICDSAIA 2026",
     "year": "2026",
+    "rank": "C",
     "website_url": "https://icdsaia2026.org/",
     "deadline_url": "https://icdsaia2026.org/authors/important-dates",
     "full_name": "International Conference on Data Science, Artificial Intelligence and Applications",
@@ -871,6 +885,7 @@
   {
     "name": "AIEI 2027",
     "year": "2027",
+    "rank": "C",
     "website_url": "https://aiei2027.org/",
     "deadline_url": "https://aiei2027.org/cfp.html",
     "full_name": "International Conference on Artificial Intelligence in Energy and Infrastructure",
@@ -908,6 +923,7 @@
   {
     "name": "IEEE SMC 2027",
     "year": "2027",
+    "rank": "B",
     "website_url": "https://ieee-smc2027.org/",
     "deadline_url": "https://ieee-smc2027.org/",
     "full_name": "2027 IEEE International Conference on Systems, Man, and Cybernetics",
@@ -961,6 +977,7 @@
   {
     "name": "FJCAI 2027",
     "year": "2027",
+    "rank": "C",
     "website_url": "https://fjcai.org.vn/",
     "deadline_url": "https://fjcai.org.vn/",
     "full_name": "FJCAI 2027 Hội thảo khoa học về Trí tuệ nhân tạo",
@@ -994,6 +1011,7 @@
   {
     "name": "IEEE NICE–TEAS ASIA 2026",
     "year": "2026",
+    "rank": "B",
     "website_url": "https://asia.nice-teas.com/",
     "deadline_url": "https://asia.nice-teas.com/",
     "full_name": "4th IEEE Networking International Conference on Emerging Trends in Expert Systems, Applications & Security, ASIA",
@@ -1017,6 +1035,7 @@
   {
     "name": "ENASE 2027",
     "year": "2027",
+    "rank": "B",
     "website_url": "https://enase.scitevents.org/",
     "deadline_url": "https://enase.scitevents.org/",
     "full_name": "Evaluation of Novel Approaches to Software Engineering",
@@ -1049,6 +1068,7 @@
   {
     "name": "GCHRCLI 2027",
     "year": "2027",
+    "rank": "C",
     "website_url": "https://www.researchworld.org/Conference/30077/GCHRCLI/",
     "deadline_url": "https://www.researchworld.org/Conference/30077/GCHRCLI/",
     "full_name": "Global Conference on Human Rights, Cybersecurity & Legal Innovation",
@@ -1082,6 +1102,7 @@
   {
     "name": "ICCSS 2027",
     "year": "2027",
+    "rank": "C",
     "website_url": "https://iccss.org/",
     "deadline_url": "https://iccss.org/",
     "full_name": "2027 10th International Conference on Circuits, Systems and Simulation (ICCSS)",
@@ -1115,6 +1136,7 @@
   {
     "name": "8th IEEE AICAS 2026",
     "year": "2026",
+    "rank": "A",
     "website_url": "https://iti.vnu.edu.vn/en/su-kien/8th-ieee-aicas-2026-ha-long-vietnam-call-for-papers-2/",
     "deadline_url": "https://iti.vnu.edu.vn/en/su-kien/8th-ieee-aicas-2026-ha-long-vietnam-call-for-papers-2/",
     "full_name": "2026 IEEE 8th International Conference on Artificial Intelligence Circuits and Systems (AICAS 2026)",
@@ -1142,6 +1164,7 @@
   {
     "name": "REV 2026",
     "year": "2026",
+    "rank": "C",
     "website_url": "https://rev-ecit.vn/",
     "deadline_url": "https://rev-ecit.vn/",
     "full_name": "Hội nghị Quốc gia lần thứ XXIX về Điện tử, Truyền thông và Công nghệ Thông tin",
@@ -1175,6 +1198,7 @@
   {
     "name": "ICE 2027",
     "year": "2027",
+    "rank": "B",
     "website_url": "https://ice-conference.org/call-for-contributions/",
     "deadline_url": "https://ice-conference.org/call-for-contributions/",
     "full_name": "ICE IEEE/ITMC",
@@ -1210,6 +1234,7 @@
   {
     "name": "ICERA 2026",
     "year": "2026",
+    "rank": "C",
     "website_url": "https://icera2026.tnut.edu.vn/",
     "deadline_url": "https://icera2026.tnut.edu.vn/",
     "full_name": "9th International Conference on Engineering Research and Applications",
@@ -1235,6 +1260,7 @@
   {
     "name": "ACM Multimedia Asia 2026",
     "year": "2026",
+    "rank": "C",
     "website_url": "https://www.mmasia2026.org/",
     "deadline_url": "https://www.mmasia2026.org/important-dates",
     "full_name": null,
@@ -1262,6 +1288,7 @@
   {
     "name": "AICAS 2026",
     "year": "2026",
+    "rank": "A",
     "website_url": "https://edas.info/N34921",
     "deadline_url": "https://edas.info/N34921",
     "full_name": null,
@@ -1288,6 +1315,7 @@
   {
     "name": "ICCTRDA 2026",
     "year": "2026",
+    "rank": "C",
     "website_url": "https://www.icctrda.com/",
     "deadline_url": "https://www.icctrda.com/",
     "full_name": null,
@@ -1314,6 +1342,7 @@
   {
     "name": "IETBHEC 2027",
     "year": "2027",
+    "rank": "C",
     "website_url": "https://khoahoc.neu.edu.vn/vi/tin-nckh-khac/thu-moi-viet-bai-va-tham-du-hoi-thao-quoc-te-ietbhec-27-lan-thu-5",
     "deadline_url": "https://khoahoc.neu.edu.vn/vi/tin-nckh-khac/thu-moi-viet-bai-va-tham-du-hoi-thao-quoc-te-ietbhec-27-lan-thu-5",
     "full_name": null,
@@ -1340,6 +1369,7 @@
   {
     "name": "International Conference on Signal Processing and Communication 2026",
     "year": "2026",
+    "rank": "C",
     "website_url": "https://dee.hcmut.edu.vn/tintuc/cfp-ieee-11",
     "deadline_url": "https://dee.hcmut.edu.vn/tintuc/cfp-ieee-11",
     "full_name": null,
@@ -1366,6 +1396,7 @@
   {
     "name": "ICEF 2026",
     "year": "2026",
+    "rank": "C",
     "website_url": "https://khoahoc.neu.edu.vn/vi/tin-nckh-khac/call-for-papers-icef-2026",
     "deadline_url": "https://khoahoc.neu.edu.vn/vi/tin-nckh-khac/call-for-papers-icef-2026",
     "full_name": null,

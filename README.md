@@ -10,7 +10,7 @@
 
 **ConfeGuide** là nền tảng web tĩnh hỗ trợ tra cứu, đánh giá uy tín học thuật và theo dõi các kỳ hội nghị khoa học thuộc lĩnh vực Công nghệ thông tin (CNTT) tại Việt Nam.
 
-Website được phát triển nhằm hỗ trợ sinh viên, giảng viên, nghiên cứu sinh và các nhóm nghiên cứu dễ dàng tìm kiếm sự kiện phù hợp, đối chiếu chuẩn phân hạng học thuật (CORE Rankings, Scopus), theo dõi thời hạn nộp bài chuẩn múi giờ quốc tế Anywhere on Earth (AoE) và chủ động quản lý lộ trình công bố bài báo khoa học.
+Website được phát triển nhằm hỗ trợ sinh viên, giảng viên, nghiên cứu sinh và các nhóm nghiên cứu dễ dàng tìm kiếm sự kiện phù hợp, đối chiếu chuẩn phân hạng học thuật (CORE Rankings, Scopus), theo dõi thời hạn nộp bài theo múi giờ UTC+7 (giờ Việt Nam, quy đổi từ chuẩn AoE) và chủ động quản lý lộ trình công bố bài báo khoa học.
 
 ---
 
@@ -79,7 +79,7 @@ Website được phát triển nhằm hỗ trợ sinh viên, giảng viên, nghi
 |---|---|---|
 | Trang chủ | [`index.html`](file:///d:/IE104/doangithub/confeguide/index.html) | Cổng tìm kiếm nhanh, gợi ý chủ đề, danh sách hội nghị sắp tới |
 | Tra cứu | [`search.html`](file:///d:/IE104/doangithub/confeguide/search.html) | Tra cứu nâng cao, bộ lọc accordion đa chiều, đồng bộ URL |
-| Chi tiết hội nghị | [`detail.html`](file:///d:/IE104/doangithub/confeguide/detail.html) | Toàn văn thông tin hội nghị, timeline 4 mốc AoE, đánh giá cộng đồng |
+| Chi tiết hội nghị | [`detail.html`](file:///d:/IE104/doangithub/confeguide/detail.html) | Toàn văn thông tin hội nghị, timeline 4 mốc UTC+7 (giờ Việt Nam), đánh giá cộng đồng |
 | Theo dõi hội nghị | [`tracker.html`](file:///d:/IE104/doangithub/confeguide/tracker.html) | Quản lý danh sách hội nghị đã lưu cá nhân hóa |
 | Hồ sơ cá nhân | [`profile.html`](file:///d:/IE104/doangithub/confeguide/profile.html) | Thông tin nhà nghiên cứu, modal chỉnh sửa, cập nhật avatar |
 | Giới thiệu | [`about.html`](file:///d:/IE104/doangithub/confeguide/about.html) | Thông tin đề tài IE104, đội ngũ UIT, modal đề xuất hội nghị |
@@ -114,7 +114,7 @@ confeguide/
 │   ├── about.css          # Styles riêng trang giới thiệu (roadmap, giá trị cốt lõi)
 │   ├── auth.css           # Styles màn hình đăng nhập & đăng ký (layout 2 cột)
 │   ├── base.css           # Design tokens, dark mode, header, footer, modal, toast
-│   ├── detail.css         # Styles trang chi tiết (timeline 4 mốc AoE, rater)
+│   ├── detail.css         # Styles trang chi tiết (timeline 4 mốc UTC+7, rater)
 │   ├── home.css           # Styles trang chủ (hero, suggestions, feature cards)
 │   ├── profile.css        # Styles trang hồ sơ cá nhân (dual-surface hero, avatar)
 │   ├── search.css         # Styles trang tra cứu (accordion filter, chips, results)
@@ -130,7 +130,7 @@ confeguide/
 │   ├── about.js           # Xử lý render giới thiệu và modal đề xuất hội nghị
 │   ├── app.js             # Logic tra cứu, accordion filters, đồng bộ URL parameters
 │   ├── auth.js            # Xác thực tài khoản, băm SHA-256, nạp seed users
-│   ├── detail.js          # Logic trang chi tiết hội nghị, timeline AoE, rating, bookmark
+│   ├── detail.js          # Logic trang chi tiết hội nghị, timeline UTC+7, rating, bookmark
 │   ├── layout.js          # [DÙNG CHUNG] Render Header & Footer, Dark mode, Auth guard
 │   ├── profile.js         # Logic trang hồ sơ cá nhân, modal cập nhật thông tin
 │   ├── script.js          # Logic trang chủ (gateway redirect, cards hội nghị sắp tới)
