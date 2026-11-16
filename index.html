@@ -21,9 +21,10 @@
   </script>
   <div id="site-header"></div>
   <main id="mainContent">
-    <!-- Giới thiệu -->
+    <!-- Giới thiệu, tìm kiếm nhanh & Slider nổi bật -->
     <section class="hero-section" id="home">
       <div class="container hero-inner">
+        <!-- Cột trái cố định: Giới thiệu + CTA + Tìm kiếm nhanh -->
         <div class="hero-content">
           <div class="hero-eyebrow">
             <span aria-hidden="true"></span>
@@ -45,7 +46,9 @@
               Khám phá hội nghị ngay
             </a>
           </div>
+
           <div class="hero-search-wrap">
+            <label for="searchInput" class="hero-search-label">Tra cứu nhanh theo tên hội nghị, lĩnh vực hoặc địa điểm:</label>
             <form class="search-box" id="searchForm" role="search">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <circle cx="11" cy="11" r="8"/>
@@ -54,26 +57,132 @@
               <input id="searchInput" type="search" autocomplete="off" aria-label="Tìm kiếm hội nghị">
               <button class="btn-primary" type="submit">Tìm kiếm</button>
             </form>
-            <div class="hero-suggestions">
-              <span>Gợi ý chủ đề:</span>
-              <button type="button" class="chip-keyword js-chip-keyword" data-keyword="computer vision">Computer Vision</button>
-              <button type="button" class="chip-keyword js-chip-keyword" data-keyword="machine learning">Machine Learning</button>
-              <button type="button" class="chip-keyword js-chip-keyword" data-keyword="multimedia">Multimedia</button>
-              <button type="button" class="chip-keyword js-chip-keyword" data-keyword="cyber security">Cyber Security</button>
-            </div>
           </div>
         </div>
-        <aside class="hero-card card-surface" aria-label="Danh ngôn học thuật">
-          <div class="quote-icon" aria-hidden="true">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-8.983z"/>
-            </svg>
+
+        <!-- Cột phải: Slider 3 thẻ nổi bật -->
+        <div
+          class="hero-slider js-hero-slider"
+          role="region"
+          aria-roledescription="carousel"
+          aria-label="Thông tin nổi bật ConfGuide"
+        >
+          <!-- Vùng hiển thị 3 slide -->
+          <div class="hero-slider__viewport js-slider-viewport">
+            <div class="hero-slider__track hero-slider__track--step-0 js-slider-track" aria-live="off">
+              <!-- Slide 1: Danh ngôn học thuật + Tóm tắt nhanh -->
+              <div
+                class="hero-slider__slide hero-slider__slide--active js-slider-slide"
+                role="group"
+                aria-roledescription="slide"
+                aria-label="1 của 3"
+                aria-hidden="false"
+                data-slide-index="0"
+              >
+                <div class="hero-slider__slide-head">
+                  <p class="hero-slider__slide-title">Góc học thuật ConfGuide</p>
+                  <span class="hero-slider__slide-badge">Tổng quan nhanh</span>
+                </div>
+
+                <div class="hero-slider__quote-panel">
+                  <div class="hero-slider__quote-icon" aria-hidden="true">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-8.983z"/>
+                    </svg>
+                  </div>
+                  <blockquote>
+                    “Research is to see what everybody else has seen, and to think what nobody else has thought.”
+                  </blockquote>
+                  <cite>— Albert Szent-Györgyi (Giải Nobel Y học)</cite>
+                </div>
+
+                <div class="hero-slider__summary" aria-label="Tóm tắt nhanh hệ thống">
+                  <div class="hero-slider__summary-item">
+                    <strong class="hero-slider__summary-val js-hero-summary-total">--</strong>
+                    <span class="hero-slider__summary-label">Hội nghị CNTT</span>
+                  </div>
+                  <div class="hero-slider__summary-item">
+                    <strong class="hero-slider__summary-val js-hero-summary-core">--</strong>
+                    <span class="hero-slider__summary-label">Hạng cao A* &amp; A</span>
+                  </div>
+                  <div class="hero-slider__summary-item">
+                    <strong class="hero-slider__summary-val js-hero-summary-open">--</strong>
+                    <span class="hero-slider__summary-label">Mở nộp (UTC+7)</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Slide 2: Hội nghị nổi bật (dùng h2) -->
+              <div
+                class="hero-slider__slide js-slider-slide"
+                role="group"
+                aria-roledescription="slide"
+                aria-label="2 của 3"
+                aria-hidden="true"
+                inert
+                data-slide-index="1"
+              >
+                <div class="hero-slider__slide-head">
+                  <h2 class="hero-slider__slide-title">Hội nghị nổi bật</h2>
+                  <span class="hero-slider__slide-badge">CORE A* &amp; A</span>
+                  <p class="hero-slider__slide-subtitle">Các hội nghị khoa học uy tín hàng đầu hiện có trên hệ thống.</p>
+                </div>
+                <div class="hero-slider__cards-grid js-slider-featured-grid">
+                  <div class="hero-slider__loading" role="status" aria-live="polite">
+                    <span class="hero-slider__spinner" aria-hidden="true"></span>
+                    <span>Đang tải hội nghị nổi bật...</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Slide 3: Sắp hết hạn nộp bài (dùng h2) -->
+              <div
+                class="hero-slider__slide js-slider-slide"
+                role="group"
+                aria-roledescription="slide"
+                aria-label="3 của 3"
+                aria-hidden="true"
+                inert
+                data-slide-index="2"
+              >
+                <div class="hero-slider__slide-head">
+                  <h2 class="hero-slider__slide-title">Sắp hết hạn nộp bài</h2>
+                  <span class="hero-slider__slide-badge">Giờ Việt Nam UTC+7</span>
+                  <p class="hero-slider__slide-subtitle">Mốc hạn nộp bài gần nhất đang mở trong thời gian tới.</p>
+                </div>
+                <div class="hero-slider__cards-grid js-slider-deadlines-grid">
+                  <div class="hero-slider__loading" role="status" aria-live="polite">
+                    <span class="hero-slider__spinner" aria-hidden="true"></span>
+                    <span>Đang tải hạn nộp bài sắp tới...</span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-          <blockquote>
-            “Research is to see what everybody else has seen, and to think what nobody else has thought.”
-          </blockquote>
-          <cite>— Albert Szent-Györgyi (Giải Nobel Y học)</cite>
-        </aside>
+
+          <!-- 3 chấm phân trang đặt giữa đáy khung slider -->
+          <div class="hero-slider__dots js-slider-dots" role="group" aria-label="Chọn slide hiển thị">
+            <button
+              type="button"
+              class="hero-slider__dot hero-slider__dot--active js-slider-dot"
+              data-slide-index="0"
+              aria-label="Chuyển đến slide 1"
+              aria-current="true"
+            ></button>
+            <button
+              type="button"
+              class="hero-slider__dot js-slider-dot"
+              data-slide-index="1"
+              aria-label="Chuyển đến slide 2"
+            ></button>
+            <button
+              type="button"
+              class="hero-slider__dot js-slider-dot"
+              data-slide-index="2"
+              aria-label="Chuyển đến slide 3"
+            ></button>
+          </div>
+        </div>
       </div>
     </section>
 

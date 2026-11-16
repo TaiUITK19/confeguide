@@ -40,25 +40,31 @@
   font-size: 15px;
 }
 
-/* Hero */
+/* Hero 2 cột cân đối: Cột trái cố định & Cột phải Slider nổi bật */
 .hero-section {
   position: relative;
-  background: var(--bg-hero);
+  background: linear-gradient(135deg, #deebfe 0%, #e9f2ff 55%, #d5e5fc 100%);
   border-bottom: 1px solid var(--border);
-  padding: 64px 0 56px;
+  padding: 36px 0 40px;
   overflow: hidden;
   scroll-margin-top: 80px;
 }
 
+body.dark .hero-section {
+  background: linear-gradient(135deg, #0b1424 0%, #0e1c33 60%, #091220 100%);
+}
+
 .hero-inner {
   display: grid;
-  grid-template-columns: 1fr 340px;
-  gap: 48px;
+  grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr);
+  gap: 36px;
   align-items: center;
 }
 
+/* Cột trái cố định: Giới thiệu + CTA + Tìm kiếm nhanh */
 .hero-content {
-  max-width: 760px;
+  min-width: 0;
+  text-align: left;
 }
 
 .hero-eyebrow {
@@ -69,10 +75,15 @@
   color: var(--primary);
   font-size: 13px;
   font-weight: 700;
-  padding: 6px 14px;
+  padding: 5px 14px;
   border-radius: var(--radius-pill);
-  border: 1px solid rgba(18, 104, 201, 0.15);
-  margin-bottom: 16px;
+  border: 1px solid rgba(18, 104, 201, 0.2);
+  margin-bottom: 12px;
+}
+
+body.dark .hero-eyebrow {
+  color: var(--navy);
+  border-color: rgba(142, 194, 255, 0.3);
 }
 
 .hero-eyebrow span {
@@ -81,27 +92,36 @@
   border-radius: 50%;
   background: var(--primary);
   display: inline-block;
+  flex-shrink: 0;
+}
+
+body.dark .hero-eyebrow span {
+  background: var(--navy);
 }
 
 .hero-content h1 {
-  font-size: 46px;
+  font-size: clamp(28px, 2.8vw, 40px);
   line-height: 1.15;
-  letter-spacing: -1.2px;
+  letter-spacing: -1px;
   color: var(--text);
   font-weight: 800;
-  margin-bottom: 18px;
+  margin-bottom: 12px;
 }
 
 .hero-content h1 span {
   color: var(--primary);
 }
 
+body.dark .hero-content h1 span {
+  color: var(--navy);
+}
+
 .hero-desc {
-  font-size: 17px;
-  line-height: 1.6;
+  font-size: 15.5px;
+  line-height: 1.58;
   color: var(--text-muted);
-  margin-bottom: 28px;
-  max-width: 680px;
+  margin-bottom: 20px;
+  max-width: 600px;
 }
 
 .hero-actions {
@@ -109,28 +129,570 @@
   align-items: center;
   gap: 16px;
   flex-wrap: wrap;
-  margin-bottom: 32px;
+  margin-bottom: 18px;
 }
 
+/* Thanh tìm kiếm tích hợp ngay dưới CTA trong cột trái */
 .hero-search-wrap {
-  margin-top: 8px;
-  max-width: 640px;
+  max-width: 580px;
+  width: 100%;
+}
+
+.hero-search-label {
+  display: block;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+
+/* Cột phải: Khung Slider 3 slide nổi bật */
+.hero-slider {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  min-height: 368px;
+  padding: 14px 14px 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 8px;
+  background: linear-gradient(180deg, var(--surface) 0%, var(--surface) 64%, var(--primary-soft) 100%);
+  border: 1px solid rgba(18, 104, 201, 0.25);
+  border-radius: var(--radius);
+  box-shadow: 0 16px 38px rgba(18, 104, 201, 0.14), 0 2px 6px rgba(11, 31, 107, 0.06);
+}
+
+body.dark .hero-slider {
+  background: linear-gradient(180deg, var(--surface) 0%, var(--surface) 64%, var(--surface-alt) 100%);
+  border-color: rgba(142, 194, 255, 0.28);
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.55), 0 2px 8px rgba(0, 0, 0, 0.35);
+}
+
+/* 3 chấm phân trang đặt giữa đáy khung slider */
+.hero-slider__dots {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.hero-slider__dot {
+  position: relative;
+  width: 32px;
+  height: 24px;
+  min-width: 24px;
+  min-height: 24px;
+  padding: 0;
+  border-radius: var(--radius-pill);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+}
+
+.hero-slider__dot::before {
+  content: "";
+  width: 9px;
+  height: 9px;
+  border-radius: var(--radius-pill);
+  background: rgba(18, 104, 201, 0.38);
+  transition: width 180ms ease, background-color 180ms ease;
+}
+
+body.dark .hero-slider__dot::before {
+  background: rgba(142, 194, 255, 0.38);
+}
+
+.hero-slider__dot:hover::before {
+  background: rgba(18, 104, 201, 0.72);
+}
+
+body.dark .hero-slider__dot:hover::before {
+  background: rgba(142, 194, 255, 0.72);
+}
+
+.hero-slider__dot--active::before,
+.hero-slider__dot[aria-current="true"]::before {
+  width: 28px;
+  height: 8px;
+  background: var(--primary);
+}
+
+body.dark .hero-slider__dot--active::before,
+body.dark .hero-slider__dot[aria-current="true"]::before {
+  background: var(--navy);
+}
+
+.hero-slider__dot:focus-visible,
+.hero-slide-card__link:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+body.dark .hero-slider__dot:focus-visible,
+body.dark .hero-slide-card__link:focus-visible {
+  outline-color: var(--navy);
+}
+
+/* Khung trượt các slide */
+.hero-slider__viewport {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden;
+  overflow: clip;
+  touch-action: pan-y;
+}
+
+.hero-slider__track {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  transition: transform 360ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.hero-slider__track--step-0 {
+  transform: translateX(0%);
+}
+
+.hero-slider__track--step-1 {
+  transform: translateX(-100%);
+}
+
+.hero-slider__track--step-2 {
+  transform: translateX(-200%);
+}
+
+.hero-slider__slide {
+  flex: 0 0 100%;
+  width: 100%;
+  min-width: 0;
+  padding: 4px 12px 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 10px;
+}
+
+/* Slide 1: Danh ngôn học thuật & Tóm tắt nhanh */
+.hero-slider__quote-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 10px;
+  padding: 16px 18px;
+  background: var(--surface-alt);
+  border: 1px solid rgba(18, 104, 201, 0.22);
+  border-left: 4px solid var(--primary);
+  border-radius: var(--radius);
+  box-shadow: 0 4px 14px rgba(18, 104, 201, 0.06);
+}
+
+body.dark .hero-slider__quote-panel {
+  background: var(--surface-alt);
+  border-color: rgba(142, 194, 255, 0.26);
+  border-left: 4px solid var(--navy);
+}
+
+.hero-slider__quote-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--primary-soft);
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+body.dark .hero-slider__quote-icon {
+  color: var(--navy);
+}
+
+.hero-slider__quote-panel blockquote {
+  font-style: italic;
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--text);
+  margin: 0;
+  max-width: 44ch;
+}
+
+.hero-slider__quote-panel cite {
+  font-style: normal;
+  font-size: 13px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.hero-slider__summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.hero-slider__summary-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 8px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+body.dark .hero-slider__summary-item {
+  background: var(--surface-alt);
+  border-color: var(--border-strong);
+}
+
+.hero-slider__summary-val {
+  font-size: 19px;
+  font-weight: 800;
+  color: var(--primary);
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+}
+
+body.dark .hero-slider__summary-val {
+  color: var(--navy);
+}
+
+.hero-slider__summary-label {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--text-muted);
+  line-height: 1.3;
+}
+
+/* Tiêu đề dùng chung của Slide 2 & 3 (badge cân sang phải để không trống góc trên) */
+.hero-slider__slide-head {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px 10px;
+}
+
+.hero-slider__slide-badge {
+  order: 2;
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 11px;
+  border-radius: var(--radius-pill);
+  background: var(--primary-soft);
+  color: var(--primary);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+body.dark .hero-slider__slide-badge {
+  color: var(--navy);
+}
+
+.hero-slider__slide-title {
+  order: 1;
+  font-size: clamp(19px, 1.7vw, 22px);
+  font-weight: 800;
+  color: var(--navy);
+  line-height: 1.22;
+  margin: 0;
+}
+
+.hero-slider__slide-subtitle {
+  order: 3;
+  flex-basis: 100%;
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.4;
+  margin: 0;
+}
+
+/* Danh sách 2 thẻ xếp dọc gọn vừa khung cột phải */
+.hero-slider__cards-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  align-items: stretch;
+}
+
+.hero-slider__loading {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 32px 16px;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.hero-slider__spinner {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2.5px solid var(--border-strong);
+  border-top-color: var(--primary);
+  animation: heroSliderSpin 0.8s linear infinite;
+}
+
+@keyframes heroSliderSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Thẻ hội nghị bên trong Slide 2 & Slide 3 */
+.hero-slide-card {
+  padding: 11px 14px;
+  border-radius: var(--radius);
+  background: var(--surface);
+  border: 1px solid rgba(18, 104, 201, 0.25);
+  border-left: 4px solid var(--primary);
+  box-shadow: 0 5px 14px rgba(18, 104, 201, 0.08), 0 1px 4px rgba(11, 31, 107, 0.04);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 6px;
+  min-width: 0;
+  transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+}
+
+body.dark .hero-slide-card {
+  background: var(--surface-alt);
+  border-color: rgba(142, 194, 255, 0.28);
+  border-left: 4px solid var(--navy);
+  box-shadow: var(--shadow-sm);
+}
+
+.hero-slide-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--primary);
+  box-shadow: 0 10px 22px rgba(18, 104, 201, 0.16), 0 3px 8px rgba(11, 31, 107, 0.08);
+}
+
+body.dark .hero-slide-card:hover {
+  border-color: var(--navy);
+  box-shadow: var(--shadow-md);
+}
+
+.hero-slide-card__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  min-width: 0;
+}
+
+.hero-slide-card__title {
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--navy);
+  line-height: 1.25;
+  margin: 0;
+  min-width: 0;
+}
+
+/* Huy hiệu Rank: A* nền --gold chữ tối; A nền --primary chữ trắng; hạng khác giữ nền dịu */
+.hero-slide-card__rank {
+  flex-shrink: 0;
+  padding: 4px 11px;
+  border-radius: var(--radius-pill);
+  font-size: 12px;
+  font-weight: 800;
+  background: var(--gold);
+  color: #10264a;
+  border: 1px solid rgba(180, 125, 0, 0.45);
+  white-space: nowrap;
+}
+
+.hero-slide-card__rank--a {
+  background: var(--primary);
+  color: #ffffff;
+  border-color: var(--primary);
+}
+
+.hero-slide-card__rank--other {
+  background: var(--primary-soft);
+  color: var(--primary);
+  border-color: var(--border-strong);
+}
+
+body.dark .hero-slide-card__rank {
+  background: var(--gold);
+  color: #10264a;
+  border-color: rgba(245, 179, 1, 0.7);
+}
+
+body.dark .hero-slide-card__rank--a {
+  background: var(--primary);
+  color: #ffffff;
+  border-color: var(--navy);
+}
+
+body.dark .hero-slide-card__rank--other {
+  background: rgba(142, 194, 255, 0.16);
+  color: var(--navy);
+  border-color: rgba(142, 194, 255, 0.36);
+}
+
+/* Nhãn đếm ngược kèm phân mức khẩn cấp rõ bằng cả chữ lẫn màu */
+.hero-slide-card__countdown {
+  flex-shrink: 0;
+  padding: 4px 11px;
+  border-radius: var(--radius-pill);
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+  border: 1px solid transparent;
+}
+
+.hero-slide-card__countdown--urgent {
+  background: #fee2e2;
+  color: #991b1b;
+  border-color: #fca5a5;
+}
+
+.hero-slide-card__countdown--normal {
+  background: #dcfce7;
+  color: #065f46;
+  border-color: rgba(16, 185, 129, 0.4);
+}
+
+body.dark .hero-slide-card__countdown--urgent {
+  background: rgba(224, 49, 49, 0.24);
+  color: #fecaca;
+  border-color: rgba(248, 113, 113, 0.45);
+}
+
+body.dark .hero-slide-card__countdown--normal {
+  background: rgba(16, 185, 129, 0.20);
+  color: #6ee7b7;
+  border-color: rgba(16, 185, 129, 0.45);
+}
+
+.hero-slide-card__fullname {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.4;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.hero-slide-card__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding-top: 7px;
+  border-top: 1px solid var(--border);
+}
+
+.hero-slide-card__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 12.5px;
+  color: var(--text);
+  min-width: 0;
+  flex: 1;
+}
+
+.hero-slide-card__meta-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.hero-slide-card__meta-item svg {
+  color: var(--primary);
+  flex-shrink: 0;
+}
+
+body.dark .hero-slide-card__meta-item svg {
+  color: var(--navy);
+}
+
+.hero-slide-card__meta-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.hero-slide-card__link {
+  flex-shrink: 0;
+  min-height: 34px;
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgba(18, 104, 201, 0.22);
+}
+
+.hero-slide-card__link:hover,
+.hero-slide-card__link:focus-visible {
+  box-shadow: 0 6px 16px rgba(18, 104, 201, 0.30);
+}
+
+/* Trạng thái rỗng Slide 3 khi không còn deadline tương lai */
+.hero-slider__empty {
+  grid-column: 1 / -1;
+  padding: 28px 24px;
+  border-radius: var(--radius);
+  background: var(--surface-alt);
+  border: 1px dashed var(--border-strong);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.hero-slider__empty p {
+  font-size: 14.5px;
+  color: var(--text-muted);
+  max-width: 540px;
+  margin: 0;
+  line-height: 1.55;
 }
 
 .search-box {
   display: flex;
   align-items: center;
   background: var(--surface);
-  border: 1.5px solid var(--border);
+  border: 1.5px solid var(--border-strong);
   border-radius: var(--radius);
-  padding: 6px 6px 6px 16px;
-  box-shadow: var(--shadow-sm);
+  padding: 5px 5px 5px 14px;
+  box-shadow: var(--shadow-md);
   transition: border-color 200ms ease, box-shadow 200ms ease;
 }
 
 .search-box:focus-within {
   border-color: var(--primary);
-  box-shadow: 0 6px 20px rgba(18, 104, 201, 0.15);
+  box-shadow: 0 0 0 3px rgba(18, 104, 201, 0.22), 0 8px 24px rgba(18, 104, 201, 0.22);
+}
+
+body.dark .search-box:focus-within {
+  border-color: var(--navy);
+  box-shadow: 0 0 0 3px rgba(142, 194, 255, 0.28), 0 8px 24px rgba(0, 0, 0, 0.45);
 }
 
 .search-box svg {
@@ -141,6 +703,7 @@
 
 .search-box input {
   flex: 1;
+  min-width: 0;
   border: none;
   outline: none;
   background: transparent;
@@ -152,70 +715,12 @@
   padding: 10px 22px;
   border-radius: 8px;
   font-weight: 600;
+  flex-shrink: 0;
 }
 
-.hero-suggestions {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 14px;
-  font-size: 13px;
-  color: var(--text-muted);
-}
-
-.chip-keyword {
-  border: 1px solid var(--border);
-  background: var(--surface);
-  color: var(--text);
-  border-radius: var(--radius-pill);
-  padding: 4px 12px;
-  font-size: 12px;
-  cursor: pointer;
-  transition: all 180ms ease;
-}
-
-.chip-keyword:hover {
-  border-color: var(--primary);
-  color: var(--primary);
-  background: var(--primary-soft);
-}
-
-.hero-card {
-  padding: 24px;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 16px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-}
-
-.hero-card .quote-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  background: var(--primary-soft);
-  color: var(--primary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.hero-card blockquote {
-  font-style: italic;
-  font-size: 15px;
-  line-height: 1.5;
-  color: var(--text);
-}
-
-.hero-card cite {
-  font-style: normal;
-  font-size: 13px;
-  color: var(--text-muted);
-  font-weight: 600;
+.search-box button:focus-visible {
+  outline: 2px solid var(--navy);
+  outline-offset: 2px;
 }
 
 /* Tính năng */
@@ -352,6 +857,7 @@
   flex-direction: column;
   justify-content: space-between;
   height: 100%;
+  min-width: 0;
 }
 
 .conf-top {
@@ -430,8 +936,70 @@
 .conf-card-actions {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   flex-wrap: wrap;
+}
+
+/* Nút Lưu hội nghị dạng icon (đồng bộ màu sao vàng với trang tra cứu & chi tiết) */
+.conf-save-btn {
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  min-height: 40px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--text-muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: border-color 160ms ease, color 160ms ease, background-color 160ms ease;
+}
+
+.conf-save-btn:hover {
+  border-color: var(--gold);
+  color: #b45309;
+  background: #fffdf5;
+}
+
+.conf-save-btn:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.conf-save-btn--saved {
+  border-color: var(--gold);
+  color: #b45309;
+  background: #fffdf5;
+}
+
+.conf-save-btn__icon {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+
+.conf-save-btn--saved .conf-save-btn__icon {
+  fill: var(--gold);
+  stroke: #b45309;
+}
+
+body.dark .conf-save-btn:hover,
+body.dark .conf-save-btn--saved {
+  border-color: var(--gold);
+  color: var(--gold);
+  background: #252213;
+}
+
+body.dark .conf-save-btn--saved .conf-save-btn__icon {
+  fill: var(--gold);
+  stroke: var(--gold);
 }
 
 .conf-deadline-badge {
@@ -452,6 +1020,10 @@ body.dark .conf-deadline-badge strong {
 }
 
 .btn-detail {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
   padding: 8px 16px;
   font-size: 13px;
   font-weight: 600;
@@ -490,19 +1062,47 @@ body.dark .conf-deadline-badge strong {
   font-size: 15px;
 }
 
-/* Giao diện responsive trang chủ */
-@media (max-width: 1280px) {
-  .hero-inner {
-    grid-template-columns: 1fr 300px;
+/* Tôn trọng tùy chọn giảm chuyển động */
+@media (prefers-reduced-motion: reduce) {
+  .hero-slider__track,
+  .hero-slider__dot::before,
+  .hero-slide-card,
+  .hero-slide-card__link,
+  .conf-save-btn {
+    transition: none;
+  }
+
+  .hero-slide-card:hover {
+    transform: none;
+  }
+
+  .hero-slider__spinner {
+    animation: none;
   }
 }
 
-@media (max-width: 1024px) {
+/* Giao diện responsive trang chủ */
+@media (max-width: 1120px) {
+  .hero-inner {
+    gap: 24px;
+  }
+}
+
+@media (max-width: 1023px) {
   .hero-inner {
     grid-template-columns: 1fr;
+    gap: 24px;
   }
-  .hero-card {
-    display: none;
+  .hero-search-wrap {
+    max-width: 100%;
+  }
+  .hero-slider {
+    padding: 14px 10px 12px;
+    min-height: 0;
+  }
+  .hero-slider__cards-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
   }
   .features-grid,
   .conference-grid {
@@ -511,11 +1111,28 @@ body.dark .conf-deadline-badge strong {
 }
 
 @media (max-width: 768px) {
+  .hero-section {
+    padding: 24px 0 28px;
+  }
+  .hero-slider {
+    padding: 14px 6px 12px;
+  }
+  .hero-slider__slide {
+    padding: 4px 12px 12px;
+  }
   .hero-content h1 {
-    font-size: 34px;
+    font-size: clamp(24px, 4.2vw, 32px);
   }
   .hero-desc {
     font-size: 15px;
+  }
+  .hero-slide-card__fullname {
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+  }
+  .hero-slide-card__link {
+    min-height: 38px;
+    padding: 7px 14px;
   }
   .features-grid,
   .conference-grid {
@@ -524,17 +1141,39 @@ body.dark .conf-deadline-badge strong {
 }
 
 @media (max-width: 640px) {
+  .hero-section {
+    padding: 18px 0 26px;
+  }
+  .hero-slider {
+    padding: 14px 4px 12px;
+  }
   .hero-content h1 {
-    font-size: 28px;
+    font-size: 25px;
+  }
+  .hero-slide-card__footer {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+  .hero-slide-card__link {
+    width: 100%;
+    justify-content: center;
   }
   .search-box {
     flex-direction: column;
     padding: 10px;
     gap: 8px;
   }
+  .search-box svg {
+    display: none;
+  }
   .search-box input {
     width: 100%;
-    padding: 6px 0;
+    min-height: 40px;
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface-alt);
   }
   .search-box button {
     width: 100%;
@@ -543,9 +1182,25 @@ body.dark .conf-deadline-badge strong {
 
 @media (max-width: 430px) {
   .hero-section {
-    padding: 44px 0 40px;
+    padding: 16px 0 24px;
+  }
+  .hero-slider {
+    padding: 12px 2px 12px;
+  }
+  .hero-slider__summary {
+    gap: 6px;
+  }
+  .hero-slider__summary-item {
+    padding: 8px 4px;
+  }
+  .hero-slider__summary-val {
+    font-size: 16px;
+  }
+  .hero-slider__summary-label {
+    font-size: 11px;
   }
   .hero-actions {
+    width: 100%;
     flex-direction: column;
     align-items: stretch;
   }
@@ -554,5 +1209,20 @@ body.dark .conf-deadline-badge strong {
   }
   .conf-card {
     padding: 18px 16px;
+  }
+  .conf-footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .conf-card-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+  .btn-detail {
+    min-height: 40px;
+    padding: 8px 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
   }
 }
