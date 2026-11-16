@@ -1,13 +1,8 @@
 /* =========================================================
-<<<<<<< Updated upstream
-   ConfGuide — Search Page Stylesheet (css/search.css)
-   Bộ lọc nâng cao dạng Accordion | Đồng bộ tokens 60:30:10
-=======
    ConfGuide — Search & Filter Stylesheet (css/search.css)
    Khung lọc hợp nhất CÒN – KHI – ĐÂU – GÌ | Thẻ kết quả BEM (.conference-card)
    Sticky Sidebar Desktop & Drawer/Bottom-Sheet Mobile | Skeleton Loading
    Chuẩn WCAG 2.1 AA (:focus-within, vùng chạm >= 44px, prefers-reduced-motion)
->>>>>>> Stashed changes
    ========================================================= */
 
 :root {
@@ -69,9 +64,6 @@
   --skeleton-highlight: #f1f5f9;
 }
 
-<<<<<<< Updated upstream
-/* ================= HERO SEARCH ================= */
-=======
 body.dark {
   /* Biến trạng thái hạn nộp CFP (Tối) */
   --cfp-open-bg: rgba(16, 185, 129, 0.16);
@@ -128,7 +120,6 @@ body.dark {
 }
 
 /* ================= Khu vực Hero & Ô Tìm kiếm ================= */
->>>>>>> Stashed changes
 .hero {
   position: relative;
   background: var(--bg-hero);
@@ -341,16 +332,12 @@ body.dark {
   background: var(--primary-soft);
 }
 
-<<<<<<< Updated upstream
-/* ================= RESULTS & SIDEBAR LAYOUT ================= */
-=======
 .keyword:focus-visible {
   outline: 2px solid var(--primary);
   outline-offset: 2px;
 }
 
 /* ================= Bố cục 2 Cột: Bộ lọc & Danh sách Kết quả ================= */
->>>>>>> Stashed changes
 .results-section {
   padding: 28px 0 64px;
 }
@@ -362,9 +349,6 @@ body.dark {
   align-items: start;
 }
 
-<<<<<<< Updated upstream
-/* ================= SIDEBAR ACCORDIONS ================= */
-=======
 .filters-backdrop {
   display: none;
 }
@@ -374,7 +358,6 @@ body.dark {
 }
 
 /* ================= Cột Trái: Bộ lọc Accordion (Sticky trên Desktop, gọn nhẹ) ================= */
->>>>>>> Stashed changes
 .filters {
   position: sticky;
   top: 84px;
@@ -1165,10 +1148,6 @@ body.dark {
   border-color: var(--primary-dark);
 }
 
-<<<<<<< Updated upstream
-/* ================= RESULTS COLUMN ================= */
-/* Active Chips Bar */
-=======
 .apply-btn:focus-visible {
   outline: 2px solid var(--primary);
   outline-offset: 2px;
@@ -1181,7 +1160,6 @@ body.dark {
 
 /* Thanh chip hiển thị bộ lọc đang chọn (fieldset/legend hoặc ul/li) */
 .filter-chips-wrapper,
->>>>>>> Stashed changes
 .active-chips-bar {
   margin: 0 0 16px;
   border: 1px solid var(--border);
@@ -2078,16 +2056,12 @@ body.dark .conference-card__badge--rank-c {
   cursor: not-allowed;
 }
 
-<<<<<<< Updated upstream
-.pagination-jump { display: inline-flex; align-items: center; gap: 7px; }
-=======
 .pagination-jump {
   display: inline-flex;
   align-items: center;
   gap: 7px;
 }
 
->>>>>>> Stashed changes
 .pagination-jump input {
   width: 58px;
   height: 38px;
@@ -2104,15 +2078,10 @@ body.dark .conference-card__badge--rank-c {
   outline: 2px solid var(--primary);
   outline-offset: 2px;
 }
-<<<<<<< Updated upstream
-.pagination-total { margin-left: 6px; }
-body.dark .pagination-button, body.dark .pagination-jump input { background: var(--surface); color: var(--text); border-color: var(--border-strong); }
-=======
 
 .pagination-total {
   margin-left: 6px;
 }
->>>>>>> Stashed changes
 
 /* Toast thông báo nhanh */
 .toast {
@@ -2333,10 +2302,6 @@ body.dark .pagination-button, body.dark .pagination-jump input { background: var
 }
 
 @media (max-width: 520px) {
-<<<<<<< Updated upstream
-  .search-pagination { gap: 8px; flex-wrap: wrap; }
-  .pagination-total { flex-basis: 100%; text-align: center; margin-left: 0; }
-=======
   .hero {
     padding: 28px 0 24px;
   }
@@ -2393,5 +2358,4 @@ body.dark .pagination-button, body.dark .pagination-jump input { background: var
     text-align: center;
     margin-left: 0;
   }
->>>>>>> Stashed changes
 }

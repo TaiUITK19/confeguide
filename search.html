@@ -10,25 +10,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Tra cứu và lọc hội nghị khoa học công nghệ thông tin tại Việt Nam theo trạng thái hạn nộp bài, thời gian, địa điểm và chủ đề nghiên cứu | ConfGuide.">
   <title>ConfGuide - Tra cứu hội nghị khoa học</title>
-  
   <link rel="icon" type="image/svg+xml" href="images/logo.svg">
-<<<<<<< Updated upstream
-  
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  
-=======
->>>>>>> Stashed changes
   <link rel="stylesheet" href="css/base.css">
   <link rel="stylesheet" href="css/search.css">
   <link rel="stylesheet" href="css/compare.css">
 </head>
-
 <body>
-<<<<<<< Updated upstream
-  <script>try { if (localStorage.getItem('confguide_theme') === 'dark') document.body.classList.add('dark'); } catch (e) {}</script>
-=======
   <script>
     try {
       if (localStorage.getItem('confguide_theme') === 'dark') {
@@ -39,7 +26,6 @@
     }
   </script>
 
->>>>>>> Stashed changes
   <!-- Shared Header -->
   <div id="site-header"></div>
 
@@ -49,26 +35,6 @@
       <div class="hero-overlay"></div>
       <div class="container hero-content">
         <h1>Tra cứu Hội nghị Khoa học Chuyên sâu</h1>
-<<<<<<< Updated upstream
-        <p>Tìm kiếm và lọc theo phân hạng CORE, lĩnh vực nghiên cứu, hạn nộp bài và chỉ mục quốc tế.</p>
-
-        <form class="search-box" id="searchForm" role="search">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <circle cx="11" cy="11" r="8"/>
-            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-          </svg>
-          <input id="searchInput" type="search" autocomplete="off" aria-label="Nhập từ khóa">
-          <button type="submit">Tìm kiếm</button>
-        </form>
-
-        <div class="examples">
-          <strong>Gợi ý nhanh:</strong>
-          <button type="button" class="keyword" data-keyword="computer vision">Computer Vision</button>
-          <button type="button" class="keyword" data-keyword="machine learning">Machine Learning</button>
-          <button type="button" class="keyword" data-keyword="ai">Artificial Intelligence</button>
-          <button type="button" class="keyword" data-keyword="nlp">NLP</button>
-          <button type="button" class="keyword" data-keyword="cyber security">Cyber Security</button>
-=======
         <p id="searchInputHint">Tìm kiếm theo tên viết tắt, tên đầy đủ, địa điểm hoặc chủ đề nghiên cứu.</p>
 
         <div class="search-box__container">
@@ -85,7 +51,6 @@
             </div>
             <button type="submit">Tìm kiếm</button>
           </form>
->>>>>>> Stashed changes
         </div>
 
         <fieldset class="examples">
@@ -99,14 +64,6 @@
       </div>
     </section>
 
-<<<<<<< Updated upstream
-    <!-- Main Results & Filter Section -->
-    <section class="results-section">
-      <div class="container results-layout">
-
-        <!-- Collapsible Filters Sidebar -->
-        <aside class="filters" id="filtersSidebar">
-=======
     <!-- Kết quả tìm kiếm và bộ lọc -->
     <section class="results-section">
       <div class="container results-layout">
@@ -115,7 +72,6 @@
 
         <!-- Thanh bên Bộ lọc (Sticky trên desktop, Drawer trên mobile/tablet) -->
         <aside class="filters" id="filtersSidebar" aria-label="Bộ lọc danh sách hội nghị">
->>>>>>> Stashed changes
           <div class="filter-header-bar">
             <div class="filter-title">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -124,96 +80,6 @@
               <h2 id="filtersDrawerTitle">Bộ lọc hội nghị</h2>
               <span class="filter-title__badge js-panel-filter-count" hidden>0</span>
             </div>
-<<<<<<< Updated upstream
-            <button type="button" class="btn-clear-all" id="btnResetAllFilters" title="Đặt lại toàn bộ bộ lọc">
-              Đặt lại
-            </button>
-          </div>
-
-          <!-- Filter Group 1: Xếp hạng (Rank) -->
-          <div class="filter-accordion open" data-group="rank">
-            <button type="button" class="accordion-head" aria-expanded="true">
-              <span>XẾP HẠNG (CORE RANK)</span>
-              <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"/></svg>
-            </button>
-            <div class="accordion-body">
-              <label class="check-row"><input type="checkbox" name="rank" value="A*"> <span>Rank A* (Hàng đầu thế giới)</span></label>
-              <label class="check-row"><input type="checkbox" name="rank" value="A"> <span>Rank A (Rất uy tín)</span></label>
-              <label class="check-row"><input type="checkbox" name="rank" value="B"> <span>Rank B (Uy tín)</span></label>
-              <label class="check-row"><input type="checkbox" name="rank" value="C"> <span>Rank C / Khác</span></label>
-            </div>
-          </div>
-
-          <!-- Filter Group 3: Hình thức tổ chức (Mode) -->
-          <div class="filter-accordion open" data-group="mode">
-            <button type="button" class="accordion-head" aria-expanded="true">
-              <span>HÌNH THỨC THAM GIA</span>
-              <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"/></svg>
-            </button>
-            <div class="accordion-body">
-              <label class="check-row"><input type="checkbox" name="mode" value="Trực tiếp"> <span>Trực tiếp (In-person)</span></label>
-              <label class="check-row"><input type="checkbox" name="mode" value="Online"> <span>Trực tuyến (Online)</span></label>
-              <label class="check-row"><input type="checkbox" name="mode" value="Hybrid"> <span>Kết hợp (Hybrid)</span></label>
-            </div>
-          </div>
-
-          <!-- Filter Group 4: Lĩnh vực nghiên cứu (Dynamic Fields) -->
-          <div class="filter-accordion open" data-group="fields">
-            <button type="button" class="accordion-head" aria-expanded="true">
-              <span>LĨNH VỰC NGHIÊN CỨU</span>
-              <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"/></svg>
-            </button>
-            <div class="accordion-body" id="dynamicFieldsContainer">
-              <!-- Rendered dynamically by js/app.js -->
-            </div>
-          </div>
-
-          <!-- Filter Group 5: Nhà xuất bản & Chỉ mục -->
-          <div class="filter-accordion" data-group="publisher">
-            <button type="button" class="accordion-head" aria-expanded="false">
-              <span>NHÀ XUẤT BẢN &amp; CHỈ MỤC</span>
-              <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"/></svg>
-            </button>
-            <div class="accordion-body">
-              <label class="check-row"><input type="checkbox" name="publisher" value="ieee"> <span>IEEE</span></label>
-              <label class="check-row"><input type="checkbox" name="publisher" value="acm"> <span>ACM</span></label>
-              <label class="check-row"><input type="checkbox" name="publisher" value="springer"> <span>Springer</span></label>
-              <label class="check-row"><input type="checkbox" name="publisher" value="elsevier"> <span>Elsevier</span></label>
-              <label class="check-row"><input type="checkbox" name="publisher" value="scopus"> <span>Chỉ mục Scopus</span></label>
-              <label class="check-row"><input type="checkbox" name="publisher" value="dblp"> <span>Chỉ mục DBLP</span></label>
-            </div>
-          </div>
-
-          <!-- Filter Group 6: Trạng thái nộp bài -->
-          <div class="filter-accordion" data-group="status">
-            <button type="button" class="accordion-head" aria-expanded="false">
-              <span>TRẠNG THÁI NỘP BÀI</span>
-              <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"/></svg>
-            </button>
-            <div class="accordion-body">
-              <label class="check-row"><input type="checkbox" name="status" value="open"> <span>Đang mở nộp bài</span></label>
-              <label class="check-row"><input type="checkbox" name="status" value="urgent"> <span>Sắp hết hạn (≤ 30 ngày)</span></label>
-              <label class="check-row"><input type="checkbox" name="status" value="closed"> <span>Đã đóng đợt nộp</span></label>
-            </div>
-          </div>
-
-          <!-- Filter Group 7: Khoảng thời gian Deadline -->
-          <div class="filter-accordion" data-group="dates">
-            <button type="button" class="accordion-head" aria-expanded="false">
-              <span>HẠN NỘP BÀI (DEADLINE)</span>
-              <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"/></svg>
-            </button>
-            <div class="accordion-body">
-              <div class="date-range">
-                <label>
-                  <span>Từ:</span>
-                  <input type="date" id="fromDate">
-                </label>
-                <label>
-                  <span>Đến:</span>
-                  <input type="date" id="toDate">
-                </label>
-=======
             <div class="filter-header-bar__actions">
               <button type="button" class="btn-clear-all js-filter-reset" id="btnResetAllFilters" title="Đặt lại toàn bộ bộ lọc" disabled>
                 Đặt lại
@@ -495,22 +361,13 @@
                     <p id="dateRangeError" class="date-range__error field-error js-date-range-error" role="alert" hidden></p>
                   </div>
                 </fieldset>
->>>>>>> Stashed changes
               </div>
             </div>
           </div>
 
-<<<<<<< Updated upstream
-          <!-- Filter Group 8: Tùy chọn hội nghị đã diễn ra -->
-          <div class="filter-accordion open" data-group="past">
-            <button type="button" class="accordion-head" aria-expanded="true">
-              <span>TÙY CHỌN HIỂN THỊ</span>
-              <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"/></svg>
-=======
           <div class="filters__footer" id="filtersFooter">
             <button type="button" class="filters__reset-btn js-filter-reset" disabled>
               Xóa tất cả
->>>>>>> Stashed changes
             </button>
             <button type="button" class="apply-btn js-apply-filters" id="applyFiltersBtn">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
@@ -572,46 +429,6 @@
             </div>
           </div>
 
-<<<<<<< Updated upstream
-          <button class="apply-btn" id="applyFiltersBtn">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-              <polyline points="20 6 9 17 4 12"/>
-            </svg>
-            <span>Áp dụng bộ lọc</span>
-          </button>
-        </aside>
-
-        <!-- Results Main Area -->
-        <section class="results">
-          <!-- Active Filter Chips Area -->
-          <div class="active-chips-bar" id="activeChipsBar" style="display: none;">
-            <div class="chips-label">Đang lọc theo:</div>
-            <div class="chips-container" id="activeChipsContainer"></div>
-            <button type="button" class="btn-clear-chips" id="btnClearAllChips">Xóa tất cả</button>
-          </div>
-
-          <!-- Header status + sorting -->
-          <div class="results-head">
-            <div>Tìm thấy <strong id="resultCount">0</strong> hội nghị phù hợp</div>
-            <select id="sortSelect" aria-label="Sắp xếp kết quả">
-              <option value="relevance">Sắp xếp: Phù hợp nhất</option>
-              <option value="deadline">Hạn nộp gần nhất</option>
-              <option value="rating">Đánh giá cao nhất</option>
-              <option value="date">Ngày tổ chức</option>
-              <option value="name">Tên hội nghị A–Z</option>
-            </select>
-          </div>
-
-          <!-- Conference Cards List -->
-          <div id="conferenceList" class="conference-list"></div>
-
-          <!-- Empty State (Chỉ hiện khi đã lọc và kết quả = 0) -->
-          <div id="emptyState" class="empty-state hidden" hidden>
-            <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-              <circle cx="11" cy="11" r="8"/>
-              <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-              <line x1="8" y1="11" x2="14" y2="11"/>
-=======
           <!-- Danh sách thẻ hội nghị (dùng aria-busy khi nạp dữ liệu/skeleton) -->
           <div id="conferenceList" class="conference-list js-conference-list" aria-busy="true"></div>
 
@@ -621,7 +438,6 @@
               <circle cx="11" cy="11" r="8"></circle>
               <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
               <line x1="8" y1="11" x2="14" y2="11"></line>
->>>>>>> Stashed changes
             </svg>
             <h3>Không tìm thấy hội nghị phù hợp</h3>
             <p id="emptyStateCause" class="empty-state__cause js-empty-cause"></p>
@@ -633,34 +449,20 @@
             <button type="button" class="btn-reset-empty js-filter-reset" id="btnResetFromEmpty">Xóa tất cả bộ lọc</button>
           </div>
 
-<<<<<<< Updated upstream
-          <!-- Error State (Chỉ hiện khi nạp dữ liệu thất bại) -->
-          <div id="searchErrorState" class="empty-state search-error-state hidden" hidden>
-            <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-              <circle cx="12" cy="12" r="10"/>
-              <line x1="12" y1="8" x2="12" y2="12"/>
-              <line x1="12" y1="16" x2="12.01" y2="16"/>
-=======
           <!-- Trạng thái lỗi tải dữ liệu -->
           <div id="searchErrorState" class="empty-state search-error-state" hidden>
             <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
               <circle cx="12" cy="12" r="10"></circle>
               <line x1="12" y1="8" x2="12" y2="12"></line>
               <line x1="12" y1="16" x2="12.01" y2="16"></line>
->>>>>>> Stashed changes
             </svg>
             <h3>Không thể nạp dữ liệu hội nghị</h3>
             <p id="searchErrorMessage">Đã có lỗi xảy ra khi nạp dữ liệu. Vui lòng thử lại hoặc kiểm tra kết nối mạng.</p>
             <button type="button" class="btn-reset-empty js-retry-load" id="btnRetryLoad">Thử lại</button>
           </div>
 
-<<<<<<< Updated upstream
-          <nav id="pagination" class="search-pagination hidden" aria-label="Phân trang kết quả" hidden></nav>
-=======
           <nav id="pagination" class="search-pagination" aria-label="Phân trang kết quả" hidden></nav>
->>>>>>> Stashed changes
         </section>
-
       </div>
     </section>
   </main>
@@ -669,15 +471,9 @@
   <div id="site-footer"></div>
 
   <!-- Toast notification -->
-<<<<<<< Updated upstream
-  <div class="toast" id="toast"></div>
-
-  <!-- Scripts -->
-=======
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <!-- JavaScript -->
->>>>>>> Stashed changes
   <script src="js/layout.js"></script>
   <script src="js/compare.js"></script>
   <script src="js/search-core.js"></script>
