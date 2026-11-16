@@ -145,38 +145,47 @@
   overflow-x: auto;
 }
 
-table {
+.tracker-table {
   width: 100%;
+  min-width: 680px;
   border-collapse: collapse;
   table-layout: fixed;
 }
 
-thead {
+.tracker-table thead {
   background: var(--surface-muted);
 }
 
-th, td {
+.tracker-table th,
+.tracker-table td {
   padding: 14px 24px;
   text-align: left;
   border-top: 1px solid var(--border);
   vertical-align: middle;
 }
 
-th {
+.tracker-table th {
   font-size: 13.5px;
   font-weight: 600;
   color: var(--text);
 }
 
-td {
+.tracker-table td {
   font-size: 14px;
   color: var(--text);
 }
 
-th:nth-child(1) { width: 34%; }
-th:nth-child(2) { width: 28%; }
-th:nth-child(3) { width: 18%; }
-th:nth-child(4) { width: 20%; }
+.loading-row {
+  text-align: center;
+  padding: 36px 20px;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.tracker-table th:nth-child(1) { width: 32%; }
+.tracker-table th:nth-child(2) { width: 26%; }
+.tracker-table th:nth-child(3) { width: 20%; }
+.tracker-table th:nth-child(4) { width: 22%; }
 
 .conference-name {
   display: flex;
@@ -184,18 +193,8 @@ th:nth-child(4) { width: 20%; }
   gap: 16px;
 }
 
+.tracker-avatar,
 .logo-badge {
-  width: 68px;
-  height: 46px;
-  border-radius: var(--radius-sm);
-  background: var(--primary-soft);
-  display: grid;
-  place-items: center;
-  color: var(--primary);
-  font-weight: 700;
-  font-size: 13px;
-  text-align: center;
-  line-height: 1.1;
   flex: 0 0 auto;
 }
 
@@ -248,6 +247,8 @@ th:nth-child(4) { width: 20%; }
 
 .actions {
   display: flex;
+  align-items: center;
+  flex-wrap: wrap;
   gap: 8px;
 }
 
@@ -365,7 +366,7 @@ th:nth-child(4) { width: 20%; }
   color: var(--text);
 }
 
-form label {
+.tracker-modal-form label {
   display: block;
   margin: 14px 0 6px;
   font-size: 13.5px;
@@ -373,7 +374,7 @@ form label {
   font-weight: 600;
 }
 
-form input {
+.tracker-modal-form input {
   width: 100%;
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
@@ -386,7 +387,7 @@ form input {
   transition: all 160ms ease;
 }
 
-form input:focus {
+.tracker-modal-form input:focus {
   border-color: var(--primary);
   box-shadow: 0 0 0 3px rgba(18, 104, 201, .15);
 }
@@ -420,8 +421,8 @@ body.dark .hero {
 
 body.dark .hero h1,
 body.dark .quote,
-body.dark td,
-body.dark th {
+body.dark .tracker-table td,
+body.dark .tracker-table th {
   color: var(--text);
 }
 
@@ -435,12 +436,12 @@ body.dark .toolbar {
   border-color: var(--border);
 }
 
-body.dark thead {
+body.dark .tracker-table thead {
   background: var(--surface-muted);
 }
 
-body.dark th,
-body.dark td {
+body.dark .tracker-table th,
+body.dark .tracker-table td {
   border-color: var(--border);
 }
 
@@ -480,7 +481,7 @@ body.dark .modal-box {
   border-color: var(--border);
 }
 
-body.dark form input {
+body.dark .tracker-modal-form input {
   background: var(--bg-primary);
   color: var(--text);
   border-color: var(--border);
@@ -524,7 +525,8 @@ body.dark .cancel-btn {
     width: 100%;
   }
 
-  th, td {
+  .tracker-table th,
+  .tracker-table td {
     padding: 11px 14px;
   }
 

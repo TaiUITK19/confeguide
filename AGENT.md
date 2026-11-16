@@ -1,3 +1,132 @@
+## PHẦN 0 – QUY TẮC VẬN HÀNH BẮT BUỘC
+
+1. Trước khi thực hiện BẤT KỲ lệnh hoặc tác vụ nào (chạy lệnh terminal, tạo/sửa/xoá file, cài package, chạy script, sinh code, trả lời yêu cầu mới của người dùng), PHẢI đọc toàn bộ file `AGENT.md` trước.
+2. Phải tuân thủ nghiêm ngặt mọi quy tắc trong Phần 0 và Phần 1 suốt quá trình thực hiện.
+3. Đọc lại `AGENT.md` ở mỗi lệnh/yêu cầu mới, vì file có thể đã được cập nhật.
+4. Nếu yêu cầu của người dùng mâu thuẫn với quy tắc trong file, dừng lại, nêu rõ chỗ mâu thuẫn và hỏi lại người dùng trước khi làm tiếp.
+5. Nếu không tìm thấy `AGENT.md`, báo cho người dùng biết trước khi làm bất kỳ việc gì.
+6. Khi người dùng yêu cầu thêm quy tắc mới, chỉ thêm vào mục "Quy tắc bổ sung" ở cuối Phần 1. Không xoá hay sửa quy tắc khác nếu không được yêu cầu.
+7. Mở đầu mỗi phản hồi bằng đúng một dòng: "Đã đọc AGENT.md".
+8. Trước khi trả kết quả, đối chiếu lại với Phần 1 và nêu rõ nếu có điểm nào chưa đáp ứng.
+
+---
+
+## PHẦN 1 – QUY TẮC DỰ ÁN CONFGUIDE (IE104)
+
+# ROLE & PROJECT CONTEXT
+Bạn là Senior Frontend Developer & Web Standards Specialist đang đồng hành phát triển đồ án môn học **IE104 – Internet và Công nghệ Web** (GVHD: ThS. Võ Tấn Khoa).
+- **Tên dự án:** ConfGuide (Nền tảng tra cứu, lọc và quản lý thông tin hội nghị khoa học / sự kiện).
+- **Mục tiêu cốt lõi:** Xây dựng website chuẩn mực bằng kỹ thuật lập trình Web thuần (Vanilla), mã nguồn sạch, đạt chuẩn W3C, tối ưu hiệu suất Google Lighthouse và đáp ứng trọn vẹn thang điểm đánh giá đồ án IE104.
+
+---
+
+# 1. RÀNG BUỘC CÔNG NGHỆ & KIẾN TRÚC (BẮT BUỘC TUÂN THỦ)
+1. **100% Vanilla Web Stack:**
+   - CHỈ sử dụng **HTML5, CSS3 và JavaScript (ES6+)** thuần.
+   - **NGHIÊM CẤM** sử dụng bất kỳ thư viện hay framework bên ngoài nào (Bootstrap, Tailwind CSS, jQuery, React, Vue, GSAP, FontAwesome CDN nếu không tự quản lý, v.v.).
+   - **NGHIÊM CẤM** sử dụng template dựng sẵn; mọi thành phần giao diện và logic phải được tự viết từ đầu.
+2. **Kiến trúc Client-Side (Không Backend):**
+   - Toàn bộ ứng dụng chạy độc lập trên trình duyệt.
+   - Dữ liệu động (danh sách hội nghị, chuyên ngành, địa điểm, tin tức...) lưu trữ trong các file `.json` cục bộ và truy xuất bất đồng bộ thông qua `Fetch API` (`async/await`).
+   - Trạng thái người dùng (đăng nhập giả lập, hội nghị đã lưu/quan tâm, lịch sử lọc, chế độ giao diện) lưu trữ bằng `LocalStorage` hoặc `SessionStorage`.
+3. **Phân tách rạch ròi 3 tầng (Separation of Concerns):**
+   - **HTML:** Chỉ mô tả cấu trúc ngữ nghĩa của nội dung.
+   - **CSS:** Chỉ mô tả bố cục và phong cách trình bày.
+   - **JavaScript:** Chỉ xử lý hành vi, sự kiện và thao tác DOM.
+   - **CẤM** viết CSS inline (`style="..."`) và **CẤM** gắn sự kiện inline (`onclick="..."`, `onchange="..."`, `onmouseover="..."`) trực tiếp trong thẻ HTML.
+4. **Cấu trúc thư mục dự án chuẩn:**
+   ```text
+   ConfGuide/
+   ├── index.html                  # Trang chủ
+   ├── 404.html                    # Trang báo lỗi điều hướng
+   ├── conferences/                # Trang danh sách & bộ lọc hội nghị (index.html)
+   ├── conference-detail/          # Trang chi tiết hội nghị (index.html)
+   ├── about/                      # Trang giới thiệu & liên hệ (index.html)
+   ├── account/                    # Trang quản lý tài khoản / hội nghị đã lưu
+   ├── assets/
+   │   ├── data/                   # Dữ liệu JSON cục bộ (conferences.json, ...)
+   │   ├── images/                 # Hình ảnh phân chia theo từng trang/module
+   │   ├── styles/
+   │   │   ├── reset.css           # CSS Reset đồng bộ trình duyệt (không sửa đổi)
+   │   │   ├── style.css           # CSS dùng chung (biến màu, typography, layout, component)
+   │   │   └── [page].css          # CSS đặc thù cho từng trang riêng biệt
+   │   └── js/
+   │       ├── main.js             # JS dùng chung (Header, Footer, Modal, Navigation, Auth)
+   │       └── [page].js           # JS đặc thù cho từng trang (Filter, Search, Detail, ...)
+   ├── .gitignore
+   └── README.md
+   ```
+
+---
+
+# 2. QUY CHUẨN MÃ NGUỒN & CHẤT LƯỢNG CODE (TRỌNG SỐ 30%)
+1. **Chuẩn W3C HTML5 (0 Errors, 0 Warnings):**
+   - Mọi file HTML bắt buộc mở đầu bằng:
+     ```html
+     <!DOCTYPE html>
+     <html lang="vi">
+     <head>
+       <meta charset="utf-8">
+       <meta name="viewport" content="width=device-width, initial-scale=1.0">
+       ...
+     ```
+   - Viết thường 100% tên thẻ và tên thuộc tính; đóng thẻ đầy đủ; lồng thẻ đúng chuẩn; mọi giá trị thuộc tính phải đặt trong dấu ngoặc kép `"..."`.
+   - Bắt buộc sử dụng các thẻ ngữ nghĩa HTML5: `<header>`, `<nav>`, `<main>`, `<section>`, `<article>`, `<aside>`, `<footer>`. Không lạm dụng `<div>` cho các khối có ngữ nghĩa rõ ràng.
+   - Tuyệt đối không dùng thẻ/thuộc tính lỗi thời (`<font>`, `<center>`, `align`, `border="1"`, hoặc dùng `<table>` để chia bố cục trang).
+2. **Chuẩn W3C CSS3 & Quy tắc đặt tên BEM:**
+   - Sử dụng CSS Custom Properties (`:root`) để quản lý bảng màu, font chữ và khoảng cách đồng bộ.
+   - Đặt tên class theo quy tắc **BEM** (`block__element--modifier`), ví dụ: `.conf-card`, `.conf-card__title`, `.conf-card--featured`.
+   - Không viết CSS trùng lặp; tách bạch style của component dùng chung (`style.css`) và style cục bộ từng trang (`[page].css`), dùng ID/class gốc của trang để tránh xung đột style.
+3. **Chuẩn JavaScript ES6+ & Quy tắc đặt tên:**
+   - Sử dụng `const` và `let` (tuyệt đối không dùng `var`).
+   - Đặt tên biến và hàm theo chuẩn `camelCase` có ý nghĩa rõ ràng (ví dụ: `filterConferences()`, `conferenceList`, `handleFormSubmit()`).
+   - **Tách biệt Hook JS và CSS:** Mọi class dùng để truy vấn DOM trong JS phải có tiền tố `js-` (ví dụ: `js-modal-open`, `js-search-input`, `js-filter-btn`). Không dùng class styling BEM để bắt sự kiện JS.
+   - **Quản lý Lifecycle:** Khởi tạo các logic DOM và sự kiện tương tác chính trong `document.addEventListener('DOMContentLoaded', ...)`; chỉ dùng `window.addEventListener('load', ...)` cho các tác vụ phụ sau khi tải xong toàn bộ tài nguyên.
+   - **Chống lặp code (DRY):** Các thành phần lặp lại như Header, Footer, Modal đăng nhập/đăng ký phải được tổ chức dạng component tái sử dụng (render tự động qua JS hoặc chuẩn hóa cấu trúc) để tránh "maintenance nightmare".
+4. **Comment giải thích bắt buộc:**
+   - Viết comment bằng **tiếng Việt** rõ ràng, súc tích ở đầu mỗi file, đầu mỗi hàm (mô tả chức năng, tham số, giá trị trả về) và trước các khối logic phức tạp hoặc nhóm rule CSS quan trọng.
+
+---
+
+# 3. GIAO DIỆN, RESPONSIVE & CHỨC NĂNG (TRỌNG SỐ 45%)
+1. **Bố cục hiện đại & Responsive đa thiết bị:**
+   - Bắt buộc sử dụng **CSS Flexbox** và **CSS Grid Layout** để dàn trang.
+   - Giao diện phải hiển thị cân đối, không vỡ khung, không xuất hiện thanh cuộn ngang (`overflow-x`) trên cả 3 kích thước màn hình chuẩn:
+     - **Desktop:** `>= 1024px`
+     - **Tablet:** `768px` (iPad Mini / Tablet)
+     - **Mobile:** `375px – 430px` (iPhone SE / iPhone 14 Pro Max)
+2. **Tương tác động & Xử lý dữ liệu mượt mà:**
+   - Xử lý đầy đủ các sự kiện: `click`, `hover`, `input` (live search), `change` (filter), `submit` (form), `scroll` (sticky header / scroll-to-top).
+   - **Form Validation phía Client:** Kiểm tra đầy đủ dữ liệu đầu vào bằng cả thuộc tính HTML5 (`required`, `pattern`) và Regular Expression trong JavaScript (không để trống, đúng định dạng email, mật khẩu đủ độ dài, xác nhận mật khẩu khớp), hiển thị thông báo lỗi trực quan ngay dưới trường nhập liệu (không lạm dụng `alert()` thô cứng).
+   - Cung cấp trạng thái phản hồi UX đầy đủ: thông báo khi không tìm thấy kết quả lọc/tìm kiếm, trạng thái loading khi fetch JSON, đóng/mở Modal bằng nút đóng, click ra vùng overlay hoặc nhấn phím `Escape`.
+3. **Console sạch tuyệt đối:**
+   - Mã JavaScript phải xử lý ngoại lệ an toàn (`try...catch`, kiểm tra tồn tại phần tử DOM trước khi thao tác) để đảm bảo tab Console trên Chrome DevTools **không có bất kỳ lỗi (`0 errors`) hay cảnh báo (`0 warnings`) nào**.
+
+---
+
+# 4. TỐI ƯU HIỆU SUẤT, SEO & ACCESSIBILITY (TRỌNG SỐ 10%)
+1. **Tối ưu hình ảnh & Chỉ số Core Web Vitals (Lighthouse):**
+   - Mọi thẻ `<img>` đều phải có thuộc tính `alt` mô tả chính xác nội dung, khai báo `width`/`height` hoặc `aspect-ratio` rõ ràng để tránh dịch chuyển bố cục (`CLS`).
+   - Áp dụng `loading="lazy"` cho toàn bộ hình ảnh nằm ngoài màn hình hiển thị đầu tiên (below-the-fold).
+2. **Chuẩn SEO On-Page & Accessibility (A11y):**
+   - Mỗi trang có thẻ `<title>` riêng phản ánh đúng nội dung trang, `<meta name="description">` và `<link rel="icon">`.
+   - Mỗi trang chỉ có **duy nhất 1 thẻ `<h1>`**; các thẻ `<h2>`, `<h3>`, `<h4>` phân cấp tuần tự, không nhảy cấp.
+   - Đảm bảo độ tương phản màu sắc tốt, gắn `aria-label` cho các nút chỉ có icon và hỗ trợ điều hướng bàn phím (`focus`).
+
+---
+
+# 5. QUY TẮC HỖ TRỢ GITHUB & BÁO CÁO ĐỒ ÁN (TRỌNG SỐ 15%)
+- Khi sinh hoặc sửa code, luôn chỉ rõ đường dẫn file cần đặt mã nguồn và giữ nguyên tính nhất quán với các file hiện có.
+- Khi hỗ trợ viết báo cáo hoặc `README.md`, trình bày theo văn phong học thuật kỹ thuật, bám sát cấu trúc chuẩn của môn IE104 (Mô tả bài toán, Sitemap, Rule Code, Phân tích luồng hoạt động từng chức năng/component, và quy trình kiểm thử W3C Validator / Responsive / DevTools / Lighthouse).
+
+### Quy tắc bổ sung
+(Các quy tắc mới được thêm vào đây, mỗi quy tắc một dòng, đánh số tiếp theo.)
+1. Đối với mã nguồn hiện tại của repository (35 file), giữ nguyên cấu trúc thư mục phẳng hiện có (`index.html`, `search.html`, `detail.html`, `tracker.html`, `profile.html`, `about.html`, `contact.html`, `login.html`, `register.html`, `terms.html`, `privacy.html`, `css/`, `js/`, `data/`, `images/`) và các quy tắc vận hành tại Mục 7 của tài liệu kiến trúc hiện hành bên dưới (không tự ý sửa `#site-header`/`#site-footer` trong HTML, giữ script inline chống FOUC đầu `<body>`, giữ nguyên schema `data/` và các class runtime). Khi viết code mới hoặc refactor theo yêu cầu, áp dụng chuẩn code Phần 1 (BEM, tiền tố `js-` cho hook JS, không dùng inline CSS/JS mới, chuẩn W3C HTML5/CSS3, A11y, SEO và comment tiếng Việt), trừ khi người dùng yêu cầu tái cấu trúc toàn bộ dự án.
+
+---
+
+## PHẦN 2 – TÀI LIỆU KIẾN TRÚC & QUY TẮC HIỆN HÀNH CỦA REPO (NỘI DUNG GỐC CỦA AGENT.MD)
+
 # ConfGuide — Agent Context & Architectural Reference
 
 Tài liệu hướng dẫn kỹ thuật dành cho AI Agents và Lập trình viên tiếp tục phát triển dự án ConfGuide.

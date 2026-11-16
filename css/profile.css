@@ -1,3 +1,8 @@
+/* =========================================================
+   ConfGuide — Profile Stylesheet (profile.css)
+   Hồ sơ học thuật | Thống kê | Hội nghị đã lưu | Tracker Preview
+   ========================================================= */
+
 .profile-page-main {
   padding: 36px 0 72px;
 }
@@ -483,16 +488,6 @@ body.dark .stat-icon-amber {
 }
 
 .saved-avatar {
-  width: 48px;
-  height: 48px;
-  border-radius: 10px;
-  background: var(--primary-soft);
-  color: var(--primary);
-  font-weight: 800;
-  font-size: 15px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   flex-shrink: 0;
 }
 
@@ -732,4 +727,61 @@ body.dark .status-review {
     width: 100%;
     justify-content: flex-end;
   }
+}
+
+/* Lớp bổ trợ thay thế inline style cho profile.html & profile.js */
+.stat-num--timezone {
+  font-size: 18px;
+}
+
+.stat-num--status {
+  font-size: 16px;
+}
+
+.modal-hint--spaced {
+  margin-top: 6px;
+}
+
+.req-mark {
+  color: var(--red);
+}
+
+.profile-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.empty-state-box--compact {
+  padding: 28px 20px;
+}
+
+.empty-state-title {
+  margin: 0 0 6px;
+  font-size: 15px;
+  color: var(--text);
+}
+
+.empty-state-desc {
+  margin: 0 0 14px;
+  font-size: 13.5px;
+  color: var(--text-muted);
+}
+
+.btn--compact-md {
+  padding: 8px 14px;
+  font-size: 13px;
+}
+
+.tracker-preview-hint {
+  margin: 12px 0 0;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.tracker-preview-link {
+  color: var(--primary);
+  font-weight: 600;
+  text-decoration: underline;
 }
