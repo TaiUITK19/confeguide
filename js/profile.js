@@ -634,26 +634,30 @@
 
   /**
    * Tải danh mục hội nghị từ JSON (ưu tiên fetch, dự phòng khi mở qua file:///).
-   * @returns {Promise<Array<Object>>} Danh sách hội nghị.
+   * Chuẩn hóa dữ liệu bằng ConfGuideUtils.normalizeConference để khớp slug/ID và trường ngày.
+   * @returns {Promise<Array<Object>>} Danh sách hội nghị đã chuẩn hóa.
    */
   async function fetchConferencesData() {
     if (cachedConferencesData.length > 0) return cachedConferencesData;
-
-    if (Array.isArray(utils.FALLBACK_CONFERENCES)) {
-      cachedConferencesData = utils.FALLBACK_CONFERENCES;
-    }
 
     try {
       const resp = await fetch('data/conference_data.json');
       if (resp.ok) {
         const json = await resp.json();
         if (Array.isArray(json) && json.length > 0) {
-          cachedConferencesData = json;
+          cachedConferencesData = typeof utils.normalizeConference === 'function'
+            ? json.map(item => utils.normalizeConference(item)).filter(Boolean)
+            : json;
         }
       }
     } catch {
       // Dự phòng khi trình duyệt chặn fetch trên giao thức file:///
     }
+
+    if (cachedConferencesData.length === 0 && Array.isArray(utils.FALLBACK_CONFERENCES)) {
+      cachedConferencesData = utils.FALLBACK_CONFERENCES;
+    }
+
     return cachedConferencesData;
   }
 
@@ -944,6 +948,53 @@
     `;
   }
 
+  /* ================= 5. LỊCH MỐC HỘI NGHỊ & TRACKER ================= */
+
+  /**
+   * Nạp dữ liệu hội nghị đã lưu cùng Tracker và khởi tạo module Lịch trên trang Hồ sơ.
+   * Tái sử dụng getSavedList, fetchConferencesData, getTrackerConferences và resolveConferenceDetails.
+   * @returns {Promise<void>}
+   */
+  async function initCalendarSection() {
+    const calendarContainer = document.getElementById('profileCalendarRoot');
+    if (!calendarContainer || !window.ConfGuideCalendar) return;
+
+    if (typeof window.ConfGuideCalendar.showLoading === 'function') {
+      window.ConfGuideCalendar.showLoading(calendarContainer);
+    }
+
+    const allConfs = await fetchConferencesData();
+    const rawSavedList = getSavedList();
+    const trackerItems = getTrackerConferences();
+
+    // Tái dùng resolveConferenceDetails để lấy slug chuẩn và ghép bản ghi hội nghị đầy đủ (tránh trùng ID)
+    const seenKeys = new Set();
+    const savedConferences = [];
+
+    rawSavedList.forEach(item => {
+      const details = resolveConferenceDetails(item, allConfs);
+      const dedupKey = String(details.slug || details.id || item).trim().toLowerCase();
+      if (!dedupKey || seenKeys.has(dedupKey)) return;
+      seenKeys.add(dedupKey);
+
+      const fullRecord = allConfs.find(c =>
+        (c.id && details.id && c.id.toLowerCase() === details.id.toLowerCase()) ||
+        (c.name && details.name && c.name.toLowerCase() === details.name.toLowerCase())
+      ) || null;
+
+      savedConferences.push({
+        details,
+        conference: fullRecord
+      });
+    });
+
+    window.ConfGuideCalendar.init(calendarContainer, {
+      savedConferences,
+      trackerItems,
+      hasAnySources: rawSavedList.length > 0 || trackerItems.length > 0
+    });
+  }
+
   /* ================= KHỞI TẠO HỒ SƠ ================= */
 
   /**
@@ -959,6 +1010,19 @@
     if (document.getElementById('trackerPreviewContainer')) {
       renderTrackerPreview();
     }
+    if (document.getElementById('profileCalendarRoot')) {
+      initCalendarSection();
+    }
+
+    // Đồng bộ lại Lịch khi danh sách đã lưu hoặc Tracker thay đổi từ tab khác
+    window.addEventListener('storage', event => {
+      const watchKeys = [getSavedStorageKey(), 'confguide_saved', 'savedConferences', 'confguides', 'confguide_current_user'];
+      if (!event.key || watchKeys.includes(event.key)) {
+        if (document.getElementById('profileCalendarRoot')) {
+          initCalendarSection();
+        }
+      }
+    });
   }
 
   if (document.readyState === 'loading') {
@@ -971,6 +1035,9 @@
   window.ConfGuideProfile = {
     refresh: function () {
       renderUserProfile();
+      if (document.getElementById('profileCalendarRoot')) {
+        initCalendarSection();
+      }
     }
   };
 })();

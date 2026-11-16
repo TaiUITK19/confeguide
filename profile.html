@@ -11,6 +11,7 @@
   <link rel="stylesheet" href="css/base.css">
   <link rel="stylesheet" href="css/profile.css">
   <link rel="stylesheet" href="css/compare.css">
+  <link rel="stylesheet" href="css/calendar.css">
 </head>
 <body>
   <script>try { if (localStorage.getItem('confguide_theme') === 'dark') document.body.classList.add('dark'); } catch (e) {}</script>
@@ -139,6 +140,21 @@
       </section>
 
 
+      <!-- ================= 3. LỊCH MỐC HỘI NGHỊ & TRACKER ================= -->
+      <section class="profile-section-card" aria-labelledby="calendarTitle">
+        <div class="section-card-header">
+          <div>
+            <h2 id="calendarTitle" class="section-card-title">Lịch các mốc quan trọng</h2>
+            <p class="section-card-subtitle">Tổng hợp hạn nộp bài (UTC+7), ngày diễn ra hội nghị đã lưu và mốc Tracker cá nhân</p>
+          </div>
+        </div>
+
+        <div class="profile-calendar js-profile-calendar" id="profileCalendarRoot">
+          <!-- Nạp động bởi js/calendar.js -->
+        </div>
+      </section>
+
+
     </div>
   </main>
 
@@ -243,6 +259,7 @@
   <!-- Scripts -->
   <script src="js/layout.js"></script>
   <script src="js/compare.js"></script>
+  <script src="js/calendar.js"></script>
   <script src="js/profile.js"></script>
 
 </body>
