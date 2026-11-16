@@ -1380,10 +1380,36 @@
   }
 
   /**
-   * Đồng bộ giá trị của các phần tử input và nút trên sidebar theo một đối tượng state.
+   * Lấy phần tử ô nhập từ khóa tìm kiếm trên trang Tra cứu.
+   * @returns {HTMLInputElement|null}
+   */
+  function getSearchInputEl() {
+    return document.querySelector('.js-search-input') || document.getElementById('searchInput');
+  }
+
+  /**
+   * Đồng bộ giá trị ô nhập từ khóa tìm kiếm theo trạng thái lọc hiện tại,
+   * tránh ghi đè khi người dùng đang gõ trực tiếp trong ô nhập.
+   * @param {Object} state
+   */
+  function syncSearchInputFromState(state) {
+    const searchInput = getSearchInputEl();
+    if (!searchInput) return;
+
+    const nextQ = state && typeof state.q === 'string' ? state.q : '';
+    const isFocused = document.activeElement === searchInput;
+    if (!isFocused || searchInput.value.trim() !== nextQ) {
+      searchInput.value = nextQ;
+    }
+  }
+
+  /**
+   * Đồng bộ giá trị của ô tìm kiếm, các phần tử input và nút trên sidebar theo một đối tượng state.
    * @param {Object} state
    */
   function syncSidebarInputsFromState(state) {
+    syncSearchInputFromState(state);
+
     document.querySelectorAll('.js-filter-rank').forEach(btn => {
       const rVal = btn.getAttribute('data-rank') || '';
       const isSelected = Array.isArray(state.ranks) && state.ranks.includes(rVal);
@@ -2255,6 +2281,7 @@
 
     if (applyChanges && draftFilterState) {
       // Gán một lần các trường từ bản nháp vào filterState
+      filterState.q = draftFilterState.q;
       filterState.ranks = [...draftFilterState.ranks];
       filterState.cfp = draftFilterState.cfp;
       filterState.month = draftFilterState.month;
@@ -2862,14 +2889,11 @@
     // 5. Điền danh sách tùy chọn Tháng diễn ra
     populateMonthOptions();
 
-    // 6. Đọc tham số URL
-    readUrlIntoFilterState();
-
-    // 7. Đồng bộ trạng thái hiển thị sidebar & accordions
+    // 6. Đồng bộ trạng thái hiển thị ô tìm kiếm, sidebar & accordions
     syncSidebarInputsFromState(filterState);
     syncInitialAccordionStates();
 
-    // 8. Kích hoạt luồng lọc và vẽ giao diện
+    // 7. Kích hoạt luồng lọc và vẽ giao diện
     await executePipeline();
   }
 
@@ -2907,6 +2931,8 @@
 
   // Khởi tạo khi DOM đã sẵn sàng
   document.addEventListener('DOMContentLoaded', () => {
+    readUrlIntoFilterState();
+    syncSearchInputFromState(filterState);
     initStaticEvents();
     loadData();
   });
