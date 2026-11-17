@@ -1030,82 +1030,107 @@
   }
 
   /**
+   * Tạo chuỗi HTML phần điều hướng người dùng đã đăng nhập (avatar + menu dropdown).
+   * @param {Object} user - Thông tin tài khoản hiện tại.
+   * @returns {string} Chuỗi HTML `.user-menu-wrapper`.
+   */
+  function renderLoggedInUserMenu(user) {
+    const displayName = user.fullName || user.username || user.email || 'U';
+    const initial = displayName.trim().charAt(0).toUpperCase() || 'U';
+    const hasPhoto = Boolean(user.avatarUrl && typeof user.avatarUrl === 'string');
+    const avatarContent = hasPhoto
+      ? `<img src="${escapeHtml(user.avatarUrl)}" alt="${escapeHtml(displayName)}" `
+        + `width="36" height="36" class="header-avatar-img">`
+      : escapeHtml(initial);
+    const thumbContent = hasPhoto
+      ? `<img src="${escapeHtml(user.avatarUrl)}" alt="${escapeHtml(displayName)}" `
+        + `width="44" height="44" class="dropdown-avatar-img">`
+      : escapeHtml(initial);
+    const userSubtitle = escapeHtml(user.email || user.username || '');
+
+    return `
+      <div class="user-menu-wrapper" id="userMenuWrapper">
+        <button type="button" class="user-avatar-btn ${hasPhoto ? 'has-avatar-photo' : ''}" id="userAvatarBtn"
+          aria-expanded="false" aria-haspopup="true"
+          aria-label="Menu tài khoản của ${escapeHtml(displayName)}"
+          title="Tài khoản (${escapeHtml(displayName)})">
+          ${avatarContent}
+        </button>
+        <div class="user-dropdown-menu" id="userDropdownMenu" role="menu" aria-label="Menu người dùng">
+          <div class="dropdown-user-header">
+            <div class="dropdown-avatar-thumb ${hasPhoto ? 'has-avatar-photo' : ''}"
+              aria-hidden="true">${thumbContent}</div>
+            <div class="dropdown-user-info">
+              <strong class="dropdown-user-name" title="${escapeHtml(displayName)}">${escapeHtml(displayName)}</strong>
+              <span class="dropdown-user-email" title="${userSubtitle}">${userSubtitle}</span>
+              <span class="dropdown-user-badge">Nhà nghiên cứu</span>
+            </div>
+          </div>
+          <div class="dropdown-divider"></div>
+          <div class="dropdown-menu-list">
+            <a href="profile.html" class="dropdown-item" role="menuitem">
+              <svg class="dropdown-item-icon" width="18" height="18" viewBox="0 0 24 24"
+                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round" aria-hidden="true">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+              <span>Trang cá nhân</span>
+            </a>
+            <button type="button" class="dropdown-item" role="menuitem" id="openSettingsModalBtn">
+              <svg class="dropdown-item-icon" width="18" height="18" viewBox="0 0 24 24"
+                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="3"></circle>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+              </svg>
+              <span>Cài đặt và quyền riêng tư</span>
+            </button>
+            <button type="button" class="dropdown-item" role="menuitem" id="openHelpModalBtn">
+              <svg class="dropdown-item-icon" width="18" height="18" viewBox="0 0 24 24"
+                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+              </svg>
+              <span>Trợ giúp và hỗ trợ</span>
+            </button>
+            <button type="button" class="dropdown-item" role="menuitem" id="openReportModalBtn">
+              <svg class="dropdown-item-icon" width="18" height="18" viewBox="0 0 24 24"
+                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round" aria-hidden="true">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                <line x1="12" y1="9" x2="12" y2="13"></line>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+              </svg>
+              <span>Báo cáo sự cố</span>
+            </button>
+          </div>
+          <div class="dropdown-divider"></div>
+          <button type="button" class="dropdown-item dropdown-item-danger" id="navLogoutBtn" role="menuitem">
+            <svg class="dropdown-item-icon" width="18" height="18" viewBox="0 0 24 24"
+              fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round" aria-hidden="true">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+              <polyline points="16 17 21 12 16 7"></polyline>
+              <line x1="21" y1="12" x2="9" y2="12"></line>
+            </svg>
+            <span>Đăng xuất</span>
+          </button>
+        </div>
+      </div>
+    `;
+  }
+
+  /**
    * Tạo HTML khối tài khoản (Menu Avatar hoặc nút Đăng nhập/Đăng ký) trên Header.
-   * @param {string} currentPage Tên trang hiện tại.
-   * @param {Object|null} user Người dùng đang đăng nhập.
+   * @param {string} currentPage - Tên trang hiện tại.
+   * @param {Object|null} user - Người dùng đang đăng nhập.
    * @returns {string} Chuỗi HTML nút xác thực hoặc dropdown tài khoản.
    */
   function renderAuthButtons(currentPage, user) {
-    if (user) {
-      const displayName = user.fullName || user.username || user.email || 'U';
-      const initial = displayName.trim().charAt(0).toUpperCase() || 'U';
-      const avatarContent = (user.avatarUrl && typeof user.avatarUrl === 'string')
-        ? `<img src="${escapeHtml(user.avatarUrl)}" alt="${escapeHtml(displayName)}" width="36" height="36" class="header-avatar-img">`
-        : escapeHtml(initial);
-      const thumbContent = (user.avatarUrl && typeof user.avatarUrl === 'string')
-        ? `<img src="${escapeHtml(user.avatarUrl)}" alt="${escapeHtml(displayName)}" width="44" height="44" class="dropdown-avatar-img">`
-        : escapeHtml(initial);
-
-      return `
-        <div class="user-menu-wrapper" id="userMenuWrapper">
-          <button type="button" class="user-avatar-btn ${user.avatarUrl ? 'has-avatar-photo' : ''}" id="userAvatarBtn" aria-expanded="false" aria-haspopup="true" aria-label="Menu tài khoản của ${escapeHtml(displayName)}" title="Tài khoản (${escapeHtml(displayName)})">
-            ${avatarContent}
-          </button>
-          <div class="user-dropdown-menu" id="userDropdownMenu" role="menu" aria-label="Menu người dùng">
-            <div class="dropdown-user-header">
-              <div class="dropdown-avatar-thumb ${user.avatarUrl ? 'has-avatar-photo' : ''}" aria-hidden="true">${thumbContent}</div>
-              <div class="dropdown-user-info">
-                <strong class="dropdown-user-name" title="${escapeHtml(displayName)}">${escapeHtml(displayName)}</strong>
-                <span class="dropdown-user-email" title="${escapeHtml(user.email || user.username || '')}">${escapeHtml(user.email || user.username || '')}</span>
-                <span class="dropdown-user-badge">Nhà nghiên cứu</span>
-              </div>
-            </div>
-            <div class="dropdown-divider"></div>
-            <div class="dropdown-menu-list">
-              <a href="profile.html" class="dropdown-item" role="menuitem">
-                <svg class="dropdown-item-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                  <circle cx="12" cy="7" r="4"></circle>
-                </svg>
-                <span>Trang cá nhân</span>
-              </a>
-              <button type="button" class="dropdown-item" role="menuitem" id="openSettingsModalBtn">
-                <svg class="dropdown-item-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                  <circle cx="12" cy="12" r="3"></circle>
-                  <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-                </svg>
-                <span>Cài đặt và quyền riêng tư</span>
-              </button>
-              <button type="button" class="dropdown-item" role="menuitem" id="openHelpModalBtn">
-                <svg class="dropdown-item-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                  <circle cx="12" cy="12" r="10"></circle>
-                  <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
-                  <line x1="12" y1="17" x2="12.01" y2="17"></line>
-                </svg>
-                <span>Trợ giúp và hỗ trợ</span>
-              </button>
-              <button type="button" class="dropdown-item" role="menuitem" id="openReportModalBtn">
-                <svg class="dropdown-item-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                  <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
-                  <line x1="12" y1="9" x2="12" y2="13"></line>
-                  <line x1="12" y1="17" x2="12.01" y2="17"></line>
-                </svg>
-                <span>Báo cáo sự cố</span>
-              </button>
-            </div>
-            <div class="dropdown-divider"></div>
-            <button type="button" class="dropdown-item dropdown-item-danger" id="navLogoutBtn" role="menuitem">
-              <svg class="dropdown-item-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                <polyline points="16 17 21 12 16 7"></polyline>
-                <line x1="21" y1="12" x2="9" y2="12"></line>
-              </svg>
-              <span>Đăng xuất</span>
-            </button>
-          </div>
-        </div>
-      `;
-    }
+    if (user) return renderLoggedInUserMenu(user);
 
     const isLoginPage = currentPage === 'login.html';
     const isRegisterPage = currentPage === 'register.html';
@@ -1115,10 +1140,14 @@
 
     return `
       <div class="auth-buttons-group">
-        <a href="login.html${redirectParam}" class="btn-header-login ${isLoginPage ? 'active' : ''}" ${isLoginPage ? 'aria-current="page"' : ''}>
+        <a href="login.html${redirectParam}"
+          class="btn-header-login ${isLoginPage ? 'active' : ''}"
+          ${isLoginPage ? 'aria-current="page"' : ''}>
           Đăng nhập
         </a>
-        <a href="register.html" class="btn-header-register ${isRegisterPage ? 'active' : ''}" ${isRegisterPage ? 'aria-current="page"' : ''}>
+        <a href="register.html"
+          class="btn-header-register ${isRegisterPage ? 'active' : ''}"
+          ${isRegisterPage ? 'aria-current="page"' : ''}>
           Đăng ký
         </a>
       </div>
@@ -1126,13 +1155,13 @@
   }
 
   /**
-   * Tạo HTML cho 3 modal toàn cục: Cài đặt, Trợ giúp và Báo cáo sự cố.
-   * @returns {string} Chuỗi HTML chứa cấu trúc 3 modal.
+   * Tạo HTML cho modal Cài đặt & Quyền riêng tư (đổi mật khẩu + tùy chọn hiển thị).
+   * @returns {string} Chuỗi HTML `#globalSettingsModal`.
    */
-  function renderGlobalModalsHtml() {
+  function buildSettingsModalHtml() {
     return `
-      <!-- Modal: Cài đặt và quyền riêng tư -->
-      <div class="layout-modal" id="globalSettingsModal" role="dialog" aria-modal="true" aria-labelledby="settingsModalTitle" hidden>
+      <div class="layout-modal" id="globalSettingsModal" role="dialog"
+        aria-modal="true" aria-labelledby="settingsModalTitle" hidden>
         <div class="layout-modal-backdrop"></div>
         <div class="layout-modal-box">
           <div class="layout-modal-header">
@@ -1165,15 +1194,15 @@
                 <button type="submit" class="btn btn-primary btn--compact-sm">Cập nhật mật khẩu</button>
               </form>
             </div>
-
             <div class="modal-divider"></div>
-
             <div class="modal-section-block">
               <h3 class="modal-block-title">Tùy chọn thời gian &amp; Thông báo</h3>
               <div class="modal-toggle-row">
                 <div>
                   <strong>Hiển thị và nhắc nhở hạn nộp bài theo UTC+7 (giờ Việt Nam)</strong>
-                  <p class="modal-hint">Tự động quy đổi hạn chót 23:59 AoE (UTC-12) sang 18:59 ngày hôm sau theo UTC+7 (giờ Việt Nam).</p>
+                  <p class="modal-hint">
+                    Tự động quy đổi hạn chót 23:59 AoE (UTC-12) sang 18:59 ngày hôm sau theo UTC+7 (giờ Việt Nam).
+                  </p>
                 </div>
                 <label class="switch" aria-label="Bật quy đổi giờ Việt Nam UTC+7">
                   <input type="checkbox" id="globalPrefAoe" checked>
@@ -1194,9 +1223,60 @@
           </div>
         </div>
       </div>
+    `;
+  }
 
-      <!-- Modal: Trợ giúp và hỗ trợ -->
-      <div class="layout-modal" id="globalHelpModal" role="dialog" aria-modal="true" aria-labelledby="helpModalTitle" hidden>
+  /**
+   * Tạo HTML cho modal Trợ giúp & Hỗ trợ với danh sách câu hỏi FAQ.
+   * @returns {string} Chuỗi HTML `#globalHelpModal`.
+   */
+  function buildHelpModalHtml() {
+    const chevronSvg = `
+      <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        stroke-width="2.5" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
+    `;
+    const faqs = [
+      {
+        q: '1. Quy tắc quy đổi múi giờ UTC+7 (giờ Việt Nam) và AoE trên ConfGuide?',
+        a: 'Các mốc hạn nộp bài theo quy ước 23:59 AoE (Anywhere on Earth, UTC-12) được hệ thống tự động '
+          + 'cộng 19 giờ để hiển thị theo chuẩn <strong>UTC+7 (giờ Việt Nam)</strong>, tức 18:59 ngày kế tiếp. '
+          + 'Riêng ngày diễn ra sự kiện hoặc các mốc chỉ có ngày mà không có giờ cụ thể được giữ nguyên để '
+          + 'tránh lệch ngày.',
+        open: true
+      },
+      {
+        q: '2. Làm thế nào để xuất hạn nộp sang Google Calendar hoặc file .ics?',
+        a: 'Tại trang Chi tiết hội nghị (detail.html), cạnh mỗi mốc hạn chót đều có nút "Google Calendar" '
+          + 'và "Tải file .ics". File .ics tự động cài sẵn nhắc nhở trước 7 ngày và trước 1 ngày.',
+        open: false
+      },
+      {
+        q: '3. Phân hạng CORE (A*, A, B, C) có ý nghĩa gì?',
+        a: 'CORE Ranking là chuẩn xếp hạng hội nghị khoa học CNTT uy tín: A* là hạng xuất sắc hàng đầu '
+          + '(Top 4%-7%), A là hội nghị rất uy tín, B là hội nghị chất lượng tốt và C là hội nghị chuyên ngành.',
+        open: false
+      },
+      {
+        q: '4. Cách theo dõi tiến độ nộp bài trong Tracker?',
+        a: 'Nhấn "Lưu lại" ở trang Tra cứu hoặc trang chi tiết để đưa hội nghị vào trang Theo dõi hội nghị. '
+          + 'Danh sách được lưu trong trình duyệt hiện tại.',
+        open: false
+      }
+    ];
+
+    const faqListHtml = faqs.map(item => `
+      <div class="faq-item${item.open ? ' open' : ''}">
+        <button type="button" class="faq-question-btn" aria-expanded="${item.open ? 'true' : 'false'}">
+          <strong>${item.q}</strong>
+          ${chevronSvg}
+        </button>
+        <div class="faq-answer-panel">${item.a}</div>
+      </div>
+    `).join('');
+
+    return `
+      <div class="layout-modal" id="globalHelpModal" role="dialog"
+        aria-modal="true" aria-labelledby="helpModalTitle" hidden>
         <div class="layout-modal-backdrop"></div>
         <div class="layout-modal-box">
           <div class="layout-modal-header">
@@ -1204,58 +1284,28 @@
             <button type="button" class="layout-modal-close-btn" aria-label="Đóng cửa sổ">&times;</button>
           </div>
           <div class="layout-modal-body">
-            <div class="faq-list">
-              <div class="faq-item open">
-                <button type="button" class="faq-question-btn" aria-expanded="true">
-                  <strong>1. Quy tắc quy đổi múi giờ UTC+7 (giờ Việt Nam) và AoE trên ConfGuide?</strong>
-                  <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                </button>
-                <div class="faq-answer-panel">
-                  Các mốc hạn nộp bài theo quy ước 23:59 AoE (Anywhere on Earth, UTC-12) được hệ thống tự động cộng 19 giờ để hiển thị theo chuẩn <strong>UTC+7 (giờ Việt Nam)</strong>, tức 18:59 ngày kế tiếp. Riêng ngày diễn ra sự kiện hoặc các mốc chỉ có ngày mà không có giờ cụ thể được giữ nguyên để tránh lệch ngày.
-                </div>
-              </div>
-
-              <div class="faq-item">
-                <button type="button" class="faq-question-btn" aria-expanded="false">
-                  <strong>2. Làm thế nào để xuất hạn nộp sang Google Calendar hoặc file .ics?</strong>
-                  <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                </button>
-                <div class="faq-answer-panel">
-                  Tại trang Chi tiết hội nghị (detail.html), cạnh mỗi mốc hạn chót đều có nút "Google Calendar" và "Tải file .ics". File .ics tự động cài sẵn nhắc nhở trước 7 ngày và trước 1 ngày.
-                </div>
-              </div>
-
-              <div class="faq-item">
-                <button type="button" class="faq-question-btn" aria-expanded="false">
-                  <strong>3. Phân hạng CORE (A*, A, B, C) có ý nghĩa gì?</strong>
-                  <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                </button>
-                <div class="faq-answer-panel">
-                  CORE Ranking là chuẩn xếp hạng hội nghị khoa học CNTT uy tín: A* là hạng xuất sắc hàng đầu (Top 4%-7%), A là hội nghị rất uy tín, B là hội nghị chất lượng tốt và C là hội nghị chuyên ngành.
-                </div>
-              </div>
-
-              <div class="faq-item">
-                <button type="button" class="faq-question-btn" aria-expanded="false">
-                  <strong>4. Cách theo dõi tiến độ nộp bài trong Tracker?</strong>
-                  <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                </button>
-                <div class="faq-answer-panel">
-                  Nhấn "Lưu lại" ở trang Tra cứu hoặc trang chi tiết để đưa hội nghị vào trang Theo dõi hội nghị. Danh sách được lưu trong trình duyệt hiện tại.
-                </div>
-              </div>
-            </div>
-
+            <div class="faq-list">${faqListHtml}</div>
             <div class="modal-contact-banner">
               <strong>Liên hệ ban quản trị học thuật:</strong>
-              <p class="help-email-note">Email: <a href="mailto:contact@confguide.vn">contact@confguide.vn</a> • Hotline: <a href="tel:+84123456789">+84 123 456 789</a></p>
+              <p class="help-email-note">
+                Email: <a href="mailto:contact@confguide.vn">contact@confguide.vn</a> •
+                Hotline: <a href="tel:+84123456789">+84 123 456 789</a>
+              </p>
             </div>
           </div>
         </div>
       </div>
+    `;
+  }
 
-      <!-- Modal: Báo cáo sự cố -->
-      <div class="layout-modal" id="globalReportModal" role="dialog" aria-modal="true" aria-labelledby="reportModalTitle" hidden>
+  /**
+   * Tạo HTML cho modal Báo cáo sự cố & Đóng góp dữ liệu.
+   * @returns {string} Chuỗi HTML `#globalReportModal`.
+   */
+  function buildReportModalHtml() {
+    return `
+      <div class="layout-modal" id="globalReportModal" role="dialog"
+        aria-modal="true" aria-labelledby="reportModalTitle" hidden>
         <div class="layout-modal-backdrop"></div>
         <div class="layout-modal-box">
           <div class="layout-modal-header">
@@ -1301,6 +1351,14 @@
         </div>
       </div>
     `;
+  }
+
+  /**
+   * Tạo HTML cho 3 modal toàn cục: Cài đặt, Trợ giúp và Báo cáo sự cố.
+   * @returns {string} Chuỗi HTML chứa cấu trúc 3 modal.
+   */
+  function renderGlobalModalsHtml() {
+    return [buildSettingsModalHtml(), buildHelpModalHtml(), buildReportModalHtml()].join('');
   }
 
   /**
@@ -1367,8 +1425,79 @@
   }
 
   /**
-   * Hiển thị Header động, gắn sự kiện menu di động, chuyển theme và các modal toàn cục.
-   * @param {string} currentPage Tên trang hiện tại.
+   * Khởi tạo HTML biểu tượng điều hướng Header (mặt trời, mặt trăng, menu di động).
+   * @returns {{ sunSvg: string, moonSvg: string, hamburgerSvg: string }} Tập SVG Header.
+   */
+  function getHeaderIcons() {
+    return {
+      sunSvg: `
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="5"></circle>
+          <line x1="12" y1="1" x2="12" y2="3"></line>
+          <line x1="12" y1="21" x2="12" y2="23"></line>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+          <line x1="1" y1="12" x2="3" y2="12"></line>
+          <line x1="21" y1="12" x2="23" y2="12"></line>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        </svg>
+      `,
+      moonSvg: `
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
+      `,
+      hamburgerSvg: `
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+      `
+    };
+  }
+
+  /**
+   * Tạo ngăn kéo điều hướng trên màn hình di động.
+   * @param {boolean} isHome - Trang chủ.
+   * @param {boolean} isSearch - Trang Tra cứu hoặc Chi tiết.
+   * @param {boolean} isTracker - Trang Theo dõi hội nghị.
+   * @param {boolean} isAbout - Trang Về chúng tôi.
+   * @param {Object|null} user - Người dùng hiện tại.
+   * @returns {string} Chuỗi HTML `.mobile-nav-drawer`.
+   */
+  function buildMobileDrawerHtml(isHome, isSearch, isTracker, isAbout, user) {
+    const userLinksHtml = user ? `
+      <div class="mobile-menu-divider" role="separator"></div>
+      <a href="profile.html" class="nav-link">Trang cá nhân</a>
+      <button type="button" id="mobileSettingsBtn"
+        class="nav-link mobile-menu-btn">Cài đặt và quyền riêng tư</button>
+      <button type="button" id="mobileHelpBtn"
+        class="nav-link mobile-menu-btn">Trợ giúp và hỗ trợ</button>
+      <button type="button" id="mobileReportBtn"
+        class="nav-link mobile-menu-btn">Báo cáo sự cố</button>
+      <button type="button" id="mobileLogoutBtn"
+        class="nav-link mobile-menu-btn mobile-menu-btn--danger">Đăng xuất</button>
+    ` : '';
+
+    return `
+      <div class="mobile-nav-drawer" id="mobileNavDrawer">
+        <a href="index.html" class="nav-link ${isHome ? 'active' : ''}">Trang chủ</a>
+        <a href="search.html" class="nav-link ${isSearch ? 'active' : ''}">Tra cứu</a>
+        <a href="tracker.html" class="nav-link ${isTracker ? 'active' : ''}">Theo dõi hội nghị</a>
+        <a href="about.html" class="nav-link ${isAbout ? 'active' : ''}">Về chúng tôi</a>
+        ${userLinksHtml}
+      </div>
+    `;
+  }
+
+  /**
+   * Render toàn bộ thanh Header, điều hướng chính, menu di động và modal toàn cục.
+   * @param {string} currentPage - Tên tệp trang hiện tại.
    */
   function renderHeader(currentPage) {
     const headerContainer = document.getElementById('site-header');
@@ -1376,46 +1505,16 @@
 
     const isAuthPage = currentPage === 'login.html' || currentPage === 'register.html';
     const user = getCurrentUser();
-
     const isHome = currentPage === 'index.html' || currentPage === '';
     const isSearch = currentPage === 'search.html' || currentPage === 'detail.html';
     const isTracker = currentPage === 'tracker.html' || currentPage === 'logs.html';
     const isAbout = currentPage === 'about.html';
 
     let storedTheme = 'light';
-    try {
-      storedTheme = localStorage.getItem('confguide_theme') || 'light';
-    } catch (e) {}
+    try { storedTheme = localStorage.getItem('confguide_theme') || 'light'; } catch (e) {}
     const isDark = document.body.classList.contains('dark') || storedTheme === 'dark';
 
-    const sunSvg = `
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <circle cx="12" cy="12" r="5"></circle>
-        <line x1="12" y1="1" x2="12" y2="3"></line>
-        <line x1="12" y1="21" x2="12" y2="23"></line>
-        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-        <line x1="1" y1="12" x2="3" y2="12"></line>
-        <line x1="21" y1="12" x2="23" y2="12"></line>
-        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-      </svg>
-    `;
-
-    const moonSvg = `
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-      </svg>
-    `;
-
-    const hamburgerSvg = `
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <line x1="3" y1="12" x2="21" y2="12"></line>
-        <line x1="3" y1="6" x2="21" y2="6"></line>
-        <line x1="3" y1="18" x2="21" y2="18"></line>
-      </svg>
-    `;
-
+    const { sunSvg, moonSvg, hamburgerSvg } = getHeaderIcons();
     const navHtml = isAuthPage ? '' : `
       <nav class="main-nav" aria-label="Điều hướng chính">
         <a href="index.html" class="nav-link ${isHome ? 'active' : ''}">Trang chủ</a>
@@ -1424,29 +1523,13 @@
         <a href="about.html" class="nav-link ${isAbout ? 'active' : ''}">Về chúng tôi</a>
       </nav>
     `;
-
     const hamburgerHtml = isAuthPage ? '' : `
-      <button type="button" class="hamburger-btn" id="mobileMenuBtn" aria-label="Mở menu di động" aria-expanded="false">
+      <button type="button" class="hamburger-btn" id="mobileMenuBtn"
+        aria-label="Mở menu di động" aria-expanded="false">
         ${hamburgerSvg}
       </button>
     `;
-
-    const mobileDrawerHtml = isAuthPage ? '' : `
-      <div class="mobile-nav-drawer" id="mobileNavDrawer">
-        <a href="index.html" class="nav-link ${isHome ? 'active' : ''}">Trang chủ</a>
-        <a href="search.html" class="nav-link ${isSearch ? 'active' : ''}">Tra cứu</a>
-        <a href="tracker.html" class="nav-link ${isTracker ? 'active' : ''}">Theo dõi hội nghị</a>
-        <a href="about.html" class="nav-link ${isAbout ? 'active' : ''}">Về chúng tôi</a>
-        ${user ? `
-          <div class="mobile-menu-divider" role="separator"></div>
-          <a href="profile.html" class="nav-link">Trang cá nhân</a>
-          <button type="button" id="mobileSettingsBtn" class="nav-link mobile-menu-btn">Cài đặt và quyền riêng tư</button>
-          <button type="button" id="mobileHelpBtn" class="nav-link mobile-menu-btn">Trợ giúp và hỗ trợ</button>
-          <button type="button" id="mobileReportBtn" class="nav-link mobile-menu-btn">Báo cáo sự cố</button>
-          <button type="button" id="mobileLogoutBtn" class="nav-link mobile-menu-btn mobile-menu-btn--danger">Đăng xuất</button>
-        ` : ''}
-      </div>
-    `;
+    const mobileDrawerHtml = isAuthPage ? '' : buildMobileDrawerHtml(isHome, isSearch, isTracker, isAbout, user);
 
     headerContainer.innerHTML = `
       <header class="site-header">
@@ -1454,7 +1537,8 @@
           ${renderBrandHtml()}
           ${navHtml}
           <div class="header-actions">
-            <button type="button" class="theme-toggle-btn" id="themeToggleBtn" title="Chuyển chế độ sáng/tối" aria-label="Chuyển chế độ giao diện">
+            <button type="button" class="theme-toggle-btn" id="themeToggleBtn"
+              title="Chuyển chế độ sáng/tối" aria-label="Chuyển chế độ giao diện">
               ${isDark ? sunSvg : moonSvg}
             </button>
             ${renderAuthButtons(currentPage, user)}
@@ -1470,84 +1554,48 @@
   }
 
   /**
-   * Gắn toàn bộ sự kiện tương tác trong Header, Dropdown, Mobile Drawer và Modal toàn cục.
-   * @param {HTMLElement} headerContainer Phần tử chứa Header.
-   * @param {Object|null} user Thông tin người dùng hiện tại.
-   * @param {string} sunSvg Biểu tượng SVG mặt trời.
-   * @param {string} moonSvg Biểu tượng SVG mặt trăng.
+   * Gắn sự kiện mở/đóng menu di động và chặn điều hướng trùng lặp tới trang hiện tại.
+   * @param {HTMLElement} headerContainer - Phần tử chứa Header.
    */
-  function bindHeaderEvents(headerContainer, user, sunSvg, moonSvg) {
-    const themeBtn = document.getElementById('themeToggleBtn');
-    if (themeBtn) {
-      themeBtn.addEventListener('click', () => {
-        const currentlyDark = document.body.classList.toggle('dark');
-        try {
-          localStorage.setItem('confguide_theme', currentlyDark ? 'dark' : 'light');
-        } catch (e) {}
-        themeBtn.innerHTML = currentlyDark ? sunSvg : moonSvg;
-      });
-    }
-
+  function bindMobileNavigationEvents(headerContainer) {
     const mobileBtn = document.getElementById('mobileMenuBtn');
     const mobileDrawer = document.getElementById('mobileNavDrawer');
+
     headerContainer.querySelectorAll('a[href]').forEach(link => {
       link.addEventListener('click', event => {
         const target = new URL(link.href, window.location.href);
-        if (target.pathname.toLowerCase() !== window.location.pathname.toLowerCase() || target.search !== window.location.search || target.hash) return;
+        const isSameUrl = target.pathname.toLowerCase() === window.location.pathname.toLowerCase()
+          && target.search === window.location.search
+          && !target.hash;
+        if (!isSameUrl) return;
         event.preventDefault();
         if (mobileDrawer) mobileDrawer.classList.remove('open');
         if (mobileBtn) mobileBtn.setAttribute('aria-expanded', 'false');
       });
     });
 
-    if (mobileBtn && mobileDrawer) {
-      mobileBtn.addEventListener('click', e => {
-        e.stopPropagation();
-        const isOpen = mobileDrawer.classList.toggle('open');
-        mobileBtn.setAttribute('aria-expanded', String(isOpen));
-      });
+    if (!mobileBtn || !mobileDrawer) return;
 
-      document.addEventListener('click', e => {
-        if (!mobileDrawer.contains(e.target) && !mobileBtn.contains(e.target)) {
-          mobileDrawer.classList.remove('open');
-          mobileBtn.setAttribute('aria-expanded', 'false');
-        }
-      });
-
-      const mobileLogoutBtn = document.getElementById('mobileLogoutBtn');
-      if (mobileLogoutBtn) {
-        mobileLogoutBtn.addEventListener('click', handleLogoutRequest);
-      }
-    }
-
-    document.querySelectorAll('.layout-modal').forEach(modal => {
-      const backdrop = modal.querySelector('.layout-modal-backdrop');
-      const closeBtn = modal.querySelector('.layout-modal-close-btn');
-      const cancelBtn = modal.querySelector('.layout-modal-cancel-btn');
-
-      if (backdrop) backdrop.addEventListener('click', () => closeLayoutModal(modal.id));
-      if (closeBtn) closeBtn.addEventListener('click', () => closeLayoutModal(modal.id));
-      if (cancelBtn) cancelBtn.addEventListener('click', () => closeLayoutModal(modal.id));
+    mobileBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      const isOpen = mobileDrawer.classList.toggle('open');
+      mobileBtn.setAttribute('aria-expanded', String(isOpen));
     });
-
-    document.addEventListener('keydown', e => {
-      if (e.key === 'Escape') {
-        document.querySelectorAll('.layout-modal.show').forEach(m => closeLayoutModal(m.id));
+    document.addEventListener('click', e => {
+      if (!mobileDrawer.contains(e.target) && !mobileBtn.contains(e.target)) {
+        mobileDrawer.classList.remove('open');
+        mobileBtn.setAttribute('aria-expanded', 'false');
       }
     });
+    const mobileLogoutBtn = document.getElementById('mobileLogoutBtn');
+    if (mobileLogoutBtn) mobileLogoutBtn.addEventListener('click', handleLogoutRequest);
+  }
 
-    const userMenuWrapper = document.getElementById('userMenuWrapper');
-    const userAvatarBtn = document.getElementById('userAvatarBtn');
-    const userDropdownMenu = document.getElementById('userDropdownMenu');
-    const navLogoutBtn = document.getElementById('navLogoutBtn');
-
-    function closeUserDropdown() {
-      if (userDropdownMenu) userDropdownMenu.classList.remove('show');
-      if (userAvatarBtn) userAvatarBtn.setAttribute('aria-expanded', 'false');
-      if (mobileDrawer) mobileDrawer.classList.remove('open');
-      if (mobileBtn) mobileBtn.setAttribute('aria-expanded', 'false');
-    }
-
+  /**
+   * Gắn sự kiện mở/đóng menu tài khoản dropdown và các nút kích hoạt modal toàn cục.
+   * @param {Function} closeUserDropdown - Hàm đóng dropdown tài khoản và menu di động.
+   */
+  function bindAccountDropdownEvents(closeUserDropdown) {
     const modalTriggerPairs = [
       ['openSettingsModalBtn', 'globalSettingsModal'],
       ['mobileSettingsBtn', 'globalSettingsModal'],
@@ -1558,41 +1606,82 @@
     ];
     modalTriggerPairs.forEach(([triggerId, modalId]) => {
       const el = document.getElementById(triggerId);
-      if (el) {
-        el.addEventListener('click', () => {
-          closeUserDropdown();
-          openLayoutModal(modalId);
-        });
+      if (!el) return;
+      el.addEventListener('click', () => {
+        closeUserDropdown();
+        openLayoutModal(modalId);
+      });
+    });
+
+    const userMenuWrapper = document.getElementById('userMenuWrapper');
+    const userAvatarBtn = document.getElementById('userAvatarBtn');
+    const userDropdownMenu = document.getElementById('userDropdownMenu');
+    if (!userAvatarBtn || !userDropdownMenu) return;
+
+    userAvatarBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      const isOpen = userDropdownMenu.classList.toggle('show');
+      userAvatarBtn.setAttribute('aria-expanded', String(isOpen));
+    });
+    document.addEventListener('click', e => {
+      if (userMenuWrapper && !userMenuWrapper.contains(e.target)) closeUserDropdown();
+    });
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && userDropdownMenu.classList.contains('show')) {
+        closeUserDropdown();
+        userAvatarBtn.focus();
+      }
+    });
+    const navLogoutBtn = document.getElementById('navLogoutBtn');
+    if (navLogoutBtn) {
+      navLogoutBtn.addEventListener('click', () => {
+        closeUserDropdown();
+        handleLogoutRequest();
+      });
+    }
+  }
+
+  /**
+   * Gắn toàn bộ sự kiện tương tác trong Header, Dropdown, Mobile Drawer và Modal toàn cục.
+   * @param {HTMLElement} headerContainer - Phần tử chứa Header.
+   * @param {Object|null} user - Thông tin người dùng hiện tại.
+   * @param {string} sunSvg - Biểu tượng SVG mặt trời.
+   * @param {string} moonSvg - Biểu tượng SVG mặt trăng.
+   */
+  function bindHeaderEvents(headerContainer, user, sunSvg, moonSvg) {
+    const themeBtn = document.getElementById('themeToggleBtn');
+    if (themeBtn) {
+      themeBtn.addEventListener('click', () => {
+        const currentlyDark = document.body.classList.toggle('dark');
+        try { localStorage.setItem('confguide_theme', currentlyDark ? 'dark' : 'light'); } catch (e) {}
+        themeBtn.innerHTML = currentlyDark ? sunSvg : moonSvg;
+      });
+    }
+
+    bindMobileNavigationEvents(headerContainer);
+
+    document.querySelectorAll('.layout-modal').forEach(modal => {
+      ['.layout-modal-backdrop', '.layout-modal-close-btn', '.layout-modal-cancel-btn'].forEach(sel => {
+        const el = modal.querySelector(sel);
+        if (el) el.addEventListener('click', () => closeLayoutModal(modal.id));
+      });
+    });
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') {
+        document.querySelectorAll('.layout-modal.show').forEach(m => closeLayoutModal(m.id));
       }
     });
 
-    if (userAvatarBtn && userDropdownMenu) {
-      userAvatarBtn.addEventListener('click', e => {
-        e.stopPropagation();
-        const isOpen = userDropdownMenu.classList.toggle('show');
-        userAvatarBtn.setAttribute('aria-expanded', String(isOpen));
-      });
-
-      document.addEventListener('click', e => {
-        if (userMenuWrapper && !userMenuWrapper.contains(e.target)) {
-          closeUserDropdown();
-        }
-      });
-
-      document.addEventListener('keydown', e => {
-        if (e.key === 'Escape' && userDropdownMenu.classList.contains('show')) {
-          closeUserDropdown();
-          userAvatarBtn.focus();
-        }
-      });
-
-      if (navLogoutBtn) {
-        navLogoutBtn.addEventListener('click', () => {
-          closeUserDropdown();
-          handleLogoutRequest();
-        });
-      }
-    }
+    const userAvatarBtn = document.getElementById('userAvatarBtn');
+    const userDropdownMenu = document.getElementById('userDropdownMenu');
+    const mobileBtn = document.getElementById('mobileMenuBtn');
+    const mobileDrawer = document.getElementById('mobileNavDrawer');
+    bindAccountDropdownEvents(() => {
+      if (userDropdownMenu) userDropdownMenu.classList.remove('show');
+      if (userAvatarBtn) userAvatarBtn.setAttribute('aria-expanded', 'false');
+      if (mobileDrawer) mobileDrawer.classList.remove('open');
+      if (mobileBtn) mobileBtn.setAttribute('aria-expanded', 'false');
+    });
 
     initGlobalPasswordForm(user);
     initGlobalPreferences();
@@ -1601,13 +1690,13 @@
   }
 
   /**
-   * Khởi tạo kiểm tra và lưu mật khẩu mới trong modal Cài đặt.
-   * @param {Object|null} user Người dùng hiện tại.
+   * Kiểm tra dữ liệu nhập và xử lý lưu mật khẩu mới từ modal Cài đặt.
+   * @param {SubmitEvent} e - Sự kiện submit của `#globalPasswordForm`.
+   * @param {Object|null} user - Thông tin người dùng hiện tại.
+   * @returns {Promise<void>}
    */
-  function initGlobalPasswordForm(user) {
-    const passForm = document.getElementById('globalPasswordForm');
-    if (!passForm) return;
-
+  async function handleGlobalPasswordSubmit(e, user) {
+    e.preventDefault();
     const curInput = document.getElementById('globalCurrentPass');
     const newInput = document.getElementById('globalNewPass');
     const conInput = document.getElementById('globalConfirmPass');
@@ -1615,74 +1704,80 @@
     const newErr = document.getElementById('globalNewPassError');
     const conErr = document.getElementById('globalConfirmPassError');
     const alertBox = document.getElementById('settingsPasswordAlert');
+    if (!curInput || !newInput || !conInput || !alertBox) return;
 
-    passForm.addEventListener('submit', async e => {
-      e.preventDefault();
-      if (!curInput || !newInput || !conInput || !alertBox) return;
+    if (curErr) curErr.textContent = '';
+    if (newErr) newErr.textContent = '';
+    if (conErr) conErr.textContent = '';
+    alertBox.className = 'modal-alert';
+    alertBox.textContent = '';
 
-      if (curErr) curErr.textContent = '';
-      if (newErr) newErr.textContent = '';
-      if (conErr) conErr.textContent = '';
-      alertBox.className = 'modal-alert';
-      alertBox.textContent = '';
+    const curPass = curInput.value;
+    const newPass = newInput.value;
+    const conPass = conInput.value;
+    let hasError = false;
+    if (!curPass) { if (curErr) curErr.textContent = 'Vui lòng nhập mật khẩu hiện tại.'; hasError = true; }
+    if (newPass.length < 6) {
+      if (newErr) newErr.textContent = 'Mật khẩu mới phải có ít nhất 6 ký tự.';
+      hasError = true;
+    }
+    if (conPass !== newPass) {
+      if (conErr) conErr.textContent = 'Xác nhận mật khẩu mới không trùng khớp.';
+      hasError = true;
+    }
+    if (hasError) {
+      alertBox.textContent = 'Vui lòng kiểm tra lại các trường thông tin bên dưới.';
+      alertBox.className = 'modal-alert show error';
+      return;
+    }
 
-      const curPass = curInput.value;
-      const newPass = newInput.value;
-      const conPass = conInput.value;
-      let hasError = false;
+    const users = readStorage('confguide_users', []);
+    const matched = user && Array.isArray(users)
+      ? users.find(u =>
+        (u.id && u.id === user.id)
+        || (u.email && u.email === user.email)
+        || (u.username && u.username === user.username)
+      )
+      : null;
 
-      if (!curPass) {
-        if (curErr) curErr.textContent = 'Vui lòng nhập mật khẩu hiện tại.';
-        hasError = true;
-      }
-      if (newPass.length < 6) {
-        if (newErr) newErr.textContent = 'Mật khẩu mới phải có ít nhất 6 ký tự.';
-        hasError = true;
-      }
-      if (conPass !== newPass) {
-        if (conErr) conErr.textContent = 'Xác nhận mật khẩu mới không trùng khớp.';
-        hasError = true;
-      }
-      if (hasError) {
-        alertBox.textContent = 'Vui lòng kiểm tra lại các trường thông tin bên dưới.';
+    const currentHash = await hashTextSha256(curPass);
+    if (matched && matched.passwordHash) {
+      const isTestShortcut = curPass.startsWith('user') && curPass.endsWith('@')
+        && matched.username === curPass.slice(0, -1);
+      if (matched.passwordHash !== currentHash && !isTestShortcut) {
+        if (curErr) curErr.textContent = 'Mật khẩu hiện tại không chính xác.';
+        alertBox.textContent = 'Mật khẩu hiện tại không chính xác.';
         alertBox.className = 'modal-alert show error';
         return;
       }
+    }
 
-      const users = readStorage('confguide_users', []);
-      const matched = user && Array.isArray(users)
-        ? users.find(u => (u.id && u.id === user.id) || (u.email && u.email === user.email) || (u.username && u.username === user.username))
-        : null;
+    const newHash = await hashTextSha256(newPass);
+    if (matched) {
+      matched.passwordHash = newHash;
+      writeStorage('confguide_users', users);
+    }
+    if (user) {
+      user.passwordHash = newHash;
+      writeStorage('confguide_current_user', user);
+    }
 
-      const currentHash = await hashTextSha256(curPass);
-      if (matched && matched.passwordHash) {
-        const valid = matched.passwordHash === currentHash || (curPass.startsWith('user') && curPass.endsWith('@') && matched.username === curPass.slice(0, -1));
-        if (!valid) {
-          if (curErr) curErr.textContent = 'Mật khẩu hiện tại không chính xác.';
-          alertBox.textContent = 'Mật khẩu hiện tại không chính xác.';
-          alertBox.className = 'modal-alert show error';
-          return;
-        }
-      }
+    e.target.reset();
+    alertBox.textContent = 'Đã đổi mật khẩu thành công!';
+    alertBox.className = 'modal-alert show success';
+    setTimeout(() => {
+      alertBox.className = 'modal-alert';
+      alertBox.textContent = '';
+    }, 3000);
+  }
 
-      const newHash = await hashTextSha256(newPass);
-      if (matched) {
-        matched.passwordHash = newHash;
-        writeStorage('confguide_users', users);
-      }
-      if (user) {
-        user.passwordHash = newHash;
-        writeStorage('confguide_current_user', user);
-      }
-
-      passForm.reset();
-      alertBox.textContent = 'Đã đổi mật khẩu thành công!';
-      alertBox.className = 'modal-alert show success';
-      setTimeout(() => {
-        alertBox.className = 'modal-alert';
-        alertBox.textContent = '';
-      }, 3000);
-    });
+  /**
+   * Khởi tạo kiểm tra và lưu mật khẩu mới trong modal Cài đặt.
+   * @param {Object|null} user - Người dùng hiện tại.
+   */
+  function initGlobalPasswordForm(user) {
+    const passForm = document.getElementById('globalPasswordForm');
+    if (passForm) passForm.addEventListener('submit', e => handleGlobalPasswordSubmit(e, user));
   }
 
   /**
@@ -1695,15 +1790,15 @@
     if (aoeToggle) aoeToggle.checked = userPrefs.aoe !== false;
     if (cdToggle) cdToggle.checked = userPrefs.countdown !== false;
 
-    function saveGlobalPrefs() {
+    const savePrefs = () => {
       writeStorage('confguide_user_preferences', {
         aoe: aoeToggle ? aoeToggle.checked : true,
         countdown: cdToggle ? cdToggle.checked : true
       });
-    }
+    };
 
-    if (aoeToggle) aoeToggle.addEventListener('change', saveGlobalPrefs);
-    if (cdToggle) cdToggle.addEventListener('change', saveGlobalPrefs);
+    if (aoeToggle) aoeToggle.addEventListener('change', savePrefs);
+    if (cdToggle) cdToggle.addEventListener('change', savePrefs);
   }
 
   /**
@@ -1800,6 +1895,64 @@
   }
 
   /**
+   * Gửi góp ý nhanh từ chân trang, kiểm tra độ dài và giới hạn tần suất 10 giây.
+   * @param {HTMLTextAreaElement} textarea - Ô nhập nội dung góp ý.
+   * @param {HTMLElement} statusEl - Phần tử hiển thị thông báo kết quả gửi.
+   */
+  function submitFooterFeedback(textarea, statusEl) {
+    const text = textarea.value.trim();
+    if (text.length < 5) {
+      statusEl.textContent = 'Vui lòng nhập góp ý từ 5 ký tự trở lên.';
+      statusEl.className = 'footer-feedback-status error';
+      return;
+    }
+    if (text.length > 500) {
+      statusEl.textContent = 'Nội dung góp ý không được vượt quá 500 ký tự.';
+      statusEl.className = 'footer-feedback-status error';
+      return;
+    }
+
+    const now = Date.now();
+    if (now - lastFeedbackSubmitTime < 10000) {
+      const remainingSec = Math.ceil((10000 - (now - lastFeedbackSubmitTime)) / 1000);
+      statusEl.textContent = `Vui lòng đợi ${remainingSec}s trước khi gửi tiếp.`;
+      statusEl.className = 'footer-feedback-status error';
+      return;
+    }
+
+    const user = getCurrentUser();
+    const userId = user ? (user.id || user.username || user.email || 'user') : 'guest';
+    const storedFeedbacks = readStorage('confguide_feedback', []);
+    const safeFeedbacks = Array.isArray(storedFeedbacks) ? storedFeedbacks : [];
+
+    safeFeedbacks.push({
+      id: 'fb_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7),
+      text,
+      userId,
+      createdAt: new Date().toISOString()
+    });
+
+    if (!writeStorage('confguide_feedback', safeFeedbacks)) {
+      statusEl.textContent = 'Không thể lưu góp ý. Vui lòng thử lại sau.';
+      statusEl.className = 'footer-feedback-status error';
+      return;
+    }
+
+    lastFeedbackSubmitTime = now;
+    textarea.value = '';
+    textarea.rows = 1;
+    statusEl.textContent = 'Cảm ơn bạn đã góp ý!';
+    statusEl.className = 'footer-feedback-status success';
+
+    setTimeout(() => {
+      if (statusEl.textContent === 'Cảm ơn bạn đã góp ý!') {
+        statusEl.textContent = '';
+        statusEl.className = 'footer-feedback-status';
+      }
+    }, 5000);
+  }
+
+  /**
    * Khởi tạo biểu mẫu góp ý nhanh ở chân trang với kiểm tra độ dài và chống gửi lặp.
    */
   function initFooterFeedback() {
@@ -1817,72 +1970,74 @@
     textarea.addEventListener('keydown', e => {
       if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
-        submitFeedback();
+        submitFooterFeedback(textarea, statusEl);
       }
     });
 
     form.addEventListener('submit', e => {
       e.preventDefault();
-      submitFeedback();
+      submitFooterFeedback(textarea, statusEl);
     });
+  }
 
-    function submitFeedback() {
-      const text = textarea.value.trim();
-      if (text.length < 5) {
-        statusEl.textContent = 'Vui lòng nhập góp ý từ 5 ký tự trở lên.';
-        statusEl.className = 'footer-feedback-status error';
-        return;
-      }
-      if (text.length > 500) {
-        statusEl.textContent = 'Nội dung góp ý không được vượt quá 500 ký tự.';
-        statusEl.className = 'footer-feedback-status error';
-        return;
-      }
+  /**
+   * Tạo danh sách liên kết mạng xã hội cho cột Kết nối ở Footer.
+   * @returns {string} Chuỗi HTML `.footer-social-list`.
+   */
+  function buildFooterSocialHtml() {
+    const fbSvg = `
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+      </svg>
+    `;
+    const inSvg = `
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z"/>
+      </svg>
+    `;
+    const ytSvg = `
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+      </svg>
+    `;
+    const rgSvg = `
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="10"></circle>
+        <path d="M8.5 16V8h3.8a2.5 2.5 0 0 1 0 5H8.5m3.5 0l2.5 3"></path>
+      </svg>
+    `;
 
-      const now = Date.now();
-      if (now - lastFeedbackSubmitTime < 10000) {
-        const remainingSec = Math.ceil((10000 - (now - lastFeedbackSubmitTime)) / 1000);
-        statusEl.textContent = `Vui lòng đợi ${remainingSec}s trước khi gửi tiếp.`;
-        statusEl.className = 'footer-feedback-status error';
-        return;
-      }
-
-      const user = getCurrentUser();
-      const userId = user ? (user.id || user.username || user.email || 'user') : 'guest';
-      const storedFeedbacks = readStorage('confguide_feedback', []);
-      const safeFeedbacks = Array.isArray(storedFeedbacks) ? storedFeedbacks : [];
-
-      safeFeedbacks.push({
-        id: 'fb_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7),
-        text: text,
-        userId: userId,
-        createdAt: new Date().toISOString()
-      });
-
-      if (!writeStorage('confguide_feedback', safeFeedbacks)) {
-        statusEl.textContent = 'Không thể lưu góp ý. Vui lòng thử lại sau.';
-        statusEl.className = 'footer-feedback-status error';
-        return;
-      }
-
-      lastFeedbackSubmitTime = now;
-      textarea.value = '';
-      textarea.rows = 1;
-      statusEl.textContent = 'Cảm ơn bạn đã góp ý!';
-      statusEl.className = 'footer-feedback-status success';
-
-      setTimeout(() => {
-        if (statusEl.textContent === 'Cảm ơn bạn đã góp ý!') {
-          statusEl.textContent = '';
-          statusEl.className = 'footer-feedback-status';
-        }
-      }, 5000);
-    }
+    return `
+      <ul class="footer-social-list">
+        <li>
+          <a href="contact.html" class="footer-social-link" aria-label="Kênh Facebook cộng đồng ConfGuide">
+            ${fbSvg}<span>Facebook</span>
+          </a>
+        </li>
+        <li>
+          <a href="contact.html" class="footer-social-link" aria-label="Mạng lưới LinkedIn của ConfGuide">
+            ${inSvg}<span>LinkedIn</span>
+          </a>
+        </li>
+        <li>
+          <a href="about.html" class="footer-social-link" aria-label="Giới thiệu kênh video học thuật ConfGuide">
+            ${ytSvg}<span>YouTube</span>
+          </a>
+        </li>
+        <li>
+          <a href="search.html" class="footer-social-link researchgate"
+            aria-label="Tra cứu hội nghị học thuật trên ConfGuide">
+            ${rgSvg}<span>ResearchGate</span>
+          </a>
+        </li>
+      </ul>
+    `;
   }
 
   /**
    * Hiển thị Footer 4 cột dùng chung cho toàn bộ trang (ẩn ở trang đăng nhập/đăng ký).
-   * @param {string} currentPage Tên trang hiện tại.
+   * @param {string} currentPage - Tên trang hiện tại.
    */
   function renderFooter(currentPage) {
     const footerContainer = document.getElementById('site-footer');
@@ -1900,34 +2055,9 @@
     }
 
     footerContainer.classList.remove('is-hidden');
-
-    const fbSvg = `
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-        <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-      </svg>
-    `;
-
-    const inSvg = `
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-        <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z"/>
-      </svg>
-    `;
-
-    const ytSvg = `
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-        <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-      </svg>
-    `;
-
-    const rgSvg = `
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <circle cx="12" cy="12" r="10"></circle>
-        <path d="M8.5 16V8h3.8a2.5 2.5 0 0 1 0 5H8.5m3.5 0l2.5 3"></path>
-      </svg>
-    `;
-
     const sendPaperPlaneSvg = `
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <line x1="22" y1="2" x2="11" y2="13"></line>
         <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
       </svg>
@@ -1941,7 +2071,8 @@
               <div>
                 ${renderBrandHtml('footer-brand')}
                 <p class="footer-brand-desc">
-                  Nền tảng hỗ trợ tìm kiếm, kết nối và quản lý các hội nghị khoa học uy tín, giúp các nhà nghiên cứu tìm đúng nơi gửi gắm công trình của mình.
+                  Nền tảng hỗ trợ tìm kiếm, kết nối và quản lý các hội nghị khoa học uy tín,
+                  giúp các nhà nghiên cứu tìm đúng nơi gửi gắm công trình của mình.
                 </p>
               </div>
               <div class="footer-copyright">
@@ -1958,7 +2089,6 @@
                   <li><a href="tracker.html">THEO DÕI HỘI NGHỊ</a></li>
                   <li><a href="profile.html">HỒ SƠ</a></li>
                 </ul>
-
                 <ul class="footer-links-secondary">
                   <li><a href="about.html">Về chúng tôi</a></li>
                   <li><a href="contact.html">Liên hệ</a></li>
@@ -1970,32 +2100,7 @@
 
             <div class="footer-col footer-col-social">
               <h3 class="footer-col-title">KẾT NỐI</h3>
-              <ul class="footer-social-list">
-                <li>
-                  <a href="contact.html" class="footer-social-link" aria-label="Kênh Facebook cộng đồng ConfGuide">
-                    ${fbSvg}
-                    <span>Facebook</span>
-                  </a>
-                </li>
-                <li>
-                  <a href="contact.html" class="footer-social-link" aria-label="Mạng lưới LinkedIn của ConfGuide">
-                    ${inSvg}
-                    <span>LinkedIn</span>
-                  </a>
-                </li>
-                <li>
-                  <a href="about.html" class="footer-social-link" aria-label="Giới thiệu kênh video học thuật ConfGuide">
-                    ${ytSvg}
-                    <span>YouTube</span>
-                  </a>
-                </li>
-                <li>
-                  <a href="search.html" class="footer-social-link researchgate" aria-label="Tra cứu hội nghị học thuật trên ConfGuide">
-                    ${rgSvg}
-                    <span>ResearchGate</span>
-                  </a>
-                </li>
-              </ul>
+              ${buildFooterSocialHtml()}
             </div>
 
             <div class="footer-col footer-col-contact">
@@ -2014,14 +2119,10 @@
 
               <form class="footer-feedback-form" id="footerFeedbackForm" novalidate>
                 <div class="footer-input-group">
-                  <textarea
-                    id="footerFeedbackInput"
-                    class="footer-feedback-textarea"
-                    rows="1"
-                    aria-label="Nội dung góp ý"
-                    maxlength="500"
-                  ></textarea>
-                  <button type="submit" class="footer-feedback-btn" id="footerFeedbackSubmitBtn" aria-label="Gửi góp ý" title="Gửi góp ý">
+                  <textarea id="footerFeedbackInput" class="footer-feedback-textarea"
+                    rows="1" aria-label="Nội dung góp ý" maxlength="500"></textarea>
+                  <button type="submit" class="footer-feedback-btn" id="footerFeedbackSubmitBtn"
+                    aria-label="Gửi góp ý" title="Gửi góp ý">
                     ${sendPaperPlaneSvg}
                   </button>
                 </div>
@@ -2052,6 +2153,14 @@
     const emailErr = document.getElementById('contactEmailError');
     const messageErr = document.getElementById('contactMessageError');
 
+    /**
+     * Kiểm tra một trường nhập liệu trong form Liên hệ và cập nhật trạng thái lỗi ARIA.
+     * @param {HTMLElement|null} inputEl - Ô nhập cần kiểm tra.
+     * @param {HTMLElement|null} errEl - Phần tử hiển thị thông báo lỗi.
+     * @param {Function} checkFn - Hàm kiểm tra nhận chuỗi đã trim và trả về boolean.
+     * @param {string} messageText - Thông báo lỗi khi không hợp lệ.
+     * @returns {boolean} True nếu hợp lệ.
+     */
     function validateField(inputEl, errEl, checkFn, messageText) {
       if (!inputEl) return true;
       const valid = checkFn(inputEl.value.trim());
@@ -2150,6 +2259,9 @@
   }
 
   window.ConfGuideLayout = {
+    /**
+     * Làm mới thanh Header và Footer khi thông tin đăng nhập thay đổi.
+     */
     update: function () {
       const page = getCurrentPage();
       renderHeader(page);

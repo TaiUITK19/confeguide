@@ -1,30 +1,62 @@
 /**
  * ConfGuide — Quản lý Hồ sơ Nghiên cứu Cá nhân (js/pages/profile.js)
- * Hiển thị thông tin học thuật, chỉnh sửa hồ sơ, tải/nén ảnh đại diện,
- * và quản lý danh sách hội nghị đã lưu / xem trước Tracker qua LocalStorage.
+ * Trang sử dụng: profile.html
+ * Phụ thuộc: js/core/layout.js (ConfGuideUtils), js/components/compare.js, js/components/calendar.js
+ * Chức năng: Hiển thị thông tin học thuật, chỉnh sửa hồ sơ, tải/nén ảnh đại diện,
+ * quản lý hội nghị đã lưu, xem trước Tracker và khởi tạo lịch mốc thời hạn.
  */
 
 (function () {
   'use strict';
 
-  const utils = window.ConfGuideUtils || {};
+  /* ================= 1. HẰNG SỐ & HÀM TIỆN ÍCH CƠ BẢN ================= */
 
-  /** Thoát ký tự HTML đặc biệt (tái sử dụng ConfGuideUtils.escapeHtml). */
+  const utils = window.ConfGuideUtils || {};
+  const MAX_AVATAR_BYTES = 10 * 1024 * 1024;
+  const AVATAR_SIZE_PX = 200;
+  const TRACKER_PREVIEW_LIMIT = 4;
+
+  /**
+   * Thoát ký tự HTML đặc biệt (tái sử dụng ConfGuideUtils.escapeHtml).
+   * @param {*} str - Giá trị đầu vào cần thoát ký tự.
+   * @returns {string} Chuỗi an toàn để chèn vào HTML.
+   */
   function escapeHtml(str) {
     if (typeof utils.escapeHtml === 'function') return utils.escapeHtml(str);
-    return String(str || '').replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[ch]));
+    const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+    return String(str || '').replace(/[&<>"']/g, ch => map[ch]);
   }
 
-  /** Đọc JSON từ localStorage an toàn (tái sử dụng ConfGuideUtils.readStorage). */
+  /**
+   * Đọc JSON từ localStorage an toàn (tái sử dụng ConfGuideUtils.readStorage).
+   * @param {string} key - Khóa lưu trữ.
+   * @param {*} fallback - Giá trị mặc định khi không đọc được.
+   * @returns {*} Dữ liệu đã giải mã hoặc giá trị mặc định.
+   */
   function readStorage(key, fallback) {
     if (typeof utils.readStorage === 'function') return utils.readStorage(key, fallback);
-    try { const raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : fallback; } catch { return fallback; }
+    try {
+      const raw = localStorage.getItem(key);
+      return raw ? JSON.parse(raw) : fallback;
+    } catch {
+      return fallback;
+    }
   }
 
-  /** Ghi JSON vào localStorage an toàn (tái sử dụng ConfGuideUtils.writeStorage). */
+  /**
+   * Ghi JSON vào localStorage an toàn (tái sử dụng ConfGuideUtils.writeStorage).
+   * @param {string} key - Khóa lưu trữ.
+   * @param {*} value - Dữ liệu cần lưu.
+   * @returns {boolean} True nếu ghi thành công.
+   */
   function writeStorage(key, value) {
     if (typeof utils.writeStorage === 'function') return utils.writeStorage(key, value);
-    try { localStorage.setItem(key, JSON.stringify(value)); return true; } catch { return false; }
+    try {
+      localStorage.setItem(key, JSON.stringify(value));
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   /**
@@ -118,6 +150,56 @@
   /**
    * Cập nhật toàn bộ giao diện thẻ hồ sơ cá nhân và nạp sẵn dữ liệu vào modal chỉnh sửa.
    */
+  /**
+   * Render ảnh đại diện hoặc chữ cái đầu vào khung hiển thị chỉ định.
+   * @param {string} elementId - ID phần tử khung chứa ảnh đại diện.
+   * @param {string|undefined} avatarUrl - URL dữ liệu ảnh đại diện nếu có.
+   * @param {string} altText - Văn bản thay thế cho thẻ `<img>`.
+   * @param {string} imgClass - Class CSS cho thẻ `<img>`.
+   * @param {number} size - Kích thước rộng/cao cố định (px) để tránh CLS.
+   * @param {string} initial - Ký tự đầu dự phòng khi chưa có ảnh.
+   */
+  function renderAvatarSlot(elementId, avatarUrl, altText, imgClass, size, initial) {
+    const slotEl = document.getElementById(elementId);
+    if (!slotEl) return;
+
+    if (avatarUrl && typeof avatarUrl === 'string') {
+      slotEl.innerHTML =
+        `<img src="${escapeHtml(avatarUrl)}" alt="${escapeHtml(altText)}" `
+        + `width="${size}" height="${size}" class="${imgClass}">`;
+    } else {
+      slotEl.textContent = initial;
+    }
+  }
+
+  /**
+   * Đồng bộ thay đổi của currentUser xuống localStorage (`confguide_current_user`,
+   * `confguide_users`) và làm mới thanh điều hướng dùng chung.
+   * @param {Function} updateFn - Hàm nhận bản ghi người dùng và trả về bản ghi sau cập nhật.
+   */
+  function syncCurrentUserRecord(updateFn) {
+    currentUser = updateFn(currentUser);
+    writeStorage('confguide_current_user', currentUser);
+
+    const users = readStorage('confguide_users', []);
+    if (Array.isArray(users)) {
+      const updated = users.map(u => {
+        const matches = (u.id && u.id === currentUser.id)
+          || (u.username && u.username === currentUser.username);
+        return matches ? updateFn({ ...u }) : u;
+      });
+      writeStorage('confguide_users', updated);
+    }
+
+    renderUserProfile();
+    if (window.ConfGuideLayout && typeof window.ConfGuideLayout.update === 'function') {
+      window.ConfGuideLayout.update();
+    }
+  }
+
+  /**
+   * Render toàn bộ thông tin hồ sơ người dùng lên giao diện và điền sẵn dữ liệu vào form chỉnh sửa.
+   */
   function renderUserProfile() {
     currentUser = getCurrentUser() || currentUser;
 
@@ -125,70 +207,54 @@
     const initial = fullName.trim().charAt(0).toUpperCase() || 'U';
     const academicTitle = currentUser.academicTitle || DEFAULT_USER_DATA.academicTitle;
     const affiliation = currentUser.affiliation || DEFAULT_USER_DATA.affiliation;
-    const headline = `${academicTitle} • ${affiliation}`;
     const email = currentUser.email || DEFAULT_USER_DATA.email;
     const bio = currentUser.bio || DEFAULT_USER_DATA.bio;
     const scholarUrl = currentUser.scholarUrl || '';
     const fieldsRaw = currentUser.fieldsOfInterest || DEFAULT_USER_DATA.fieldsOfInterest;
 
-    // Avatar lớn và ảnh xem trước trong modal (có kích thước rõ ràng để tránh layout shift)
-    const avatarEl = document.getElementById('profileAvatarBig');
-    if (avatarEl) {
-      if (currentUser.avatarUrl && typeof currentUser.avatarUrl === 'string') {
-        avatarEl.innerHTML = `<img src="${escapeHtml(currentUser.avatarUrl)}" alt="Ảnh đại diện của ${escapeHtml(fullName)}" width="104" height="104" class="profile-avatar-img-tag">`;
-      } else {
-        avatarEl.textContent = initial;
-      }
-    }
+    renderAvatarSlot(
+      'profileAvatarBig',
+      currentUser.avatarUrl,
+      `Ảnh đại diện của ${fullName}`,
+      'profile-avatar-img-tag',
+      104,
+      initial
+    );
+    renderAvatarSlot(
+      'modalAvatarPreview',
+      currentUser.avatarUrl,
+      `Xem trước ảnh đại diện của ${fullName}`,
+      'modal-avatar-img-tag',
+      64,
+      initial
+    );
 
-    const modalAvatarPreview = document.getElementById('modalAvatarPreview');
-    if (modalAvatarPreview) {
-      if (currentUser.avatarUrl && typeof currentUser.avatarUrl === 'string') {
-        modalAvatarPreview.innerHTML = `<img src="${escapeHtml(currentUser.avatarUrl)}" alt="Xem trước ảnh đại diện của ${escapeHtml(fullName)}" width="64" height="64" class="modal-avatar-img-tag">`;
-      } else {
-        modalAvatarPreview.textContent = initial;
-      }
-    }
+    const textBindings = {
+      profileNameDisplay: fullName,
+      profileTitleAffiliation: `${academicTitle} • ${affiliation}`,
+      profileEmailDisplay: email,
+      profileBioText: `"${bio}"`
+    };
+    Object.entries(textBindings).forEach(([id, val]) => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = val;
+    });
 
-    const nameEl = document.getElementById('profileNameDisplay');
-    if (nameEl) nameEl.textContent = fullName;
-
-    const headlineEl = document.getElementById('profileTitleAffiliation');
-    if (headlineEl) headlineEl.textContent = headline;
-
-    const emailEl = document.getElementById('profileEmailDisplay');
-    if (emailEl) emailEl.textContent = email;
-
-    // Liên kết Google Scholar / ORCID: dùng class .is-hidden thay cho inline style
     const scholarLink = document.getElementById('profileScholarLink');
     if (scholarLink) {
-      if (isValidHttpUrl(scholarUrl)) {
-        scholarLink.href = scholarUrl.trim();
-        scholarLink.classList.remove('is-hidden');
-      } else {
-        scholarLink.href = '#';
-        scholarLink.classList.add('is-hidden');
-      }
+      const hasValidScholar = isValidHttpUrl(scholarUrl);
+      scholarLink.href = hasValidScholar ? scholarUrl.trim() : '#';
+      scholarLink.classList.toggle('is-hidden', !hasValidScholar);
     }
 
-    // Lĩnh vực nghiên cứu dạng thẻ nhãn
     const fieldsContainer = document.getElementById('profileFieldsChips');
     if (fieldsContainer) {
       const fieldList = fieldsRaw.split(',').map(f => f.trim()).filter(Boolean);
-      if (fieldList.length > 0) {
-        fieldsContainer.innerHTML = fieldList
-          .map(f => `<span class="profile-field-pill">${escapeHtml(f)}</span>`)
-          .join('');
-      } else {
-        fieldsContainer.innerHTML = '<span class="profile-field-pill">Khoa học máy tính</span>';
-      }
+      fieldsContainer.innerHTML = fieldList.length > 0
+        ? fieldList.map(f => `<span class="profile-field-pill">${escapeHtml(f)}</span>`).join('')
+        : '<span class="profile-field-pill">Khoa học máy tính</span>';
     }
 
-    // Giới thiệu bản thân
-    const bioEl = document.getElementById('profileBioText');
-    if (bioEl) bioEl.textContent = `"${bio}"`;
-
-    // Điền sẵn dữ liệu vào các trường trong form chỉnh sửa
     const fieldValues = {
       editFullName: fullName,
       editEmail: email,
@@ -207,118 +273,145 @@
   /* ================= 2. MODAL CHỈNH SỬA HỒ SƠ ================= */
 
   /**
+   * Hiển thị hoặc xóa thông báo lỗi ngay dưới trường nhập trong modal hồ sơ.
+   * @param {HTMLElement|null} inputEl - Phần tử input cần kiểm tra.
+   * @param {HTMLElement|null} errEl - Phần tử hiển thị thông báo lỗi tương ứng.
+   * @param {string} errorMessage - Chuỗi lỗi (rỗng nếu hợp lệ).
+   * @returns {boolean} True nếu trường hợp lệ.
+   */
+  function setProfileFieldValidation(inputEl, errEl, errorMessage) {
+    if (errEl) errEl.textContent = errorMessage;
+    if (inputEl) inputEl.setAttribute('aria-invalid', String(Boolean(errorMessage)));
+    return !errorMessage;
+  }
+
+  /**
+   * Tạo bộ hàm kiểm tra hợp lệ cho các trường trong modal Chỉnh sửa hồ sơ.
+   * @param {Object} els - Các phần tử input và phần tử hiển thị lỗi tương ứng.
+   * @returns {Object} Bộ hàm kiểm tra và xóa lỗi form.
+   */
+  function createProfileFormValidators(els) {
+    const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+    const NAME_REGEX = /^[\p{L}\p{N}\s.'-]{2,80}$/u;
+
+    const validateFullName = () => {
+      if (!els.fullNameInput) return true;
+      const val = els.fullNameInput.value.trim();
+      const msg = !val
+        ? 'Vui lòng nhập Họ và tên.'
+        : (!NAME_REGEX.test(val) ? 'Họ và tên phải có từ 2–80 ký tự và không chứa ký tự đặc biệt lạ.' : '');
+      return setProfileFieldValidation(els.fullNameInput, els.fullNameErr, msg);
+    };
+
+    const validateEmail = () => {
+      if (!els.emailInput) return true;
+      const val = els.emailInput.value.trim();
+      const msg = !val
+        ? 'Vui lòng nhập địa chỉ email.'
+        : (!EMAIL_REGEX.test(val) ? 'Địa chỉ email không đúng định dạng (ví dụ: ten@truong.edu.vn).' : '');
+      return setProfileFieldValidation(els.emailInput, els.emailErr, msg);
+    };
+
+    const validateScholarUrl = () => {
+      if (!els.scholarInput) return true;
+      const val = els.scholarInput.value.trim();
+      const msg = val && !isValidHttpUrl(val) ? 'Liên kết phải bắt đầu bằng http:// hoặc https:// hợp lệ.' : '';
+      return setProfileFieldValidation(els.scholarInput, els.scholarErr, msg);
+    };
+
+    const clearAll = () => {
+      setProfileFieldValidation(els.fullNameInput, els.fullNameErr, '');
+      setProfileFieldValidation(els.emailInput, els.emailErr, '');
+      setProfileFieldValidation(els.scholarInput, els.scholarErr, '');
+      if (els.modalAlert) {
+        els.modalAlert.className = 'modal-alert';
+        els.modalAlert.textContent = '';
+      }
+    };
+
+    return { validateFullName, validateEmail, validateScholarUrl, clearAll };
+  }
+
+  /**
+   * Xử lý submit biểu mẫu chỉnh sửa hồ sơ và lưu vào bộ nhớ cục bộ.
+   * @param {SubmitEvent} e - Sự kiện submit form.
+   * @param {Object} ctx - Ngữ cảnh form gồm input, validators và closeModal.
+   */
+  function handleEditProfileSubmit(e, ctx) {
+    e.preventDefault();
+    const { form, fullNameInput, emailInput, scholarInput, modalAlert, validators, closeModal } = ctx;
+    if (modalAlert) {
+      modalAlert.className = 'modal-alert';
+      modalAlert.textContent = '';
+    }
+
+    const isAllValid = [
+      validators.validateFullName(),
+      validators.validateEmail(),
+      validators.validateScholarUrl()
+    ].every(Boolean);
+
+    if (!isAllValid) {
+      const firstInvalid = form.querySelector('[aria-invalid="true"]');
+      if (firstInvalid) firstInvalid.focus();
+      return;
+    }
+
+    const readTrimmed = id => document.getElementById(id)?.value.trim() || '';
+    const fullName = fullNameInput ? fullNameInput.value.trim() : currentUser.fullName;
+    const email = emailInput ? emailInput.value.trim() : currentUser.email;
+    const patch = {
+      fullName,
+      name: fullName,
+      email,
+      academicTitle: readTrimmed('editTitle'),
+      affiliation: readTrimmed('editAffiliation'),
+      scholarUrl: scholarInput ? scholarInput.value.trim() : '',
+      fieldsOfInterest: readTrimmed('editFields'),
+      bio: readTrimmed('editBio')
+    };
+
+    syncCurrentUserRecord(user => ({ ...user, ...patch }));
+    closeModal();
+    showPageAlert('Đã cập nhật thông tin hồ sơ nghiên cứu thành công!', 'success');
+  }
+
+  /**
    * Khởi tạo hộp thoại Chỉnh sửa hồ sơ, bao gồm khôi phục focus và kiểm tra hợp lệ từng trường bằng Regex.
    */
   function initEditProfileModal() {
     const modal = document.getElementById('editProfileModal');
-    const openBtn = document.getElementById('openEditProfileBtn');
-    const closeBtn = document.getElementById('closeEditProfileBtn');
-    const cancelBtn = document.getElementById('cancelEditProfileBtn');
-    const backdrop = document.getElementById('editProfileBackdrop');
-    const form = document.getElementById('editProfileForm');
-    const modalAlert = document.getElementById('editModalAlert');
+    if (!modal) return;
 
+    const form = document.getElementById('editProfileForm');
     const fullNameInput = document.getElementById('editFullName');
     const emailInput = document.getElementById('editEmail');
     const scholarInput = document.getElementById('editScholar');
-    const fullNameErr = document.getElementById('editFullNameError');
-    const emailErr = document.getElementById('editEmailError');
-    const scholarErr = document.getElementById('editScholarError');
+    const modalAlert = document.getElementById('editModalAlert');
 
-    if (!modal) return;
+    const validators = createProfileFormValidators({
+      fullNameInput,
+      emailInput,
+      scholarInput,
+      modalAlert,
+      fullNameErr: document.getElementById('editFullNameError'),
+      emailErr: document.getElementById('editEmailError'),
+      scholarErr: document.getElementById('editScholarError')
+    });
 
-    const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
-    const NAME_REGEX = /^[\p{L}\p{N}\s.'-]{2,80}$/u;
     let lastFocusedElement = null;
 
-    /**
-     * Hiển thị hoặc xóa thông báo lỗi ngay dưới trường nhập trong modal hồ sơ.
-     * @param {HTMLElement|null} inputEl - Phần tử input cần kiểm tra.
-     * @param {HTMLElement|null} errEl - Phần tử hiển thị thông báo lỗi tương ứng.
-     * @param {string} errorMessage - Chuỗi lỗi (rỗng nếu hợp lệ).
-     * @returns {boolean} True nếu trường hợp lệ.
-     */
-    function setFieldValidation(inputEl, errEl, errorMessage) {
-      if (errEl) errEl.textContent = errorMessage;
-      if (inputEl) inputEl.setAttribute('aria-invalid', String(Boolean(errorMessage)));
-      return !errorMessage;
-    }
-
-    /**
-     * Xóa toàn bộ thông báo lỗi cũ trên form chỉnh sửa.
-     */
-    function clearValidationErrors() {
-      setFieldValidation(fullNameInput, fullNameErr, '');
-      setFieldValidation(emailInput, emailErr, '');
-      setFieldValidation(scholarInput, scholarErr, '');
-      if (modalAlert) {
-        modalAlert.className = 'modal-alert';
-        modalAlert.textContent = '';
-      }
-    }
-
-    /**
-     * Kiểm tra Họ và tên theo độ dài tối thiểu và ký tự hợp lệ.
-     * @returns {boolean} True nếu hợp lệ.
-     */
-    function validateFullName() {
-      if (!fullNameInput) return true;
-      const val = fullNameInput.value.trim();
-      let msg = '';
-      if (!val) {
-        msg = 'Vui lòng nhập Họ và tên.';
-      } else if (!NAME_REGEX.test(val)) {
-        msg = 'Họ và tên phải có từ 2–80 ký tự và không chứa ký tự đặc biệt lạ.';
-      }
-      return setFieldValidation(fullNameInput, fullNameErr, msg);
-    }
-
-    /**
-     * Kiểm tra định dạng email liên hệ.
-     * @returns {boolean} True nếu hợp lệ.
-     */
-    function validateEmail() {
-      if (!emailInput) return true;
-      const val = emailInput.value.trim();
-      let msg = '';
-      if (!val) {
-        msg = 'Vui lòng nhập địa chỉ email.';
-      } else if (!EMAIL_REGEX.test(val)) {
-        msg = 'Địa chỉ email không đúng định dạng (ví dụ: ten@truong.edu.vn).';
-      }
-      return setFieldValidation(emailInput, emailErr, msg);
-    }
-
-    /**
-     * Kiểm tra liên kết Google Scholar / ORCID (không bắt buộc; nếu nhập phải là http/https).
-     * @returns {boolean} True nếu hợp lệ.
-     */
-    function validateScholarUrl() {
-      if (!scholarInput) return true;
-      const val = scholarInput.value.trim();
-      const msg = val && !isValidHttpUrl(val)
-        ? 'Liên kết phải bắt đầu bằng http:// hoặc https:// hợp lệ.'
-        : '';
-      return setFieldValidation(scholarInput, scholarErr, msg);
-    }
-
-    /**
-     * Mở modal chỉnh sửa hồ sơ và đặt focus vào ô nhập đầu tiên.
-     */
-    function openModal() {
+    const openModal = () => {
       lastFocusedElement = document.activeElement;
       renderUserProfile();
-      clearValidationErrors();
+      validators.clearAll();
       modal.removeAttribute('hidden');
       document.body.classList.add('modal-open');
       requestAnimationFrame(() => modal.classList.add('show'));
       if (fullNameInput) setTimeout(() => fullNameInput.focus(), 150);
-    }
+    };
 
-    /**
-     * Đóng modal chỉnh sửa hồ sơ và trả focus về phần tử kích hoạt trước đó.
-     */
-    function closeModal() {
+    const closeModal = () => {
       modal.classList.remove('show');
       document.body.classList.remove('modal-open');
       setTimeout(() => {
@@ -327,111 +420,35 @@
           lastFocusedElement.focus();
         }
       }, 180);
-    }
+    };
 
+    const openBtn = document.getElementById('openEditProfileBtn');
     if (openBtn) openBtn.addEventListener('click', openModal);
-    if (closeBtn) closeBtn.addEventListener('click', closeModal);
-    if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
-    if (backdrop) backdrop.addEventListener('click', closeModal);
-
-    document.addEventListener('keydown', e => {
-      if (e.key === 'Escape' && modal.classList.contains('show')) {
-        closeModal();
-      }
+    ['closeEditProfileBtn', 'cancelEditProfileBtn', 'editProfileBackdrop'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener('click', closeModal);
     });
 
-    if (fullNameInput) {
-      fullNameInput.addEventListener('blur', validateFullName);
-      fullNameInput.addEventListener('input', () => {
-        if (fullNameInput.getAttribute('aria-invalid') === 'true') validateFullName();
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && modal.classList.contains('show')) closeModal();
+    });
+
+    [
+      [fullNameInput, validators.validateFullName],
+      [emailInput, validators.validateEmail],
+      [scholarInput, validators.validateScholarUrl]
+    ].forEach(([inputEl, validateFn]) => {
+      if (!inputEl) return;
+      inputEl.addEventListener('blur', validateFn);
+      inputEl.addEventListener('input', () => {
+        if (inputEl.getAttribute('aria-invalid') === 'true') validateFn();
       });
-    }
-    if (emailInput) {
-      emailInput.addEventListener('blur', validateEmail);
-      emailInput.addEventListener('input', () => {
-        if (emailInput.getAttribute('aria-invalid') === 'true') validateEmail();
-      });
-    }
-    if (scholarInput) {
-      scholarInput.addEventListener('blur', validateScholarUrl);
-      scholarInput.addEventListener('input', () => {
-        if (scholarInput.getAttribute('aria-invalid') === 'true') validateScholarUrl();
-      });
-    }
+    });
 
     if (form) {
-      form.addEventListener('submit', e => {
-        e.preventDefault();
-        if (modalAlert) {
-          modalAlert.className = 'modal-alert';
-          modalAlert.textContent = '';
-        }
-
-        const okName = validateFullName();
-        const okEmail = validateEmail();
-        const okScholar = validateScholarUrl();
-
-        if (!okName || !okEmail || !okScholar) {
-          const firstInvalid = form.querySelector('[aria-invalid="true"]');
-          if (firstInvalid) firstInvalid.focus();
-          return;
-        }
-
-        const fullName = fullNameInput ? fullNameInput.value.trim() : currentUser.fullName;
-        const email = emailInput ? emailInput.value.trim() : currentUser.email;
-        const titleEl = document.getElementById('editTitle');
-        const affiliationEl = document.getElementById('editAffiliation');
-        const fieldsEl = document.getElementById('editFields');
-        const bioEl = document.getElementById('editBio');
-
-        const title = titleEl ? titleEl.value.trim() : '';
-        const affiliation = affiliationEl ? affiliationEl.value.trim() : '';
-        const scholar = scholarInput ? scholarInput.value.trim() : '';
-        const fields = fieldsEl ? fieldsEl.value.trim() : '';
-        const bio = bioEl ? bioEl.value.trim() : '';
-
-        currentUser.fullName = fullName;
-        currentUser.name = fullName;
-        currentUser.email = email;
-        currentUser.academicTitle = title;
-        currentUser.affiliation = affiliation;
-        currentUser.scholarUrl = scholar;
-        currentUser.fieldsOfInterest = fields;
-        currentUser.bio = bio;
-
-        writeStorage('confguide_current_user', currentUser);
-
-        // Đồng bộ lại vào danh sách tài khoản cục bộ nếu tìm thấy người dùng tương ứng
-        const users = readStorage('confguide_users', []);
-        if (Array.isArray(users)) {
-          const updatedUsers = users.map(u => {
-            if ((u.id && u.id === currentUser.id) || (u.username && u.username === currentUser.username)) {
-              return {
-                ...u,
-                fullName,
-                name: fullName,
-                email,
-                academicTitle: title,
-                affiliation,
-                scholarUrl: scholar,
-                fieldsOfInterest: fields,
-                bio
-              };
-            }
-            return u;
-          });
-          writeStorage('confguide_users', updatedUsers);
-        }
-
-        renderUserProfile();
-
-        if (window.ConfGuideLayout && typeof window.ConfGuideLayout.update === 'function') {
-          window.ConfGuideLayout.update();
-        }
-
-        closeModal();
-        showPageAlert('Đã cập nhật thông tin hồ sơ nghiên cứu thành công!', 'success');
-      });
+      form.addEventListener('submit', e => handleEditProfileSubmit(e, {
+        form, fullNameInput, emailInput, scholarInput, modalAlert, validators, closeModal
+      }));
     }
   }
 
@@ -448,8 +465,7 @@
       showPageAlert('Vui lòng chọn một tệp hình ảnh hợp lệ (PNG, JPG, WEBP, GIF).', 'error');
       return;
     }
-
-    if (file.size > 10 * 1024 * 1024) {
+    if (file.size > MAX_AVATAR_BYTES) {
       showPageAlert('Kích thước tệp quá lớn. Vui lòng chọn ảnh dưới 10MB.', 'error');
       return;
     }
@@ -460,8 +476,8 @@
       img.onload = function () {
         try {
           const canvas = document.createElement('canvas');
-          canvas.width = 200;
-          canvas.height = 200;
+          canvas.width = AVATAR_SIZE_PX;
+          canvas.height = AVATAR_SIZE_PX;
           const ctx = canvas.getContext('2d');
           if (!ctx) throw new Error('Canvas 2D không khả dụng.');
 
@@ -469,30 +485,10 @@
           const minDim = Math.min(img.width, img.height);
           const sx = (img.width - minDim) / 2;
           const sy = (img.height - minDim) / 2;
-
-          ctx.drawImage(img, sx, sy, minDim, minDim, 0, 0, 200, 200);
+          ctx.drawImage(img, sx, sy, minDim, minDim, 0, 0, AVATAR_SIZE_PX, AVATAR_SIZE_PX);
 
           const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.85);
-          currentUser.avatarUrl = compressedDataUrl;
-          writeStorage('confguide_current_user', currentUser);
-
-          const users = readStorage('confguide_users', []);
-          if (Array.isArray(users)) {
-            const updated = users.map(u => {
-              if ((u.id && u.id === currentUser.id) || (u.username && u.username === currentUser.username)) {
-                return { ...u, avatarUrl: compressedDataUrl };
-              }
-              return u;
-            });
-            writeStorage('confguide_users', updated);
-          }
-
-          renderUserProfile();
-
-          if (window.ConfGuideLayout && typeof window.ConfGuideLayout.update === 'function') {
-            window.ConfGuideLayout.update();
-          }
-
+          syncCurrentUserRecord(user => ({ ...user, avatarUrl: compressedDataUrl }));
           showPageAlert('Đã tải và cập nhật ảnh đại diện thành công!', 'success');
         } catch {
           showPageAlert('Không thể xử lý ảnh. Vui lòng thử lại với ảnh khác.', 'error');
@@ -528,31 +524,13 @@
         }
       );
     }
-
     if (!confirmed) return;
 
-    delete currentUser.avatarUrl;
-    writeStorage('confguide_current_user', currentUser);
-
-    const users = readStorage('confguide_users', []);
-    if (Array.isArray(users)) {
-      const updated = users.map(u => {
-        if ((u.id && u.id === currentUser.id) || (u.username && u.username === currentUser.username)) {
-          const copy = { ...u };
-          delete copy.avatarUrl;
-          return copy;
-        }
-        return u;
-      });
-      writeStorage('confguide_users', updated);
-    }
-
-    renderUserProfile();
-
-    if (window.ConfGuideLayout && typeof window.ConfGuideLayout.update === 'function') {
-      window.ConfGuideLayout.update();
-    }
-
+    syncCurrentUserRecord(user => {
+      const copy = { ...user };
+      delete copy.avatarUrl;
+      return copy;
+    });
     showPageAlert('Đã xóa ảnh đại diện thành công.', 'success');
   }
 
@@ -691,69 +669,53 @@
   }
 
   /**
-   * Hiển thị danh sách hội nghị đã lưu kèm bộ lọc từ khóa.
-   * @param {string} [filterKeyword=''] - Từ khóa lọc danh sách.
-   * @returns {Promise<void>}
+   * Tạo mã HTML trạng thái rỗng cho danh sách hội nghị đã lưu.
+   * @param {boolean} hasAnySaved - True nếu người dùng đã lưu ít nhất 1 hội nghị (chỉ rỗng do lọc).
+   * @param {string} filterKeyword - Từ khóa lọc hiện tại.
+   * @returns {string} Chuỗi HTML `.empty-state-box`.
    */
-  async function renderSavedConferences(filterKeyword = '') {
-    const container = document.getElementById('savedConferencesList');
-    if (container && cachedConferencesData.length === 0) {
-      container.innerHTML = '<div class="loading-state-box">Đang tải danh sách hội nghị đã lưu...</div>';
-    }
-
-    const allConfs = await fetchConferencesData();
-    const rawList = getSavedList();
-
-    const statSavedNum = document.getElementById('statSavedNum');
-    if (statSavedNum) statSavedNum.textContent = rawList.length;
-
-    if (!container) return;
-
-    let items = rawList.map(item => resolveConferenceDetails(item, allConfs));
-
-    if (filterKeyword.trim()) {
-      const q = filterKeyword.trim().toLowerCase();
-      items = items.filter(c =>
-        c.name.toLowerCase().includes(q) ||
-        c.fullName.toLowerCase().includes(q) ||
-        c.rank.toLowerCase().includes(q)
-      );
-    }
-
-    if (items.length === 0) {
-      if (rawList.length === 0) {
-        container.innerHTML = `
-          <div class="empty-state-box">
-            <svg class="empty-state-icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
-            </svg>
-            <h3 class="empty-state-title">Chưa có hội nghị nào được lưu</h3>
-            <p class="empty-state-desc">
-              Khám phá danh sách hội nghị khoa học công nghệ, bấm biểu tượng lưu để theo dõi thời gian nộp bài tại đây.
-            </p>
-            <a href="search.html" class="btn btn-primary btn--compact-md">
-              <span>Khám phá danh mục hội nghị &rarr;</span>
-            </a>
-          </div>
-        `;
-      } else {
-        container.innerHTML = `
-          <div class="empty-state-box">
-            <p class="empty-state-desc">
-              Không tìm thấy hội nghị phù hợp với từ khóa "<strong>${escapeHtml(filterKeyword)}</strong>".
-            </p>
-          </div>
-        `;
-      }
-      return;
-    }
-
-    container.innerHTML = items.map(c => {
-      const avatarHtml = window.ConfGuideUtils && typeof window.ConfGuideUtils.renderConferenceAvatar === 'function'
-        ? window.ConfGuideUtils.renderConferenceAvatar(c, 'saved-avatar')
-        : `<div class="conf-badge-logo saved-avatar" aria-hidden="true">${escapeHtml((c.acronym || c.name || 'CG').slice(0, 4).toUpperCase())}</div>`;
-
+  function buildSavedEmptyHtml(hasAnySaved, filterKeyword) {
+    if (hasAnySaved) {
       return `
+        <div class="empty-state-box">
+          <p class="empty-state-desc">
+            Không tìm thấy hội nghị phù hợp với từ khóa "<strong>${escapeHtml(filterKeyword)}</strong>".
+          </p>
+        </div>
+      `;
+    }
+    return `
+      <div class="empty-state-box">
+        <svg class="empty-state-icon" width="48" height="48" viewBox="0 0 24 24"
+          fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"
+          stroke-linejoin="round" aria-hidden="true">
+          <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+        </svg>
+        <h3 class="empty-state-title">Chưa có hội nghị nào được lưu</h3>
+        <p class="empty-state-desc">
+          Khám phá danh sách hội nghị khoa học công nghệ, bấm biểu tượng lưu để theo dõi thời gian nộp bài tại đây.
+        </p>
+        <a href="search.html" class="btn btn-primary btn--compact-md">
+          <span>Khám phá danh mục hội nghị &rarr;</span>
+        </a>
+      </div>
+    `;
+  }
+
+  /**
+   * Tạo mã HTML một thẻ hội nghị đã lưu trong tab Hồ sơ.
+   * @param {Object} c - Thông tin hội nghị đã tổng hợp từ resolveConferenceDetails.
+   * @returns {string} Chuỗi HTML `.saved-card`.
+   */
+  function buildSavedCardHtml(c) {
+    const fallbackBadge =
+      `<div class="conf-badge-logo saved-avatar" aria-hidden="true">`
+      + `${escapeHtml((c.acronym || c.name || 'CG').slice(0, 4).toUpperCase())}</div>`;
+    const avatarHtml = window.ConfGuideUtils && typeof window.ConfGuideUtils.renderConferenceAvatar === 'function'
+      ? window.ConfGuideUtils.renderConferenceAvatar(c, 'saved-avatar')
+      : fallbackBadge;
+
+    return `
       <div class="saved-card">
         <div class="saved-card-main">
           ${avatarHtml}
@@ -773,13 +735,50 @@
           <a href="detail.html?id=${encodeURIComponent(c.slug)}" class="btn btn-secondary btn--compact-sm">
             <span>Xem chi tiết &rarr;</span>
           </a>
-          <button type="button" class="btn btn-secondary btn--compact-sm btn--danger-text js-remove-saved-btn" data-id="${escapeHtml(c.id)}" title="Bỏ lưu hội nghị">
+          <button type="button"
+            class="btn btn-secondary btn--compact-sm btn--danger-text js-remove-saved-btn"
+            data-id="${escapeHtml(c.id)}" title="Bỏ lưu hội nghị">
             <span>Bỏ lưu</span>
           </button>
         </div>
       </div>
     `;
-    }).join('');
+  }
+
+  /**
+   * Hiển thị danh sách hội nghị đã lưu kèm bộ lọc từ khóa.
+   * @param {string} [filterKeyword=''] - Từ khóa lọc danh sách.
+   * @returns {Promise<void>}
+   */
+  async function renderSavedConferences(filterKeyword = '') {
+    const container = document.getElementById('savedConferencesList');
+    if (container && cachedConferencesData.length === 0) {
+      container.innerHTML = '<div class="loading-state-box">Đang tải danh sách hội nghị đã lưu...</div>';
+    }
+
+    const allConfs = await fetchConferencesData();
+    const rawList = getSavedList();
+
+    const statSavedNum = document.getElementById('statSavedNum');
+    if (statSavedNum) statSavedNum.textContent = rawList.length;
+    if (!container) return;
+
+    let items = rawList.map(item => resolveConferenceDetails(item, allConfs));
+    const trimmedKeyword = filterKeyword.trim().toLowerCase();
+    if (trimmedKeyword) {
+      items = items.filter(c =>
+        c.name.toLowerCase().includes(trimmedKeyword)
+        || c.fullName.toLowerCase().includes(trimmedKeyword)
+        || c.rank.toLowerCase().includes(trimmedKeyword)
+      );
+    }
+
+    if (items.length === 0) {
+      container.innerHTML = buildSavedEmptyHtml(rawList.length > 0, filterKeyword);
+      return;
+    }
+
+    container.innerHTML = items.map(buildSavedCardHtml).join('');
   }
 
   /**
@@ -852,11 +851,42 @@
   }
 
   /**
+   * Tạo mã HTML cho một thẻ xem trước bài báo Tracker trên trang Hồ sơ.
+   * @param {Object} item - Bản ghi từ danh sách Tracker.
+   * @returns {string} Chuỗi HTML `.tracker-card-item`.
+   */
+  function buildTrackerPreviewCardHtml(item) {
+    const name = item.name || 'Bài báo khoa học';
+    // Mốc propDeadline chỉ có ngày (YYYY-MM-DD), giữ nguyên nhãn AoE để không sai lệch giờ
+    const deadline = item.deadline
+      ? (utils.formatDeadlineVi
+          ? utils.formatDeadlineVi(item.deadline, { hasExplicitTime: false })
+          : `${new Date(`${item.deadline}T00:00:00`).toLocaleDateString('vi-VN')} (AoE)`)
+      : 'Chưa có hạn';
+    const fieldsStr = Array.isArray(item.fields) ? item.fields.join(', ') : 'Công nghệ thông tin';
+
+    return `
+      <div class="tracker-card-item">
+        <div class="tracker-card-top">
+          <div class="tracker-paper-title">${escapeHtml(name)}</div>
+          <span class="tracker-status-tag status-submitted">Đang theo dõi</span>
+        </div>
+        <div class="tracker-preview-hint">
+          Lĩnh vực: <strong>${escapeHtml(fieldsStr)}</strong>
+        </div>
+        <div class="tracker-card-bottom">
+          <span>Mốc nộp bài: <strong>${escapeHtml(deadline)}</strong></span>
+          <a href="tracker.html" class="tracker-preview-link">Xem &rarr;</a>
+        </div>
+      </div>
+    `;
+  }
+
+  /**
    * Render tối đa 4 bài báo xem trước từ Tracker lên trang Hồ sơ.
    */
   function renderTrackerPreview() {
     const trackerList = getTrackerConferences();
-
     const statTrackerNum = document.getElementById('statTrackerNum');
     if (statTrackerNum) statTrackerNum.textContent = trackerList.length;
 
@@ -866,7 +896,9 @@
     if (trackerList.length === 0) {
       container.innerHTML = `
         <div class="empty-state-box empty-state-box--compact">
-          <svg class="empty-state-icon" width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <svg class="empty-state-icon" width="42" height="42" viewBox="0 0 24 24"
+            fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"
+            stroke-linejoin="round" aria-hidden="true">
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
             <polyline points="14 2 14 8 20 8"></polyline>
           </svg>
@@ -882,36 +914,10 @@
       return;
     }
 
-    const previewItems = trackerList.slice(0, 4);
-
+    const previewItems = trackerList.slice(0, TRACKER_PREVIEW_LIMIT);
     container.innerHTML = `
       <div class="tracker-preview-grid">
-        ${previewItems.map(item => {
-          const name = item.name || 'Bài báo khoa học';
-          // Mốc propDeadline từ form đề xuất chỉ có ngày (YYYY-MM-DD), không có giờ cụ thể nên giữ nguyên nhãn AoE
-          const deadline = item.deadline
-            ? (utils.formatDeadlineVi
-                ? utils.formatDeadlineVi(item.deadline, { hasExplicitTime: false })
-                : `${new Date(`${item.deadline}T00:00:00`).toLocaleDateString('vi-VN')} (AoE)`)
-            : 'Chưa có hạn';
-          const fieldsStr = Array.isArray(item.fields) ? item.fields.join(', ') : 'Công nghệ thông tin';
-
-          return `
-            <div class="tracker-card-item">
-              <div class="tracker-card-top">
-                <div class="tracker-paper-title">${escapeHtml(name)}</div>
-                <span class="tracker-status-tag status-submitted">Đang theo dõi</span>
-              </div>
-              <div class="tracker-preview-hint">
-                Lĩnh vực: <strong>${escapeHtml(fieldsStr)}</strong>
-              </div>
-              <div class="tracker-card-bottom">
-                <span>Mốc nộp bài: <strong>${escapeHtml(deadline)}</strong></span>
-                <a href="tracker.html" class="tracker-preview-link">Xem &rarr;</a>
-              </div>
-            </div>
-          `;
-        }).join('')}
+        ${previewItems.map(buildTrackerPreviewCardHtml).join('')}
       </div>
     `;
   }
@@ -1001,6 +1007,9 @@
 
   // Xuất API làm mới hồ sơ khi dữ liệu phiên đăng nhập thay đổi
   window.ConfGuideProfile = {
+    /**
+     * Tải lại thông tin hồ sơ và lịch mốc hội nghị sau khi cập nhật dữ liệu phiên.
+     */
     refresh: function () {
       renderUserProfile();
       if (document.getElementById('profileCalendarRoot')) {

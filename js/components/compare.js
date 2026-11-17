@@ -1,15 +1,21 @@
 /**
  * ConfGuide — Module So sánh Hội nghị Cạnh nhau (js/components/compare.js)
- * Quản lý chọn tối đa 3 hội nghị qua sessionStorage (confguide_compare_ids),
- * hiển thị thanh nổi dưới đáy màn hình (.compare-bar) và hộp thoại bảng đối chiếu
- * 2 chiều (.compare-dialog) theo 3 nhóm / 8 tiêu chí chuẩn múi giờ UTC+7.
+ * Trang sử dụng: index.html, search.html, detail.html, tracker.html, profile.html
+ * Phụ thuộc: js/core/layout.js (window.ConfGuideUtils)
+ * Chức năng: Quản lý chọn tối đa 3 hội nghị qua sessionStorage (`confguide_compare_ids`),
+ * hiển thị thanh nổi dưới đáy màn hình (`.compare-bar`) và hộp thoại bảng đối chiếu
+ * 2 chiều (`.compare-dialog`) theo 3 nhóm / 8 tiêu chí chuẩn múi giờ UTC+7.
  */
 
 (function () {
   'use strict';
 
+  /* ================= 1. HẰNG SỐ & TRẠNG THÁI MODULE ================= */
+
   const STORAGE_KEY = 'confguide_compare_ids';
   const MAX_COMPARE_ITEMS = 3;
+  const CONFERENCES_DATA_URL = 'data/conferences.json';
+  const URGENT_COMPARE_DAYS = 14;
 
   let memoryIdsFallback = [];
   let conferencesCache = null;
@@ -414,17 +420,24 @@
   }
 
   /**
+   * Chuẩn hóa mảng hội nghị thô và loại bỏ các phần tử rỗng.
+   * @param {Array<Object>} list - Mảng dữ liệu hội nghị đầu vào.
+   * @param {Object} utils - Tập tiện ích ConfGuideUtils.
+   * @returns {Array<Object>} Mảng hội nghị đã chuẩn hóa.
+   */
+  function normalizeConferenceList(list, utils) {
+    const fn = typeof utils.normalizeConference === 'function' ? utils.normalizeConference : item => item;
+    return list.map(item => fn(item)).filter(Boolean);
+  }
+
+  /**
    * Tải và chuẩn hóa danh sách hội nghị từ data/conferences.json (kèm dự phòng FALLBACK_CONFERENCES).
    * Tự động loại bỏ các ID trong sessionStorage không còn tồn tại trong dữ liệu.
    * @returns {Promise<Array<Object>>} Danh sách hội nghị đã chuẩn hóa.
    */
   async function ensureConferencesLoaded() {
-    if (Array.isArray(conferencesCache) && conferencesCache.length > 0) {
-      return conferencesCache;
-    }
-    if (conferencesPromise) {
-      return conferencesPromise;
-    }
+    if (Array.isArray(conferencesCache) && conferencesCache.length > 0) return conferencesCache;
+    if (conferencesPromise) return conferencesPromise;
 
     const utils = getCompareUtils();
     const fallbackList = Array.isArray(utils.FALLBACK_CONFERENCES) ? utils.FALLBACK_CONFERENCES : [];
@@ -433,49 +446,41 @@
       let normalizedList = [];
       try {
         const rawData = typeof utils.fetchJsonCached === 'function'
-          ? await utils.fetchJsonCached('data/conferences.json')
-          : await fetch('data/conferences.json').then(r => { if (!r.ok) throw new Error(r.status); return r.json(); });
+          ? await utils.fetchJsonCached(CONFERENCES_DATA_URL)
+          : await fetch(CONFERENCES_DATA_URL).then(r => {
+            if (!r.ok) throw new Error(r.status);
+            return r.json();
+          });
         if (Array.isArray(rawData) && rawData.length > 0) {
-          normalizedList = rawData
-            .map(item => (typeof utils.normalizeConference === 'function' ? utils.normalizeConference(item) : item))
-            .filter(Boolean);
+          normalizedList = normalizeConferenceList(rawData, utils);
         }
       } catch (e) {
-        normalizedList = fallbackList
-          .map(item => (typeof utils.normalizeConference === 'function' ? utils.normalizeConference(item) : item))
-          .filter(Boolean);
+        normalizedList = normalizeConferenceList(fallbackList, utils);
       }
 
       if (!normalizedList.length && fallbackList.length) {
-        normalizedList = fallbackList
-          .map(item => (typeof utils.normalizeConference === 'function' ? utils.normalizeConference(item) : item))
-          .filter(Boolean);
+        normalizedList = normalizeConferenceList(fallbackList, utils);
       }
 
       normalizedList.forEach(conf => {
         const id = normalizeId(utils.getConferenceId ? utils.getConferenceId(conf) : conf.id);
         if (!id) return;
         knownConfsMap.set(id, conf);
-        if (conf.name) {
-          knownNamesMap.set(id, String(conf.name).trim());
-        }
+        if (conf.name) knownNamesMap.set(id, String(conf.name).trim());
       });
-
       conferencesCache = normalizedList;
 
-      // Nếu ID trong sessionStorage không còn tồn tại trong tập dữ liệu đã tải, tự động loại bỏ
       if (normalizedList.length > 0) {
         const currentIds = getSelectedIds();
         const validIds = currentIds.filter(id => knownConfsMap.has(id));
         if (validIds.length !== currentIds.length) {
           saveSelectedIds(validIds);
           syncToggleButtons();
-          renderCompareBar();
-        } else if (currentIds.length > 0) {
+        }
+        if (validIds.length !== currentIds.length || currentIds.length > 0) {
           renderCompareBar();
         }
       }
-
       return normalizedList;
     })();
 
@@ -522,209 +527,200 @@
     return null;
   }
 
+  /** Tạo ô dữ liệu mặc định khi thiếu thông tin tiêu chí */
+  const createMutedCell = label => ({
+    html: `<span class="compare-table__muted">${label}</span>`,
+    normVal: ''
+  });
+
+  /**
+   * Tạo ô dữ liệu Bậc CORE cho một hội nghị.
+   * @param {Object} conf - Đối tượng hội nghị.
+   * @param {Function} esc - Hàm thoát ký tự HTML.
+   * @returns {{ html: string, normVal: string }}
+   */
+  function createRankCell(conf, esc) {
+    const rawRank = String(conf.rank || '').trim();
+    if (!rawRank || /^unranked$/i.test(rawRank)) return createMutedCell('Chưa cập nhật');
+    const displayRank = /^core\b/i.test(rawRank) ? rawRank : `CORE ${rawRank}`;
+    return {
+      html: `<span class="compare-table__rank-badge">${esc(displayRank)}</span>`,
+      normVal: normalizeCompareValue(displayRank)
+    };
+  }
+
+  /**
+   * Tạo ô dữ liệu Lĩnh vực nghiên cứu cho một hội nghị.
+   * @param {Object} conf - Đối tượng hội nghị.
+   * @param {Function} esc - Hàm thoát ký tự HTML.
+   * @returns {{ html: string, normVal: string }}
+   */
+  function createFieldsCell(conf, esc) {
+    const fields = Array.isArray(conf.fields)
+      ? conf.fields.map(f => String(f || '').trim()).filter(Boolean)
+      : [];
+    if (!fields.length) return createMutedCell('Chưa cập nhật');
+    const itemsHtml = fields.map(field => `<li class="compare-table__tag">${esc(field)}</li>`).join('');
+    return {
+      html: `<ul class="compare-table__tags">${itemsHtml}</ul>`,
+      normVal: fields.map(f => normalizeCompareValue(f)).sort().join('|')
+    };
+  }
+
+  /**
+   * Tạo ô dữ liệu Nhà xuất bản cho một hội nghị.
+   * @param {Object} conf - Đối tượng hội nghị.
+   * @param {Function} esc - Hàm thoát ký tự HTML.
+   * @returns {{ html: string, normVal: string }}
+   */
+  function createPublisherCell(conf, esc) {
+    const pub = String(conf.publisher || '').trim();
+    if (!pub) return createMutedCell('Chưa cập nhật');
+    return { html: `<span>${esc(pub)}</span>`, normVal: normalizeCompareValue(pub) };
+  }
+
+  /**
+   * Tạo ô dữ liệu Hạn nộp toàn văn theo múi giờ UTC+7.
+   * @param {Object|null} fp - Mốc Full Paper đã trích xuất.
+   * @param {Object} utils - Tập tiện ích ConfGuideUtils.
+   * @returns {{ html: string, normVal: string }}
+   */
+  function createFullPaperCell(fp, utils) {
+    if (!fp || !fp.date) return createMutedCell('Chưa công bố');
+    const esc = utils.escapeHtml;
+    const converted = typeof utils.convertDeadlineToVn === 'function'
+      ? utils.convertDeadlineToVn(fp.date, { isDeadline: true })
+      : null;
+    const formattedText = typeof utils.formatDeadlineVi === 'function'
+      ? utils.formatDeadlineVi(fp.date)
+      : (converted ? converted.displayText : fp.date);
+    const datetimeAttr = converted && converted.vnIsoDate ? converted.vnIsoDate : fp.date;
+    return {
+      html: `<time datetime="${esc(datetimeAttr)}">${esc(formattedText)}</time>`,
+      normVal: normalizeCompareValue(formattedText)
+    };
+  }
+
+  /**
+   * Tạo ô dữ liệu Số ngày còn lại kèm nhãn "Gần nhất" nếu ngắn nhất.
+   * @param {number|null} days - Số ngày còn lại.
+   * @param {boolean} shouldHighlightNearest - Có cần đánh dấu mốc gần nhất không.
+   * @param {number|null} minActiveDays - Số ngày nhỏ nhất còn hạn trong các cột.
+   * @param {Function} esc - Hàm thoát ký tự HTML.
+   * @returns {{ html: string, normVal: string }}
+   */
+  function createDaysLeftCell(days, shouldHighlightNearest, minActiveDays, esc) {
+    if (days === null || days === undefined) return createMutedCell('Chưa công bố');
+    if (days < 0) {
+      return {
+        html: '<span class="compare-table__days compare-table__days--passed">Đã qua hạn</span>',
+        normVal: 'đã qua hạn'
+      };
+    }
+    const nearestBadge = shouldHighlightNearest && days === minActiveDays
+      ? '<span class="compare-table__nearest-badge">Gần nhất</span>'
+      : '';
+    const textVal = `Còn ${days} ngày`;
+    const statusMod = days <= URGENT_COMPARE_DAYS ? 'urgent' : 'open';
+    const cls = `compare-table__days compare-table__days--${statusMod}`;
+    return {
+      html: `<div class="compare-table__days-wrap"><span class="${cls}">${esc(textVal)}</span>${nearestBadge}</div>`,
+      normVal: normalizeCompareValue(textVal)
+    };
+  }
+
+  /**
+   * Tạo ô dữ liệu Ngày tổ chức hội nghị.
+   * @param {Object} conf - Đối tượng hội nghị.
+   * @param {Object} utils - Tập tiện ích ConfGuideUtils.
+   * @returns {{ html: string, normVal: string }}
+   */
+  function createEventDateCell(conf, utils) {
+    const dateText = typeof utils.formatConferenceEventDate === 'function'
+      ? utils.formatConferenceEventDate(conf)
+      : 'Chưa cập nhật';
+    if (!dateText || dateText === 'Chưa cập nhật') return createMutedCell('Chưa cập nhật');
+    return { html: `<span>${utils.escapeHtml(dateText)}</span>`, normVal: normalizeCompareValue(dateText) };
+  }
+
+  /**
+   * Tạo ô dữ liệu Hình thức / Địa điểm tổ chức.
+   * @param {Object} conf - Đối tượng hội nghị.
+   * @param {Object} utils - Tập tiện ích ConfGuideUtils.
+   * @returns {{ html: string, normVal: string }}
+   */
+  function createModeLocationCell(conf, utils) {
+    const esc = utils.escapeHtml;
+    const modeText = typeof utils.formatConferenceMode === 'function'
+      ? utils.formatConferenceMode(conf)
+      : 'Chưa cập nhật';
+    const locParts = [conf.location, conf.country].map(v => String(v || '').trim()).filter(Boolean);
+    const uniqueLoc = [...new Set(locParts)].join(', ') || 'Chưa cập nhật';
+    if (modeText === 'Chưa cập nhật' && uniqueLoc === 'Chưa cập nhật') return createMutedCell('Chưa cập nhật');
+    return {
+      html: `
+        <span class="compare-table__mode">${esc(modeText)}</span>
+        <span class="compare-table__loc">${esc(uniqueLoc)}</span>
+      `,
+      normVal: normalizeCompareValue(`${modeText} | ${uniqueLoc}`)
+    };
+  }
+
+  /**
+   * Tạo ô dữ liệu Lệ phí ước tính của hội nghị.
+   * @param {Object} conf - Đối tượng hội nghị.
+   * @param {Function} esc - Hàm thoát ký tự HTML.
+   * @returns {{ html: string, normVal: string }}
+   */
+  function createFeeCell(conf, esc) {
+    const rawFee = String(conf.fee || '').trim();
+    if (!rawFee) return createMutedCell('Chưa cập nhật');
+    return { html: `<span>${esc(rawFee)}</span>`, normVal: normalizeCompareValue(rawFee) };
+  }
+
   /**
    * Tạo cấu trúc dữ liệu 3 nhóm và 8 tiêu chí cố định theo đúng thứ tự yêu cầu cho các hội nghị được chọn.
-   * @param {Array<Object>} confs Danh sách 2–3 đối tượng hội nghị.
+   * @param {Array<Object>} confs - Danh sách 2–3 đối tượng hội nghị.
    * @returns {Array<Object>} Danh sách nhóm tiêu chí và các dòng dữ liệu đã tính toán.
    */
   function buildComparisonGroups(confs) {
     const utils = getCompareUtils();
     const esc = utils.escapeHtml;
 
-    // Tiền xử lý mốc nộp toàn văn và số ngày còn lại cho từng hội nghị
     const fullPaperList = confs.map(conf => getFullPaperMilestone(conf));
-    const daysLeftList = fullPaperList.map(fp => {
-      if (!fp || !fp.date || typeof utils.daysLeft !== 'function') return null;
-      return utils.daysLeft(fp.date);
-    });
+    const daysLeftList = fullPaperList.map(fp => (
+      fp && fp.date && typeof utils.daysLeft === 'function' ? utils.daysLeft(fp.date) : null
+    ));
 
-    // Xác định cột có hạn nộp toàn văn gần nhất (khi có >= 2 cột còn hạn và số ngày khác nhau)
     const activeDays = daysLeftList.filter(d => d !== null && d >= 0);
-    const uniqueActiveDays = new Set(activeDays);
-    const shouldHighlightNearest = activeDays.length >= 2 && uniqueActiveDays.size > 1;
+    const shouldHighlightNearest = activeDays.length >= 2 && new Set(activeDays).size > 1;
     const minActiveDays = shouldHighlightNearest ? Math.min(...activeDays) : null;
 
     return [
       {
         groupTitle: 'Học thuật',
         rows: [
-          {
-            label: 'Bậc CORE',
-            cells: confs.map(conf => {
-              const rawRank = String(conf.rank || '').trim();
-              if (!rawRank || /^unranked$/i.test(rawRank)) {
-                return {
-                  html: '<span class="compare-table__muted">Chưa cập nhật</span>',
-                  normVal: ''
-                };
-              }
-              const displayRank = /^core\b/i.test(rawRank) ? rawRank : `CORE ${rawRank}`;
-              return {
-                html: `<span class="compare-table__rank-badge">${esc(displayRank)}</span>`,
-                normVal: normalizeCompareValue(displayRank)
-              };
-            })
-          },
-          {
-            label: 'Lĩnh vực nghiên cứu',
-            cells: confs.map(conf => {
-              const fields = Array.isArray(conf.fields)
-                ? conf.fields.map(f => String(f || '').trim()).filter(Boolean)
-                : [];
-              if (!fields.length) {
-                return {
-                  html: '<span class="compare-table__muted">Chưa cập nhật</span>',
-                  normVal: ''
-                };
-              }
-              const itemsHtml = fields
-                .map(field => `<li class="compare-table__tag">${esc(field)}</li>`)
-                .join('');
-              const comparable = fields.map(f => normalizeCompareValue(f)).sort().join('|');
-              return {
-                html: `<ul class="compare-table__tags">${itemsHtml}</ul>`,
-                normVal: comparable
-              };
-            })
-          },
-          {
-            label: 'Nhà xuất bản',
-            cells: confs.map(conf => {
-              const pub = String(conf.publisher || '').trim();
-              if (!pub) {
-                return {
-                  html: '<span class="compare-table__muted">Chưa cập nhật</span>',
-                  normVal: ''
-                };
-              }
-              return {
-                html: `<span>${esc(pub)}</span>`,
-                normVal: normalizeCompareValue(pub)
-              };
-            })
-          }
+          { label: 'Bậc CORE', cells: confs.map(conf => createRankCell(conf, esc)) },
+          { label: 'Lĩnh vực nghiên cứu', cells: confs.map(conf => createFieldsCell(conf, esc)) },
+          { label: 'Nhà xuất bản', cells: confs.map(conf => createPublisherCell(conf, esc)) }
         ]
       },
       {
         groupTitle: 'Thời hạn (UTC+7)',
         rows: [
-          {
-            label: 'Hạn nộp toàn văn',
-            cells: confs.map((conf, idx) => {
-              const fp = fullPaperList[idx];
-              if (!fp || !fp.date) {
-                return {
-                  html: '<span class="compare-table__muted">Chưa công bố</span>',
-                  normVal: ''
-                };
-              }
-              const converted = typeof utils.convertDeadlineToVn === 'function'
-                ? utils.convertDeadlineToVn(fp.date, { isDeadline: true })
-                : null;
-              const formattedText = typeof utils.formatDeadlineVi === 'function'
-                ? utils.formatDeadlineVi(fp.date)
-                : (converted ? converted.displayText : fp.date);
-              const datetimeAttr = converted && converted.vnIsoDate ? converted.vnIsoDate : fp.date;
-              return {
-                html: `<time datetime="${esc(datetimeAttr)}">${esc(formattedText)}</time>`,
-                normVal: normalizeCompareValue(formattedText)
-              };
-            })
-          },
+          { label: 'Hạn nộp toàn văn', cells: confs.map((_, idx) => createFullPaperCell(fullPaperList[idx], utils)) },
           {
             label: 'Số ngày còn lại',
-            cells: confs.map((conf, idx) => {
-              const d = daysLeftList[idx];
-              if (d === null || d === undefined) {
-                return {
-                  html: '<span class="compare-table__muted">Chưa công bố</span>',
-                  normVal: ''
-                };
-              }
-              if (d < 0) {
-                return {
-                  html: '<span class="compare-table__days compare-table__days--passed">Đã qua hạn</span>',
-                  normVal: 'đã qua hạn'
-                };
-              }
-              const isNearest = shouldHighlightNearest && d === minActiveDays;
-              const nearestBadge = isNearest
-                ? '<span class="compare-table__nearest-badge">Gần nhất</span>'
-                : '';
-              const textVal = `Còn ${d} ngày`;
-              const statusMod = d <= 14 ? 'urgent' : 'open';
-              return {
-                html: `<div class="compare-table__days-wrap"><span class="compare-table__days compare-table__days--${statusMod}">${esc(textVal)}</span>${nearestBadge}</div>`,
-                normVal: normalizeCompareValue(textVal)
-              };
-            })
+            cells: daysLeftList.map(days => createDaysLeftCell(days, shouldHighlightNearest, minActiveDays, esc))
           }
         ]
       },
       {
         groupTitle: 'Tổ chức',
         rows: [
-          {
-            label: 'Ngày tổ chức',
-            cells: confs.map(conf => {
-              const dateText = typeof utils.formatConferenceEventDate === 'function'
-                ? utils.formatConferenceEventDate(conf)
-                : 'Chưa cập nhật';
-              if (!dateText || dateText === 'Chưa cập nhật') {
-                return {
-                  html: '<span class="compare-table__muted">Chưa cập nhật</span>',
-                  normVal: ''
-                };
-              }
-              return {
-                html: `<span>${esc(dateText)}</span>`,
-                normVal: normalizeCompareValue(dateText)
-              };
-            })
-          },
-          {
-            label: 'Hình thức / địa điểm',
-            cells: confs.map(conf => {
-              const modeText = typeof utils.formatConferenceMode === 'function'
-                ? utils.formatConferenceMode(conf)
-                : 'Chưa cập nhật';
-              const locParts = [conf.location, conf.country]
-                .map(v => String(v || '').trim())
-                .filter(Boolean);
-              const uniqueLoc = [...new Set(locParts)].join(', ') || 'Chưa cập nhật';
-
-              if (modeText === 'Chưa cập nhật' && uniqueLoc === 'Chưa cập nhật') {
-                return {
-                  html: '<span class="compare-table__muted">Chưa cập nhật</span>',
-                  normVal: ''
-                };
-              }
-
-              return {
-                html: `
-                  <span class="compare-table__mode">${esc(modeText)}</span>
-                  <span class="compare-table__loc">${esc(uniqueLoc)}</span>
-                `,
-                normVal: normalizeCompareValue(`${modeText} | ${uniqueLoc}`)
-              };
-            })
-          },
-          {
-            label: 'Lệ phí ước tính',
-            cells: confs.map(conf => {
-              const rawFee = String(conf.fee || '').trim();
-              if (!rawFee) {
-                return {
-                  html: '<span class="compare-table__muted">Chưa cập nhật</span>',
-                  normVal: ''
-                };
-              }
-              return {
-                html: `<span>${esc(rawFee)}</span>`,
-                normVal: normalizeCompareValue(rawFee)
-              };
-            })
-          }
+          { label: 'Ngày tổ chức', cells: confs.map(conf => createEventDateCell(conf, utils)) },
+          { label: 'Hình thức / địa điểm', cells: confs.map(conf => createModeLocationCell(conf, utils)) },
+          { label: 'Lệ phí ước tính', cells: confs.map(conf => createFeeCell(conf, esc)) }
         ]
       }
     ];
@@ -759,7 +755,68 @@
   }
 
   /**
-   * Dựng bảng đối chiếu 2 chiều bên trong <dialog> theo danh sách hội nghị đang chọn.
+   * Tạo mã HTML cột tiêu đề hội nghị bên trong thead bảng đối chiếu.
+   * @param {Object} conf - Đối tượng hội nghị.
+   * @param {Object} utils - Tập tiện ích ConfGuideUtils.
+   * @returns {string} Chuỗi HTML thẻ `<th>`.
+   */
+  function buildDialogHeadColHtml(conf, utils) {
+    const esc = utils.escapeHtml;
+    const confId = normalizeId(utils.getConferenceId ? utils.getConferenceId(conf) : conf.id);
+    const shortName = String(conf.name || confId).trim();
+    const fullName = String(conf.fullName || conf.full_name || '').trim();
+    return `
+      <th scope="col" class="compare-table__conf-head">
+        <div class="compare-table__conf-top">
+          <a class="compare-table__conf-link" href="detail.html?id=${encodeURIComponent(confId)}">
+            ${esc(shortName)}
+          </a>
+          <button
+            type="button"
+            class="compare-table__remove-btn js-compare-remove"
+            data-conf-id="${esc(confId)}"
+            aria-label="Bỏ hội nghị ${esc(shortName)} khỏi bảng so sánh"
+          >
+            Bỏ khỏi so sánh
+          </button>
+        </div>
+        ${fullName && fullName !== shortName
+          ? `<p class="compare-table__conf-fullname" title="${esc(fullName)}">${esc(fullName)}</p>`
+          : ''}
+      </th>
+    `;
+  }
+
+  /**
+   * Tạo mã HTML một dòng tiêu chí trong bảng đối chiếu kèm đánh dấu khác biệt.
+   * @param {Object} row - Dữ liệu tiêu chí gồm label và cells.
+   * @param {Function} esc - Hàm thoát ký tự HTML.
+   * @returns {string} Chuỗi HTML thẻ `<tr>`.
+   */
+  function buildDialogRowHtml(row, esc) {
+    const allEmpty = row.cells.every(c => !c.normVal);
+    const uniqueVals = new Set(row.cells.map(c => c.normVal || '__missing__'));
+    const isDiff = !allEmpty && uniqueVals.size > 1;
+    const rowClass = isDiff ? 'compare-table__row compare-table__row--diff' : 'compare-table__row';
+    const diffBadgeHtml = isDiff ? '<span class="compare-table__diff-badge">Khác nhau</span>' : '';
+    const cellsHtml = row.cells.map(cell => `<td class="compare-table__cell">${cell.html}</td>`).join('');
+
+    return `
+      <tr class="${rowClass}">
+        <th scope="row" class="compare-table__criterion">
+          <div class="compare-table__criterion-wrap">
+            <span>${esc(row.label)}</span>
+            ${diffBadgeHtml}
+          </div>
+        </th>
+        ${cellsHtml}
+      </tr>
+    `;
+  }
+
+  /**
+   * Dựng bảng đối chiếu 2 chiều bên trong `<dialog>` theo danh sách hội nghị đang chọn.
+   * @returns {Promise<void>}
    */
   async function renderDialogTable() {
     ensureCompareDialogDom();
@@ -774,13 +831,9 @@
     if (!conferencesCache) {
       setDialogViewState('loading', 'Đang tải dữ liệu so sánh...');
     }
-
     await ensureConferencesLoaded();
 
-    const validConfs = getSelectedIds()
-      .map(id => knownConfsMap.get(id))
-      .filter(Boolean);
-
+    const validConfs = getSelectedIds().map(id => knownConfsMap.get(id)).filter(Boolean);
     if (validConfs.length < 2) {
       setDialogViewState(
         'error',
@@ -793,75 +846,22 @@
     const esc = utils.escapeHtml;
     const totalCols = validConfs.length + 1;
     const groups = buildComparisonGroups(validConfs);
-
-    const headColsHtml = validConfs.map(conf => {
-      const confId = normalizeId(utils.getConferenceId ? utils.getConferenceId(conf) : conf.id);
-      const shortName = String(conf.name || confId).trim();
-      const fullName = String(conf.fullName || conf.full_name || '').trim();
-      return `
-        <th scope="col" class="compare-table__conf-head">
-          <div class="compare-table__conf-top">
-            <a class="compare-table__conf-link" href="detail.html?id=${encodeURIComponent(confId)}">
-              ${esc(shortName)}
-            </a>
-            <button
-              type="button"
-              class="compare-table__remove-btn js-compare-remove"
-              data-conf-id="${esc(confId)}"
-              aria-label="Bỏ hội nghị ${esc(shortName)} khỏi bảng so sánh"
-            >
-              Bỏ khỏi so sánh
-            </button>
-          </div>
-          ${fullName && fullName !== shortName
-            ? `<p class="compare-table__conf-fullname" title="${esc(fullName)}">${esc(fullName)}</p>`
-            : ''}
-        </th>
-      `;
-    }).join('');
-
-    const tbodiesHtml = groups.map(group => {
-      const rowsHtml = group.rows.map(row => {
-        const allEmpty = row.cells.every(c => !c.normVal);
-        const uniqueVals = new Set(row.cells.map(c => c.normVal || '__missing__'));
-        const isDiff = !allEmpty && uniqueVals.size > 1;
-        const rowClass = isDiff ? 'compare-table__row compare-table__row--diff' : 'compare-table__row';
-        const diffBadgeHtml = isDiff
-          ? '<span class="compare-table__diff-badge">Khác nhau</span>'
-          : '';
-
-        const cellsHtml = row.cells
-          .map(cell => `<td class="compare-table__cell">${cell.html}</td>`)
-          .join('');
-
-        return `
-          <tr class="${rowClass}">
-            <th scope="row" class="compare-table__criterion">
-              <div class="compare-table__criterion-wrap">
-                <span>${esc(row.label)}</span>
-                ${diffBadgeHtml}
-              </div>
-            </th>
-            ${cellsHtml}
-          </tr>
-        `;
-      }).join('');
-
-      return `
-        <tbody class="compare-table__group">
-          <tr class="compare-table__group-row">
-            <th colspan="${totalCols}">${esc(group.groupTitle)}</th>
-          </tr>
-          ${rowsHtml}
-        </tbody>
-      `;
-    }).join('');
+    const headColsHtml = validConfs.map(conf => buildDialogHeadColHtml(conf, utils)).join('');
+    const tbodiesHtml = groups.map(group => `
+      <tbody class="compare-table__group">
+        <tr class="compare-table__group-row">
+          <th colspan="${totalCols}">${esc(group.groupTitle)}</th>
+        </tr>
+        ${group.rows.map(row => buildDialogRowHtml(row, esc)).join('')}
+      </tbody>
+    `).join('');
 
     const tableEl = dialogEl.querySelector('.js-compare-table');
     if (tableEl) {
       tableEl.innerHTML = `
         <caption class="sr-only">
-          Bảng đối chiếu chi tiết ${validConfs.length} hội nghị khoa học theo các tiêu chí học thuật, thời hạn nộp bài (UTC+7) và tổ chức
+          Bảng đối chiếu chi tiết ${validConfs.length} hội nghị khoa học theo các tiêu chí
+          học thuật, thời hạn nộp bài (UTC+7) và tổ chức
         </caption>
         <thead>
           <tr>
@@ -1039,65 +1039,62 @@
   }
 
   /**
+   * Xử lý các tương tác click trên thanh nổi, nút chọn và hộp thoại so sánh (Event Delegation).
+   * @param {MouseEvent} event - Sự kiện click toàn tài liệu.
+   */
+  function handleCompareDocumentClick(event) {
+    const target = event.target;
+    if (!(target instanceof Element)) return;
+
+    const toggleBtn = target.closest('.js-compare-toggle');
+    if (toggleBtn) {
+      event.preventDefault();
+      event.stopPropagation();
+      toggleConference(
+        toggleBtn.getAttribute('data-conf-id') || '',
+        toggleBtn.getAttribute('data-conf-name') || ''
+      );
+      return;
+    }
+
+    const chipRemoveBtn = target.closest('.js-compare-chip-remove');
+    if (chipRemoveBtn) {
+      event.preventDefault();
+      removeConference(chipRemoveBtn.getAttribute('data-conf-id') || '', false);
+      return;
+    }
+
+    if (target.closest('.js-compare-clear')) {
+      event.preventDefault();
+      clearAll();
+      return;
+    }
+
+    const openBtn = target.closest('.js-compare-open');
+    if (openBtn) {
+      event.preventDefault();
+      if (openBtn instanceof HTMLElement && !openBtn.disabled) openDialog(openBtn);
+      return;
+    }
+
+    if (target.closest('.js-compare-close')) {
+      event.preventDefault();
+      closeDialog();
+      return;
+    }
+
+    const colRemoveBtn = target.closest('.js-compare-remove');
+    if (colRemoveBtn) {
+      event.preventDefault();
+      removeConference(colRemoveBtn.getAttribute('data-conf-id') || '', true);
+    }
+  }
+
+  /**
    * Thiết lập lắng nghe sự kiện ủy quyền (Event Delegation) trên toàn tài liệu.
    */
   function setupCompareEvents() {
-    document.addEventListener('click', event => {
-      const target = event.target;
-      if (!(target instanceof Element)) return;
-
-      // 1. Bấm nút "So sánh" / "Đã chọn" trên thẻ hoặc hàng hội nghị
-      const toggleBtn = target.closest('.js-compare-toggle');
-      if (toggleBtn) {
-        event.preventDefault();
-        event.stopPropagation();
-        const confId = toggleBtn.getAttribute('data-conf-id') || '';
-        const confName = toggleBtn.getAttribute('data-conf-name') || '';
-        toggleConference(confId, confName);
-        return;
-      }
-
-      // 2. Bấm nút "×" trên chip của thanh nổi
-      const chipRemoveBtn = target.closest('.js-compare-chip-remove');
-      if (chipRemoveBtn) {
-        event.preventDefault();
-        const confId = chipRemoveBtn.getAttribute('data-conf-id') || '';
-        removeConference(confId, false);
-        return;
-      }
-
-      // 3. Bấm nút "Xóa tất cả" trên thanh nổi
-      if (target.closest('.js-compare-clear')) {
-        event.preventDefault();
-        clearAll();
-        return;
-      }
-
-      // 4. Bấm nút "So sánh ngay" trên thanh nổi
-      const openBtn = target.closest('.js-compare-open');
-      if (openBtn) {
-        event.preventDefault();
-        if (openBtn instanceof HTMLElement && !openBtn.disabled) {
-          openDialog(openBtn);
-        }
-        return;
-      }
-
-      // 5. Bấm nút đóng hộp thoại bảng so sánh
-      if (target.closest('.js-compare-close')) {
-        event.preventDefault();
-        closeDialog();
-        return;
-      }
-
-      // 6. Bấm nút "Bỏ khỏi so sánh" ở đầu cột bên trong bảng <dialog>
-      const colRemoveBtn = target.closest('.js-compare-remove');
-      if (colRemoveBtn) {
-        event.preventDefault();
-        const confId = colRemoveBtn.getAttribute('data-conf-id') || '';
-        removeConference(confId, true);
-      }
-    });
+    document.addEventListener('click', handleCompareDocumentClick);
 
     // Đồng bộ lại trạng thái khi quay lại trang từ lịch sử duyệt web (bfcache)
     window.addEventListener('pageshow', () => {

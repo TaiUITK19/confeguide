@@ -1,16 +1,22 @@
 /**
  * ConfGuide — Module Lịch Các Mốc Hội nghị Cá nhân (js/components/calendar.js)
- * Chuẩn hóa 3 nguồn sự kiện (hạn nộp bài quy đổi UTC+7 từ AoE, ngày diễn ra hội nghị,
- * mốc Tracker từ localStorage 'confguides'), hiển thị lưới tháng 7 cột (T2..CN),
- * panel chi tiết theo ngày, danh sách 5 sự kiện sắp tới và hỗ trợ đầy đủ A11y / bàn phím.
+ * Trang sử dụng: profile.html
+ * Phụ thuộc: js/core/layout.js (window.ConfGuideUtils)
+ * Chức năng: Chuẩn hóa 3 nguồn sự kiện (hạn nộp quy đổi UTC+7 từ AoE, ngày diễn ra
+ * hội nghị, mốc Tracker từ localStorage `confguides`), hiển thị lưới tháng 7 cột (T2..CN),
+ * panel chi tiết theo ngày, danh sách 5 sự kiện sắp tới và điều hướng bàn phím A11y.
  */
 
 (function () {
   'use strict';
 
+  /* ================= 1. HẰNG SỐ & TRẠNG THÁI MODULE ================= */
+
   const MAX_VISIBLE_DAY_EVENTS = 3;
   const MAX_EVENT_SPAN_DAYS = 60;
   const UPCOMING_LIMIT = 5;
+  const AOE_OFFSET_MS = 12 * 3600000;
+  const VN_OFFSET_MS = 7 * 3600000;
   const WEEKDAY_LABELS = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
 
   const EVENT_META = {
@@ -169,6 +175,56 @@
    * @param {Object} [options={}] Tùy chọn ({ isDeadline, hasExplicitTime }).
    * @returns {Object|null} Thông tin đã quy đổi gồm vnIsoDate, displayText, targetMs hoặc null.
    */
+  /**
+   * Tính giờ và ngày Việt Nam (UTC+7) từ chuỗi mốc AoE đã phân tích.
+   * @param {{ year: number, month: number, day: number }} parts - Thành phần ngày gốc.
+   * @param {string} trimmed - Chuỗi ngày giờ gốc đã trim.
+   * @param {string} aoeDateVi - Ngày AoE định dạng tiếng Việt.
+   * @returns {Object} Đối tượng thời gian đã quy đổi sang UTC+7.
+   */
+  function computeVnDeadlinePayload(parts, trimmed, aoeDateVi) {
+    let hourAoE = 23;
+    let minuteAoE = 59;
+    let secondAoE = 59;
+    const timeMatch = trimmed.match(/[T\s](\d{1,2}):(\d{2})(?::(\d{2}))?/);
+    if (timeMatch) {
+      hourAoE = Number(timeMatch[1]);
+      minuteAoE = Number(timeMatch[2]);
+      secondAoE = timeMatch[3] ? Number(timeMatch[3]) : 0;
+    }
+
+    const targetMs = Date.UTC(parts.year, parts.month - 1, parts.day, hourAoE, minuteAoE, secondAoE) + AOE_OFFSET_MS;
+    const vnDateObj = new Date(targetMs + VN_OFFSET_MS);
+    const vnIsoDate = formatIsoDate(
+      vnDateObj.getUTCFullYear(),
+      vnDateObj.getUTCMonth() + 1,
+      vnDateObj.getUTCDate()
+    );
+    const vnDateVi = formatDateVi(vnIsoDate);
+    const hh = String(vnDateObj.getUTCHours()).padStart(2, '0');
+    const mm = String(vnDateObj.getUTCMinutes()).padStart(2, '0');
+    const vnTimeVi = `${hh}:${mm}`;
+    const timezoneLabel = 'UTC+7 (giờ Việt Nam)';
+
+    return {
+      rawDate: formatIsoDate(parts.year, parts.month, parts.day),
+      aoeDateVi,
+      vnIsoDate,
+      vnDateVi,
+      vnTimeVi,
+      timezoneLabel,
+      converted: true,
+      targetMs,
+      displayText: `${vnTimeVi} ${vnDateVi} — ${timezoneLabel}`
+    };
+  }
+
+  /**
+   * Quy đổi ngày deadline AoE sang ngày giờ Việt Nam (UTC+7) với dự phòng khi thiếu ConfGuideUtils.
+   * @param {string} dateStr - Chuỗi ngày gốc (YYYY-MM-DD...).
+   * @param {Object} [options={}] - Tùy chọn quy đổi (`isDeadline`, `hasExplicitTime`).
+   * @returns {Object|null} Thông tin đã quy đổi gồm vnIsoDate, displayText, targetMs hoặc null.
+   */
   function convertDeadlineToVnHelper(dateStr, options = {}) {
     const utils = getCalendarUtils();
     if (typeof utils.convertDeadlineToVn === 'function') {
@@ -182,10 +238,7 @@
 
     const iso = formatIsoDate(parts.year, parts.month, parts.day);
     const aoeDateVi = formatDateVi(iso);
-    const isDeadline = options.isDeadline !== false;
-    const hasExplicitTime = options.hasExplicitTime !== false;
-
-    if (!isDeadline || !hasExplicitTime) {
+    if (options.isDeadline === false || options.hasExplicitTime === false) {
       return {
         rawDate: iso,
         aoeDateVi,
@@ -194,43 +247,59 @@
         vnTimeVi: '',
         timezoneLabel: 'AoE',
         converted: false,
-        targetMs: Date.UTC(parts.year, parts.month - 1, parts.day, 23, 59, 59) + 12 * 3600000,
+        targetMs: Date.UTC(parts.year, parts.month - 1, parts.day, 23, 59, 59) + AOE_OFFSET_MS,
         displayText: `${aoeDateVi} (AoE)`
       };
     }
 
-    let hourAoE = 23;
-    let minuteAoE = 59;
-    let secondAoE = 59;
-    const timeMatch = trimmed.match(/[T\s](\d{1,2}):(\d{2})(?::(\d{2}))?/);
-    if (timeMatch) {
-      hourAoE = Number(timeMatch[1]);
-      minuteAoE = Number(timeMatch[2]);
-      secondAoE = timeMatch[3] ? Number(timeMatch[3]) : 0;
+    return computeVnDeadlinePayload(parts, trimmed, aoeDateVi);
+  }
+
+  /**
+   * Trích xuất dự phòng các mốc deadline khi ConfGuideUtils.parseDeadlinesList chưa khả dụng.
+   * @param {Array|Object} deadlines - Cấu trúc deadlines thô của hội nghị.
+   * @param {string} confTitle - Tên hội nghị hiển thị.
+   * @param {string|null} confSlug - Mã hội nghị.
+   * @param {number} nowMs - Mốc thời gian hiện tại (epoch ms).
+   * @param {Object} utils - Đối tượng tiện ích dùng chung.
+   * @returns {Array<Object>} Danh sách sự kiện type='deadline'.
+   */
+  function extractFallbackDeadlines(deadlines, confTitle, confSlug, nowMs, utils) {
+    const events = [];
+    const appendEvent = (rawDate, label) => {
+      const converted = convertDeadlineToVnHelper(rawDate, { isDeadline: true });
+      if (!converted || !converted.vnIsoDate) return;
+      events.push({
+        date: converted.vnIsoDate,
+        type: 'deadline',
+        title: confTitle,
+        subtitle: `${label} · ${converted.displayText}`,
+        slug: confSlug,
+        isPast: converted.targetMs <= nowMs
+      });
+    };
+
+    if (Array.isArray(deadlines)) {
+      deadlines.forEach(entry => {
+        if (entry && typeof entry === 'object') {
+          appendEvent(entry.date, String(entry.name || 'Deadline').trim());
+        }
+      });
+      return events;
     }
 
-    const targetMs = Date.UTC(parts.year, parts.month - 1, parts.day, hourAoE, minuteAoE, secondAoE) + 12 * 3600000;
-    const vnDateObj = new Date(targetMs + 7 * 3600000);
-    const vnIsoDate = formatIsoDate(
-      vnDateObj.getUTCFullYear(),
-      vnDateObj.getUTCMonth() + 1,
-      vnDateObj.getUTCDate()
-    );
-    const vnDateVi = formatDateVi(vnIsoDate);
-    const vnTimeVi = `${String(vnDateObj.getUTCHours()).padStart(2, '0')}:${String(vnDateObj.getUTCMinutes()).padStart(2, '0')}`;
-    const timezoneLabel = 'UTC+7 (giờ Việt Nam)';
-
-    return {
-      rawDate: iso,
-      aoeDateVi,
-      vnIsoDate,
-      vnDateVi,
-      vnTimeVi,
-      timezoneLabel,
-      converted: true,
-      targetMs,
-      displayText: `${vnTimeVi} ${vnDateVi} — ${timezoneLabel}`
-    };
+    if (typeof deadlines === 'object') {
+      const defs = Array.isArray(utils.MILESTONE_DEFINITIONS)
+        ? utils.MILESTONE_DEFINITIONS
+        : [
+            { key: 'abstract', name: 'Abstract' },
+            { key: 'fullPaper', name: 'Full Paper' },
+            { key: 'notification', name: 'Notification' },
+            { key: 'cameraReady', name: 'Camera-Ready' }
+          ];
+      defs.forEach(def => appendEvent(deadlines[def.key], def.name));
+    }
+    return events;
   }
 
   /**
@@ -244,68 +313,23 @@
   function extractDeadlineEvents(conf, details, nowMs) {
     if (!conf || !conf.deadlines) return [];
     const utils = getCalendarUtils();
-    const events = [];
     const confTitle = (details && details.name) || conf.name || 'Hội nghị';
-    const confSlug = (details && details.slug) ? String(details.slug) : null;
+    const confSlug = details && details.slug ? String(details.slug) : null;
 
-    if (typeof utils.parseDeadlinesList === 'function') {
-      const parsed = utils.parseDeadlinesList(conf.deadlines);
-      parsed.forEach(item => {
-        if (!item || !item.vnDate) return;
-        const isPast = Number.isFinite(item.targetMs) ? item.targetMs <= nowMs : Boolean(item.isPassed);
-        events.push({
-          date: item.vnDate,
-          type: 'deadline',
-          title: confTitle,
-          subtitle: `${item.name || item.shortName || 'Deadline'} · ${item.displayDate}`,
-          slug: confSlug,
-          isPast
-        });
-      });
-      return events;
+    if (typeof utils.parseDeadlinesList !== 'function') {
+      return extractFallbackDeadlines(conf.deadlines, confTitle, confSlug, nowMs, utils);
     }
 
-    // Dự phòng khi parseDeadlinesList không tồn tại
-    if (Array.isArray(conf.deadlines)) {
-      conf.deadlines.forEach(entry => {
-        if (!entry || typeof entry !== 'object') return;
-        const converted = convertDeadlineToVnHelper(entry.date, { isDeadline: true });
-        if (!converted || !converted.vnIsoDate) return;
-        const milestoneName = String(entry.name || 'Deadline').trim();
-        events.push({
-          date: converted.vnIsoDate,
-          type: 'deadline',
-          title: confTitle,
-          subtitle: `${milestoneName} · ${converted.displayText}`,
-          slug: confSlug,
-          isPast: converted.targetMs <= nowMs
-        });
-      });
-    } else if (typeof conf.deadlines === 'object') {
-      const defs = Array.isArray(utils.MILESTONE_DEFINITIONS)
-        ? utils.MILESTONE_DEFINITIONS
-        : [
-            { key: 'abstract', name: 'Abstract' },
-            { key: 'fullPaper', name: 'Full Paper' },
-            { key: 'notification', name: 'Notification' },
-            { key: 'cameraReady', name: 'Camera-Ready' }
-          ];
-      defs.forEach(def => {
-        const rawDate = conf.deadlines[def.key];
-        const converted = convertDeadlineToVnHelper(rawDate, { isDeadline: true });
-        if (!converted || !converted.vnIsoDate) return;
-        events.push({
-          date: converted.vnIsoDate,
-          type: 'deadline',
-          title: confTitle,
-          subtitle: `${def.name} · ${converted.displayText}`,
-          slug: confSlug,
-          isPast: converted.targetMs <= nowMs
-        });
-      });
-    }
-
-    return events;
+    return utils.parseDeadlinesList(conf.deadlines)
+      .filter(item => item && item.vnDate)
+      .map(item => ({
+        date: item.vnDate,
+        type: 'deadline',
+        title: confTitle,
+        subtitle: `${item.name || item.shortName || 'Deadline'} · ${item.displayDate}`,
+        slug: confSlug,
+        isPast: Number.isFinite(item.targetMs) ? item.targetMs <= nowMs : Boolean(item.isPassed)
+      }));
   }
 
   /**
@@ -573,6 +597,76 @@
    * Render phần lưới ngày của tháng đang xem và cập nhật tiêu đề tháng trong vùng aria-live.
    * @param {HTMLElement} container Phần tử gốc chứa lịch.
    */
+  /**
+   * Tạo mã HTML các thẻ sự kiện hiển thị trong một ô ngày của lưới lịch.
+   * @param {Object} ev - Dữ liệu sự kiện trong ngày.
+   * @returns {string} Chuỗi HTML `.profile-calendar__chip`.
+   */
+  function buildDayChipHtml(ev) {
+    const meta = EVENT_META[ev.type] || EVENT_META.deadline;
+    const pastClass = ev.isPast ? ' profile-calendar__chip--past' : '';
+    const chipText = buildChipLabel(ev);
+    const chipClass = `profile-calendar__chip profile-calendar__chip--${escapeHtml(ev.type)}${pastClass}`;
+    const tip = `${escapeHtml(ev.title)} — ${escapeHtml(ev.subtitle)}`;
+    return `
+      <span class="${chipClass}" title="${tip}">
+        <span class="profile-calendar__chip-mark" aria-hidden="true">${meta.symbol}</span>
+        <span class="profile-calendar__chip-text">${escapeHtml(chipText)}</span>
+      </span>
+    `;
+  }
+
+  /**
+   * Tạo mã HTML một nút ô ngày trong lưới lịch tháng.
+   * @param {Object} cell - Thông tin ô ngày từ buildMonthCells.
+   * @param {Object} state - Trạng thái lịch hiện tại của container.
+   * @param {string} activeFocusIso - Ngày đang giữ tabindex="0" trong lưới.
+   * @returns {string} Chuỗi HTML thẻ `<button>`.
+   */
+  function buildCalendarDayHtml(cell, state, activeFocusIso) {
+    const dayEvents = state.eventsByDate.get(cell.iso) || [];
+    const isToday = cell.iso === state.todayInfo.iso;
+    const isSelected = cell.iso === state.selectedDate;
+    const tabIndex = cell.iso === activeFocusIso ? '0' : '-1';
+
+    const classes = ['profile-calendar__day', 'js-calendar-day'];
+    if (cell.isOutside) classes.push('profile-calendar__day--outside');
+    if (isToday) classes.push('profile-calendar__day--today');
+    if (isSelected) classes.push('profile-calendar__day--selected');
+    if (dayEvents.length > 0) classes.push('profile-calendar__day--has-events');
+
+    const countText = dayEvents.length > 0 ? `${dayEvents.length} sự kiện` : 'Không có sự kiện';
+    const ariaLabel = `${cell.day} tháng ${cell.month}, ${cell.year}: ${countText}`;
+    const visibleEvents = dayEvents.slice(0, MAX_VISIBLE_DAY_EVENTS);
+    const hiddenCount = Math.max(0, dayEvents.length - MAX_VISIBLE_DAY_EVENTS);
+    const chipsHtml = visibleEvents.map(buildDayChipHtml).join('');
+    const moreHtml = hiddenCount > 0 ? `<span class="profile-calendar__more">+${hiddenCount}</span>` : '';
+
+    return `
+      <button
+        type="button"
+        class="${classes.join(' ')}"
+        data-date="${escapeHtml(cell.iso)}"
+        tabindex="${tabIndex}"
+        aria-label="${escapeHtml(ariaLabel)}"
+        aria-pressed="${isSelected ? 'true' : 'false'}"
+        ${isToday ? 'aria-current="date"' : ''}
+      >
+        <span class="profile-calendar__day-top">
+          <span class="profile-calendar__day-num">${cell.day}</span>
+        </span>
+        <span class="profile-calendar__day-events" aria-hidden="true">
+          ${chipsHtml}
+          ${moreHtml}
+        </span>
+      </button>
+    `;
+  }
+
+  /**
+   * Render lưới lịch tháng (42 ô = 6 hàng x 7 cột) vào `.js-calendar-grid`.
+   * @param {HTMLElement} container - Phần tử gốc chứa lịch.
+   */
   function renderCalendarGrid(container) {
     const state = containerStates.get(container);
     if (!state) return;
@@ -593,62 +687,7 @@
           : formatIsoDate(state.viewYear, state.viewMonth, 1));
     state.focusedDate = activeFocusIso;
 
-    gridEl.innerHTML = cells.map(cell => {
-      const dayEvents = state.eventsByDate.get(cell.iso) || [];
-      const isToday = cell.iso === state.todayInfo.iso;
-      const isSelected = cell.iso === state.selectedDate;
-      const tabIndex = cell.iso === activeFocusIso ? '0' : '-1';
-
-      const classes = ['profile-calendar__day', 'js-calendar-day'];
-      if (cell.isOutside) classes.push('profile-calendar__day--outside');
-      if (isToday) classes.push('profile-calendar__day--today');
-      if (isSelected) classes.push('profile-calendar__day--selected');
-      if (dayEvents.length > 0) classes.push('profile-calendar__day--has-events');
-
-      const countText = dayEvents.length > 0
-        ? `${dayEvents.length} sự kiện`
-        : 'Không có sự kiện';
-      const ariaLabel = `${cell.day} tháng ${cell.month}, ${cell.year}: ${countText}`;
-
-      const visibleEvents = dayEvents.slice(0, MAX_VISIBLE_DAY_EVENTS);
-      const hiddenCount = Math.max(0, dayEvents.length - MAX_VISIBLE_DAY_EVENTS);
-
-      const chipsHtml = visibleEvents.map(ev => {
-        const meta = EVENT_META[ev.type] || EVENT_META.deadline;
-        const pastClass = ev.isPast ? ' profile-calendar__chip--past' : '';
-        const chipText = buildChipLabel(ev);
-        return `
-          <span class="profile-calendar__chip profile-calendar__chip--${escapeHtml(ev.type)}${pastClass}" title="${escapeHtml(ev.title)} — ${escapeHtml(ev.subtitle)}">
-            <span class="profile-calendar__chip-mark" aria-hidden="true">${meta.symbol}</span>
-            <span class="profile-calendar__chip-text">${escapeHtml(chipText)}</span>
-          </span>
-        `;
-      }).join('');
-
-      const moreHtml = hiddenCount > 0
-        ? `<span class="profile-calendar__more">+${hiddenCount}</span>`
-        : '';
-
-      return `
-        <button
-          type="button"
-          class="${classes.join(' ')}"
-          data-date="${escapeHtml(cell.iso)}"
-          tabindex="${tabIndex}"
-          aria-label="${escapeHtml(ariaLabel)}"
-          aria-pressed="${isSelected ? 'true' : 'false'}"
-          ${isToday ? 'aria-current="date"' : ''}
-        >
-          <span class="profile-calendar__day-top">
-            <span class="profile-calendar__day-num">${cell.day}</span>
-          </span>
-          <span class="profile-calendar__day-events" aria-hidden="true">
-            ${chipsHtml}
-            ${moreHtml}
-          </span>
-        </button>
-      `;
-    }).join('');
+    gridEl.innerHTML = cells.map(cell => buildCalendarDayHtml(cell, state, activeFocusIso)).join('');
   }
 
   /**
@@ -726,7 +765,9 @@
 
             return `
               <li class="profile-calendar__upcoming-item">
-                <button type="button" class="profile-calendar__upcoming-jump js-calendar-jump" data-date="${escapeHtml(ev.date)}" aria-label="Xem ngày ${escapeHtml(formatDateVi(ev.date))}: ${escapeHtml(ev.title)}">
+                <button type="button" class="profile-calendar__upcoming-jump js-calendar-jump"
+                  data-date="${escapeHtml(ev.date)}"
+                  aria-label="Xem ngày ${escapeHtml(formatDateVi(ev.date))}: ${escapeHtml(ev.title)}">
                   <span class="profile-calendar__upcoming-date" aria-hidden="true">
                     <span class="profile-calendar__upcoming-day">${escapeHtml(dayNum)}</span>
                     <span class="profile-calendar__upcoming-month">${escapeHtml(monthLabel)}</span>
@@ -860,114 +901,93 @@
   }
 
   /**
+   * Tính thứ tự ngày trong tuần (T2 = 0 .. CN = 6) từ chuỗi YYYY-MM-DD.
+   * @param {string} isoDate - Chuỗi ngày ISO.
+   * @returns {number|null} Offset 0..6 hoặc null nếu không hợp lệ.
+   */
+  function getWeekdayOffset(isoDate) {
+    const parts = parseIsoParts(isoDate);
+    if (!parts) return null;
+    const d = new Date(Date.UTC(parts.year, parts.month - 1, parts.day));
+    return (d.getUTCDay() + 6) % 7;
+  }
+
+  /**
+   * Xử lý sự kiện click điều hướng tháng, nút Hôm nay và chọn ô ngày trên lịch.
+   * @param {HTMLElement} container - Phần tử gốc chứa lịch.
+   * @param {MouseEvent} event - Sự kiện click.
+   */
+  function handleCalendarClick(container, event) {
+    const target = event.target;
+    if (!(target instanceof Element)) return;
+
+    if (target.closest('.js-calendar-prev')) { changeMonth(container, -1, false); return; }
+    if (target.closest('.js-calendar-next')) { changeMonth(container, 1, false); return; }
+
+    if (target.closest('.js-calendar-today')) {
+      const state = containerStates.get(container);
+      if (!state) return;
+      state.todayInfo = getVnTodayInfo();
+      selectDate(container, state.todayInfo.iso, false);
+      return;
+    }
+
+    const dateBtn = target.closest('.js-calendar-day, .js-calendar-jump');
+    const dateVal = dateBtn ? (dateBtn.getAttribute('data-date') || '') : '';
+    if (dateVal) selectDate(container, dateVal, true);
+  }
+
+  /**
+   * Xử lý điều hướng bàn phím chuẩn ARIA Grid trên lịch (Arrow, Home, End, PageUp/Down, Enter).
+   * @param {HTMLElement} container - Phần tử gốc chứa lịch.
+   * @param {KeyboardEvent} event - Sự kiện bàn phím.
+   */
+  function handleCalendarKeydown(container, event) {
+    const target = event.target;
+    if (!(target instanceof Element)) return;
+
+    const dayBtn = target.closest('.js-calendar-day');
+    if (event.key === 'PageUp' || event.key === 'PageDown') {
+      event.preventDefault();
+      changeMonth(container, event.key === 'PageUp' ? -1 : 1, Boolean(dayBtn));
+      return;
+    }
+
+    const currentIso = dayBtn ? (dayBtn.getAttribute('data-date') || '') : '';
+    if (!currentIso) return;
+
+    const deltaMap = { ArrowLeft: -1, ArrowRight: 1, ArrowUp: -7, ArrowDown: 7 };
+    if (Object.hasOwn(deltaMap, event.key)) {
+      event.preventDefault();
+      focusDateCell(container, addDaysIso(currentIso, deltaMap[event.key]));
+      return;
+    }
+
+    if (event.key === 'Home' || event.key === 'End') {
+      event.preventDefault();
+      const offset = getWeekdayOffset(currentIso);
+      if (offset !== null) {
+        const delta = event.key === 'Home' ? -offset : 6 - offset;
+        focusDateCell(container, addDaysIso(currentIso, delta));
+      }
+      return;
+    }
+
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      selectDate(container, currentIso, true);
+    }
+  }
+
+  /**
    * Gắn các bộ lắng nghe sự kiện ủy quyền (click và điều hướng bàn phím) một lần duy nhất trên container.
-   * @param {HTMLElement} container Phần tử gốc chứa lịch.
+   * @param {HTMLElement} container - Phần tử gốc chứa lịch.
    */
   function bindCalendarEvents(container) {
     if (!container || container.dataset.calendarBound === 'true') return;
     container.dataset.calendarBound = 'true';
-
-    container.addEventListener('click', event => {
-      const target = event.target;
-      if (!(target instanceof Element)) return;
-
-      if (target.closest('.js-calendar-prev')) {
-        changeMonth(container, -1, false);
-        return;
-      }
-
-      if (target.closest('.js-calendar-next')) {
-        changeMonth(container, 1, false);
-        return;
-      }
-
-      if (target.closest('.js-calendar-today')) {
-        const state = containerStates.get(container);
-        if (!state) return;
-        state.todayInfo = getVnTodayInfo();
-        selectDate(container, state.todayInfo.iso, false);
-        return;
-      }
-
-      const dayBtn = target.closest('.js-calendar-day');
-      if (dayBtn) {
-        const dateVal = dayBtn.getAttribute('data-date') || '';
-        if (dateVal) {
-          selectDate(container, dateVal, true);
-        }
-        return;
-      }
-
-      const jumpBtn = target.closest('.js-calendar-jump');
-      if (jumpBtn) {
-        const dateVal = jumpBtn.getAttribute('data-date') || '';
-        if (dateVal) {
-          selectDate(container, dateVal, true);
-        }
-      }
-    });
-
-    container.addEventListener('keydown', event => {
-      const target = event.target;
-      if (!(target instanceof Element)) return;
-
-      const dayBtn = target.closest('.js-calendar-day');
-      if (event.key === 'PageUp' || event.key === 'PageDown') {
-        event.preventDefault();
-        const delta = event.key === 'PageUp' ? -1 : 1;
-        changeMonth(container, delta, Boolean(dayBtn));
-        return;
-      }
-
-      if (!dayBtn) return;
-      const currentIso = dayBtn.getAttribute('data-date') || '';
-      if (!currentIso) return;
-
-      switch (event.key) {
-        case 'ArrowLeft':
-          event.preventDefault();
-          focusDateCell(container, addDaysIso(currentIso, -1));
-          break;
-        case 'ArrowRight':
-          event.preventDefault();
-          focusDateCell(container, addDaysIso(currentIso, 1));
-          break;
-        case 'ArrowUp':
-          event.preventDefault();
-          focusDateCell(container, addDaysIso(currentIso, -7));
-          break;
-        case 'ArrowDown':
-          event.preventDefault();
-          focusDateCell(container, addDaysIso(currentIso, 7));
-          break;
-        case 'Home': {
-          event.preventDefault();
-          const parts = parseIsoParts(currentIso);
-          if (parts) {
-            const d = new Date(Date.UTC(parts.year, parts.month - 1, parts.day));
-            const weekdayOffset = (d.getUTCDay() + 6) % 7;
-            focusDateCell(container, addDaysIso(currentIso, -weekdayOffset));
-          }
-          break;
-        }
-        case 'End': {
-          event.preventDefault();
-          const parts = parseIsoParts(currentIso);
-          if (parts) {
-            const d = new Date(Date.UTC(parts.year, parts.month - 1, parts.day));
-            const weekdayOffset = (d.getUTCDay() + 6) % 7;
-            focusDateCell(container, addDaysIso(currentIso, 6 - weekdayOffset));
-          }
-          break;
-        }
-        case 'Enter':
-          event.preventDefault();
-          selectDate(container, currentIso, true);
-          break;
-        default:
-          break;
-      }
-    });
+    container.addEventListener('click', event => handleCalendarClick(container, event));
+    container.addEventListener('keydown', event => handleCalendarKeydown(container, event));
   }
 
   /**
@@ -977,7 +997,8 @@
   function showLoading(container) {
     if (!container) return;
     container.innerHTML = `
-      <div class="profile-calendar__state profile-calendar__state--loading" role="status" aria-live="polite" aria-busy="true">
+      <div class="profile-calendar__state profile-calendar__state--loading"
+        role="status" aria-live="polite" aria-busy="true">
         Đang tải lịch các mốc hội nghị và Tracker...
       </div>
     `;
@@ -991,7 +1012,9 @@
     if (!container) return;
     container.innerHTML = `
       <div class="profile-calendar__state">
-        <svg class="profile-calendar__empty-icon" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <svg class="profile-calendar__empty-icon" width="44" height="44" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="1.6" stroke-linecap="round"
+          stroke-linejoin="round" aria-hidden="true">
           <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
           <line x1="16" y1="2" x2="16" y2="6"></line>
           <line x1="8" y1="2" x2="8" y2="6"></line>
@@ -999,7 +1022,8 @@
         </svg>
         <h3 class="profile-calendar__empty-title">Chưa có mốc hội nghị hoặc Tracker nào trên lịch</h3>
         <p class="profile-calendar__empty-desc">
-          Bạn chưa lưu hội nghị nào và chưa có mục nào trong Tracker. Hãy khám phá danh mục hội nghị và bấm "Lưu lại" để tự động đồng bộ hạn nộp bài (UTC+7) và ngày diễn ra tại đây.
+          Bạn chưa lưu hội nghị nào và chưa có mục nào trong Tracker. Hãy khám phá danh mục hội nghị và bấm
+          "Lưu lại" để tự động đồng bộ hạn nộp bài (UTC+7) và ngày diễn ra tại đây.
         </p>
         <div class="profile-calendar__empty-actions">
           <a href="search.html" class="btn btn-primary btn--compact-md">
@@ -1014,6 +1038,41 @@
    * Dựng khung HTML chính của Lịch (thanh điều hướng, chú thích, lưới tháng T2..CN và panel bên cạnh).
    * @param {HTMLElement} container Phần tử gốc chứa lịch.
    * @param {boolean} showNoDatesNotice Hiển thị ghi chú nếu có hội nghị đã lưu nhưng chưa có ngày công bố.
+   */
+  /**
+   * Tạo mã HTML chú giải các loại sự kiện (Deadline, Hội nghị, Tracker, Đã qua).
+   * @returns {string} Chuỗi HTML `.profile-calendar__legend`.
+   */
+  function buildCalendarLegendHtml() {
+    const types = [
+      { key: 'deadline', text: 'Hạn nộp (UTC+7)' },
+      { key: 'event', text: 'Ngày diễn ra' },
+      { key: 'tracker', text: 'Tracker của tôi' }
+    ];
+    const itemsHtml = types.map(({ key, text }) => `
+      <span class="profile-calendar__legend-item">
+        <span class="profile-calendar__legend-badge profile-calendar__legend-badge--${key}">
+          <span aria-hidden="true">${EVENT_META[key].symbol}</span> ${EVENT_META[key].label}
+        </span>
+        <span>${text}</span>
+      </span>
+    `).join('');
+
+    return `
+      <div class="profile-calendar__legend" aria-label="Chú thích các loại sự kiện">
+        ${itemsHtml}
+        <span class="profile-calendar__legend-item profile-calendar__legend-item--past">
+          <span class="profile-calendar__legend-past-sample">Mờ</span>
+          <span>Sự kiện đã qua</span>
+        </span>
+      </div>
+    `;
+  }
+
+  /**
+   * Dựng khung HTML tổng thể cho Lịch tháng và Panel chi tiết bên phải.
+   * @param {HTMLElement} container - Phần tử gốc chứa lịch.
+   * @param {boolean} showNoDatesNotice - Hiển thị ghi chú nếu có hội nghị đã lưu nhưng chưa có ngày công bố.
    */
   function renderCalendarShell(container, showNoDatesNotice) {
     const weekdaysHtml = WEEKDAY_LABELS
@@ -1038,41 +1097,30 @@
               <h3 class="profile-calendar__month-title js-calendar-month-title"></h3>
             </div>
             <div class="profile-calendar__nav" role="group" aria-label="Điều hướng tháng">
-              <button type="button" class="profile-calendar__nav-btn js-calendar-prev" aria-label="Tháng trước" title="Tháng trước (PageUp)">&lsaquo;</button>
+              <button
+                type="button"
+                class="profile-calendar__nav-btn js-calendar-prev"
+                aria-label="Tháng trước"
+                title="Tháng trước (PageUp)"
+              >&lsaquo;</button>
               <button type="button" class="profile-calendar__today-btn js-calendar-today">Hôm nay</button>
-              <button type="button" class="profile-calendar__nav-btn js-calendar-next" aria-label="Tháng sau" title="Tháng sau (PageDown)">&rsaquo;</button>
+              <button
+                type="button"
+                class="profile-calendar__nav-btn js-calendar-next"
+                aria-label="Tháng sau"
+                title="Tháng sau (PageDown)"
+              >&rsaquo;</button>
             </div>
           </div>
 
-          <div class="profile-calendar__legend" aria-label="Chú thích các loại sự kiện">
-            <span class="profile-calendar__legend-item">
-              <span class="profile-calendar__legend-badge profile-calendar__legend-badge--deadline">
-                <span aria-hidden="true">${EVENT_META.deadline.symbol}</span> ${EVENT_META.deadline.label}
-              </span>
-              <span>Hạn nộp (UTC+7)</span>
-            </span>
-            <span class="profile-calendar__legend-item">
-              <span class="profile-calendar__legend-badge profile-calendar__legend-badge--event">
-                <span aria-hidden="true">${EVENT_META.event.symbol}</span> ${EVENT_META.event.label}
-              </span>
-              <span>Ngày diễn ra</span>
-            </span>
-            <span class="profile-calendar__legend-item">
-              <span class="profile-calendar__legend-badge profile-calendar__legend-badge--tracker">
-                <span aria-hidden="true">${EVENT_META.tracker.symbol}</span> ${EVENT_META.tracker.label}
-              </span>
-              <span>Tracker của tôi</span>
-            </span>
-            <span class="profile-calendar__legend-item profile-calendar__legend-item--past">
-              <span class="profile-calendar__legend-past-sample">Mờ</span>
-              <span>Sự kiện đã qua</span>
-            </span>
-          </div>
+          ${buildCalendarLegendHtml()}
 
-          <div class="profile-calendar__weekdays" aria-hidden="true">
-            ${weekdaysHtml}
-          </div>
-          <div class="profile-calendar__grid js-calendar-grid" role="group" aria-label="Lưới lịch các ngày trong tháng"></div>
+          <div class="profile-calendar__weekdays" aria-hidden="true">${weekdaysHtml}</div>
+          <div
+            class="profile-calendar__grid js-calendar-grid"
+            role="group"
+            aria-label="Lưới lịch các ngày trong tháng"
+          ></div>
         </div>
 
         <aside class="profile-calendar__panel" aria-label="Chi tiết sự kiện theo ngày và danh sách sắp tới">
@@ -1131,6 +1179,12 @@
     init,
     showLoading,
     normalizeEvents,
+    /**
+     * Quy đổi ngày deadline AoE sang chuỗi ngày YYYY-MM-DD theo múi giờ UTC+7.
+     * @param {string} dateStr - Chuỗi ngày đầu vào.
+     * @param {Object} [options] - Tùy chọn quy đổi.
+     * @returns {string} Ngày YYYY-MM-DD tại UTC+7 hoặc chuỗi rỗng.
+     */
     convertDeadlineToVnDate: function (dateStr, options) {
       const converted = convertDeadlineToVnHelper(dateStr, options);
       return converted ? converted.vnIsoDate : '';

@@ -1,17 +1,28 @@
 /**
  * ConfGuide — Kịch bản Trang Chi tiết Hội nghị (js/pages/detail.js)
- * Quản lý tải dữ liệu hội nghị theo ?id=<slug>, hiển thị bố cục ưu tiên hành động chính,
- * đếm ngược mốc tiếp theo (1 bộ setInterval duy nhất), timeline 4 mốc kèm nhãn múi giờ UTC+7/AoE,
- * thông tin học thuật (<dl>), đánh giá & nhận xét hợp nhất (#danh-gia) và xuất lịch Google / .ics.
+ * Trang sử dụng: detail.html
+ * Phụ thuộc: js/core/layout.js (ConfGuideUtils), js/components/compare.js
+ * Chức năng: Quản lý tải dữ liệu hội nghị theo `?id=<slug>`, hiển thị bố cục ưu tiên hành động chính,
+ * đếm ngược mốc tiếp theo (1 bộ `setInterval` duy nhất), timeline 4 mốc kèm nhãn múi giờ UTC+7/AoE,
+ * thông tin học thuật (`<dl>`), đánh giá & nhận xét hợp nhất (`#danh-gia`) và xuất lịch Google / `.ics`.
  */
 
 (function () {
   'use strict';
 
+  /* ================= 1. HẰNG SỐ & TRẠNG THÁI MODULE ================= */
+
+  const CONFERENCES_DATA_URL = 'data/conferences.json';
+  const DETAIL_URGENT_DAYS = 14;
+  const COUNTDOWN_TICK_MS = 1000;
+  const MIN_REVIEW_CHARS = 8;
+
   let currentConference = null;
   let allConferences = [];
   let coreMilestonesCache = [];
   let countdownTimer = null;
+
+  /* ================= 2. HÀM TIỆN ÍCH CƠ BẢN & STORAGE ================= */
 
   /**
    * Lấy đối tượng tiện ích dùng chung window.ConfGuideUtils kèm dự phòng an toàn.
@@ -278,30 +289,17 @@
   }
 
   /**
-   * Render phần Header hội nghị: Rank (nếu có thật), Trạng thái, Tên (h1), Lĩnh vực, Nút Lưu/Website và 4 thông tin nhanh.
-   * @param {Object} conf Đối tượng hội nghị đã chuẩn hóa.
+   * Cập nhật nhãn phân hạng CORE, nhãn trạng thái và thẻ lĩnh vực ở đầu trang Chi tiết.
+   * @param {HTMLElement} root - Phần tử gốc `.js-detail-root`.
+   * @param {Object} conf - Đối tượng hội nghị chuẩn hóa.
+   * @param {Object} utils - Tập tiện ích ConfGuideUtils.
    */
-  function renderHeader(conf) {
-    const root = document.querySelector('.js-detail-root');
-    if (!root || !conf) return;
-
-    const utils = getDetailUtils();
-    const esc = utils.escapeHtml;
-    const confId = utils.getConferenceId(conf);
-
-    document.title = `${conf.name || 'Chi tiết hội nghị'} - ConfGuide`;
-
-    // 1. Nhãn phân hạng (chỉ hiện khi có dữ liệu thật) và Nhãn trạng thái
+  function renderHeaderBadgesAndTags(root, conf, utils) {
     const rankBadge = root.querySelector('.js-rank-badge');
     const realRank = conf.rank ? String(conf.rank).trim() : '';
     if (rankBadge) {
-      if (realRank) {
-        rankBadge.textContent = `Rank ${realRank}`;
-        rankBadge.hidden = false;
-      } else {
-        rankBadge.textContent = '';
-        rankBadge.hidden = true;
-      }
+      rankBadge.textContent = realRank ? `Rank ${realRank}` : '';
+      rankBadge.hidden = !realRank;
     }
 
     const statusObj = utils.getStatus(conf);
@@ -311,7 +309,62 @@
       statusBadge.className = `conf-badge conf-badge--status js-status-badge ${statusObj.badgeClass}`;
     }
 
-    // 2. Tên viết tắt (h1) & Tên đầy đủ
+    const tagsEl = root.querySelector('.js-conf-tags');
+    const realFields = Array.isArray(conf.fields)
+      ? conf.fields.map(f => String(f).trim()).filter(Boolean)
+      : [];
+    if (tagsEl) {
+      tagsEl.innerHTML = realFields.length > 0
+        ? realFields.map(tag => `<span class="conf-header__tag">${utils.escapeHtml(tag)}</span>`).join('')
+        : '';
+      tagsEl.hidden = realFields.length === 0;
+    }
+  }
+
+  /**
+   * Cập nhật 4 thông tin nhanh và nút Website chính thức trên Header hội nghị.
+   * @param {HTMLElement} root - Phần tử gốc `.js-detail-root`.
+   * @param {Object} conf - Đối tượng hội nghị chuẩn hóa.
+   * @param {Object} utils - Tập tiện ích ConfGuideUtils.
+   */
+  function renderHeaderFactsAndWebsite(root, conf, utils) {
+    const webBtn = root.querySelector('.js-web-btn');
+    if (webBtn) {
+      const targetWeb = (conf.website || conf.website_url || '').trim();
+      webBtn.href = targetWeb || '#';
+      webBtn.classList.toggle('conf-btn--disabled', !targetWeb);
+      if (targetWeb) webBtn.removeAttribute('aria-disabled');
+      else webBtn.setAttribute('aria-disabled', 'true');
+    }
+
+    const locParts = [conf.location, conf.country].map(v => String(v || '').trim()).filter(Boolean);
+    const uniqueLoc = [...new Set(locParts)].join(', ');
+    const factMap = {
+      '.js-fact-date': utils.formatConferenceEventDate(conf),
+      '.js-fact-location': uniqueLoc || 'Chưa cập nhật',
+      '.js-fact-format': utils.formatConferenceMode(conf),
+      '.js-fact-fee': conf.fee ? String(conf.fee).trim() : 'Chưa cập nhật'
+    };
+    Object.entries(factMap).forEach(([sel, val]) => {
+      const el = root.querySelector(sel);
+      if (el) el.textContent = val || 'Chưa cập nhật';
+    });
+  }
+
+  /**
+   * Render phần Header hội nghị: Rank (nếu có), Trạng thái, Tên (h1), Lĩnh vực, Nút Lưu/Website và 4 thông tin nhanh.
+   * @param {Object} conf - Đối tượng hội nghị đã chuẩn hóa.
+   */
+  function renderHeader(conf) {
+    const root = document.querySelector('.js-detail-root');
+    if (!root || !conf) return;
+
+    const utils = getDetailUtils();
+    const confId = utils.getConferenceId(conf);
+    document.title = `${conf.name || 'Chi tiết hội nghị'} - ConfGuide`;
+
+    renderHeaderBadgesAndTags(root, conf, utils);
+
     const titleEl = root.querySelector('.js-conf-title');
     if (titleEl) titleEl.textContent = conf.name || 'Hội nghị khoa học';
 
@@ -321,176 +374,213 @@
       fullEl.textContent = fullNameText && fullNameText !== conf.name ? fullNameText : '';
     }
 
-    // 3. Thẻ lĩnh vực nghiên cứu (chỉ hiển thị dữ liệu thật)
-    const tagsEl = root.querySelector('.js-conf-tags');
-    const realFields = Array.isArray(conf.fields)
-      ? conf.fields.map(f => String(f).trim()).filter(Boolean)
-      : [];
-    if (tagsEl) {
-      if (realFields.length > 0) {
-        tagsEl.innerHTML = realFields
-          .map(tag => `<span class="conf-header__tag">${esc(tag)}</span>`)
-          .join('');
-        tagsEl.hidden = false;
-      } else {
-        tagsEl.innerHTML = '';
-        tagsEl.hidden = true;
-      }
-    }
-
-    // 4. Nút Lưu hội nghị & Website chính thức
     updateSaveButtonUi(getSavedList().includes(confId));
+    renderHeaderFactsAndWebsite(root, conf, utils);
+  }
 
-    const webBtn = root.querySelector('.js-web-btn');
-    if (webBtn) {
-      const targetWeb = (conf.website || conf.website_url || '').trim();
-      if (targetWeb) {
-        webBtn.href = targetWeb;
-        webBtn.classList.remove('conf-btn--disabled');
-        webBtn.removeAttribute('aria-disabled');
+  /**
+   * Gắn class trạng thái màu (open/urgent/closed) lên thẻ số ngày và khung đếm ngược.
+   * @param {HTMLElement|null} daysEl - Phần tử hiển thị số ngày còn lại.
+   * @param {HTMLElement|null} tickerBox - Khung đồng hồ đếm ngược thời gian thực.
+   * @param {'open'|'urgent'|'closed'} status - Trạng thái hạn nộp.
+   */
+  function applyCountdownStatusClasses(daysEl, tickerBox, status) {
+    if (daysEl) {
+      daysEl.classList.remove(
+        'next-deadline-card__days--open',
+        'next-deadline-card__days--urgent',
+        'next-deadline-card__days--closed'
+      );
+      daysEl.classList.add(`next-deadline-card__days--${status}`);
+    }
+    if (tickerBox) {
+      tickerBox.classList.remove(
+        'next-deadline-card__ticker--open',
+        'next-deadline-card__ticker--urgent'
+      );
+      if (status === 'open' || status === 'urgent') {
+        tickerBox.classList.add(`next-deadline-card__ticker--${status}`);
+      }
+    }
+  }
+
+  /**
+   * Render thẻ "Mốc tiếp theo" ở cột phải khi hội nghị vẫn còn hạn nộp ở tương lai.
+   * @param {Object} els - Các phần tử DOM trong thẻ đếm ngược.
+   * @param {Object} nextMilestone - Thông tin mốc deadline kế tiếp.
+   * @param {Object} utils - Tập tiện ích ConfGuideUtils.
+   */
+  function renderActiveNextDeadline(els, nextMilestone, utils) {
+    const { nameEl, daysEl, exactEl, tickerBox, tickerText, calGroup } = els;
+    if (nameEl) nameEl.textContent = nextMilestone.name;
+
+    const leftDays = utils.daysLeft(nextMilestone.date);
+    const statusMod = leftDays !== null && leftDays <= DETAIL_URGENT_DAYS ? 'urgent' : 'open';
+    if (daysEl) daysEl.textContent = `Còn ${Math.max(0, leftDays ?? 0)} ngày`;
+    applyCountdownStatusClasses(daysEl, tickerBox, statusMod);
+
+    const converted = utils.convertDeadlineToVn
+      ? utils.convertDeadlineToVn(nextMilestone.date, { isDeadline: true })
+      : null;
+
+    if (exactEl) {
+      if (converted) {
+        const textFormatted = utils.formatDeadlineVi
+          ? utils.formatDeadlineVi(nextMilestone.date, { includeAoEOrigin: true })
+          : converted.displayText;
+        exactEl.innerHTML =
+          `<time datetime="${utils.escapeHtml(converted.vnIsoDate)}">`
+          + `${utils.escapeHtml(textFormatted)}</time>`;
       } else {
-        webBtn.href = '#';
-        webBtn.classList.add('conf-btn--disabled');
-        webBtn.setAttribute('aria-disabled', 'true');
+        exactEl.textContent = nextMilestone.date;
       }
     }
 
-    // 5. Bốn thông tin nhanh duy nhất: Thời gian | Địa điểm | Hình thức | Lệ phí
-    const dateEl = root.querySelector('.js-fact-date');
-    if (dateEl) dateEl.textContent = utils.formatConferenceEventDate(conf);
+    if (tickerBox) tickerBox.hidden = false;
+    if (calGroup) calGroup.hidden = false;
 
-    const locEl = root.querySelector('.js-fact-location');
-    const locParts = [conf.location, conf.country]
-      .map(v => String(v || '').trim())
-      .filter(Boolean);
-    const uniqueLoc = [...new Set(locParts)].join(', ');
-    if (locEl) locEl.textContent = uniqueLoc || 'Chưa cập nhật';
+    const updateLiveTicker = () => {
+      const rem = utils.getAoETimeRemaining(nextMilestone.date);
+      if (!tickerText || !rem) return;
+      if (rem.isPassed) {
+        tickerText.textContent = 'Đã hết thời gian nhận bài';
+        applyCountdownStatusClasses(daysEl, tickerBox, 'closed');
+        stopCountdownTimer();
+        return;
+      }
+      tickerText.textContent = `Đếm ngược: ${rem.days} ngày ${rem.hours}h ${rem.minutes}m ${rem.seconds}s`;
+    };
 
-    const formatEl = root.querySelector('.js-fact-format');
-    if (formatEl) formatEl.textContent = utils.formatConferenceMode(conf);
-
-    const feeEl = root.querySelector('.js-fact-fee');
-    const realFee = conf.fee ? String(conf.fee).trim() : '';
-    if (feeEl) feeEl.textContent = realFee || 'Chưa cập nhật';
+    updateLiveTicker();
+    countdownTimer = window.setInterval(updateLiveTicker, COUNTDOWN_TICK_MS);
   }
 
   /**
    * Render thẻ "Mốc tiếp theo" ở cột phải (nơi duy nhất chạy đồng hồ đếm ngược setInterval).
-   * @param {Object} conf Đối tượng hội nghị.
+   * @param {Object} conf - Đối tượng hội nghị.
    */
   function renderNextDeadlineCard(conf) {
     const root = document.querySelector('.js-detail-root');
     if (!root || !conf) return;
 
     stopCountdownTimer();
-
     const utils = getDetailUtils();
-    const nextMilestone = utils.getNextDeadline(conf);
-    const nameEl = root.querySelector('.js-next-milestone-name');
-    const daysEl = root.querySelector('.js-countdown-days');
-    const exactEl = root.querySelector('.js-deadline-exact');
-    const tickerBox = root.querySelector('.js-live-ticker-box');
-    const tickerText = root.querySelector('.js-live-ticker-text');
-    const calGroup = root.querySelector('.js-next-cal-group');
+    const els = {
+      nameEl: root.querySelector('.js-next-milestone-name'),
+      daysEl: root.querySelector('.js-countdown-days'),
+      exactEl: root.querySelector('.js-deadline-exact'),
+      tickerBox: root.querySelector('.js-live-ticker-box'),
+      tickerText: root.querySelector('.js-live-ticker-text'),
+      calGroup: root.querySelector('.js-next-cal-group')
+    };
     const exportAllBtn = root.querySelector('[data-cal-action="ics-all"]');
-
-    const allMilestones = utils.parseDeadlinesList(conf.deadlines);
     if (exportAllBtn) {
-      exportAllBtn.hidden = allMilestones.length === 0;
+      exportAllBtn.hidden = utils.parseDeadlinesList(conf.deadlines).length === 0;
     }
 
-    const applyCountdownStatus = (status) => {
-      if (daysEl) {
-        daysEl.classList.remove(
-          'next-deadline-card__days--open',
-          'next-deadline-card__days--urgent',
-          'next-deadline-card__days--closed'
-        );
-        daysEl.classList.add(`next-deadline-card__days--${status}`);
-      }
-      if (tickerBox) {
-        tickerBox.classList.remove(
-          'next-deadline-card__ticker--open',
-          'next-deadline-card__ticker--urgent'
-        );
-        if (status === 'open' || status === 'urgent') {
-          tickerBox.classList.add(`next-deadline-card__ticker--${status}`);
-        }
-      }
-    };
-
+    const nextMilestone = utils.getNextDeadline(conf);
     if (nextMilestone && !nextMilestone.isPassed) {
-      if (nameEl) nameEl.textContent = nextMilestone.name;
+      renderActiveNextDeadline(els, nextMilestone, utils);
+      return;
+    }
 
-      const leftDays = utils.daysLeft(nextMilestone.date);
-      const statusMod = (leftDays !== null && leftDays <= 14) ? 'urgent' : 'open';
-      if (daysEl) daysEl.textContent = `Còn ${Math.max(0, leftDays ?? 0)} ngày`;
-      applyCountdownStatus(statusMod);
+    applyCountdownStatusClasses(els.daysEl, els.tickerBox, 'closed');
+    if (els.tickerBox) els.tickerBox.hidden = true;
+    if (els.calGroup) els.calGroup.hidden = true;
 
-      const converted = utils.convertDeadlineToVn
-        ? utils.convertDeadlineToVn(nextMilestone.date, { isDeadline: true })
-        : null;
-
-      if (exactEl) {
-        if (converted) {
-          const textFormatted = utils.formatDeadlineVi
-            ? utils.formatDeadlineVi(nextMilestone.date, { includeAoEOrigin: true })
-            : converted.displayText;
-          exactEl.innerHTML = `<time datetime="${utils.escapeHtml(converted.vnIsoDate)}">${utils.escapeHtml(textFormatted)}</time>`;
-        } else {
-          exactEl.textContent = nextMilestone.date;
-        }
+    if (nextMilestone && nextMilestone.isPassed) {
+      if (els.nameEl) els.nameEl.textContent = 'Đã hết hạn nộp bài';
+      if (els.daysEl) els.daysEl.textContent = 'Đã đóng đợt nộp';
+      if (els.exactEl) {
+        const lastFormatted = utils.formatDeadlineVi ? utils.formatDeadlineVi(nextMilestone.date) : nextMilestone.date;
+        els.exactEl.textContent = `Mốc cuối: ${lastFormatted}`;
       }
-
-      if (tickerBox) tickerBox.hidden = false;
-      if (calGroup) calGroup.hidden = false;
-
-      const updateLiveTicker = () => {
-        const rem = utils.getAoETimeRemaining(nextMilestone.date);
-        if (!tickerText || !rem) return;
-        if (rem.isPassed) {
-          tickerText.textContent = 'Đã hết thời gian nhận bài';
-          applyCountdownStatus('closed');
-          stopCountdownTimer();
-          return;
-        }
-        tickerText.textContent = `Đếm ngược: ${rem.days} ngày ${rem.hours}h ${rem.minutes}m ${rem.seconds}s`;
-      };
-
-      updateLiveTicker();
-      countdownTimer = window.setInterval(updateLiveTicker, 1000);
-    } else if (nextMilestone && nextMilestone.isPassed) {
-      if (nameEl) nameEl.textContent = 'Đã hết hạn nộp bài';
-      if (daysEl) daysEl.textContent = 'Đã đóng đợt nộp';
-      applyCountdownStatus('closed');
-      if (exactEl) {
-        const lastFormatted = utils.formatDeadlineVi
-          ? utils.formatDeadlineVi(nextMilestone.date)
-          : nextMilestone.date;
-        exactEl.textContent = `Mốc cuối: ${lastFormatted}`;
-      }
-      if (tickerBox) tickerBox.hidden = true;
-      if (calGroup) calGroup.hidden = true;
     } else {
-      if (nameEl) nameEl.textContent = 'Chưa công bố mốc';
-      if (daysEl) daysEl.textContent = 'Chưa cập nhật';
-      applyCountdownStatus('closed');
-      if (exactEl) exactEl.textContent = 'Ban tổ chức chưa công bố lịch nộp bài cụ thể.';
-      if (tickerBox) tickerBox.hidden = true;
-      if (calGroup) calGroup.hidden = true;
+      if (els.nameEl) els.nameEl.textContent = 'Chưa công bố mốc';
+      if (els.daysEl) els.daysEl.textContent = 'Chưa cập nhật';
+      if (els.exactEl) els.exactEl.textContent = 'Ban tổ chức chưa công bố lịch nộp bài cụ thể.';
     }
   }
 
   /**
-   * Render thanh tiến trình 4 mốc quan trọng kèm thẻ <time datetime>, nhãn múi giờ rõ ràng và nút icon thêm lịch.
-   * @param {Object} conf Đối tượng hội nghị.
+   * Tạo mã HTML một bước trong thanh tiến trình 4 mốc quan trọng của hội nghị.
+   * @param {Object} milestone - Dữ liệu mốc nộp bài.
+   * @param {number} idx - Chỉ số thứ tự mốc (0..3).
+   * @param {Object|null} next - Mốc sắp tới gần nhất để đánh dấu active.
+   * @param {Object} utils - Tập tiện ích ConfGuideUtils.
+   * @returns {string} Chuỗi HTML `.deadline-timeline__step`.
+   */
+  function buildTimelineStepHtml(milestone, idx, next, utils) {
+    const esc = utils.escapeHtml;
+    const dateVal = milestone.date;
+    const converted = dateVal && utils.convertDeadlineToVn
+      ? utils.convertDeadlineToVn(dateVal, { isDeadline: true })
+      : null;
+    const left = dateVal ? utils.daysLeft(dateVal) : null;
+    const isPassed = left !== null && left < 0;
+    const isActive = Boolean(next && !next.isPassed && next.date === dateVal && next.key === milestone.key);
+
+    let modifierClass = 'deadline-timeline__step--upcoming';
+    let statusLabel = `Sắp tới · Còn ${Math.max(0, left ?? 0)} ngày`;
+    let badgeContent = String(idx + 1);
+
+    if (!dateVal || !converted) {
+      statusLabel = 'Chưa công bố';
+    } else if (isPassed) {
+      modifierClass = 'deadline-timeline__step--passed';
+      statusLabel = 'Đã qua';
+      badgeContent = renderSpriteIcon('icon-check', 14);
+    } else if (isActive) {
+      const mod = left !== null && left <= DETAIL_URGENT_DAYS ? 'urgent' : 'open';
+      modifierClass = `deadline-timeline__step--active deadline-timeline__step--${mod}`;
+      statusLabel = `Mốc tiếp theo · Còn ${Math.max(0, left)} ngày`;
+    }
+
+    const timeDisplay = converted
+      ? (converted.vnTimeVi ? `${converted.vnTimeVi} ${converted.vnDateVi}` : converted.vnDateVi)
+      : 'Chưa cập nhật';
+    const tzLabel = converted ? converted.timezoneLabel : 'UTC+7 (giờ Việt Nam)';
+    const datetimeAttr = converted ? converted.vnIsoDate : '';
+
+    const calButtonHtml = dateVal && converted && !isPassed
+      ? `
+        <button
+          type="button"
+          class="deadline-timeline__cal-btn js-step-cal-btn"
+          data-milestone-index="${idx}"
+          aria-label="Thêm mốc ${esc(milestone.name)} vào Google Calendar"
+          title="Thêm vào Google Calendar"
+        >
+          ${renderSpriteIcon('icon-calendar-plus', 15)}
+        </button>
+      `
+      : '';
+
+    return `
+      <div class="deadline-timeline__step ${modifierClass} timeline-step">
+        <div class="deadline-timeline__step-top">
+          <span class="deadline-timeline__badge" aria-hidden="true">${badgeContent}</span>
+          ${calButtonHtml}
+        </div>
+        <h3 class="deadline-timeline__name">${esc(milestone.name)}</h3>
+        ${datetimeAttr
+          ? `<time class="deadline-timeline__time" datetime="${esc(datetimeAttr)}">${esc(timeDisplay)}</time>`
+          : `<span class="deadline-timeline__time">${esc(timeDisplay)}</span>`}
+        <span class="deadline-timeline__tz">${esc(tzLabel)}</span>
+        <span class="deadline-timeline__status">${esc(statusLabel)}</span>
+      </div>
+    `;
+  }
+
+  /**
+   * Render thanh tiến trình 4 mốc quan trọng kèm thẻ `<time datetime>`, nhãn múi giờ rõ ràng và nút icon thêm lịch.
+   * @param {Object} conf - Đối tượng hội nghị.
    */
   function renderTimeline(conf) {
     const track = document.querySelector('.js-timeline-track');
     if (!track || !conf) return;
 
     const utils = getDetailUtils();
-    const esc = utils.escapeHtml;
     const milestones = utils.getCoreMilestones(conf);
     const next = utils.getNextDeadline(conf);
     coreMilestonesCache = milestones;
@@ -509,70 +599,7 @@
       return;
     }
 
-    track.innerHTML = milestones.map((m, idx) => {
-      const dateVal = m.date;
-      const converted = dateVal && utils.convertDeadlineToVn
-        ? utils.convertDeadlineToVn(dateVal, { isDeadline: true })
-        : null;
-      const left = dateVal ? utils.daysLeft(dateVal) : null;
-      const isPassed = left !== null && left < 0;
-      const isActive = Boolean(next && !next.isPassed && next.date === dateVal && next.key === m.key);
-
-      let modifierClass = 'deadline-timeline__step--upcoming';
-      let statusLabel = 'Sắp tới';
-      let badgeContent = String(idx + 1);
-
-      if (!dateVal || !converted) {
-        statusLabel = 'Chưa công bố';
-      } else if (isPassed) {
-        modifierClass = 'deadline-timeline__step--passed';
-        statusLabel = 'Đã qua';
-        badgeContent = renderSpriteIcon('icon-check', 14);
-      } else if (isActive) {
-        const isUrgentActive = left !== null && left <= 14;
-        modifierClass = isUrgentActive
-          ? 'deadline-timeline__step--active deadline-timeline__step--urgent'
-          : 'deadline-timeline__step--active deadline-timeline__step--open';
-        statusLabel = `Mốc tiếp theo · Còn ${Math.max(0, left)} ngày`;
-      } else {
-        statusLabel = `Sắp tới · Còn ${Math.max(0, left)} ngày`;
-      }
-
-      const timeDisplay = converted
-        ? (converted.vnTimeVi ? `${converted.vnTimeVi} ${converted.vnDateVi}` : converted.vnDateVi)
-        : 'Chưa cập nhật';
-      const tzLabel = converted ? converted.timezoneLabel : 'UTC+7 (giờ Việt Nam)';
-      const datetimeAttr = converted ? converted.vnIsoDate : '';
-
-      const calButtonHtml = dateVal && converted && !isPassed
-        ? `
-          <button
-            type="button"
-            class="deadline-timeline__cal-btn js-step-cal-btn"
-            data-milestone-index="${idx}"
-            aria-label="Thêm mốc ${esc(m.name)} vào Google Calendar"
-            title="Thêm vào Google Calendar"
-          >
-            ${renderSpriteIcon('icon-calendar-plus', 15)}
-          </button>
-        `
-        : '';
-
-      return `
-        <div class="deadline-timeline__step ${modifierClass} timeline-step">
-          <div class="deadline-timeline__step-top">
-            <span class="deadline-timeline__badge" aria-hidden="true">${badgeContent}</span>
-            ${calButtonHtml}
-          </div>
-          <h3 class="deadline-timeline__name">${esc(m.name)}</h3>
-          ${datetimeAttr
-            ? `<time class="deadline-timeline__time" datetime="${esc(datetimeAttr)}">${esc(timeDisplay)}</time>`
-            : `<span class="deadline-timeline__time">${esc(timeDisplay)}</span>`}
-          <span class="deadline-timeline__tz">${esc(tzLabel)}</span>
-          <span class="deadline-timeline__status">${esc(statusLabel)}</span>
-        </div>
-      `;
-    }).join('');
+    track.innerHTML = milestones.map((m, idx) => buildTimelineStepHtml(m, idx, next, utils)).join('');
   }
 
   /**
@@ -718,25 +745,20 @@
    * Render khu vực Đánh giá & Nhận xét hợp nhất trên trang chi tiết và cập nhật danh sách ở view #danh-gia.
    * @param {Object} conf Đối tượng hội nghị.
    */
-  function renderReviews(conf) {
-    const root = document.querySelector('.js-detail-root');
-    if (!root || !conf) return;
-
-    const utils = getDetailUtils();
-    const esc = utils.escapeHtml;
-    const confId = utils.getConferenceId(conf) || 'conf';
-
-    // 1. Điểm tham khảo từ dữ liệu hội nghị
-    const hasRating = Number.isFinite(Number(conf.rating)) && Number(conf.rating) > 0;
-    const ratingVal = hasRating ? Number(conf.rating) : 0;
-
+  /**
+   * Render phần tóm tắt điểm đánh giá và nhóm nút radio 5 sao cá nhân trên trang Chi tiết.
+   * @param {HTMLElement} root - Phần tử gốc `.js-detail-root`.
+   * @param {Object} conf - Đối tượng hội nghị.
+   * @param {boolean} hasRating - True nếu hội nghị có điểm tham khảo từ dữ liệu.
+   * @param {number} ratingVal - Điểm số tham khảo.
+   * @param {number} savedRating - Số sao người dùng hiện tại đã chấm.
+   */
+  function renderReviewRatingControls(root, conf, hasRating, ratingVal, savedRating) {
     const avgScoreEl = root.querySelector('.js-avg-score');
     if (avgScoreEl) avgScoreEl.textContent = hasRating ? ratingVal.toFixed(1) : '—';
 
     const headerStarsEl = root.querySelector('.js-header-stars');
-    if (headerStarsEl) {
-      headerStarsEl.innerHTML = renderStaticStarsHtml(ratingVal, 17);
-    }
+    if (headerStarsEl) headerStarsEl.innerHTML = renderStaticStarsHtml(ratingVal, 17);
 
     const countTextEl = root.querySelector('.js-reviews-count-text');
     if (countTextEl) {
@@ -745,12 +767,7 @@
         : (hasRating ? 'Điểm tham khảo từ dữ liệu hội nghị' : 'Chưa có điểm tham khảo');
     }
 
-    // 2. Nhóm radio 5 sao chấm điểm của người dùng
-    const userRatingKey = `confguide_rating_${confId}`;
-    const savedRating = Number(utils.readStorage(userRatingKey, 0)) || 0;
     const starsBox = root.querySelector('.js-star-rating');
-    const rateMsgEl = root.querySelector('.js-rate-msg');
-
     if (starsBox) {
       starsBox.innerHTML = [1, 2, 3, 4, 5].map(star => `
         <button
@@ -770,13 +787,64 @@
       updateUserStarRadioGroup(savedRating, savedRating);
     }
 
+    const rateMsgEl = root.querySelector('.js-rate-msg');
     if (rateMsgEl) {
       rateMsgEl.textContent = savedRating ? `Bạn đã chấm ${savedRating}/5 sao.` : 'Nhấn vào ngôi sao để chấm điểm.';
     }
+  }
 
-    // 3. Đồng bộ số lượng nhận xét cục bộ và view #danh-gia
-    const reviewsKey = `confguide_reviews_${confId}`;
-    const rawReviews = utils.readStorage(reviewsKey, []);
+  /**
+   * Render danh sách nhận xét lưu trên trình duyệt cho chế độ xem `#danh-gia`.
+   * @param {HTMLElement} root - Phần tử gốc `.js-detail-root`.
+   * @param {Array<Object>} reviews - Mảng nhận xét của hội nghị hiện tại.
+   * @param {Function} esc - Hàm thoát ký tự HTML.
+   */
+  function renderLocalReviewItems(root, reviews, esc) {
+    const rvList = root.querySelector('.js-rv-list');
+    if (!rvList) return;
+
+    if (reviews.length === 0) {
+      rvList.innerHTML =
+        '<p class="reviews-view__item">'
+        + 'Chưa có nhận xét nào được lưu trên trình duyệt này. Bạn có thể gửi nhận xét đầu tiên ở biểu mẫu phía trên.'
+        + '</p>';
+      return;
+    }
+
+    rvList.innerHTML = reviews.map(item => {
+      const createdIso = item.createdAt ? String(item.createdAt) : '';
+      const createdVi = createdIso ? new Date(createdIso).toLocaleString('vi-VN') : '';
+      return `
+        <article class="reviews-view__item">
+          <div class="reviews-view__item-head">
+            <strong class="reviews-view__author">${esc(item.author || 'Người dùng ConfGuide')}</strong>
+            ${createdIso
+              ? `<time class="reviews-view__time" datetime="${esc(createdIso)}">${esc(createdVi)}</time>`
+              : ''}
+          </div>
+          <p class="reviews-view__text">${esc(item.text || '')}</p>
+        </article>
+      `;
+    }).join('');
+  }
+
+  /**
+   * Render khu vực Đánh giá & Nhận xét hợp nhất (#danh-gia).
+   * @param {Object} conf - Đối tượng hội nghị.
+   */
+  function renderReviews(conf) {
+    const root = document.querySelector('.js-detail-root');
+    if (!root || !conf) return;
+
+    const utils = getDetailUtils();
+    const confId = utils.getConferenceId(conf) || 'conf';
+    const hasRating = Number.isFinite(Number(conf.rating)) && Number(conf.rating) > 0;
+    const ratingVal = hasRating ? Number(conf.rating) : 0;
+    const savedRating = Number(utils.readStorage(`confguide_rating_${confId}`, 0)) || 0;
+
+    renderReviewRatingControls(root, conf, hasRating, ratingVal, savedRating);
+
+    const rawReviews = utils.readStorage(`confguide_reviews_${confId}`, []);
     const reviews = Array.isArray(rawReviews) ? rawReviews : [];
 
     const localSummaryEl = root.querySelector('.js-local-review-summary');
@@ -793,38 +861,13 @@
     if (rvAvg) rvAvg.textContent = hasRating ? ratingVal.toFixed(1) : (savedRating ? savedRating.toFixed(1) : '—');
 
     const rvStars = root.querySelector('.js-rv-stars');
-    if (rvStars) {
-      const displayScore = hasRating ? ratingVal : savedRating;
-      rvStars.innerHTML = renderStaticStarsHtml(displayScore, 20);
-    }
+    if (rvStars) rvStars.innerHTML = renderStaticStarsHtml(hasRating ? ratingVal : savedRating, 20);
 
     const rvTotal = root.querySelector('.js-rv-total');
     if (rvTotal) rvTotal.textContent = `${reviews.length} nhận xét lưu trên trình duyệt này`;
 
     renderRatingDistributionBars(conf);
-
-    const rvList = root.querySelector('.js-rv-list');
-    if (rvList) {
-      if (reviews.length > 0) {
-        rvList.innerHTML = reviews.map(item => {
-          const createdIso = item.createdAt ? String(item.createdAt) : '';
-          const createdVi = createdIso ? new Date(createdIso).toLocaleString('vi-VN') : '';
-          return `
-            <article class="reviews-view__item">
-              <div class="reviews-view__item-head">
-                <strong class="reviews-view__author">${esc(item.author || 'Người dùng ConfGuide')}</strong>
-                ${createdIso
-                  ? `<time class="reviews-view__time" datetime="${esc(createdIso)}">${esc(createdVi)}</time>`
-                  : ''}
-              </div>
-              <p class="reviews-view__text">${esc(item.text || '')}</p>
-            </article>
-          `;
-        }).join('');
-      } else {
-        rvList.innerHTML = '<p class="reviews-view__item">Chưa có nhận xét nào được lưu trên trình duyệt này. Bạn có thể gửi nhận xét đầu tiên ở biểu mẫu phía trên.</p>';
-      }
-    }
+    renderLocalReviewItems(root, reviews, utils.escapeHtml);
   }
 
   /**
@@ -1068,122 +1111,108 @@
   }
 
   /**
-   * Thiết lập Event Delegation tập trung trên gốc .js-detail-root và các sự kiện vòng đời cửa sổ.
+   * Xử lý các tương tác click trên `.js-detail-root` (lưu, quay lại, xuất lịch, chấm sao).
+   * @param {MouseEvent} event - Sự kiện click ủy quyền.
+   */
+  function handleDetailRootClick(event) {
+    const target = event.target;
+    if (!(target instanceof Element)) return;
+
+    if (target.closest('.js-back-btn')) { navigateBackFromDetail(); return; }
+    if (target.closest('.js-back-to-detail-btn')) {
+      history.replaceState(null, '', window.location.pathname + window.location.search);
+      syncHashRoute();
+      return;
+    }
+    if (target.closest('.js-open-reviews')) { window.location.hash = '#danh-gia'; return; }
+    if (target.closest('.js-save-btn')) { toggleSaveCurrentConference(); return; }
+
+    const calActionBtn = target.closest('.js-cal-action');
+    if (calActionBtn && currentConference) {
+      const actionMap = {
+        'google-next': ['google', getDetailUtils().getNextDeadline(currentConference)],
+        'ics-next': ['ics-single', getDetailUtils().getNextDeadline(currentConference)],
+        'ics-all': ['ics-all', null]
+      };
+      const entry = actionMap[calActionBtn.getAttribute('data-cal-action')];
+      if (entry) handleCalendarAction(entry[0], currentConference, entry[1]);
+      return;
+    }
+
+    const stepCalBtn = target.closest('.js-step-cal-btn');
+    if (stepCalBtn && currentConference) {
+      const milestone = coreMilestonesCache[Number(stepCalBtn.getAttribute('data-milestone-index'))];
+      if (milestone) handleCalendarAction('google', currentConference, milestone);
+      return;
+    }
+
+    const starBtn = target.closest('.js-star-btn');
+    if (starBtn) {
+      const starVal = Number(starBtn.getAttribute('data-star'));
+      if (starVal >= 1 && starVal <= 5) saveUserStarRating(starVal);
+    }
+  }
+
+  /**
+   * Đọc điểm sao người dùng đã lưu cho hội nghị hiện hành.
+   * @returns {number} Giá trị 1..5 hoặc 0 nếu chưa chấm.
+   */
+  function readSavedConferenceRating() {
+    if (!currentConference) return 0;
+    const confId = getDetailUtils().getConferenceId(currentConference) || 'conf';
+    return Number(getDetailUtils().readStorage(`confguide_rating_${confId}`, 0)) || 0;
+  }
+
+  /**
+   * Hỗ trợ điều hướng phím mũi tên trong nhóm radio 5 sao đánh giá hội nghị.
+   * @param {HTMLElement} root - Phần tử gốc `.js-detail-root`.
+   * @param {KeyboardEvent} event - Sự kiện bàn phím.
+   */
+  function handleStarRatingKeydown(root, event) {
+    const starBtn = event.target instanceof Element ? event.target.closest('.js-star-btn') : null;
+    if (!starBtn) return;
+
+    const currentStar = Number(starBtn.getAttribute('data-star')) || 1;
+    let nextStar = null;
+    if (event.key === 'ArrowRight' || event.key === 'ArrowUp') nextStar = currentStar < 5 ? currentStar + 1 : 1;
+    else if (event.key === 'ArrowLeft' || event.key === 'ArrowDown') nextStar = currentStar > 1 ? currentStar - 1 : 5;
+    if (nextStar === null) return;
+
+    event.preventDefault();
+    saveUserStarRating(nextStar);
+    const nextBtn = root.querySelector(`.js-star-btn[data-star="${nextStar}"]`);
+    if (nextBtn instanceof HTMLElement) nextBtn.focus();
+  }
+
+  /**
+   * Thiết lập Event Delegation tập trung trên gốc `.js-detail-root` và các sự kiện vòng đời cửa sổ.
    */
   function setupEventDelegation() {
     const root = document.querySelector('.js-detail-root');
     if (!root) return;
 
-    // 1. Ủy quyền sự kiện Click
-    root.addEventListener('click', event => {
-      const target = event.target;
-      if (!(target instanceof Element)) return;
+    root.addEventListener('click', handleDetailRootClick);
 
-      if (target.closest('.js-back-btn')) {
-        navigateBackFromDetail();
-        return;
-      }
-
-      if (target.closest('.js-back-to-detail-btn')) {
-        history.replaceState(null, '', window.location.pathname + window.location.search);
-        syncHashRoute();
-        return;
-      }
-
-      if (target.closest('.js-open-reviews')) {
-        window.location.hash = '#danh-gia';
-        return;
-      }
-
-      if (target.closest('.js-save-btn')) {
-        toggleSaveCurrentConference();
-        return;
-      }
-
-      const calActionBtn = target.closest('.js-cal-action');
-      if (calActionBtn && currentConference) {
-        const action = calActionBtn.getAttribute('data-cal-action');
-        const nextMilestone = getDetailUtils().getNextDeadline(currentConference);
-        if (action === 'google-next') {
-          handleCalendarAction('google', currentConference, nextMilestone);
-        } else if (action === 'ics-next') {
-          handleCalendarAction('ics-single', currentConference, nextMilestone);
-        } else if (action === 'ics-all') {
-          handleCalendarAction('ics-all', currentConference, null);
-        }
-        return;
-      }
-
-      const stepCalBtn = target.closest('.js-step-cal-btn');
-      if (stepCalBtn && currentConference) {
-        const idx = Number(stepCalBtn.getAttribute('data-milestone-index'));
-        const milestone = coreMilestonesCache[idx];
-        if (milestone) {
-          handleCalendarAction('google', currentConference, milestone);
-        }
-        return;
-      }
-
-      const starBtn = target.closest('.js-star-btn');
-      if (starBtn) {
-        const starVal = Number(starBtn.getAttribute('data-star'));
-        if (starVal >= 1 && starVal <= 5) {
-          saveUserStarRating(starVal);
-        }
-      }
-    });
-
-    // 2. Hiệu ứng rê chuột và điều hướng bàn phím mũi tên cho nhóm radio 5 sao
     root.addEventListener('mouseover', event => {
-      const target = event.target;
-      if (!(target instanceof Element)) return;
-      const starBtn = target.closest('.js-star-btn');
+      const starBtn = event.target instanceof Element ? event.target.closest('.js-star-btn') : null;
       if (!starBtn || !currentConference) return;
-      const hoverVal = Number(starBtn.getAttribute('data-star')) || 0;
-      const confId = getDetailUtils().getConferenceId(currentConference) || 'conf';
-      const savedRating = Number(getDetailUtils().readStorage(`confguide_rating_${confId}`, 0)) || 0;
-      updateUserStarRadioGroup(hoverVal, savedRating);
+      updateUserStarRadioGroup(Number(starBtn.getAttribute('data-star')) || 0, readSavedConferenceRating());
     });
 
     root.addEventListener('mouseout', event => {
-      const target = event.target;
-      if (!(target instanceof Element)) return;
-      const ratingBox = target.closest('.js-star-rating');
+      const ratingBox = event.target instanceof Element ? event.target.closest('.js-star-rating') : null;
       if (!ratingBox || !currentConference) return;
-      const related = event.relatedTarget;
-      if (related instanceof Element && ratingBox.contains(related)) return;
-      const confId = getDetailUtils().getConferenceId(currentConference) || 'conf';
-      const savedRating = Number(getDetailUtils().readStorage(`confguide_rating_${confId}`, 0)) || 0;
-      updateUserStarRadioGroup(savedRating, savedRating);
+      if (event.relatedTarget instanceof Element && ratingBox.contains(event.relatedTarget)) return;
+      const saved = readSavedConferenceRating();
+      updateUserStarRadioGroup(saved, saved);
     });
 
-    root.addEventListener('keydown', event => {
-      const target = event.target;
-      if (!(target instanceof Element)) return;
-      const starBtn = target.closest('.js-star-btn');
-      if (!starBtn) return;
+    root.addEventListener('keydown', event => handleStarRatingKeydown(root, event));
 
-      const currentStar = Number(starBtn.getAttribute('data-star')) || 1;
-      let nextStar = null;
-      if (event.key === 'ArrowRight' || event.key === 'ArrowUp') {
-        nextStar = currentStar < 5 ? currentStar + 1 : 1;
-      } else if (event.key === 'ArrowLeft' || event.key === 'ArrowDown') {
-        nextStar = currentStar > 1 ? currentStar - 1 : 5;
-      }
-
-      if (nextStar !== null) {
-        event.preventDefault();
-        saveUserStarRating(nextStar);
-        const nextBtn = root.querySelector(`.js-star-btn[data-star="${nextStar}"]`);
-        if (nextBtn instanceof HTMLElement) nextBtn.focus();
-      }
-    });
-
-    // 3. Sự kiện nhập liệu & gửi biểu mẫu nhận xét
     root.addEventListener('input', event => {
       const target = event.target;
       if (!(target instanceof HTMLTextAreaElement) || !target.classList.contains('js-review-textarea')) return;
-      if (target.value.trim().length >= 8) {
+      if (target.value.trim().length >= MIN_REVIEW_CHARS) {
         const errEl = root.querySelector('.js-field-error');
         if (errEl) errEl.textContent = '';
         target.setAttribute('aria-invalid', 'false');
@@ -1203,8 +1232,41 @@
   }
 
   /**
-   * Tải dữ liệu hội nghị theo ?id=<slug> và khởi tạo toàn bộ các phần trên trang Chi tiết.
-   * Báo lỗi rõ ràng khi thiếu ?id, không tìm thấy hội nghị hoặc khi fetch dữ liệu gặp sự cố.
+   * Chuẩn hóa và tải toàn bộ danh sách hội nghị (fetch JSON kèm fallback cục bộ).
+   * @param {Object} utils - Tập tiện ích ConfGuideUtils.
+   * @returns {Promise<Array<Object>>} Danh sách hội nghị đã chuẩn hóa.
+   */
+  async function loadNormalizedConferences(utils) {
+    const fallbackList = Array.isArray(utils.FALLBACK_CONFERENCES) ? utils.FALLBACK_CONFERENCES : [];
+    const mapFallback = () => fallbackList.map(c => utils.normalizeConference(c)).filter(Boolean);
+
+    try {
+      const data = typeof utils.fetchJsonCached === 'function'
+        ? await utils.fetchJsonCached(CONFERENCES_DATA_URL)
+        : await fetch(CONFERENCES_DATA_URL).then(r => {
+          if (!r.ok) throw new Error(r.status);
+          return r.json();
+        });
+      if (Array.isArray(data) && data.length > 0) {
+        return data.map(c => utils.normalizeConference(c)).filter(Boolean);
+      }
+    } catch (err) {
+      const fallbackConfs = mapFallback();
+      if (fallbackConfs.length > 0) {
+        setFetchNotice(
+          'Không thể kết nối tệp dữ liệu máy chủ (data/conferences.json). '
+          + 'Hệ thống đang hiển thị từ dữ liệu dự phòng cục bộ.'
+        );
+      }
+      return fallbackConfs;
+    }
+
+    return mapFallback();
+  }
+
+  /**
+   * Tải dữ liệu hội nghị theo `?id=<slug>` và khởi tạo toàn bộ các phần trên trang Chi tiết.
+   * Báo lỗi rõ ràng khi thiếu `?id`, không tìm thấy hội nghị hoặc khi fetch dữ liệu gặp sự cố.
    * @returns {Promise<void>}
    */
   async function initDetailPage() {
@@ -1224,28 +1286,7 @@
 
     setPageState('loading');
     setFetchNotice('');
-
-    const fallbackList = Array.isArray(utils.FALLBACK_CONFERENCES) ? utils.FALLBACK_CONFERENCES : [];
-    let loadedFromJson = false;
-
-    try {
-      const data = typeof utils.fetchJsonCached === 'function'
-        ? await utils.fetchJsonCached('data/conferences.json')
-        : await fetch('data/conferences.json').then(r => { if (!r.ok) throw new Error(r.status); return r.json(); });
-      if (Array.isArray(data) && data.length > 0) {
-        allConferences = data.map(c => utils.normalizeConference(c)).filter(Boolean);
-        loadedFromJson = true;
-      }
-    } catch (err) {
-      allConferences = fallbackList.map(c => utils.normalizeConference(c)).filter(Boolean);
-      if (allConferences.length > 0) {
-        setFetchNotice('Không thể kết nối tệp dữ liệu máy chủ (data/conferences.json). Hệ thống đang hiển thị từ dữ liệu dự phòng cục bộ.');
-      }
-    }
-
-    if (!loadedFromJson && allConferences.length === 0) {
-      allConferences = fallbackList.map(c => utils.normalizeConference(c)).filter(Boolean);
-    }
+    allConferences = await loadNormalizedConferences(utils);
 
     currentConference = allConferences.find(c => utils.getConferenceId(c).toLowerCase() === requestedId)
       || allConferences.find(c => utils.slugify && utils.slugify(c.name) === requestedId)

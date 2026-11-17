@@ -1,15 +1,27 @@
 /**
- * ConfGuide - Kịch bản Trang Theo dõi Hội nghị (js/pages/tracker.js)
- * Hiển thị danh sách hội nghị người dùng đã lưu, tính hạn nộp gần nhất
- * và cho phép xóa hội nghị khỏi danh sách theo dõi.
+ * ConfGuide — Kịch bản Trang Theo dõi Hội nghị (js/pages/tracker.js)
+ * Trang sử dụng: tracker.html
+ * Phụ thuộc: js/core/layout.js (window.ConfGuideUtils), js/components/compare.js
+ * Chức năng: Nạp dữ liệu hội nghị, tính hạn nộp gần nhất theo UTC+7,
+ * render bảng theo dõi cá nhân và xử lý xóa / đồng bộ giữa các tab.
  */
 
 (function () {
   'use strict';
 
+  /* ================= 1. HẰNG SỐ & CẤU HÌNH ================= */
+
+  /** Đường dẫn tệp dữ liệu hội nghị tĩnh */
+  const CONFERENCES_DATA_URL = 'data/conferences.json';
+
+  /** Ngưỡng số ngày đánh dấu trạng thái hạn nộp khẩn cấp */
+  const URGENT_DEADLINE_DAYS = 14;
+
+  /* ================= 2. HÀM HỖ TRỢ DỮ LIỆU & STORAGE ================= */
+
   /**
    * Lấy tham chiếu tới tiện ích dùng chung window.ConfGuideUtils.
-   * @returns {Object|null}
+   * @returns {Object|null} Đối tượng ConfGuideUtils hoặc null nếu chưa tải.
    */
   function getUtils() {
     return window.ConfGuideUtils || null;
@@ -111,9 +123,49 @@
       ? (daysLeft >= 0 ? `Còn ${daysLeft} ngày` : `Đã quá hạn ${Math.abs(daysLeft)} ngày`)
       : '';
     const status = Number.isFinite(daysLeft)
-      ? (daysLeft < 0 ? 'closed' : (daysLeft <= 14 ? 'urgent' : 'open'))
+      ? (daysLeft < 0 ? 'closed' : (daysLeft <= URGENT_DEADLINE_DAYS ? 'urgent' : 'open'))
       : 'closed';
     return { date, remaining, status };
+  }
+
+  /* ================= 3. HÀM RENDER & XỬ LÝ SỰ KIỆN ================= */
+
+  /**
+   * Tạo mã HTML cho một dòng hội nghị trong bảng theo dõi.
+   * @param {Object} conf - Đối tượng hội nghị chuẩn hóa.
+   * @param {Object|null} utils - Đối tượng ConfGuideUtils.
+   * @returns {string} Chuỗi HTML thẻ `<tr>`.
+   */
+  function buildTrackerRowHtml(conf, utils) {
+    const esc = utils && utils.escapeHtml ? utils.escapeHtml : val => String(val ?? '');
+    const confId = utils && utils.getConferenceId ? utils.getConferenceId(conf) : String(conf.id || '');
+    const fields = (conf.fields || []).slice(0, 3).map(f => `<span class="tag">${esc(f)}</span>`).join('');
+    const badgeLabel = esc(conf.acronym || conf.short_name || (conf.name ? conf.name.slice(0, 4) : 'CG'));
+    const nearest = getDeadlineSummary(conf);
+    const compareBtnHtml = window.ConfGuideCompare ? window.ConfGuideCompare.renderToggleButton(conf) : '';
+    const avatarHtml = utils && utils.renderConferenceAvatar
+      ? utils.renderConferenceAvatar(conf, 'tracker-avatar')
+      : `<div class="conf-badge-logo tracker-avatar" aria-hidden="true">${badgeLabel.toUpperCase()}</div>`;
+    const remainingHtml = nearest.remaining
+      ? `<div class="deadline-remaining deadline-remaining--${esc(nearest.status)}">${esc(nearest.remaining)}</div>`
+      : '';
+
+    return `<tr>
+        <td>
+          <div class="conference-name">
+            ${avatarHtml}
+            <div class="name-text"><a href="detail.html?id=${encodeURIComponent(confId)}">${esc(conf.name || confId)}</a></div>
+          </div>
+        </td>
+        <td><div class="tags">${fields || '<span class="tag">Chưa phân loại</span>'}</div></td>
+        <td><div class="deadline-cell"><div class="deadline">${esc(nearest.date)}</div>${remainingHtml}</div></td>
+        <td>
+          <div class="actions">
+            ${compareBtnHtml}
+            <button class="action-btn delete" type="button" data-remove="${esc(confId)}">Xóa</button>
+          </div>
+        </td>
+      </tr>`;
   }
 
   /**
@@ -125,7 +177,6 @@
     if (!tbody) return;
 
     const utils = getUtils();
-    const esc = utils && utils.escapeHtml ? utils.escapeHtml : val => String(val ?? '');
     const ids = getSaved();
     const conferences = allConferences();
 
@@ -140,31 +191,40 @@
     if (count) count.textContent = String(rows.length);
 
     if (!rows.length) {
-      tbody.innerHTML = '<tr><td colspan="4" class="tracker-empty">Bạn chưa lưu hội nghị nào. Hãy tìm hội nghị phù hợp và nhấn “Lưu lại” để theo dõi tại đây.</td></tr>';
+      tbody.innerHTML =
+        '<tr><td colspan="4" class="tracker-empty">'
+        + 'Bạn chưa lưu hội nghị nào. Hãy tìm hội nghị phù hợp và nhấn “Lưu lại” để theo dõi tại đây.'
+        + '</td></tr>';
       return;
     }
 
-    tbody.innerHTML = rows.map(conf => {
-      const confId = utils && utils.getConferenceId ? utils.getConferenceId(conf) : String(conf.id || '');
-      const fields = (conf.fields || []).slice(0, 3).map(f => `<span class="tag">${esc(f)}</span>`).join('');
-      const badgeLabel = esc(conf.acronym || conf.short_name || (conf.name ? conf.name.slice(0, 4) : 'CG'));
-      const nearest = getDeadlineSummary(conf);
-      const compareBtnHtml = window.ConfGuideCompare ? window.ConfGuideCompare.renderToggleButton(conf) : '';
-      const avatarHtml = utils && utils.renderConferenceAvatar
-        ? utils.renderConferenceAvatar(conf, 'tracker-avatar')
-        : `<div class="conf-badge-logo tracker-avatar" aria-hidden="true">${badgeLabel.toUpperCase()}</div>`;
-
-      return `<tr>
-        <td><div class="conference-name">${avatarHtml}<div class="name-text"><a href="detail.html?id=${encodeURIComponent(confId)}">${esc(conf.name || confId)}</a></div></div></td>
-        <td><div class="tags">${fields || '<span class="tag">Chưa phân loại</span>'}</div></td>
-        <td><div class="deadline-cell"><div class="deadline">${esc(nearest.date)}</div>${nearest.remaining ? `<div class="deadline-remaining deadline-remaining--${esc(nearest.status)}">${esc(nearest.remaining)}</div>` : ''}</div></td>
-        <td><div class="actions">${compareBtnHtml}<button class="action-btn delete" type="button" data-remove="${esc(confId)}">Xóa</button></div></td>
-      </tr>`;
-    }).join('');
+    tbody.innerHTML = rows.map(conf => buildTrackerRowHtml(conf, utils)).join('');
   }
 
   /**
+   * Xử lý sự kiện nhấn nút Xóa khỏi danh sách theo dõi bằng Event Delegation trên `tbody`.
+   * @param {MouseEvent} event - Sự kiện click trên bảng.
+   * @param {HTMLElement} tbody - Phần tử `<tbody>` của bảng theo dõi.
+   */
+  function handleTrackerTableClick(event, tbody) {
+    const btn = event.target instanceof Element ? event.target.closest('[data-remove]') : null;
+    if (!btn || !tbody.contains(btn)) return;
+
+    const targetId = btn.dataset.remove;
+    setSaved(getSaved().filter(item => String(item) !== targetId));
+    render();
+
+    const utils = getUtils();
+    if (utils && utils.showToast) {
+      utils.showToast('Đã xóa hội nghị khỏi danh sách theo dõi.', 'info');
+    }
+  }
+
+  /* ================= 4. KHỞI TẠO TRANG ================= */
+
+  /**
    * Nạp dữ liệu hội nghị từ JSON và khởi tạo sự kiện đồng bộ giữa các tab.
+   * @returns {Promise<void>}
    */
   async function initTracker() {
     const tbody = document.getElementById('conferenceBody');
@@ -174,23 +234,20 @@
     const normalize = utils && utils.normalizeConference ? utils.normalizeConference : item => item;
 
     // Event delegation một lần trên tbody thay vì gắn lại listener cho từng hàng sau mỗi lần render
-    tbody.addEventListener('click', event => {
-      const btn = event.target instanceof Element ? event.target.closest('[data-remove]') : null;
-      if (!btn || !tbody.contains(btn)) return;
-      const targetId = btn.dataset.remove;
-      setSaved(getSaved().filter(item => String(item) !== targetId));
-      render();
-      if (utils && utils.showToast) {
-        utils.showToast('Đã xóa hội nghị khỏi danh sách theo dõi.', 'info');
-      }
-    });
+    tbody.addEventListener('click', event => handleTrackerTableClick(event, tbody));
 
-    tbody.innerHTML = '<tr class="loading-row"><td colspan="4" class="loading-row">Đang tải dữ liệu hội nghị...</td></tr>';
+    tbody.innerHTML =
+      '<tr class="loading-row"><td colspan="4" class="loading-row">'
+      + 'Đang tải dữ liệu hội nghị...'
+      + '</td></tr>';
 
     try {
       const data = utils && typeof utils.fetchJsonCached === 'function'
-        ? await utils.fetchJsonCached('data/conferences.json')
-        : await fetch('data/conferences.json').then(r => { if (!r.ok) throw new Error(r.status); return r.json(); });
+        ? await utils.fetchJsonCached(CONFERENCES_DATA_URL)
+        : await fetch(CONFERENCES_DATA_URL).then(r => {
+          if (!r.ok) throw new Error(r.status);
+          return r.json();
+        });
       if (Array.isArray(data) && data.length > 0) {
         window.ConfGuideTrackerConferences = data.map(normalize).filter(Boolean);
       }
