@@ -19,6 +19,7 @@
 - [7. Công nghệ và ràng buộc](#7-công-nghệ-và-ràng-buộc)
 - [8. Cấu trúc thư mục và quy ước đặt tên](#8-cấu-trúc-thư-mục-và-quy-ước-đặt-tên)
 - [9. Quy tắc code](#9-quy-tắc-code)
+- [Bản đồ mã nguồn (Source Code Map)](#bản-đồ-mã-nguồn-source-code-map)
 - [10. Luồng hoạt động của các chức năng chính](#10-luồng-hoạt-động-của-các-chức-năng-chính)
 - [11. Kiểm thử và chất lượng](#11-kiểm-thử-và-chất-lượng)
 - [12. Cài đặt và chạy](#12-cài-đặt-và-chạy)
@@ -29,6 +30,7 @@
 - [Phụ lục B: Số liệu đo ban đầu trước tối ưu](#phụ-lục-b-số-liệu-đo-ban-đầu-trước-tối-ưu)
 - [Phụ lục C: Báo cáo tối ưu mã nguồn chi tiết](#phụ-lục-c-báo-cáo-tối-ưu-mã-nguồn-chi-tiết)
 - [Phụ lục D: Chẩn đoán và sửa lỗi hiệu ứng chuyển trang](#phụ-lục-d-chẩn-đoán-và-sửa-lỗi-hiệu-ứng-chuyển-trang)
+- [Phụ lục E: Báo cáo Clean Code và Tái cấu trúc mã nguồn](#phụ-lục-e-báo-cáo-clean-code-và-tái-cấu-trúc-mã-nguồn)
 
 ---
 
@@ -240,6 +242,61 @@ Dự án tuân thủ nghiêm ngặt bộ quy chuẩn kỹ thuật trong [`AGENT.
 
 ---
 
+## Bản đồ mã nguồn (Source Code Map)
+
+Mọi trang HTML đều dùng chung bộ nền tảng ở `<head>`: `css/base/base.css`, `css/base/transition.css`, `js/core/page-transition.js` và `js/core/layout.js` (`defer blocking="render"`), kèm đoạn script anti-FOUC ngắn đầu `<body>` để áp dụng Dark Mode trước khi vẽ khung hình đầu tiên.
+
+### 1. Nhóm trang HTML (`11` tệp đặt ở thư mục gốc)
+
+| Tệp HTML | Số dòng | Stylesheet đi kèm *(ngoài nền chung)* | Script đi kèm *(ngoài lõi chung)* | Vai trò chức năng chính |
+|---|---:|---|---|---|
+| [`index.html`](index.html) | 294 | `css/pages/index.css`, `css/components/compare.css` | `js/components/compare.js`, `js/pages/index.js` | Trang chủ: giới thiệu, tìm kiếm nhanh, slider 3 slide, hội nghị tiêu biểu |
+| [`search.html`](search.html) | 488 | `css/pages/search.css`, `css/components/compare.css` | `js/components/compare.js`, `js/components/search-core.js`, `js/pages/search.js` | Trang Tra cứu: lọc đa tiêu chí, đồng bộ URL, gợi ý chính tả, phân trang |
+| [`detail.html`](detail.html) | 452 | `css/pages/detail.css`, `css/components/compare.css` | `js/components/compare.js`, `js/pages/detail.js` | Trang Chi tiết (`?id=`): timeline 4 mốc UTC+7, đếm ngược, xuất `.ics`, đánh giá `#danh-gia` |
+| [`tracker.html`](tracker.html) | 88 | `css/pages/tracker.css`, `css/components/compare.css` | `js/components/compare.js`, `js/pages/tracker.js` | Theo dõi hội nghị đã lưu, hiển thị mốc hạn nộp gần nhất & xóa nhanh |
+| [`profile.html`](profile.html) | 271 | `css/pages/profile.css`, `css/components/compare.css`, `css/components/calendar.css` | `js/components/compare.js`, `js/components/calendar.js`, `js/pages/profile.js` | Hồ sơ cá nhân (Auth Guard): chỉnh sửa hồ sơ/avatar, lịch mốc cá nhân |
+| [`about.html`](about.html) | 201 | `css/pages/about.css` | `js/pages/about.js` | Giới thiệu đồ án, minh bạch dữ liệu, đội ngũ và modal đề xuất hội nghị |
+| [`contact.html`](contact.html) | 108 | *(chỉ dùng `base.css` + `transition.css`)* | *(dùng `initContactForm` trong `layout.js`)* | Biểu mẫu liên hệ, đóng góp hội nghị và thông tin văn phòng đồ án |
+| [`login.html`](login.html) | 107 | `css/pages/auth.css` | `js/pages/auth.js` | Biểu mẫu đăng nhập kiểm tra mật khẩu SHA-256 & ghi nhớ phiên |
+| [`register.html`](register.html) | 133 | `css/pages/auth.css` | `js/pages/auth.js` | Biểu mẫu đăng ký tài khoản & checklist độ mạnh mật khẩu |
+| [`terms.html`](terms.html) | 93 | *(chỉ dùng `base.css` + `transition.css`)* | *(chỉ dùng lõi chung)* | Điều khoản và điều kiện sử dụng nền tảng ConfGuide |
+| [`privacy.html`](privacy.html) | 100 | *(chỉ dùng `base.css` + `transition.css`)* | *(chỉ dùng lõi chung)* | Chính sách bảo mật dữ liệu LocalStorage và quyền người dùng |
+
+### 2. Nhóm Stylesheet CSS (`11` tệp — 3 tầng `base / components / pages`)
+
+| Tệp CSS | Số dòng | Tầng | Nhiệm vụ chính |
+|---|---:|---|---|
+| [`css/base/base.css`](css/base/base.css) | 2,263 | `base` | Tokens OKLCH 2 lớp (Light/Dark 60:30:10 + `@supports` fallback), reset, Header/Footer, modal, policy, contact |
+| [`css/base/transition.css`](css/base/transition.css) | 355 | `base` | Chuyển trang Phương án B (`@view-transition`, keyframes GPU `translate3d`, `is-leaving`/`is-entering`, `reduced-motion`) |
+| [`css/components/compare.css`](css/components/compare.css) | 886 | `components` | Nút chọn so sánh, thanh nổi `.compare-bar`, modal `<dialog>` & bảng 2 chiều sticky cột trái |
+| [`css/components/calendar.css`](css/components/calendar.css) | 893 | `components` | Lưới lịch 7 cột `T2–CN`, ký hiệu sự kiện phân biệt hình dạng (mobile dots), panel chi tiết ngày |
+| [`css/pages/index.css`](css/pages/index.css) | 1,154 | `pages` | `@view-transition` search-morph, Hero 2 cột, Slider 3 thẻ nổi bật, `.search-box`, thẻ tính năng & hội nghị |
+| [`css/pages/search.css`](css/pages/search.css) | 2,352 | `pages` | `@view-transition` search-morph, Hero tìm kiếm + combobox, sidebar accordion, drawer mobile, thẻ kết quả, skeleton |
+| [`css/pages/detail.css`](css/pages/detail.css) | 1,558 | `pages` | Header hội nghị, timeline 4 mốc, thông tin học thuật `<dl>`, khối đánh giá & view `#danh-gia`, sidebar sticky |
+| [`css/pages/tracker.css`](css/pages/tracker.css) | 478 | `pages` | Hero theo dõi, thanh thống kê, bảng danh sách hạn chót & huy hiệu khẩn cấp/hết hạn |
+| [`css/pages/profile.css`](css/pages/profile.css) | 758 | `pages` | Thẻ hồ sơ hero 2 tầng, lưới thống kê, editor ảnh đại diện modal & các lớp tiện ích hồ sơ |
+| [`css/pages/about.css`](css/pages/about.css) | 970 | `pages` | 6 phần nội dung trang Giới thiệu, thẻ cố vấn/thành viên, lộ trình 2 giai đoạn & modal đề xuất |
+| [`css/pages/auth.css`](css/pages/auth.css) | 744 | `pages` | Ảnh nền phủ `--auth-overlay` + `@supports`, bố cục 2 cột đăng nhập/đăng ký, checklist mật khẩu |
+
+### 3. Nhóm Module JavaScript (`12` tệp — 3 tầng `core / components / pages`)
+
+| Tệp JS | Số dòng | Tên hàm chính / API xuất ra | Vai trò trong kiến trúc |
+|---|---:|---|---|
+| [`js/core/layout.js`](js/core/layout.js) | 2,307 | `ConfGuideUtils`, `renderHeader`, `renderFooter`, `convertDeadlineToVn`, `initContactForm` | Lõi toàn site: cache JSON theo Promise, quy đổi AoE → UTC+7, phiên đăng nhập, Auth Guard, modal & form liên hệ |
+| [`js/core/page-transition.js`](js/core/page-transition.js) | 683 | `ConfGuidePageTransition`, `injectSpeculationRules`, `navigateWithWaapiExit`, `handlePageReveal` | Điều phối chuyển trang (View Transitions + WAAPI), Speculation Rules, khôi phục `bfcache` & focus thanh tìm kiếm |
+| [`js/components/search-core.js`](js/components/search-core.js) | 736 | `ConfGuideSearchCore` (`buildIndex`, `scoreConference`, `matchesFilters`, `computeFacetCounts`, `getRelaxSuggestions`, `highlightMatches`) | Bộ máy tìm kiếm thuần hàm: chuẩn hóa tiếng Việt, khoảng cách Damerau-Levenshtein, tính facet & gợi ý nới lọc |
+| [`js/components/compare.js`](js/components/compare.js) | 1,140 | `ConfGuideCompare` (`toggleConference`, `buildComparisonGroups`, `renderDialogTable`, `openDialog`) | Thành phần đối chiếu tối đa 3 hội nghị cạnh nhau qua `sessionStorage` & `<dialog>` chuẩn A11y |
+| [`js/components/calendar.js`](js/components/calendar.js) | 1,194 | `ConfGuideProfileCalendar` (`collectCalendarEvents`, `renderCalendarShell`, `renderSelectedDayPanel`, `handleCalendarKeydown`) | Tổng hợp deadline + sự kiện + Tracker vào lịch tháng 7 cột kèm điều hướng phím |
+| [`js/pages/index.js`](js/pages/index.js) | 1,110 | `initIndexPage`, `renderDeadlineSliderCards`, `renderFeaturedConferences`, `goToSlide` | Điều khiển slider hero 3 slide, tìm kiếm nhanh & hiển thị lưới hội nghị tiêu biểu trang chủ |
+| [`js/pages/search.js`](js/pages/search.js) | 2,797 | `Proxy filterState`, `readUrlIntoFilterState`, `executePipeline`, `renderConferenceListUI`, `bindSearchComboboxEvents` | Tầng điều phối UI trang Tra cứu: microtask batching, đồng bộ URL 2 chiều, `<template>` + `DocumentFragment` |
+| [`js/pages/detail.js`](js/pages/detail.js) | 1,324 | `initDetailPage`, `renderHeader`, `renderActiveNextDeadline`, `buildTimelineStepHtml`, `handleReviewFormSubmit` | Nạp chi tiết 1 hội nghị, chạy đồng hồ đếm ngược dọn sạch trên `pagehide`, xuất `.ics` & lưu nhận xét |
+| [`js/pages/tracker.js`](js/pages/tracker.js) | 267 | `initTracker`, `render`, `buildTrackerRowHtml`, `handleTrackerTableClick` | Đọc `confguide_saved_<userId>`, tính hạn nộp gần nhất & cập nhật bảng bằng event delegation |
+| [`js/pages/profile.js`](js/pages/profile.js) | 1,021 | `renderUserProfile`, `initEditProfileModal`, `processAndSaveAvatar`, `initCalendarSection` | Cập nhật hồ sơ, nén ảnh `<canvas>` 200×200px, đồng bộ user vào LocalStorage & khởi tạo Lịch |
+| [`js/pages/about.js`](js/pages/about.js) | 692 | `initAboutPage`, `renderHero`, `renderTransparencyAndTech`, `setupProposalModal` | Nạp `data/about.json` & vận hành modal đề xuất hội nghị với validation + focus trap |
+| [`js/pages/auth.js`](js/pages/auth.js) | 768 | `initializeAuthPage`, `initLoginForm`, `initRegisterForm`, `hashPassword`, `verifyPassword` | Quản lý `SEED_USERS`/`data/users.json`, băm SHA-256 & xử lý đăng nhập/đăng ký |
+
+---
+
 ## 10. Luồng hoạt động của các chức năng chính
 
 1. **Tìm kiếm nhanh → Tra cứu nâng cao & Đồng bộ URL (`index.js` → `search.js` + `search-core.js`):**
@@ -291,6 +348,20 @@ Dự án tuân thủ nghiêm ngặt bộ quy chuẩn kỹ thuật trong [`AGENT.
   - Toàn bộ **11/11 trang** giữ **Accessibility = 100, Best Practices = 100, SEO = 100** (commit `e04662e`).
   - Riêng `profile.html` ở trạng thái **đã đăng nhập** sau bản sửa Dark Mode & tương phản lịch (`cd3d5ea`) đạt: **Desktop Light** `100/100/100/100` (`LCP=578ms`, `CLS=0.0015`), **Desktop Dark** `100/100/100/100` (`LCP=613ms`, `CLS=0`), **Mobile Light** `88/100/100/100` (`LCP=3026ms`), **Mobile Dark** `89/100/100/100` (`LCP=2955ms`), `0` lỗi tương phản (`colorContrastScore = 1`).
   - Chi tiết chỉ số gốc xem [Phụ lục B](#phụ-lục-b-số-liệu-đo-ban-đầu-trước-tối-ưu); chi tiết từng hạng mục tối ưu và code nghi ngờ thừa xem [Phụ lục C](#phụ-lục-c-báo-cáo-tối-ưu-mã-nguồn-chi-tiết).
+
+### Đợt Clean Code & Chuẩn hóa (nhánh `refactor/clean-code`: Trước → Sau trên 11 trang)
+
+| Chỉ số kiểm chứng (`clean_before` → `clean_after`) | Trước Clean Code | Sau Clean Code | Kết luận |
+|---|---:|---:|---|
+| **Hàm có tên dài nhất (`maxNamedFnLines`)** | `431` dòng *(search.js)* | **`97` dòng** *(layout.js)* | **Giảm `-77.5%`** |
+| **Độ sâu lồng điều khiển tối đa (`maxCtrlDepth`)** | `5` tầng *(search-core.js)* | **`3` tầng** | **Giảm `2` tầng** |
+| **Tổng dòng comment giải thích + JSDoc (JS / CSS / HTML)** | `1,842 / 301 / 102` | **`2,481 / 324 / 152`** | **Tăng độ rõ ràng đồng bộ** |
+| **Quy tắc CSS gộp 1 dòng (`multiPropLines`) / dòng CSS `>120`** | `160` / `46` | **`0`** / **`1`** *(URL ngoài)* | **Sạch định dạng 100%** |
+| **Bất biến hiển thị CDP (`computedStyle` / viewport overflow)** | `0` lỗi | **`0` khác biệt / `0` tràn** | **60/66 PNG trùng pixel tuyệt đối** *(6 ảnh `detail` chỉ đổi vùng đồng hồ live)* |
+| **Dữ liệu `data/*` (SHA-256 4 tệp)** | Nguyên gốc | **Khớp 100% từng byte** | **0 byte thay đổi** |
+| **Lighthouse Accessibility / Best Practices / SEO (11/11 trang)** | `100 / 100 / 100` | **`100 / 100 / 100`** | Giữ nguyên điểm tuyệt đối trên cả Desktop & Mobile |
+
+Chi tiết từng tệp trước/sau và kết quả Lighthouse từng trang xem tại [Phụ lục E](#phụ-lục-e-báo-cáo-clean-code-và-tái-cấu-trúc-mã-nguồn).
 
 ---
 
@@ -730,5 +801,78 @@ Kiểm thử bằng Chrome DevTools Protocol `Animation.setPlaybackRate(0.02)` k
   - **`0 px` sai lệch** trên vùng nav cho toàn bộ **`12/12` cặp điều hướng** (`index`, `search`, `tracker`, `about` hai chiều; `hdrReady = true` `12/12`) và **`0 px` sai lệch** khi cuộn trang chuyển `index.html → search.html` ở cả Light Mode lẫn Dark Mode (giảm từ `73,986 px` / `74,200 px` xuống `0 px`). Trên nhánh WAAPI, `.site-header` giữ nguyên `opacity: 1` và `backdropFilter: blur(14px)` sống.
   - `prefers-reduced-motion: reduce`, Firefox giả lập (`cap=false`, giữ `?q=SOICT` và focus `#searchInput`), giao thức `file:///`, Back/Forward (`bfcache`) và double-click nhanh đều đạt `0` lỗi console / `0` warning / `0` ngoại lệ / `0` 404.
   - `compare_cdp.mjs`: `0` sai lệch computed style trên 11/11 trang, `0` sai lệch overflow, `55/66` PNG khớp tuyệt đối từng byte; dữ liệu `data/` giữ nguyên `SHA-256`.
+
+</details>
+
+---
+
+## Phụ lục E: Báo cáo Clean Code và Tái cấu trúc mã nguồn
+
+<details>
+<summary>Mở rộng chi tiết số liệu Clean Code (code_quality_clean_before → clean_after), Lighthouse 11 trang & Suspect List</summary>
+
+> Thực hiện trên nhánh `refactor/clean-code` tách từ `0b5a5ba` qua 4 commit theo từng tầng (`js` → `css` → `html` → `README.md`), giữ bất biến 100% giao diện, màu sắc OKLCH, hiệu ứng kính mờ, View Transitions và logic nghiệp vụ.
+
+### E.1. Tổng hợp Chỉ số Chất lượng Mã nguồn (12 JS · 11 CSS · 11 HTML)
+
+| Nhóm / Chỉ số | Trước (`clean_before`) | Sau (`clean_after`) | Thay đổi |
+|---|---:|---:|---|
+| **JS — Tổng số dòng / Dung lượng** | `13,713 L` / `557,204 B` | `14,039 L` / `578,154 B` | Tách hàm nhỏ + thêm JSDoc tiếng Việt (`0` minify) |
+| **JS — Số dòng comment** | `1,842` | **`2,481`** | `+639` dòng (`+34.7%`) |
+| **JS — Tổng số hàm có tên (`namedFunctions`)** | `389` | **`480`** | `+91` helper nhỏ dễ đọc & dễ giải thích |
+| **JS — Độ dài hàm dài nhất (`maxNamedFnLines`)** | `431` (`initStaticEvents`) | **`97`** (`renderFooter`) | **`-77.5%`** |
+| **JS — Độ sâu điều khiển tối đa (`maxCtrlDepth`)** | `5` (`getRelaxSuggestions`) | **`3`** | **`-2` tầng lồng** nhờ early return & tách helper |
+| **JS — Dòng > 120 ký tự / Lỗi `node --check`** | `206` / `0` | **`90`** / **`0`** | `-56.3%` dòng dài; 12/12 đạt chuẩn cú pháp |
+| **JS — `var` / `console.*` / `TODO`** | `0 / 0 / 0` | **`0 / 0 / 0`** | Giữ sạch 100% |
+| **CSS — Tổng số dòng / Dung lượng** | `11,200 L` / `262,414 B` | `12,411 L` / `266,700 B` | Tách mỗi khai báo CSS xuống 1 dòng chuẩn |
+| **CSS — Dòng gộp nhiều thuộc tính (`multiPropLines`)** | `160` *(auth: 63, detail: 96, tracker: 1)* | **`0`** | **`-100%`** |
+| **CSS — Dòng > 120 ký tự / `dupSel` cùng phạm vi** | `46` / `0` | **`1`** *(URL ảnh nền ngoài trong `auth.css`)* / **`0`** | Sạch toàn bộ dòng dài & trùng phạm vi |
+| **HTML — Tổng số dòng / Dòng comment** | `2,217 L` / `102` cmt | `2,335 L` / **`152`** cmt | Đồng bộ thứ tự `<head>` 11/11 trang + comment khối |
+| **HTML — Lỗi `HTMLParser` / `style=` / `on*=` / Trùng `id`** | `0 / 0 / 0 / 0` | **`0 / 0 / 0 / 0`** | Chuẩn cấu trúc semantic HTML5 |
+
+### E.2. Chi tiết Cải thiện Độ dài Hàm JavaScript theo từng Tệp (`12` tệp)
+
+| Tệp JS | Hàm dài nhất Trước (dòng) | Hàm dài nhất Sau (dòng) | Số hàm có tên (Trước → Sau) | `maxCtrlDepth` (Trước → Sau) | Điểm tái cấu trúc trọng tâm |
+|---|---:|---:|---:|---:|---|
+| `js/pages/search.js` | `initStaticEvents` (**431**) | `bindResultsAreaDelegation` (**80**) | 78 → 90 | 4 → **2** | Tách 12 helper cho pipeline lọc, thẻ kết quả, combobox & 7 event binder con |
+| `js/pages/auth.js` | `initializeAuthPage` (**376**) | `initLoginForm` (**75**) | 19 → 27 | 2 → 2 | Tạo `createSeedUser`, tách `handleLoginSubmit`, `handleRegisterSubmit`, validator factory |
+| `js/pages/about.js` | `setupProposalModal` (**237**) | `setupProposalModal` (**65**) | 21 → 21 | 2 → 2 | Un-nest 5 helper form/focus trap ra cấp module |
+| `js/pages/profile.js` | `initEditProfileModal` (**225**) | `initEditProfileModal` (**72**) | 34 → 41 | 2 → 2 | Gom 3 vòng lặp đồng bộ user thành `syncCurrentUserRecord`, tách card/validator builder |
+| `js/components/compare.js` | `buildComparisonGroups` (**202**) | `renderDialogTable` (**57**) | 29 → 41 | 2 → 2 | Tách 8 cell renderer theo tiêu chí + HTML row/header builder |
+| `js/core/layout.js` | `renderGlobalModalsHtml` (**173**) | `renderFooter` (**97**) | 57 → 66 | 2 → 2 | Tách 3 hàm dựng modal (`Settings`/`Help`/`Report`), gom icon nav & event binder |
+| `js/components/search-core.js` | `getRelaxSuggestions` (**141**) | `getRelaxSuggestions` (**68**) | 14 → 24 | **5 → 2** | Tách `buildFacetEvaluator`, `countRelaxedMatches`, `findSpellingSuggestion` dùng early return |
+| `js/pages/detail.js` | `setupEventDelegation` (**131**) | `renderGridConferenceCard` (**64**) | 33 → 43 | 3 → 3 | Tách render header, timeline step, stars & delegation handler |
+| `js/pages/index.js` | `initHeroSliderEvents` (**128**) | `buildFeaturedConferenceCardHtml` (**80**) | 38 → 44 | 2 → 2 | Tách event slider (reduced motion, nav, swipe), phân loại featured/deadline |
+| `js/components/calendar.js` | `bindCalendarEvents` (**106**) | `renderUpcomingPanel` (**61**) | 32 → 41 | 2 → 2 | Tách `computeVnDeadlinePayload`, `buildCalendarDayHtml`, click/keydown handlers |
+| `js/core/page-transition.js` | `initViewTransitionEvents` (**96**) | `navigateWithWaapiExit` (**45**) | 24 → 30 | 2 → 2 | Hoàn thiện JSDoc cho mọi helper điều hướng, WAAPI & `bfcache` |
+| `js/pages/tracker.js` | `render` (**43**) | `initTracker` (**35**) | 10 → 12 | 3 → 3 | Chuẩn hóa 6 phần & tách `buildTrackerRowHtml`, `handleTrackerTableClick` |
+
+### E.3. Đối chiếu Lighthouse 11 trang (`clean_before` → `clean_after`)
+
+| Trang | Mobile (Perf / A11y / BP / SEO) Trước → Sau | Mobile LCP / CLS / TBT (Sau) | Desktop (Perf / A11y / BP / SEO) Trước → Sau | Desktop LCP / CLS / TBT (Sau) |
+|---|---|---|---|---|
+| `index.html` | `92/100/100/100` → `88/100/100/100` | `3036ms / 0.0119 / 0ms` | `79/100/100/100` → `79/100/100/100` | `687ms / 0.4662 / 0ms` |
+| `search.html` | `83/100/100/100` → `82/100/100/100` | `3589ms / 0 / 73ms` | `100/100/100/100` → **`100/100/100/100`** | **`623ms / 0.0002 / 0ms`** |
+| `detail.html?id=enase-2027` | `69/100/100/100` → `67/100/100/100` | `2862ms / 0.6829 / 37ms` | `86/100/100/100` → `86/100/100/100` | `751ms / 0.2698 / 0ms` |
+| `tracker.html` | `96/100/100/100` → `91/100/100/100` | `2797ms / 0.0147 / 0ms` | `100/100/100/100` → **`100/100/100/100`** | `551ms / 0.0139 / 0ms` |
+| `profile.html` *(auth guard)* | `80/100/100/100` → `80/100/100/100` | `3771ms / 0 / 23ms` | `99/100/100/100` → `99/100/100/100` | `822ms / 0 / 0ms` |
+| `profile.html` *(đã đăng nhập, Dark / Light)* | — | `LCP 2882ms / CLS 0.0164` *(Dark)* | **`100/100/100/100`** *(Sáng & Tối)* | **`LCP 583ms / CLS 0.0015 / TBT 0ms`** *(Dark)* |
+| `about.html` | `70/100/100/100` → `70/100/100/100` | `2649ms / 0.633 / 0ms` | `84/100/100/100` → **`86/100/100/100`** | `595ms / 0.2768 / 0ms` |
+| `contact.html` | `97/100/100/100` → `96/100/100/100` | `2215ms / 0 / 0ms` | `100/100/100/100` → **`100/100/100/100`** | `471ms / 0 / 0ms` |
+| `login.html` | `98/100/100/100` → `97/100/100/100` | `2103ms / 0 / 0ms` | `100/100/100/100` → **`100/100/100/100`** | `524ms / 0 / 0ms` |
+| `register.html` | `97/100/100/100` → `97/100/100/100` | `2104ms / 0 / 0ms` | `100/100/100/100` → **`100/100/100/100`** | `444ms / 0 / 0ms` |
+| `terms.html` | `97/100/100/100` → `96/100/100/100` | `2194ms / 0 / 0ms` | `100/100/100/100` → **`100/100/100/100`** | `470ms / 0 / 0ms` |
+| `privacy.html` | `97/100/100/100` → `96/100/100/100` | `2202ms / 0 / 0ms` | `100/100/100/100` → **`100/100/100/100`** | `474ms / 0 / 0ms` |
+
+> Lưu ý kiểm định: (1) Các endpoint W3C trực tuyến (`validator.w3.org/nu/`, `jigsaw.w3.org`) gặp lỗi chứng chỉ TLS/Cloudflare trong môi trường CLI (`URLError: CERTIFICATE_VERIFY_FAILED`), được kiểm chứng thay thế bằng `StrictHTMLChecker` (`0` lỗi trên `11/11` HTML) và Chrome CSSOM (`11/11` CSS nạp hợp lệ); (2) Toàn bộ 4 tệp trong `data/` giữ nguyên **100% SHA-256** (`about.json`, `conferences.json`, `scrape-conferences.py`, `users.json`).
+
+### E.4. Danh sách Điểm nghi ngờ giữ nguyên an toàn (Suspect List)
+
+Các thành phần sau không được xóa để bảo đảm nguyên tắc không phá vỡ tham chiếu dự phòng hoặc hook tương thích cũ:
+1. `css/pages/auth.css` (`.auth-header*`): `login.html` và `register.html` thực tế nạp `#site-header` từ `layout.js`; giữ nguyên selector dự phòng.
+2. `css/pages/profile.css` (`.saved-*`, `.tracker-preview-*`, `#savedConferencesList`, `#trackerPreviewContainer`) & hàm tương ứng trong `js/pages/profile.js`: được giữ lại kèm kiểm tra `if (!container) return;` an toàn cho bố cục danh sách đã lưu cũ.
+3. `js/pages/search.js` (`DUPLICATE_RAW_NAMES`, `ENABLED_FILTER_GROUPS.mode/publisher`): cờ tắt sẵn để mở rộng bộ lọc hình thức / nhà xuất bản về sau mà không đổi cấu trúc `filterState`.
+4. `js/pages/index.js` (`initTabs`, `currentTab`) & `css/pages/index.css` (`.filter-tabs`, `.tab-btn`): hook tab lọc hội nghị cũ trên trang chủ, giữ nguyên tương thích.
+5. `js/core/layout.js` (`logs.html` trong kiểm tra active link; `#contactFullName` đối ứng với `#fullName` trong `contact.html`) và `data/scrape-conferences.py` (`INPUT_FILE = "conferences.json"`, `OUTPUT_FILE = os.path.join("data", "conference_data.json")` thuộc `data/` bất biến).
 
 </details>
