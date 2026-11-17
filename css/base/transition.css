@@ -1,40 +1,34 @@
 /* ==========================================================================
-   CONFGUIDE — HIỆU ỨNG CHUYỂN TRANG & SHARED-ELEMENT THANH TÌM KIẾM
-   Cơ chế tăng tiến dần (Progressive Enhancement):
-   1. Trình duyệt hỗ trợ Cross-Document View Transitions (@view-transition):
-      - Giữ cố định thanh điều hướng (.site-header), chân trang (.site-footer) và nền (:root).
-      - Chỉ phần nội dung chính (main) trượt nhẹ theo hướng nav hoặc mờ dần.
-      - Thanh tìm kiếm (.search-box) trượt và co giãn mượt giữa index.html và search.html.
-   2. Trình duyệt chưa hỗ trợ (hoặc giao thức file://):
-      - Dùng fallback JS qua class is-leaving / is-entering trên phần tử gốc.
-   3. Chỉ animate transform và opacity; hỗ trợ đầy đủ prefers-reduced-motion.
+   CONFGUIDE — HIỆU ỨNG CHUYỂN TRANG & MORPH THANH TÌM KIẾM (PHƯƠNG ÁN B)
+   Kiến trúc hai nhánh tối ưu độ mượt & bảo toàn kính mờ (liquid glass) trên nav:
+   1. Cặp index.html <-> search.html (Cross-Document View Transitions):
+      - Chỉ 2 trang này khai báo @view-transition (trong index.css & search.css).
+      - Giữ tối đa 3 snapshot: site-nav, page-main, search-bar; không tách footer.
+      - Áp dụng quy tắc Phương án A cho site-nav (tắt animation, display:none old,
+        isolation:auto, background nền chuẩn) để nav đứng yên tuyệt đối và không lộ bóng mờ.
+   2. Toàn bộ các cặp điều hướng khác (và trình duyệt chưa hỗ trợ @view-transition / file:///):
+      - Không chụp snapshot nav: .site-header luôn là DOM sống giữ nguyên backdrop-filter.
+      - Chỉ phần tử <main> chạy animation ra ngắn bằng WAAPI (130ms, ease-in) và vào bằng
+        CSS @keyframes (270ms, cubic-bezier(0.22, 1, 0.36, 1)) dùng translate3d + opacity.
+   3. Hỗ trợ prefers-reduced-motion và tạm dừng animation nền vô hạn khi chuyển trang.
    ========================================================================== */
 
-@view-transition {
-  navigation: auto;
-}
-
 :root {
-  --vt-page-duration: 300ms;
-  --vt-exit-duration: 220ms;
-  --vt-search-duration: 400ms;
-  --vt-fallback-leave-duration: 180ms;
+  --vt-out-duration: 130ms;
+  --vt-in-duration: 270ms;
+  --vt-search-duration: 390ms;
+  --vt-ease-in: cubic-bezier(0.4, 0, 1, 1);
   --vt-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-/* ================= 1. Gán view-transition-name cho từng vùng bố cục ================= */
+/* ================= 1. Gán view-transition-name (tối đa 3 lớp) ================= */
 
-/* Thanh điều hướng và chân trang đứng yên giữa các trang */
-.site-header,
-.auth-header {
+/* Chỉ gắn site-nav cho thanh điều hướng chính; trang Auth (.auth-header) không gán */
+.site-header {
   view-transition-name: site-nav;
 }
 
-.site-footer {
-  view-transition-name: site-footer;
-}
-
-/* Nội dung chính của từng trang */
+/* Nội dung chính (<main>) kèm footer trôi tự nhiên, không tách riêng site-footer */
 main {
   view-transition-name: page-main;
 }
@@ -44,35 +38,56 @@ body.is-filter-drawer-open main {
   view-transition-name: none;
 }
 
-/* Thanh tìm kiếm dùng chung tên giữa index.html và search.html (mỗi trang tối đa 1 phần tử) */
+/* Thanh tìm kiếm dùng chung cho cặp index.html <-> search.html */
 .search-box {
   view-transition-name: search-bar;
 }
 
-/* Khi chuyển từ index/search sang trang không có ô tìm kiếm, giữ thanh trượt cùng main */
 html.vt-disable-search-bar .search-box {
   view-transition-name: none;
 }
 
-/* ================= 2. Phân tầng z-index & Cố định Header / Footer ================= */
+/* ================= 2. Phân tầng & Bảo toàn Nav Đứng yên Tuyệt đối ================= */
 
 ::view-transition-group(root) {
   animation: none;
   z-index: 1;
 }
 
+::view-transition-old(root) {
+  display: none;
+}
+
+::view-transition-new(root) {
+  animation: none;
+}
+
 ::view-transition-group(page-main) {
   z-index: 10;
 }
 
-::view-transition-group(site-footer) {
-  animation: none;
-  z-index: 15;
-}
-
+/* Khóa cứng site-nav: chỉ hiển thị snapshot mới, nền khớp :root/body.dark chống xuyên nét unblurred */
 ::view-transition-group(site-nav) {
   animation: none;
+  background: var(--cg-neutral-25);
   z-index: 20;
+}
+
+html:has(body.dark)::view-transition-group(site-nav) {
+  background: var(--cg-neutral-950);
+}
+
+::view-transition-image-pair(site-nav) {
+  isolation: auto;
+}
+
+::view-transition-old(site-nav) {
+  display: none;
+}
+
+::view-transition-new(site-nav) {
+  animation: none;
+  mix-blend-mode: normal;
 }
 
 ::view-transition-group(search-bar) {
@@ -81,39 +96,16 @@ html.vt-disable-search-bar .search-box {
   animation-timing-function: var(--vt-ease-out);
 }
 
-/* Chống nhấp nháy nền và hiệu ứng kính mờ (liquid glass) trên header/footer */
-::view-transition-old(root),
-::view-transition-old(site-nav),
-::view-transition-old(site-footer) {
-  animation: none;
-  opacity: 0;
-  mix-blend-mode: normal;
-}
-
-::view-transition-new(root),
-::view-transition-new(site-nav),
-::view-transition-new(site-footer) {
-  animation: none;
-  opacity: 1;
-  mix-blend-mode: normal;
-}
-
-/* Nếu đi từ trang xác thực (không footer) sang trang chính (có footer), hiện footer êm */
-::view-transition-new(site-footer):only-child {
-  animation: vtFadeIn var(--vt-page-duration) var(--vt-ease-out) both;
-}
-
-/* ================= 3. Hoạt ảnh phần nội dung chính (page-main) ================= */
+/* ================= 3. Hoạt ảnh Nội dung chính cho Cặp index <-> search ================= */
 
 ::view-transition-old(page-main) {
-  animation: vtFadeSlideOut var(--vt-exit-duration) var(--vt-ease-out) both;
+  animation: vtFadeSlideOut var(--vt-out-duration) var(--vt-ease-in) both;
 }
 
 ::view-transition-new(page-main) {
-  animation: vtFadeSlideIn var(--vt-page-duration) var(--vt-ease-out) both;
+  animation: vtFadeSlideIn var(--vt-in-duration) var(--vt-ease-out) both;
 }
 
-/* Điều hướng tiến theo thứ tự nav: trượt từ phải sang */
 html.vt-forward::view-transition-old(page-main) {
   animation-name: vtForwardOut;
 }
@@ -122,7 +114,6 @@ html.vt-forward::view-transition-new(page-main) {
   animation-name: vtForwardIn;
 }
 
-/* Điều hướng lùi theo thứ tự nav hoặc nút Back: trượt từ trái sang */
 html.vt-back::view-transition-old(page-main) {
   animation-name: vtBackOut;
 }
@@ -131,19 +122,21 @@ html.vt-back::view-transition-new(page-main) {
   animation-name: vtBackIn;
 }
 
-/* Khi thanh tìm kiếm đang biến hình index <-> search, nội dung cũ rút nhanh trước khi trang đích hiện ra */
+/* Khi thanh tìm kiếm biến hình index <-> search, phần nội dung khác rút nhanh và vào êm <= 350ms */
 html.vt-search-morph::view-transition-old(page-main) {
   animation-name: vtFadeOut;
-  animation-duration: 110ms;
+  animation-duration: 120ms;
+  animation-timing-function: var(--vt-ease-in);
 }
 
 html.vt-search-morph::view-transition-new(page-main) {
   animation-name: vtFadeSlideIn;
-  animation-duration: 290ms;
-  animation-delay: 90ms;
+  animation-duration: 260ms;
+  animation-delay: 50ms;
+  animation-timing-function: var(--vt-ease-out);
 }
 
-/* ================= 4. Shared-element cho thanh tìm kiếm (search-bar) ================= */
+/* ================= 4. Shared-element Thanh Tìm kiếm (search-bar) ================= */
 
 ::view-transition-image-pair(search-bar) {
   isolation: isolate;
@@ -160,43 +153,33 @@ html.vt-search-morph::view-transition-new(page-main) {
 }
 
 ::view-transition-old(search-bar) {
-  animation: vtSearchOldOut 120ms var(--vt-ease-out) both;
+  animation: vtSearchOldOut 130ms var(--vt-ease-in) both;
 }
 
 ::view-transition-new(search-bar) {
-  animation: vtSearchNewIn 140ms var(--vt-ease-out) both;
+  animation: vtSearchNewIn 150ms var(--vt-ease-out) both;
 }
 
-/* Nếu chỉ có trang đích mang search-bar (từ trang khác sang qua bfcache), trượt chung nhịp với main */
 html.vt-forward::view-transition-new(search-bar):only-child {
-  animation: vtForwardIn var(--vt-page-duration) var(--vt-ease-out) both;
+  animation: vtForwardIn var(--vt-in-duration) var(--vt-ease-out) both;
 }
 
 html.vt-back::view-transition-new(search-bar):only-child {
-  animation: vtBackIn var(--vt-page-duration) var(--vt-ease-out) both;
+  animation: vtBackIn var(--vt-in-duration) var(--vt-ease-out) both;
 }
 
 html:not(.vt-forward):not(.vt-back)::view-transition-new(search-bar):only-child {
-  animation: vtFadeSlideIn var(--vt-page-duration) var(--vt-ease-out) both;
+  animation: vtFadeSlideIn var(--vt-in-duration) var(--vt-ease-out) both;
 }
 
-/* Nội dung phụ ở search.html (gợi ý nhanh, bộ lọc, kết quả) nối nhịp sau khi thanh tìm kiếm ổn định */
+/* Nội dung phụ ở search.html nối nhịp sau khi thanh tìm kiếm định vị xong */
 html.vt-search-to-results #searchHero .examples,
 html.vt-search-to-results .results-section {
-  animation: vtStaggerUp 260ms var(--vt-ease-out) 120ms both;
+  animation: vtStaggerUp 240ms var(--vt-ease-out) 80ms both;
   will-change: transform, opacity;
 }
 
-/* ================= 5. Keyframes View Transitions ================= */
-
-@keyframes vtFadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
+/* ================= 5. Keyframes Thuần GPU (Chỉ translate3d & opacity) ================= */
 
 @keyframes vtFadeOut {
   from {
@@ -210,70 +193,70 @@ html.vt-search-to-results .results-section {
 @keyframes vtFadeSlideOut {
   from {
     opacity: 1;
-    transform: translateY(0);
+    transform: translate3d(0, 0, 0);
   }
   to {
     opacity: 0;
-    transform: translateY(-6px);
+    transform: translate3d(0, -6px, 0);
   }
 }
 
 @keyframes vtFadeSlideIn {
   from {
     opacity: 0;
-    transform: translateY(12px);
+    transform: translate3d(0, 12px, 0);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translate3d(0, 0, 0);
   }
 }
 
 @keyframes vtForwardOut {
   from {
     opacity: 1;
-    transform: translateX(0);
+    transform: translate3d(0, 0, 0);
   }
   to {
     opacity: 0;
-    transform: translateX(-18px);
+    transform: translate3d(-18px, 0, 0);
   }
 }
 
 @keyframes vtForwardIn {
   from {
     opacity: 0;
-    transform: translateX(22px);
+    transform: translate3d(20px, 0, 0);
   }
   to {
     opacity: 1;
-    transform: translateX(0);
+    transform: translate3d(0, 0, 0);
   }
 }
 
 @keyframes vtBackOut {
   from {
     opacity: 1;
-    transform: translateX(0);
+    transform: translate3d(0, 0, 0);
   }
   to {
     opacity: 0;
-    transform: translateX(18px);
+    transform: translate3d(18px, 0, 0);
   }
 }
 
 @keyframes vtBackIn {
   from {
     opacity: 0;
-    transform: translateX(-22px);
+    transform: translate3d(-20px, 0, 0);
   }
   to {
     opacity: 1;
-    transform: translateX(0);
+    transform: translate3d(0, 0, 0);
   }
 }
 
-/* Giữ lớp cũ đục nhẹ cho tới khi lớp mới phủ lên nhằm tránh xuyên nền lúc co giãn */
+/* Giữ lớp cũ đục nhẹ cho tới khi lớp mới phủ lên tránh xuyên nền lúc co giãn */
 @keyframes vtSearchOldOut {
   0% {
     opacity: 1;
@@ -298,23 +281,24 @@ html.vt-search-to-results .results-section {
 @keyframes vtStaggerUp {
   from {
     opacity: 0;
-    transform: translateY(14px);
+    transform: translate3d(0, 12px, 0);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translate3d(0, 0, 0);
   }
 }
 
-/* ================= 6. Nhánh Fallback cho trình duyệt chưa hỗ trợ View Transitions ================= */
+/* ================= 6. Nhánh Chính cho Mọi Cặp Trang Khác (WAAPI Out + Keyframes In) ================= */
 
+/* Chỉ khóa pointer-events và cấp GPU cho <main>; tuyệt đối không chạm body hay .site-header */
 html.is-entering,
 html.is-leaving {
   overflow-x: clip;
 }
 
 html.is-entering main {
-  animation: vtFadeSlideIn var(--vt-page-duration) var(--vt-ease-out) both;
+  animation: vtFadeSlideIn var(--vt-in-duration) var(--vt-ease-out) both;
   will-change: transform, opacity;
 }
 
@@ -327,23 +311,24 @@ html.is-entering.vt-back main {
 }
 
 html.is-leaving main {
-  opacity: 0;
-  transform: translateY(-6px);
-  transition: opacity var(--vt-fallback-leave-duration) var(--vt-ease-out),
-              transform var(--vt-fallback-leave-duration) var(--vt-ease-out);
-  will-change: transform, opacity;
   pointer-events: none;
+  will-change: transform, opacity;
 }
 
-html.is-leaving.vt-forward main {
-  transform: translateX(-16px);
+/* Giảm tải GPU trong lúc chuyển: tạm dừng animation nền lặp vô hạn */
+html:active-view-transition .hero-slider__track,
+html:active-view-transition .next-deadline-card__ticker,
+html:active-view-transition .loading-spinner,
+html.is-leaving .hero-slider__track,
+html.is-leaving .next-deadline-card__ticker,
+html.is-leaving .loading-spinner,
+html.is-entering .hero-slider__track,
+html.is-entering .next-deadline-card__ticker,
+html.is-entering .loading-spinner {
+  animation-play-state: paused !important;
 }
 
-html.is-leaving.vt-back main {
-  transform: translateX(16px);
-}
-
-/* ================= 7. Tôn trọng tùy chọn giảm chuyển động (Reduced Motion) ================= */
+/* ================= 7. Tôn trọng Tùy chọn Giảm Chuyển động ================= */
 
 @media (prefers-reduced-motion: reduce) {
   ::view-transition-group(*),
@@ -363,7 +348,6 @@ html.is-leaving.vt-back main {
   }
 
   html.is-leaving main {
-    transition-duration: 0.01ms !important;
     transform: none !important;
     will-change: auto;
   }

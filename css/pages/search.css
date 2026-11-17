@@ -5,6 +5,12 @@
    Chuẩn WCAG 2.1 AA (:focus-within, vùng chạm >= 44px, prefers-reduced-motion)
    ========================================================= */
 
+/* Phương án B: Chỉ index.html và search.html khai báo @view-transition để morph thanh tìm kiếm */
+@view-transition {
+  navigation: auto;
+  types: search-morph;
+}
+
 body {
   --shadow-search: var(--shadow-md);
   --search-focus-ring: var(--primary-ring);

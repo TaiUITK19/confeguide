@@ -3,6 +3,12 @@
    Kiểu dáng riêng cho trang chủ | Kế thừa tokens và layout từ css/base/base.css
    ========================================================= */
 
+/* Phương án B: Chỉ index.html và search.html khai báo @view-transition để morph thanh tìm kiếm */
+@view-transition {
+  navigation: auto;
+  types: search-morph;
+}
+
 /* Nút CTA trang chủ kế thừa .btn từ base.css */
 .hero-actions .btn,
 .featured-cta-wrap .btn {
