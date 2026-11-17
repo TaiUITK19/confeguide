@@ -1,6 +1,6 @@
 /* =========================================================
-   ConfGuide — Stylesheet Lịch Mốc Hội nghị Cá nhân (css/calendar.css)
-   Chuẩn BEM (.profile-calendar__*), dùng Design Tokens từ css/base.css,
+   ConfGuide — Stylesheet Lịch Mốc Hội nghị Cá nhân (css/components/calendar.css)
+   Chuẩn BEM (.profile-calendar__*), dùng Design Tokens từ css/base/base.css,
    hỗ trợ Dark Mode (body.dark), responsive >=1024px / 768px / 375-430px
    và tôn trọng tùy chọn prefers-reduced-motion.
    ========================================================= */

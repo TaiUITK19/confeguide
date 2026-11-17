@@ -1,6 +1,6 @@
 /* =========================================================
-   ConfGuide — Stylesheet So sánh Hội nghị Cạnh nhau (css/compare.css)
-   Chuẩn BEM, dùng lại Design Tokens từ css/base.css, hỗ trợ Dark Mode (body.dark),
+   ConfGuide — Stylesheet So sánh Hội nghị Cạnh nhau (css/components/compare.css)
+   Chuẩn BEM, dùng lại Design Tokens từ css/base/base.css, hỗ trợ Dark Mode (body.dark),
    cột đầu tiên cố định (sticky left: 0) khi cuộn ngang trên mobile (375px–430px),
    đảm bảo chuẩn A11y (:focus-visible, vùng chạm >= 44px, prefers-reduced-motion).
    ========================================================= */

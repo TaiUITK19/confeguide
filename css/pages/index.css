@@ -1,6 +1,6 @@
 /* =========================================================
-   ConfGuide — Home Stylesheet (home.css)
-   Kiểu dáng riêng cho trang chủ | Kế thừa tokens và layout từ base.css
+   ConfGuide — Stylesheet Trang chủ (css/pages/index.css)
+   Kiểu dáng riêng cho trang chủ | Kế thừa tokens và layout từ css/base/base.css
    ========================================================= */
 
 /* Nút CTA trang chủ kế thừa .btn từ base.css */
@@ -780,7 +780,7 @@ body.dark .hero-slide-card__meta-item svg {
   margin-bottom: 14px;
 }
 
-/* .conf-badge-logo dùng chung từ css/base.css */
+/* .conf-badge-logo dùng chung từ css/base/base.css */
 
 .conf-title-wrap {
   flex: 1;
