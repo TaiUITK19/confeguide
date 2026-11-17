@@ -8,8 +8,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Tra cứu và lọc hội nghị khoa học công nghệ thông tin tại Việt Nam theo trạng thái hạn nộp bài, thời gian, địa điểm và chủ đề nghiên cứu | ConfGuide.">
   <title>ConfGuide - Tra cứu hội nghị khoa học</title>
+  <meta name="description" content="Tra cứu và lọc hội nghị khoa học công nghệ thông tin tại Việt Nam theo trạng thái hạn nộp bài, thời gian, địa điểm và chủ đề nghiên cứu | ConfGuide.">
+
   <link rel="icon" type="image/svg+xml" href="images/logo.svg">
   <link rel="stylesheet" href="css/base/base.css">
   <link rel="stylesheet" href="css/pages/search.css">
@@ -19,6 +20,7 @@
   <script src="js/core/layout.js" defer blocking="render"></script>
 </head>
 <body>
+  <!-- Áp dụng nhanh Dark Mode trước khi sơn giao diện để tránh nhấp nháy sáng/tối (anti-FOUC) -->
   <script>
     try {
       if (localStorage.getItem('confguide_theme') === 'dark') {
@@ -29,7 +31,7 @@
     }
   </script>
 
-  <!-- Shared Header -->
+  <!-- Thanh điều hướng dùng chung -->
   <div id="site-header"></div>
 
   <main>
@@ -470,15 +472,16 @@
     </section>
   </main>
 
-  <!-- Shared Footer -->
+  <!-- Chân trang dùng chung -->
   <div id="site-footer"></div>
 
-  <!-- Toast notification -->
+  <!-- Thông báo Toast -->
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-  <!-- JavaScript -->
+  <!-- Script thành phần và trang Tra cứu -->
   <script src="js/components/compare.js" defer></script>
   <script src="js/components/search-core.js" defer></script>
   <script src="js/pages/search.js" defer></script>
 </body>
 </html>
+

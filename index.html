@@ -1,10 +1,14 @@
 <!DOCTYPE html>
+<!--
+  ConfGuide — Trang chủ (index.html)
+  Giới thiệu nền tảng, thanh tìm kiếm nhanh chuyển hướng, slider 3 slide nổi bật và lưới hội nghị tiêu biểu.
+-->
 <html lang="vi">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="ConfGuide — Nền tảng tra cứu, đánh giá uy tín và gợi ý hội nghị khoa học hàng đầu theo chủ đề nghiên cứu.">
   <title>ConfGuide — Tra cứu & Khuyến nghị Hội nghị Khoa học</title>
+  <meta name="description" content="ConfGuide — Nền tảng tra cứu, đánh giá uy tín và gợi ý hội nghị khoa học hàng đầu theo chủ đề nghiên cứu.">
 
   <link rel="icon" type="image/svg+xml" href="images/logo.svg">
   <link rel="stylesheet" href="css/base/base.css">
@@ -15,6 +19,7 @@
   <script src="js/core/layout.js" defer blocking="render"></script>
 </head>
 <body>
+  <!-- Áp dụng nhanh Dark Mode trước khi sơn giao diện để tránh nhấp nháy sáng/tối (anti-FOUC) -->
   <script>
     try {
       if (localStorage.getItem('confguide_theme') === 'dark') {
@@ -22,6 +27,8 @@
       }
     } catch (e) {}
   </script>
+
+  <!-- Thanh điều hướng dùng chung -->
   <div id="site-header"></div>
   <main id="mainContent">
     <!-- Giới thiệu, tìm kiếm nhanh & Slider nổi bật -->
@@ -276,7 +283,10 @@
       </div>
     </section>
   </main>
+  <!-- Chân trang dùng chung -->
   <div id="site-footer"></div>
+
+  <!-- Script thành phần và trang chủ -->
   <script src="js/components/compare.js" defer></script>
   <script src="js/pages/index.js" defer></script>
 </body>

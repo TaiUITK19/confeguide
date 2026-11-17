@@ -1,28 +1,32 @@
 <!DOCTYPE html>
+<!--
+  ConfGuide — Trang Liên hệ & Đóng góp Dữ liệu (contact.html)
+  Biểu mẫu gửi thông điệp, đề xuất hội nghị và thông tin văn phòng đồ án IE104.
+-->
 <html lang="vi">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Liên hệ và đóng góp dữ liệu hội nghị khoa học cho nền tảng ConfGuide.">
   <title>Liên hệ &amp; Đóng góp | ConfGuide</title>
-  
+  <meta name="description" content="Liên hệ và đóng góp dữ liệu hội nghị khoa học cho nền tảng ConfGuide.">
+
   <link rel="icon" type="image/svg+xml" href="images/logo.svg">
-  
   <link rel="stylesheet" href="css/base/base.css">
   <link rel="stylesheet" href="css/base/transition.css">
   <script src="js/core/page-transition.js"></script>
   <script src="js/core/layout.js" defer blocking="render"></script>
 </head>
 <body>
+  <!-- Áp dụng nhanh Dark Mode trước khi sơn giao diện để tránh nhấp nháy sáng/tối (anti-FOUC) -->
   <script>try { if (localStorage.getItem('confguide_theme') === 'dark') document.body.classList.add('dark'); } catch (e) {}</script>
 
-  <!-- Shared Header -->
+  <!-- Thanh điều hướng dùng chung -->
   <div id="site-header"></div>
 
-  <!-- Main Content -->
+  <!-- Nội dung chính -->
   <main class="section-pad">
     <div class="container">
-      
+      <!-- Tiêu đề khu vực liên hệ -->
       <div class="section-head">
         <span class="eyebrow">KẾT NỐI &amp; ĐÓNG GÓP</span>
         <h1>Liên hệ với Nhóm Phát triển ConfGuide</h1>
@@ -30,11 +34,10 @@
       </div>
 
       <div class="contact-grid">
-        
-        <!-- Form liên hệ -->
+        <!-- Cột trái: Biểu mẫu gửi thông điệp -->
         <section class="card-surface contact-form-card">
           <h2 class="contact-form-card__title">Gửi thông điệp / Đóng góp dữ liệu</h2>
-          
+
           <form id="contactForm" class="contact-form" novalidate>
             <div class="contact-field">
               <label for="fullName" class="contact-field__label">Họ và tên *</label>
@@ -71,7 +74,7 @@
           </form>
         </section>
 
-        <!-- Thông tin liên hệ trực tiếp -->
+        <!-- Cột phải: Thông tin văn phòng đồ án & quy trình kiểm duyệt -->
         <aside class="contact-sidebar" aria-label="Thông tin liên hệ và quy trình kiểm duyệt">
           <div class="card-surface contact-info-card">
             <h2 class="contact-info-card__title">Văn phòng Đồ án</h2>
@@ -94,15 +97,11 @@
             </p>
           </div>
         </aside>
-
       </div>
-
     </div>
   </main>
 
-  <!-- Shared Footer -->
+  <!-- Chân trang dùng chung -->
   <div id="site-footer"></div>
-
-  <!-- Scripts -->
 </body>
 </html>

@@ -1,13 +1,16 @@
 <!DOCTYPE html>
+<!--
+  ConfGuide — Trang Đăng ký Tài khoản (register.html)
+  Kiểm tra độ mạnh mật khẩu trực tiếp theo thời gian thực và đồng ý điều khoản sử dụng.
+-->
 <html lang="vi">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Tạo tài khoản ConfGuide để lưu hội nghị và quản lý hồ sơ nghiên cứu.">
   <title>Đăng ký | ConfGuide</title>
-  
+  <meta name="description" content="Tạo tài khoản ConfGuide để lưu hội nghị và quản lý hồ sơ nghiên cứu.">
+
   <link rel="icon" type="image/svg+xml" href="images/logo.svg">
-  
   <link rel="stylesheet" href="css/base/base.css">
   <link rel="stylesheet" href="css/pages/auth.css">
   <link rel="stylesheet" href="css/base/transition.css">
@@ -15,12 +18,16 @@
   <script src="js/core/layout.js" defer blocking="render"></script>
 </head>
 <body class="auth-page">
+  <!-- Áp dụng nhanh Dark Mode trước khi sơn giao diện để tránh nhấp nháy sáng/tối (anti-FOUC) -->
   <script>try { if (localStorage.getItem('confguide_theme') === 'dark') document.body.classList.add('dark'); } catch (e) {}</script>
-  <!-- Shared Header -->
+
+  <!-- Thanh điều hướng dùng chung -->
   <div id="site-header"></div>
 
+  <!-- Nội dung chính -->
   <main class="auth-main">
     <div class="auth-layout">
+      <!-- Cột trái: Thông điệp giới thiệu nền tảng -->
       <section class="auth-promo" aria-labelledby="promoTitle">
         <p class="auth-eyebrow"><span aria-hidden="true">✦</span> Khám phá cơ hội công bố nghiên cứu</p>
         <h1 id="promoTitle">Tìm đúng hội nghị<br><span>cho nghiên cứu của bạn</span></h1>
@@ -32,26 +39,35 @@
         </ul>
       </section>
 
+      <!-- Cột phải: Thẻ biểu mẫu đăng ký tài khoản -->
       <section class="login-card register-card" aria-labelledby="registerTitle">
         <div class="login-heading">
           <h2 id="registerTitle">Đăng ký tài khoản</h2>
         </div>
+
         <form id="registerForm" novalidate>
           <div class="form-field">
             <label for="fullName">Họ và tên</label>
             <input id="fullName" name="name" type="text" autocomplete="name" required aria-describedby="nameError">
             <p class="field-error" id="nameError" aria-live="polite"></p>
           </div>
+
           <div class="form-field">
             <label for="registerEmail">Email</label>
             <input id="registerEmail" name="email" type="email" autocomplete="email" required aria-describedby="registerEmailError">
             <p class="field-error" id="registerEmailError" aria-live="polite"></p>
           </div>
+
           <div class="form-field">
             <label for="registerPassword">Mật khẩu</label>
             <div class="password-wrap">
               <input id="registerPassword" name="password" type="password" autocomplete="new-password" required aria-describedby="passwordRequirements registerPasswordError">
-              <button class="password-toggle" id="registerPasswordToggle" type="button" aria-label="Hiện mật khẩu" aria-pressed="false" data-password-target="registerPassword"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button>
+              <button class="password-toggle" id="registerPasswordToggle" type="button" aria-label="Hiện mật khẩu" aria-pressed="false" data-password-target="registerPassword">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+              </button>
             </div>
             <p class="field-error" id="registerPasswordError" aria-live="polite"></p>
             <ul class="password-requirements" id="passwordRequirements" aria-label="Yêu cầu mật khẩu">
@@ -61,31 +77,56 @@
               <li data-rule="number"><span aria-hidden="true">○</span> Có ít nhất 1 chữ số</li>
             </ul>
           </div>
+
           <div class="form-field">
             <label for="confirmPassword">Xác nhận mật khẩu</label>
             <div class="password-wrap">
               <input id="confirmPassword" name="confirmPassword" type="password" autocomplete="new-password" required aria-describedby="confirmPasswordError">
-              <button class="password-toggle" id="confirmPasswordToggle" type="button" aria-label="Hiện mật khẩu" aria-pressed="false" data-password-target="confirmPassword"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button>
+              <button class="password-toggle" id="confirmPasswordToggle" type="button" aria-label="Hiện mật khẩu" aria-pressed="false" data-password-target="confirmPassword">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+              </button>
             </div>
             <p class="field-error" id="confirmPasswordError" aria-live="polite"></p>
           </div>
+
           <div class="form-options">
-            <label class="terms-option"><input id="termsAccepted" name="terms" type="checkbox" required aria-describedby="termsError"><span>Tôi đồng ý với <a href="terms.html" target="_blank" rel="noopener noreferrer">Điều khoản sử dụng</a> và <a href="privacy.html" target="_blank" rel="noopener noreferrer">Chính sách bảo mật</a></span></label>
+            <label class="terms-option">
+              <input id="termsAccepted" name="terms" type="checkbox" required aria-describedby="termsError">
+              <span>Tôi đồng ý với <a href="terms.html" target="_blank" rel="noopener noreferrer">Điều khoản sử dụng</a> và <a href="privacy.html" target="_blank" rel="noopener noreferrer">Chính sách bảo mật</a></span>
+            </label>
             <p class="field-error" id="termsError" aria-live="polite"></p>
           </div>
+
           <p class="form-message" id="registerMessage" role="status" aria-live="polite"></p>
-          <button class="login-submit" id="registerSubmit" type="submit" disabled><span class="button-label">Đăng ký tài khoản</span></button>
+          <button class="login-submit" id="registerSubmit" type="submit" disabled>
+            <span class="button-label">Đăng ký tài khoản</span>
+          </button>
         </form>
+
         <div class="auth-divider"><span>Hoặc đăng ký với</span></div>
-        <button class="google-login" id="googleRegister" type="button"><svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#4285F4" d="M43.6 24.5c0-1.4-.1-2.8-.4-4.1H24v7.8h11a9.4 9.4 0 0 1-4.1 6.2v5.1h6.7c3.9-3.6 6-8.8 6-15Z"/><path fill="#34A853" d="M24 44c5.5 0 10.1-1.8 13.5-4.8l-6.7-5.1c-1.9 1.3-4.1 2-6.8 2-5.2 0-9.6-3.5-11.2-8.2H5.9v5.3A20 20 0 0 0 24 44Z"/><path fill="#FBBC05" d="M12.8 27.9a12 12 0 0 1 0-7.7v-5.3H5.9a20 20 0 0 0 0 18.3l6.9-5.3Z"/><path fill="#EA4335" d="M24 12c3 0 5.7 1 7.8 3.1l5.9-5.9A19.7 19.7 0 0 0 24 4 20 20 0 0 0 5.9 14.9l6.9 5.3C14.4 15.5 18.8 12 24 12Z"/></svg><span>Đăng ký với Google</span></button>
+
+        <button class="google-login" id="googleRegister" type="button">
+          <svg viewBox="0 0 48 48" aria-hidden="true">
+            <path fill="#4285F4" d="M43.6 24.5c0-1.4-.1-2.8-.4-4.1H24v7.8h11a9.4 9.4 0 0 1-4.1 6.2v5.1h6.7c3.9-3.6 6-8.8 6-15Z"/>
+            <path fill="#34A853" d="M24 44c5.5 0 10.1-1.8 13.5-4.8l-6.7-5.1c-1.9 1.3-4.1 2-6.8 2-5.2 0-9.6-3.5-11.2-8.2H5.9v5.3A20 20 0 0 0 24 44Z"/>
+            <path fill="#FBBC05" d="M12.8 27.9a12 12 0 0 1 0-7.7v-5.3H5.9a20 20 0 0 0 0 18.3l6.9-5.3Z"/>
+            <path fill="#EA4335" d="M24 12c3 0 5.7 1 7.8 3.1l5.9-5.9A19.7 19.7 0 0 0 24 4 20 20 0 0 0 5.9 14.9l6.9 5.3C14.4 15.5 18.8 12 24 12Z"/>
+          </svg>
+          <span>Đăng ký với Google</span>
+        </button>
+
         <p class="register-prompt">Đã có tài khoản? <a href="login.html">Đăng nhập</a></p>
       </section>
     </div>
   </main>
 
-  <!-- Shared Footer -->
+  <!-- Chân trang dùng chung -->
   <div id="site-footer"></div>
 
+  <!-- Script xác thực trang Đăng ký -->
   <script src="js/pages/auth.js" defer></script>
 </body>
 </html>
