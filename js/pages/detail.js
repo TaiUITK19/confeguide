@@ -1231,11 +1231,7 @@
     try {
       const data = typeof utils.fetchJsonCached === 'function'
         ? await utils.fetchJsonCached('data/conferences.json')
-        : await (async () => {
-          const response = await fetch('data/conferences.json');
-          if (!response.ok) throw new Error(`HTTP ${response.status}`);
-          return response.json();
-        })();
+        : await fetch('data/conferences.json').then(r => { if (!r.ok) throw new Error(r.status); return r.json(); });
       if (Array.isArray(data) && data.length > 0) {
         allConferences = data.map(c => utils.normalizeConference(c)).filter(Boolean);
         loadedFromJson = true;

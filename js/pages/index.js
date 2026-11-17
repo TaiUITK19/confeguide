@@ -46,57 +46,25 @@
     return window.ConfGuideUtils || null;
   }
 
-  /**
-   * Đọc dữ liệu JSON từ localStorage an toàn kèm giá trị mặc định.
-   * @param {string} key Khóa lưu trữ trong localStorage.
-   * @param {*} fallback Giá trị trả về khi không có hoặc bị chặn.
-   * @returns {*} Dữ liệu đã parse hoặc giá trị fallback.
-   */
+  /** Đọc JSON từ localStorage an toàn (tái sử dụng ConfGuideUtils.readStorage). */
   function readStorageSafe(key, fallback) {
     const utils = getUtils();
-    if (utils && typeof utils.readStorage === 'function') {
-      return utils.readStorage(key, fallback);
-    }
-    try {
-      const raw = window.localStorage.getItem(key);
-      if (raw === null) return fallback;
-      return JSON.parse(raw);
-    } catch (e) {
-      return fallback;
-    }
+    if (utils && typeof utils.readStorage === 'function') return utils.readStorage(key, fallback);
+    try { const raw = window.localStorage.getItem(key); return raw === null ? fallback : JSON.parse(raw); } catch { return fallback; }
   }
 
-  /**
-   * Ghi dữ liệu JSON vào localStorage an toàn, không gây lỗi console khi bị chặn.
-   * @param {string} key Khóa lưu trữ.
-   * @param {*} value Giá trị cần lưu.
-   * @returns {boolean} True nếu lưu thành công, false nếu thất bại.
-   */
+  /** Ghi JSON vào localStorage an toàn (tái sử dụng ConfGuideUtils.writeStorage). */
   function writeStorageSafe(key, value) {
     const utils = getUtils();
-    if (utils && typeof utils.writeStorage === 'function') {
-      return utils.writeStorage(key, value);
-    }
-    try {
-      window.localStorage.setItem(key, JSON.stringify(value));
-      return true;
-    } catch (e) {
-      return false;
-    }
+    if (utils && typeof utils.writeStorage === 'function') return utils.writeStorage(key, value);
+    try { window.localStorage.setItem(key, JSON.stringify(value)); return true; } catch { return false; }
   }
 
-  /**
-   * Chuẩn hóa chuỗi thành mã slug URL khớp với js/core/layout.js / js/pages/search.js / js/pages/detail.js.
-   * @param {string} text Chuỗi tên hội nghị.
-   * @returns {string} Chuỗi slug chữ thường.
-   */
+  /** Chuẩn hóa chuỗi thành mã slug URL (tái sử dụng ConfGuideUtils.slugify). */
   function fallbackSlugify(text) {
-    return String(text || '')
-      .toLowerCase()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, '');
+    const utils = getUtils();
+    if (utils && typeof utils.slugify === 'function') return utils.slugify(text);
+    return String(text || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
   }
 
   /**
@@ -941,11 +909,7 @@
     try {
       const data = utils && typeof utils.fetchJsonCached === 'function'
         ? await utils.fetchJsonCached('data/conferences.json')
-        : await (async () => {
-          const response = await fetch('data/conferences.json');
-          if (!response.ok) throw new Error(`HTTP ${response.status}`);
-          return response.json();
-        })();
+        : await fetch('data/conferences.json').then(r => { if (!r.ok) throw new Error(r.status); return r.json(); });
       allConferences = Array.isArray(data) && data.length > 0
         ? data.map(normalize).filter(Boolean)
         : fallback;

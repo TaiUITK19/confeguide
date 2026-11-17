@@ -9,58 +9,22 @@
 
   const utils = window.ConfGuideUtils || {};
 
-  /**
-   * Thoát các ký tự HTML đặc biệt để phòng chống XSS khi render chuỗi động.
-   * @param {string} str - Chuỗi đầu vào cần xử lý.
-   * @returns {string} Chuỗi đã được mã hóa an toàn cho HTML.
-   */
+  /** Thoát ký tự HTML đặc biệt (tái sử dụng ConfGuideUtils.escapeHtml). */
   function escapeHtml(str) {
-    if (typeof utils.escapeHtml === 'function') {
-      return utils.escapeHtml(str);
-    }
-    if (!str) return '';
-    return String(str)
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#039;');
+    if (typeof utils.escapeHtml === 'function') return utils.escapeHtml(str);
+    return String(str || '').replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[ch]));
   }
 
-  /**
-   * Đọc và giải mã dữ liệu JSON từ localStorage an toàn.
-   * @param {string} key - Khóa lưu trữ trong localStorage.
-   * @param {*} fallback - Giá trị mặc định khi không có hoặc lỗi phân tích JSON.
-   * @returns {*} Dữ liệu đã giải mã hoặc giá trị dự phòng.
-   */
+  /** Đọc JSON từ localStorage an toàn (tái sử dụng ConfGuideUtils.readStorage). */
   function readStorage(key, fallback) {
-    if (typeof utils.readStorage === 'function') {
-      return utils.readStorage(key, fallback);
-    }
-    try {
-      const raw = localStorage.getItem(key);
-      return raw ? JSON.parse(raw) : fallback;
-    } catch {
-      return fallback;
-    }
+    if (typeof utils.readStorage === 'function') return utils.readStorage(key, fallback);
+    try { const raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : fallback; } catch { return fallback; }
   }
 
-  /**
-   * Lưu dữ liệu xuống localStorage dưới dạng JSON có kiểm soát ngoại lệ.
-   * @param {string} key - Khóa lưu trữ trong localStorage.
-   * @param {*} value - Giá trị cần tuần tự hóa và lưu.
-   * @returns {boolean} Trả về true nếu ghi thành công.
-   */
+  /** Ghi JSON vào localStorage an toàn (tái sử dụng ConfGuideUtils.writeStorage). */
   function writeStorage(key, value) {
-    if (typeof utils.writeStorage === 'function') {
-      return utils.writeStorage(key, value);
-    }
-    try {
-      localStorage.setItem(key, JSON.stringify(value));
-      return true;
-    } catch {
-      return false;
-    }
+    if (typeof utils.writeStorage === 'function') return utils.writeStorage(key, value);
+    try { localStorage.setItem(key, JSON.stringify(value)); return true; } catch { return false; }
   }
 
   /**
@@ -643,11 +607,7 @@
     try {
       const json = typeof utils.fetchJsonCached === 'function'
         ? await utils.fetchJsonCached('data/conferences.json')
-        : await (async () => {
-          const resp = await fetch('data/conferences.json');
-          if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-          return resp.json();
-        })();
+        : await fetch('data/conferences.json').then(r => { if (!r.ok) throw new Error(r.status); return r.json(); });
       if (Array.isArray(json) && json.length > 0) {
         cachedConferencesData = typeof utils.normalizeConference === 'function'
           ? json.map(item => utils.normalizeConference(item)).filter(Boolean)

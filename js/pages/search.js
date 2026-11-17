@@ -237,23 +237,11 @@
     };
   }
 
-  /**
-   * Thoát ký tự đặc biệt HTML chống tấn công XSS.
-   * @param {*} val
-   * @returns {string}
-   */
+  /** Thoát ký tự đặc biệt HTML chống XSS (tái sử dụng ConfGuideUtils.escapeHtml). */
   function escapeHtml(val) {
     const utils = getUtils();
-    if (utils && typeof utils.escapeHtml === 'function') {
-      return utils.escapeHtml(val);
-    }
-    if (val === null || val === undefined) return '';
-    return String(val)
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#039;');
+    if (utils && typeof utils.escapeHtml === 'function') return utils.escapeHtml(val);
+    return String(val ?? '').replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[ch]));
   }
 
   /**
@@ -2852,11 +2840,7 @@
       const utils = getUtils();
       const data = utils && typeof utils.fetchJsonCached === 'function'
         ? await utils.fetchJsonCached('data/conferences.json')
-        : await (async () => {
-          const response = await fetch('data/conferences.json');
-          if (!response.ok) throw new Error(`HTTP ${response.status}`);
-          return response.json();
-        })();
+        : await fetch('data/conferences.json').then(r => { if (!r.ok) throw new Error(r.status); return r.json(); });
       if (!Array.isArray(data) || data.length === 0) throw new Error('Dữ liệu trống');
       rawList = data;
       isDataLoaded = true;

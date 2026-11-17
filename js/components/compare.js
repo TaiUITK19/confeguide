@@ -434,11 +434,7 @@
       try {
         const rawData = typeof utils.fetchJsonCached === 'function'
           ? await utils.fetchJsonCached('data/conferences.json')
-          : await (async () => {
-            const res = await fetch('data/conferences.json');
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-            return res.json();
-          })();
+          : await fetch('data/conferences.json').then(r => { if (!r.ok) throw new Error(r.status); return r.json(); });
         if (Array.isArray(rawData) && rawData.length > 0) {
           normalizedList = rawData
             .map(item => (typeof utils.normalizeConference === 'function' ? utils.normalizeConference(item) : item))

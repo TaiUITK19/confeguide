@@ -47,23 +47,11 @@
     return window.ConfGuideUtils || {};
   }
 
-  /**
-   * Thoát ký tự đặc biệt HTML để phòng chống XSS khi render dữ liệu động.
-   * @param {*} value Giá trị đầu vào cần làm sạch.
-   * @returns {string} Chuỗi an toàn cho HTML.
-   */
+  /** Thoát ký tự đặc biệt HTML chống XSS (tái sử dụng ConfGuideUtils.escapeHtml). */
   function escapeHtml(value) {
     const utils = getCalendarUtils();
-    if (typeof utils.escapeHtml === 'function') {
-      return utils.escapeHtml(value);
-    }
-    if (value === null || value === undefined) return '';
-    return String(value)
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#039;');
+    if (typeof utils.escapeHtml === 'function') return utils.escapeHtml(value);
+    return String(value ?? '').replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[ch]));
   }
 
   /**

@@ -162,58 +162,22 @@
     info: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>'
   };
 
-  /**
-   * Thoát ký tự HTML đặc biệt để phòng tránh XSS khi ghép dữ liệu từ JSON.
-   * @param {string} str - Chuỗi đầu vào.
-   * @returns {string} Chuỗi đã được thoát ký tự HTML.
-   */
+  /** Thoát ký tự HTML đặc biệt (tái sử dụng ConfGuideUtils.escapeHtml). */
   function escapeHtml(str) {
-    if (typeof utils.escapeHtml === 'function') {
-      return utils.escapeHtml(str);
-    }
-    if (!str) return '';
-    return String(str)
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#039;');
+    if (typeof utils.escapeHtml === 'function') return utils.escapeHtml(str);
+    return String(str || '').replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[ch]));
   }
 
-  /**
-   * Đọc dữ liệu JSON từ localStorage an toàn.
-   * @param {string} key - Khóa lưu trữ.
-   * @param {*} fallback - Giá trị trả về mặc định khi lỗi hoặc rỗng.
-   * @returns {*} Dữ liệu đã phân tích hoặc fallback.
-   */
+  /** Đọc JSON từ localStorage an toàn (tái sử dụng ConfGuideUtils.readStorage). */
   function readStorage(key, fallback) {
-    if (typeof utils.readStorage === 'function') {
-      return utils.readStorage(key, fallback);
-    }
-    try {
-      const raw = localStorage.getItem(key);
-      return raw ? JSON.parse(raw) : fallback;
-    } catch {
-      return fallback;
-    }
+    if (typeof utils.readStorage === 'function') return utils.readStorage(key, fallback);
+    try { const raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : fallback; } catch { return fallback; }
   }
 
-  /**
-   * Ghi dữ liệu JSON vào localStorage có bắt lỗi.
-   * @param {string} key - Khóa lưu trữ.
-   * @param {*} value - Dữ liệu cần lưu.
-   * @returns {boolean} True nếu lưu thành công.
-   */
+  /** Ghi JSON vào localStorage an toàn (tái sử dụng ConfGuideUtils.writeStorage). */
   function writeStorage(key, value) {
-    if (typeof utils.writeStorage === 'function') {
-      return utils.writeStorage(key, value);
-    }
-    try {
-      localStorage.setItem(key, JSON.stringify(value));
-      return true;
-    } catch {
-      return false;
-    }
+    if (typeof utils.writeStorage === 'function') return utils.writeStorage(key, value);
+    try { localStorage.setItem(key, JSON.stringify(value)); return true; } catch { return false; }
   }
 
   /**
@@ -280,11 +244,7 @@
     try {
       const json = typeof utils.fetchJsonCached === 'function'
         ? await utils.fetchJsonCached('data/about.json')
-        : await (async () => {
-          const res = await fetch('data/about.json');
-          if (!res.ok) throw new Error(`HTTP ${res.status}`);
-          return res.json();
-        })();
+        : await fetch('data/about.json').then(r => { if (!r.ok) throw new Error(r.status); return r.json(); });
       if (json && json.hero) {
         data = normalizeAboutDataForDisplay(json);
       }
