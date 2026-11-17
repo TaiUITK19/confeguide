@@ -1,9 +1,10 @@
 /* =========================================================
-   ConfGuide — Tracker Stylesheet (tracker.css)
+   ConfGuide — Tracker Stylesheet (css/pages/tracker.css)
    Quản lý tiến độ bài báo | Hạn nộp | Bảng theo dõi | Modal
    Đồng bộ hoàn toàn với base.css & tokens dùng chung
    ========================================================= */
 
+/* ================= 1. BANNER HERO & TRÍCH DẪN ================= */
 .hero {
   min-height: 205px;
   position: relative;
@@ -76,7 +77,7 @@
   margin-top: 14px;
 }
 
-/* ================= Content Card & Toolbar ================= */
+/* ================= 2. THẺ NỘI DUNG & THANH CÔNG CỤ ================= */
 .content-card {
   margin: 28px 5.2% 0;
   border: 1px solid var(--border);
@@ -138,7 +139,7 @@
   transform: translateY(-1px);
 }
 
-/* ================= Table ================= */
+/* ================= 3. BẢNG THEO DÕI NỘP BÀI ================= */
 .table-wrap {
   overflow-x: auto;
 }
@@ -180,10 +181,22 @@
   font-size: 14px;
 }
 
-.tracker-table th:nth-child(1) { width: 32%; }
-.tracker-table th:nth-child(2) { width: 26%; }
-.tracker-table th:nth-child(3) { width: 20%; }
-.tracker-table th:nth-child(4) { width: 22%; }
+/* Phân bổ độ rộng 4 cột cố định (table-layout: fixed) */
+.tracker-table th:nth-child(1) {
+  width: 32%;
+}
+
+.tracker-table th:nth-child(2) {
+  width: 26%;
+}
+
+.tracker-table th:nth-child(3) {
+  width: 20%;
+}
+
+.tracker-table th:nth-child(4) {
+  width: 22%;
+}
 
 .conference-name {
   display: flex;
@@ -225,7 +238,12 @@
   font-size: 13.5px;
 }
 
-.deadline-cell { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
+.deadline-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
 
 /* Đếm ngược hạn chót trong Tracker đồng bộ token Open/Urgent/Closed */
 .deadline-remaining {
@@ -308,7 +326,7 @@
   border-color: var(--danger-dot);
 }
 
-/* ================= Notice ================= */
+/* ================= 4. KHỐI LƯU Ý & MODAL TIỆN ÍCH ================= */
 .notice {
   margin: 18px 5.2% 42px;
   display: flex;
@@ -336,7 +354,7 @@
   font-size: 13px;
 }
 
-/* ================= Modal ================= */
+/* ================= 5. MODAL XÁC NHẬN ================= */
 .modal {
   display: none;
   position: fixed;
@@ -406,7 +424,7 @@
   background: var(--surface-muted);
 }
 
-/* ================= Dark Mode ================= */
+/* ================= 6. DARK MODE & RESPONSIVE ================= */
 body.dark .hero::after {
   opacity: .24;
 }

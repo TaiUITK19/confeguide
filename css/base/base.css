@@ -161,7 +161,11 @@
   --toast-text: var(--cg-neutral-0);
   --knob-thumb: var(--cg-neutral-0);
   --knob-shadow: 0 1px 3px color-mix(in oklch, var(--cg-neutral-950) 24%, transparent);
-  --conf-badge-bg: linear-gradient(140deg, var(--primary-soft), color-mix(in oklch, var(--primary) 18%, var(--surface)));
+  --conf-badge-bg: linear-gradient(
+    140deg,
+    var(--primary-soft),
+    color-mix(in oklch, var(--primary) 18%, var(--surface))
+  );
   --conf-badge-border: color-mix(in oklch, var(--primary) 28%, var(--surface));
 
   /* --- Chữ (WCAG AA >= 4.5:1) --- */
@@ -177,7 +181,12 @@ body.dark {
 
   --bg-primary: var(--cg-neutral-950);
   --bg-secondary: var(--cg-neutral-900);
-  --bg-hero: linear-gradient(135deg, oklch(0.205 0.026 253) 0%, oklch(0.222 0.030 253) 60%, oklch(0.232 0.036 253) 100%);
+  --bg-hero: linear-gradient(
+    135deg,
+    oklch(0.205 0.026 253) 0%,
+    oklch(0.222 0.030 253) 60%,
+    oklch(0.232 0.036 253) 100%
+  );
   --glass-header-bg: color-mix(in oklch, var(--bg-primary) 85%, transparent);
   --footer-radial-tint: color-mix(in oklch, var(--primary) 6%, transparent);
 
@@ -1757,7 +1766,7 @@ textarea.modal-input {
   text-decoration: underline;
 }
 
-/* Global Hidden Utility */
+/* Cần !important để bảo đảm thuộc tính [hidden] và lớp .hidden thắng mọi display: flex/grid */
 [hidden],
 .hidden {
   display: none !important;
@@ -1913,7 +1922,7 @@ textarea.modal-input {
   border: 0;
 }
 
-/* Tiện ích ẩn/hiện đồng bộ qua class thay cho inline style */
+/* Tiện ích ẩn/hiện qua class (thay inline style); dùng !important để ghi đè display của card/modal */
 .is-hidden {
   display: none !important;
 }

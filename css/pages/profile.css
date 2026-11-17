@@ -1,5 +1,5 @@
 /* =========================================================
-   ConfGuide — Profile Stylesheet (profile.css)
+   ConfGuide — Profile Stylesheet (css/pages/profile.css)
    Hồ sơ học thuật | Thống kê | Hội nghị đã lưu | Tracker Preview
    ========================================================= */
 
@@ -47,7 +47,8 @@
   }
 }
 
-/* ================= 1. HERO PROFILE CARD (Light Mode: phân tầng kép banner tối + thân sáng; Dark Mode: đồng bộ nền tối) ================= */
+/* ================= 1. HERO PROFILE CARD ================= */
+/* Light Mode dùng banner tối kết hợp thân sáng tạo chiều sâu; Dark Mode đồng bộ surface */
 .profile-hero-card {
   background: var(--surface);
   color: var(--text);
@@ -648,57 +649,7 @@
   flex-wrap: wrap;
 }
 
-/* ================= RESPONSIVE ================= */
-@media (max-width: 991px) {
-  .profile-stats-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (max-width: 639px) {
-  .profile-hero-content {
-    padding: 0 18px 24px;
-  }
-  .profile-hero-top-row {
-    flex-direction: row;
-    align-items: flex-end;
-    justify-content: space-between;
-    gap: 12px;
-    width: 100%;
-  }
-  .profile-avatar-outer {
-    width: 88px;
-    height: 88px;
-  }
-  .profile-avatar-display {
-    font-size: 36px;
-  }
-  .profile-hero-actions {
-    margin-bottom: 6px;
-  }
-  .profile-hero-actions .btn {
-    padding: 8px 14px;
-    font-size: 13px;
-    white-space: nowrap;
-  }
-  .profile-stats-grid {
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
-  .profile-section-card {
-    padding: 20px 18px;
-  }
-  .saved-card {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  .saved-actions {
-    width: 100%;
-    justify-content: flex-end;
-  }
-}
-
-/* Lớp bổ trợ thay thế inline style cho profile.html & profile.js */
+/* ================= 5. LỚP BỔ TRỢ GIAO DIỆN (PROFILE UTILITIES) ================= */
 .stat-num--timezone {
   font-size: 18px;
 }
@@ -753,4 +704,54 @@
   color: var(--primary);
   font-weight: 600;
   text-decoration: underline;
+}
+
+/* ================= 6. RESPONSIVE ================= */
+@media (max-width: 991px) {
+  .profile-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 639px) {
+  .profile-hero-content {
+    padding: 0 18px 24px;
+  }
+  .profile-hero-top-row {
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 12px;
+    width: 100%;
+  }
+  .profile-avatar-outer {
+    width: 88px;
+    height: 88px;
+  }
+  .profile-avatar-display {
+    font-size: 36px;
+  }
+  .profile-hero-actions {
+    margin-bottom: 6px;
+  }
+  .profile-hero-actions .btn {
+    padding: 8px 14px;
+    font-size: 13px;
+    white-space: nowrap;
+  }
+  .profile-stats-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .profile-section-card {
+    padding: 20px 18px;
+  }
+  .saved-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .saved-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
 }

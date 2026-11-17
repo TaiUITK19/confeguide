@@ -4,7 +4,8 @@
    Responsive 3 mốc: Desktop (>=1024px), Tablet (768px), Mobile (375–430px).
    ========================================================= */
 
-/* Biến màu trạng thái ánh xạ đồng bộ từ tokens nền tảng (base.css) */
+/* ================= 1. TOKENS TRẠNG THÁI & TIỆN ÍCH CƠ BẢN ================= */
+/* Ánh xạ tên biến cục bộ sang hệ tokens ngữ nghĩa dùng chung trong base.css */
 body {
   --status-urgent-bg: var(--status-warning-bg);
   --status-urgent-text: var(--status-warning-text);
@@ -18,7 +19,7 @@ body {
   --header-sticky-offset: 92px;
 }
 
-/* Ẩn kho SVG Sprite khỏi luồng bố cục */
+/* Ẩn kho SVG Sprite khỏi luồng bố cục nhưng giữ nguyên trong DOM để <use> tham chiếu */
 .svg-sprite {
   position: absolute;
   width: 0;
@@ -27,9 +28,14 @@ body {
   pointer-events: none;
 }
 
-/* ================= Khung chứa chính & Thanh điều hướng Quay lại ================= */
-.conf-detail { padding: 20px 0 60px; }
-.conf-detail__container { min-width: 0; }
+/* ================= 2. KHUNG CHỨA CHÍNH & THANH QUAY LẠI ================= */
+.conf-detail {
+  padding: 20px 0 60px;
+}
+
+.conf-detail__container {
+  min-width: 0;
+}
 
 .conf-nav {
   display: flex;
@@ -50,7 +56,11 @@ body {
   font-size: 14px;
   font-weight: 600;
   box-shadow: var(--shadow-sm);
-  transition: background-color 160ms ease, color 160ms ease, border-color 160ms ease, transform 160ms ease;
+  transition:
+    background-color 160ms ease,
+    color 160ms ease,
+    border-color 160ms ease,
+    transform 160ms ease;
 }
 
 .conf-nav__back-btn:hover {
@@ -60,15 +70,18 @@ body {
   transform: translateX(-2px);
 }
 
+/* Focus ring kép giữ đủ độ tương phản WCAG 2.2 AA trên cả nền sáng và nền tối */
 .conf-nav__back-btn:focus-visible {
   outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
   box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--focus-ring);
 }
 
-.conf-nav__icon { flex-shrink: 0; }
+.conf-nav__icon {
+  flex-shrink: 0;
+}
 
-/* ================= Trạng thái Loading / Cảnh báo / Lỗi ================= */
+/* ================= 3. TRẠNG THÁI LOADING / CẢNH BÁO / LỖI ================= */
 .conf-state {
   border-radius: var(--radius);
   border: 1px solid var(--border);
@@ -107,9 +120,24 @@ body {
   justify-content: center;
 }
 
-.conf-state__title { font-size: 22px; font-weight: 800; color: var(--navy); margin-bottom: 8px; }
-.conf-state__desc { font-size: 15px; color: var(--text-muted); line-height: 1.6; margin-bottom: 20px; }
-.conf-state__actions { display: flex; justify-content: center; }
+.conf-state__title {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--navy);
+  margin-bottom: 8px;
+}
+
+.conf-state__desc {
+  font-size: 15px;
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+.conf-state__actions {
+  display: flex;
+  justify-content: center;
+}
 
 .conf-fetch-notice {
   margin-bottom: 16px;
@@ -122,7 +150,7 @@ body {
   font-weight: 500;
 }
 
-/* ================= Nút bấm & Nhãn trạng thái / phân hạng ================= */
+/* ================= 4. HUY HIỆU & NÚT HÀNH ĐỘNG (.conf-badge / .conf-btn) ================= */
 .conf-badge {
   display: inline-flex;
   align-items: center;
@@ -195,7 +223,12 @@ body {
   cursor: pointer;
   text-decoration: none;
   white-space: nowrap;
-  transition: background-color 160ms ease, color 160ms ease, border-color 160ms ease, transform 160ms ease, box-shadow 160ms ease;
+  transition:
+    background-color 160ms ease,
+    color 160ms ease,
+    border-color 160ms ease,
+    transform 160ms ease,
+    box-shadow 160ms ease;
 }
 
 .conf-btn:focus-visible {
@@ -248,8 +281,16 @@ body {
   border-color: var(--gold-stroke);
 }
 
-.conf-btn__star-icon { fill: none; stroke: currentColor; stroke-width: 2; }
-.conf-btn--bookmark.is-saved .conf-btn__star-icon { fill: var(--gold); stroke: var(--gold-stroke); }
+.conf-btn__star-icon {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+}
+
+.conf-btn--bookmark.is-saved .conf-btn__star-icon {
+  fill: var(--gold);
+  stroke: var(--gold-stroke);
+}
 
 .conf-btn--outline {
   background: var(--surface);
@@ -266,9 +307,12 @@ body {
   border-color: var(--primary);
 }
 
-.conf-btn--disabled { opacity: 0.55; pointer-events: none; }
+.conf-btn--disabled {
+  opacity: 0.55;
+  pointer-events: none;
+}
 
-/* ================= Khối Header Hội nghị (Gọn, Ưu tiên CTA & 4 Thông tin nhanh) ================= */
+/* ================= 5. HEADER HỘI NGHỊ & THÔNG TIN NHANH ================= */
 .conf-header {
   background: var(--bg-hero);
   border: 1px solid var(--border);
@@ -286,7 +330,12 @@ body {
   margin-bottom: 10px;
 }
 
-.conf-header__badges { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.conf-header__badges {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
 
 .conf-header__main {
   display: flex;
@@ -297,7 +346,10 @@ body {
   border-bottom: 1px solid var(--border);
 }
 
-.conf-header__identity { min-width: 0; flex: 1; }
+.conf-header__identity {
+  min-width: 0;
+  flex: 1;
+}
 
 .conf-header__title-line {
   display: flex;
@@ -315,7 +367,11 @@ body {
   letter-spacing: -0.4px;
 }
 
-.conf-header__sep { color: var(--text-dim); font-weight: 700; font-size: 18px; }
+.conf-header__sep {
+  color: var(--text-dim);
+  font-weight: 700;
+  font-size: 18px;
+}
 
 .conf-header__fullname {
   font-size: clamp(15px, 1.4vw, 17.5px);
@@ -325,7 +381,11 @@ body {
   min-width: 0;
 }
 
-.conf-header__tags { display: flex; flex-wrap: wrap; gap: 8px; }
+.conf-header__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
 
 .conf-header__tag {
   background: var(--surface);
@@ -337,7 +397,12 @@ body {
   font-weight: 600;
 }
 
-.conf-header__actions { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.conf-header__actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
 
 .conf-header__quick-facts {
   list-style: none;
@@ -347,9 +412,24 @@ body {
   padding-top: 14px;
 }
 
-.conf-header__fact { display: flex; align-items: center; gap: 7px; font-size: 13.5px; min-width: 0; }
-.conf-header__fact-icon { color: var(--primary); flex-shrink: 0; }
-.conf-header__fact-label { color: var(--text-muted); font-weight: 500; flex-shrink: 0; }
+.conf-header__fact {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13.5px;
+  min-width: 0;
+}
+
+.conf-header__fact-icon {
+  color: var(--primary);
+  flex-shrink: 0;
+}
+
+.conf-header__fact-label {
+  color: var(--text-muted);
+  font-weight: 500;
+  flex-shrink: 0;
+}
 
 .conf-header__fact-value {
   color: var(--text);
@@ -360,7 +440,7 @@ body {
   white-space: nowrap;
 }
 
-/* ================= Bố cục 2 cột chính (Desktop >= 1024px) ================= */
+/* ================= 6. BỐ CỤC 2 CỘT & KHỐI SECTION CHUNG ================= */
 .conf-layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 330px;
@@ -368,10 +448,19 @@ body {
   align-items: start;
 }
 
-.conf-layout__main { min-width: 0; display: flex; flex-direction: column; gap: 20px; }
-.conf-layout__sidebar { min-width: 0; position: sticky; top: var(--header-sticky-offset); }
+.conf-layout__main {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
 
-/* ================= Khối Section dùng chung ================= */
+.conf-layout__sidebar {
+  min-width: 0;
+  position: sticky;
+  top: var(--header-sticky-offset);
+}
+
 .conf-section {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -402,10 +491,16 @@ body {
   margin: 0;
 }
 
-.conf-section > .conf-section__title { margin-bottom: 14px; }
-.conf-section__icon { color: var(--primary); flex-shrink: 0; }
+.conf-section > .conf-section__title {
+  margin-bottom: 14px;
+}
 
-/* ================= 1. Timeline 4 mốc quan trọng (Có đường nối CSS) ================= */
+.conf-section__icon {
+  color: var(--primary);
+  flex-shrink: 0;
+}
+
+/* ================= 7. TIMELINE 4 MỐC THỜI GIAN ================= */
 .deadline-timeline__tz-note {
   display: inline-flex;
   align-items: center;
@@ -425,6 +520,7 @@ body {
   position: relative;
 }
 
+/* Đường kẻ ngang nối các thẻ mốc thời gian trên giao diện 4 cột desktop */
 .deadline-timeline__track::before {
   content: "";
   position: absolute;
@@ -486,16 +582,41 @@ body {
   transition: background-color 140ms ease, border-color 140ms ease, color 140ms ease;
 }
 
-.deadline-timeline__cal-btn:hover { background: var(--primary); color: var(--on-primary); border-color: var(--primary); }
+.deadline-timeline__cal-btn:hover {
+  background: var(--primary);
+  color: var(--on-primary);
+  border-color: var(--primary);
+}
+
 .deadline-timeline__cal-btn:focus-visible {
   outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
   box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--focus-ring);
 }
 
-.deadline-timeline__name { font-size: 13.5px; font-weight: 700; color: var(--navy); line-height: 1.35; margin-bottom: 6px; }
-.deadline-timeline__time { display: block; font-size: 13px; font-weight: 600; color: var(--text); line-height: 1.4; margin-bottom: 2px; }
-.deadline-timeline__tz { display: block; font-size: 11.5px; color: var(--text-muted); margin-bottom: 10px; }
+.deadline-timeline__name {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--navy);
+  line-height: 1.35;
+  margin-bottom: 6px;
+}
+
+.deadline-timeline__time {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.4;
+  margin-bottom: 2px;
+}
+
+.deadline-timeline__tz {
+  display: block;
+  font-size: 11.5px;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+}
 
 .deadline-timeline__status {
   margin-top: auto;
@@ -512,7 +633,11 @@ body {
   text-align: center;
 }
 
-.deadline-timeline__step--passed { background: var(--surface-muted); border-color: var(--status-closed-border); }
+.deadline-timeline__step--passed {
+  background: var(--surface-muted);
+  border-color: var(--status-closed-border);
+}
+
 .deadline-timeline__step--passed .deadline-timeline__badge {
   background: var(--status-closed-bg);
   border-color: var(--status-closed-border);
@@ -570,10 +695,22 @@ body {
   border: 1px solid var(--status-warning-border);
 }
 
-/* ================= 2. Giới thiệu & 3. Thông tin học thuật (<dl>) ================= */
-.conf-overview__body p { font-size: 15px; color: var(--text); line-height: 1.7; margin-bottom: 10px; }
-.conf-overview__body p:last-child { margin-bottom: 0; }
-.conf-overview__empty { color: var(--text-muted); font-style: italic; }
+/* ================= 8. GIỚI THIỆU & THÔNG TIN HỌC THUẬT (<dl>) ================= */
+.conf-overview__body p {
+  font-size: 15px;
+  color: var(--text);
+  line-height: 1.7;
+  margin-bottom: 10px;
+}
+
+.conf-overview__body p:last-child {
+  margin-bottom: 0;
+}
+
+.conf-overview__empty {
+  color: var(--text-muted);
+  font-style: italic;
+}
 
 .academic-specs__list {
   display: grid;
@@ -593,10 +730,21 @@ body {
   min-width: 0;
 }
 
-.academic-specs__term { font-size: 13.5px; font-weight: 600; color: var(--text-muted); }
-.academic-specs__desc { font-size: 14px; font-weight: 700; color: var(--text); word-break: break-word; min-width: 0; }
+.academic-specs__term {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
 
-/* ================= 4. Đánh giá & Nhận xét hợp nhất ================= */
+.academic-specs__desc {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  word-break: break-word;
+  min-width: 0;
+}
+
+/* ================= 9. TỔNG QUAN ĐÁNH GIÁ & CHỌN SAO ================= */
 .conf-reviews__grid {
   display: grid;
   grid-template-columns: 180px minmax(0, 1fr) 210px;
@@ -612,19 +760,76 @@ body {
   border: 1px solid var(--border);
 }
 
-.conf-reviews__label { display: block; font-size: 12.5px; font-weight: 600; color: var(--text-muted); margin-bottom: 4px; }
-.conf-reviews__score-line { display: flex; align-items: baseline; justify-content: center; gap: 4px; }
-.conf-reviews__score-num { font-size: 28px; font-weight: 800; color: var(--navy); line-height: 1.1; }
-.conf-reviews__score-max { font-size: 14px; color: var(--text-muted); font-weight: 600; }
-.conf-reviews__stars { display: flex; justify-content: center; gap: 3px; margin: 6px 0; }
-.conf-reviews__star-svg { fill: none; stroke: var(--text-dim); stroke-width: 1.6; }
-.conf-reviews__star-svg.is-lit { fill: var(--gold); stroke: var(--gold-stroke); }
-.conf-reviews__meta { display: block; font-size: 12px; color: var(--text-muted); }
+.conf-reviews__label {
+  display: block;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
 
-.conf-reviews__user-rate { text-align: center; padding: 10px 12px; min-width: 0; }
-.conf-reviews__subhead { font-size: 14.5px; font-weight: 700; color: var(--navy); margin-bottom: 8px; }
+.conf-reviews__score-line {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 4px;
+}
 
-.star-rating { display: inline-flex; justify-content: center; gap: 8px; }
+.conf-reviews__score-num {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--navy);
+  line-height: 1.1;
+}
+
+.conf-reviews__score-max {
+  font-size: 14px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.conf-reviews__stars {
+  display: flex;
+  justify-content: center;
+  gap: 3px;
+  margin: 6px 0;
+}
+
+.conf-reviews__star-svg {
+  fill: none;
+  stroke: var(--text-dim);
+  stroke-width: 1.6;
+}
+
+.conf-reviews__star-svg.is-lit {
+  fill: var(--gold);
+  stroke: var(--gold-stroke);
+}
+
+.conf-reviews__meta {
+  display: block;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.conf-reviews__user-rate {
+  text-align: center;
+  padding: 10px 12px;
+  min-width: 0;
+}
+
+.conf-reviews__subhead {
+  font-size: 14.5px;
+  font-weight: 700;
+  color: var(--navy);
+  margin-bottom: 8px;
+}
+
+.star-rating {
+  display: inline-flex;
+  justify-content: center;
+  gap: 8px;
+}
 
 .star-rating__btn {
   display: flex;
@@ -639,7 +844,11 @@ body {
   transition: transform 120ms ease, background-color 120ms ease;
 }
 
-.star-rating__btn:hover { transform: scale(1.1); background: var(--primary-soft); }
+.star-rating__btn:hover {
+  transform: scale(1.1);
+  background: var(--primary-soft);
+}
+
 .star-rating__btn:focus-visible {
   outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
@@ -655,13 +864,37 @@ body {
   transition: fill 140ms ease, stroke 140ms ease;
 }
 
-.star-rating__btn.is-lit .star-rating__svg { fill: var(--gold); stroke: var(--gold-stroke); }
-.conf-reviews__rate-msg { min-height: 18px; margin-top: 6px; font-size: 12.5px; font-weight: 600; color: var(--primary); }
-.conf-reviews__cta { display: flex; flex-direction: column; align-items: stretch; gap: 10px; }
-.conf-reviews__cta-desc { font-size: 13px; color: var(--text-muted); line-height: 1.45; }
-.conf-reviews__open-btn { width: 100%; }
+.star-rating__btn.is-lit .star-rating__svg {
+  fill: var(--gold);
+  stroke: var(--gold-stroke);
+}
 
-/* ================= Cột phải Sticky: Thẻ Mốc tiếp theo ================= */
+.conf-reviews__rate-msg {
+  min-height: 18px;
+  margin-top: 6px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--primary);
+}
+
+.conf-reviews__cta {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+}
+
+.conf-reviews__cta-desc {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.45;
+}
+
+.conf-reviews__open-btn {
+  width: 100%;
+}
+
+/* ================= 10. CỘT PHẢI STICKY — MỐC TIẾP THEO ================= */
 .next-deadline-card {
   background: var(--surface);
   border: 1.5px solid var(--primary);
@@ -673,7 +906,11 @@ body {
   gap: 14px;
 }
 
-.next-deadline-card__header { display: flex; align-items: center; gap: 12px; }
+.next-deadline-card__header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
 
 .next-deadline-card__icon {
   width: 42px;
@@ -687,9 +924,27 @@ body {
   flex-shrink: 0;
 }
 
-.next-deadline-card__heading { min-width: 0; }
-.next-deadline-card__eyebrow { display: block; font-size: 11px; font-weight: 700; color: var(--text-muted); letter-spacing: 0.5px; text-transform: uppercase; }
-.next-deadline-card__title { font-size: 15.5px; font-weight: 800; color: var(--navy); line-height: 1.3; margin: 0; word-break: break-word; }
+.next-deadline-card__heading {
+  min-width: 0;
+}
+
+.next-deadline-card__eyebrow {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.next-deadline-card__title {
+  font-size: 15.5px;
+  font-weight: 800;
+  color: var(--navy);
+  line-height: 1.3;
+  margin: 0;
+  word-break: break-word;
+}
 
 .next-deadline-card__countdown {
   background: var(--surface-alt);
@@ -699,11 +954,32 @@ body {
   text-align: center;
 }
 
-.next-deadline-card__days { display: block; font-size: 24px; font-weight: 800; color: var(--status-open-text); line-height: 1.2; }
-.next-deadline-card__days--open { color: var(--status-open-text); }
-.next-deadline-card__days--urgent { color: var(--status-warning-text); }
-.next-deadline-card__days--closed { color: var(--status-closed-text); }
-.next-deadline-card__exact { font-size: 12.5px; color: var(--text-muted); margin-top: 4px; line-height: 1.45; }
+.next-deadline-card__days {
+  display: block;
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--status-open-text);
+  line-height: 1.2;
+}
+
+.next-deadline-card__days--open {
+  color: var(--status-open-text);
+}
+
+.next-deadline-card__days--urgent {
+  color: var(--status-warning-text);
+}
+
+.next-deadline-card__days--closed {
+  color: var(--status-closed-text);
+}
+
+.next-deadline-card__exact {
+  font-size: 12.5px;
+  color: var(--text-muted);
+  margin-top: 4px;
+  line-height: 1.45;
+}
 
 .next-deadline-card__ticker {
   display: flex;
@@ -739,11 +1015,22 @@ body {
 }
 
 @keyframes pulseTicker {
-  0%, 100% { transform: scale(0.9); opacity: 0.75; }
-  50% { transform: scale(1.28); opacity: 1; }
+  0%,
+  100% {
+    transform: scale(0.9);
+    opacity: 0.75;
+  }
+  50% {
+    transform: scale(1.28);
+    opacity: 1;
+  }
 }
 
-.next-deadline-card__actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.next-deadline-card__actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
 
 .next-deadline-card__export-all {
   display: inline-flex;
@@ -774,9 +1061,16 @@ body {
   box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--focus-ring);
 }
 
-/* ================= 5. Hội nghị liên quan (Thẻ Grid đồng nhất, 1 thẻ <a> phủ ::after) ================= */
-.conf-related { margin-top: 32px; }
-.conf-related__grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+/* ================= 11. HỘI NGHỊ LIÊN QUAN ================= */
+.conf-related {
+  margin-top: 32px;
+}
+
+.conf-related__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
 
 .related-card {
   position: relative;
@@ -792,15 +1086,32 @@ body {
   transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
 }
 
-.related-card:hover { border-color: var(--primary); box-shadow: var(--shadow-md); transform: translateY(-2px); }
+.related-card:hover {
+  border-color: var(--primary);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
 .related-card:focus-within {
   outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
   box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--focus-ring);
 }
 
-.related-card__top { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 8px; }
-.related-card__brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.related-card__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.related-card__brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
 
 .related-card__monogram {
   width: 44px;
@@ -809,11 +1120,35 @@ body {
   flex-shrink: 0;
 }
 
-.related-card__title { font-size: 16px; font-weight: 800; color: var(--navy); line-height: 1.25; margin: 0; min-width: 0; }
-.related-card__link { color: inherit; text-decoration: none; }
-.related-card__link::after { content: ""; position: absolute; inset: 0; z-index: 1; border-radius: var(--radius); }
-.related-card__link:focus-visible { outline: 2px solid transparent; box-shadow: none; }
+.related-card__title {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--navy);
+  line-height: 1.25;
+  margin: 0;
+  min-width: 0;
+}
 
+.related-card__link {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Kỹ thuật Stretched Link: mở rộng ::after phủ kín thẻ mà vẫn giữ markup <a> hợp lệ */
+.related-card__link::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: var(--radius);
+}
+
+.related-card__link:focus-visible {
+  outline: 2px solid transparent;
+  box-shadow: none;
+}
+
+/* Giới hạn tên đầy đủ tối đa 2 dòng để giữ chiều cao các thẻ liên quan đồng đều */
 .related-card__fullname {
   font-size: 13px;
   color: var(--text-muted);
@@ -826,9 +1161,26 @@ body {
   overflow: hidden;
 }
 
-.related-card__meta { display: flex; flex-wrap: wrap; gap: 8px 14px; font-size: 12.5px; color: var(--text-muted); margin-bottom: 12px; }
-.related-card__meta-item { display: inline-flex; align-items: center; gap: 5px; min-width: 0; }
-.related-card__meta-item svg { color: var(--primary); flex-shrink: 0; }
+.related-card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  font-size: 12.5px;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+
+.related-card__meta-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+}
+
+.related-card__meta-item svg {
+  color: var(--primary);
+  flex-shrink: 0;
+}
 
 .related-card__footer {
   margin-top: auto;
@@ -841,13 +1193,42 @@ body {
   gap: 8px;
 }
 
-.related-card__deadline { font-size: 12px; font-weight: 700; color: var(--primary); min-width: 0; }
-.related-card__actions { display: inline-flex; align-items: center; gap: 10px; flex-shrink: 0; }
-.related-card__cta { font-size: 12.5px; font-weight: 700; color: var(--primary); flex-shrink: 0; }
+.related-card__deadline {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--primary);
+  min-width: 0;
+}
 
-/* ================= VIEW 2: Trang Nhận xét đầy đủ (#danh-gia) ================= */
-.reviews-view__header { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 18px; }
-.reviews-view__title { font-size: 21px; font-weight: 800; color: var(--navy); margin: 0; }
+.related-card__actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.related-card__cta {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--primary);
+  flex-shrink: 0;
+}
+
+/* ================= 12. VIEW 2 — TRANG NHẬN XÉT ĐẦY ĐỦ (#danh-gia) ================= */
+.reviews-view__header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+
+.reviews-view__title {
+  font-size: 21px;
+  font-weight: 800;
+  color: var(--navy);
+  margin: 0;
+}
 
 .reviews-view__summary {
   display: flex;
@@ -858,13 +1239,50 @@ body {
   margin-bottom: 22px;
 }
 
-.reviews-view__score-box { text-align: center; min-width: 150px; }
-.reviews-view__score-big { display: block; font-size: 46px; font-weight: 800; color: var(--navy); line-height: 1; }
-.reviews-view__stars { display: flex; justify-content: center; gap: 4px; margin: 8px 0 6px; }
-.reviews-view__count { display: block; font-size: 13px; color: var(--text-muted); }
+.reviews-view__score-box {
+  text-align: center;
+  min-width: 150px;
+}
 
-.reviews-view__bars { flex: 1; min-width: 240px; max-width: 480px; display: flex; flex-direction: column; gap: 7px; }
-.reviews-view__bar-row { display: grid; grid-template-columns: 48px minmax(0, 1fr) 42px; align-items: center; gap: 10px; font-size: 12.5px; font-weight: 600; color: var(--text); }
+.reviews-view__score-big {
+  display: block;
+  font-size: 46px;
+  font-weight: 800;
+  color: var(--navy);
+  line-height: 1;
+}
+
+.reviews-view__stars {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+  margin: 8px 0 6px;
+}
+
+.reviews-view__count {
+  display: block;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.reviews-view__bars {
+  flex: 1;
+  min-width: 240px;
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.reviews-view__bar-row {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) 42px;
+  align-items: center;
+  gap: 10px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text);
+}
 
 .reviews-view__bar-progress {
   width: 100%;
@@ -877,14 +1295,44 @@ body {
   overflow: hidden;
 }
 
-.reviews-view__bar-progress::-webkit-progress-bar { background: var(--surface-muted); border-radius: var(--radius-pill); }
-.reviews-view__bar-progress::-webkit-progress-value { background: var(--gold-stroke); border-radius: var(--radius-pill); }
-.reviews-view__bar-progress::-moz-progress-bar { background: var(--gold-stroke); border-radius: var(--radius-pill); }
-.reviews-view__bar-pct { text-align: right; color: var(--text-muted); }
+.reviews-view__bar-progress::-webkit-progress-bar {
+  background: var(--surface-muted);
+  border-radius: var(--radius-pill);
+}
 
-.reviews-view__section-title { font-size: 18px; font-weight: 700; color: var(--navy); margin-bottom: 14px; }
-.reviews-view__form { margin-bottom: 18px; }
-.reviews-view__label { display: block; font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+.reviews-view__bar-progress::-webkit-progress-value {
+  background: var(--gold-stroke);
+  border-radius: var(--radius-pill);
+}
+
+.reviews-view__bar-progress::-moz-progress-bar {
+  background: var(--gold-stroke);
+  border-radius: var(--radius-pill);
+}
+
+.reviews-view__bar-pct {
+  text-align: right;
+  color: var(--text-muted);
+}
+
+.reviews-view__section-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--navy);
+  margin-bottom: 14px;
+}
+
+.reviews-view__form {
+  margin-bottom: 18px;
+}
+
+.reviews-view__label {
+  display: block;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 8px;
+}
 
 .reviews-view__textarea {
   display: block;
@@ -903,51 +1351,207 @@ body {
   outline-offset: 2px;
   box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--focus-ring);
 }
-.reviews-view__form-footer { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-top: 12px; }
-.reviews-view__note { font-size: 12.5px; color: var(--text-muted); }
-.reviews-view__form-msg { min-height: 18px; margin-top: 8px; font-size: 13px; font-weight: 600; color: var(--primary); }
 
-.reviews-view__list { display: flex; flex-direction: column; gap: 12px; }
-.reviews-view__item { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 20px; box-shadow: var(--shadow-sm); }
-.reviews-view__item-head { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 6px; }
-.reviews-view__author { font-size: 14.5px; font-weight: 700; color: var(--navy); }
-.reviews-view__time { font-size: 12px; color: var(--text-muted); }
-.reviews-view__text { font-size: 14.5px; color: var(--text); line-height: 1.65; white-space: pre-wrap; overflow-wrap: anywhere; }
+.reviews-view__form-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 12px;
+}
 
-/* ================= Tôn trọng tùy chọn giảm chuyển động (Reduced Motion) ================= */
+.reviews-view__note {
+  font-size: 12.5px;
+  color: var(--text-muted);
+}
+
+.reviews-view__form-msg {
+  min-height: 18px;
+  margin-top: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--primary);
+}
+
+.reviews-view__list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.reviews-view__item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  box-shadow: var(--shadow-sm);
+}
+
+.reviews-view__item-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.reviews-view__author {
+  font-size: 14.5px;
+  font-weight: 700;
+  color: var(--navy);
+}
+
+.reviews-view__time {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.reviews-view__text {
+  font-size: 14.5px;
+  color: var(--text);
+  line-height: 1.65;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* ================= 13. REDUCED MOTION & RESPONSIVE ================= */
 @media (prefers-reduced-motion: reduce) {
-  .next-deadline-card__pulse { animation: none; }
-  .conf-nav__back-btn, .conf-btn, .related-card, .star-rating__btn, .deadline-timeline__step { transition: none; }
-  .conf-nav__back-btn:hover, .conf-btn--primary:hover, .related-card:hover, .star-rating__btn:hover { transform: none; }
+  .next-deadline-card__pulse {
+    animation: none;
+  }
+
+  .conf-nav__back-btn,
+  .conf-btn,
+  .related-card,
+  .star-rating__btn,
+  .deadline-timeline__step {
+    transition: none;
+  }
+
+  .conf-nav__back-btn:hover,
+  .conf-btn--primary:hover,
+  .related-card:hover,
+  .star-rating__btn:hover {
+    transform: none;
+  }
 }
 
-/* ================= RESPONSIVE: Tablet (768px – 1023px) ================= */
+/* Tablet (768px – 1023px) */
 @media (max-width: 1023px) {
-  .conf-header__quick-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .conf-layout { grid-template-columns: minmax(0, 1fr); }
-  .conf-layout__sidebar { position: static; order: -1; }
-  .deadline-timeline__track { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .deadline-timeline__track::before { display: none; }
-  .conf-reviews__grid { grid-template-columns: 1fr 1fr; }
-  .conf-reviews__cta { grid-column: 1 / -1; flex-direction: row; align-items: center; justify-content: space-between; }
-  .conf-reviews__open-btn { width: auto; }
-  .conf-related__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .conf-header__quick-facts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .conf-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* Đưa thẻ đếm ngược lên trước phần chi tiết khi xếp 1 cột */
+  .conf-layout__sidebar {
+    position: static;
+    order: -1;
+  }
+
+  .deadline-timeline__track {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .deadline-timeline__track::before {
+    display: none;
+  }
+
+  .conf-reviews__grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .conf-reviews__cta {
+    grid-column: 1 / -1;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .conf-reviews__open-btn {
+    width: auto;
+  }
+
+  .conf-related__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
-/* ================= RESPONSIVE: Mobile (375px – 640px) ================= */
+/* Mobile (375px – 640px) */
 @media (max-width: 640px) {
-  .conf-detail { padding: 14px 0 40px; }
-  .conf-header { padding: 18px 16px; }
-  .conf-header__main { flex-direction: column; align-items: stretch; gap: 14px; }
-  .conf-header__sep { display: none; }
-  .conf-header__title-line { flex-direction: column; align-items: flex-start; gap: 4px; }
-  .conf-header__actions { width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-  .conf-header__actions .conf-btn { width: 100%; padding: 10px 10px; font-size: 13px; }
-  .conf-header__quick-facts { grid-template-columns: minmax(0, 1fr); gap: 10px; }
-  .conf-section { padding: 18px 16px; }
-  .deadline-timeline__track { grid-template-columns: minmax(0, 1fr); padding-left: 14px; border-left: 2px solid var(--border-strong); }
-  .academic-specs__list, .conf-reviews__grid, .conf-related__grid { grid-template-columns: minmax(0, 1fr); }
-  .academic-specs__item { grid-template-columns: 120px minmax(0, 1fr); }
-  .conf-reviews__cta { flex-direction: column; align-items: stretch; }
-  .conf-reviews__open-btn { width: 100%; }
+  .conf-detail {
+    padding: 14px 0 40px;
+  }
+
+  .conf-header {
+    padding: 18px 16px;
+  }
+
+  .conf-header__main {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+  }
+
+  .conf-header__sep {
+    display: none;
+  }
+
+  .conf-header__title-line {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .conf-header__actions {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .conf-header__actions .conf-btn {
+    width: 100%;
+    padding: 10px 10px;
+    font-size: 13px;
+  }
+
+  .conf-header__quick-facts {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+  }
+
+  .conf-section {
+    padding: 18px 16px;
+  }
+
+  .deadline-timeline__track {
+    grid-template-columns: minmax(0, 1fr);
+    padding-left: 14px;
+    border-left: 2px solid var(--border-strong);
+  }
+
+  .academic-specs__list,
+  .conf-reviews__grid,
+  .conf-related__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .academic-specs__item {
+    grid-template-columns: 120px minmax(0, 1fr);
+  }
+
+  .conf-reviews__cta {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .conf-reviews__open-btn {
+    width: 100%;
+  }
 }

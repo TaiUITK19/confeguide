@@ -315,7 +315,7 @@ html.is-leaving main {
   will-change: transform, opacity;
 }
 
-/* Giảm tải GPU trong lúc chuyển: tạm dừng animation nền lặp vô hạn */
+/* Giảm tải GPU trong lúc chuyển: buộc tạm dừng animation lặp vô hạn bất kể độ ưu tiên selector */
 html:active-view-transition .hero-slider__track,
 html:active-view-transition .next-deadline-card__ticker,
 html:active-view-transition .loading-spinner,
@@ -329,7 +329,7 @@ html.is-entering .loading-spinner {
 }
 
 /* ================= 7. Tôn trọng Tùy chọn Giảm Chuyển động ================= */
-
+/* Sử dụng !important theo chuẩn A11y (WCAG 2.3.3) để ghi đè mọi keyframe/transition chuyển trang */
 @media (prefers-reduced-motion: reduce) {
   ::view-transition-group(*),
   ::view-transition-old(*),

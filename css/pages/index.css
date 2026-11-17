@@ -3,6 +3,7 @@
    Kiểu dáng riêng cho trang chủ | Kế thừa tokens và layout từ css/base/base.css
    ========================================================= */
 
+/* ================= 1. VIEW TRANSITIONS & NÚT CTA TRANG CHỦ ================= */
 /* Phương án B: Chỉ index.html và search.html khai báo @view-transition để morph thanh tìm kiếm */
 @view-transition {
   navigation: auto;
@@ -46,7 +47,7 @@
   font-size: 15px;
 }
 
-/* Hero 2 cột cân đối: Cột trái cố định & Cột phải Slider nổi bật */
+/* ================= 2. HERO 2 CỘT (CỘT TRÁI CTA & CỘT PHẢI SLIDER) ================= */
 .hero-section {
   position: relative;
   background: var(--bg-hero);
@@ -591,6 +592,7 @@ body.dark .hero-slide-card__meta-item svg {
   line-height: 1.55;
 }
 
+/* ================= 3. THANH TÌM KIẾM NHANH (.search-box) ================= */
 .search-box {
   display: flex;
   align-items: center;
@@ -642,7 +644,7 @@ body.dark .hero-slide-card__meta-item svg {
   box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--focus-ring);
 }
 
-/* Tính năng */
+/* ================= 4. KHỐI TÍNH NĂNG CỐT LÕI ================= */
 .features-section {
   background: var(--bg-secondary);
   border-top: 1px solid var(--border);
@@ -715,7 +717,7 @@ body.dark .hero-slide-card__meta-item svg {
   flex-shrink: 0;
 }
 
-/* Danh sách hội nghị */
+/* ================= 5. DANH SÁCH HỘI NGHỊ NỔI BẬT ================= */
 .conference-section {
   background: var(--bg-primary);
   scroll-margin-top: 80px;
@@ -998,7 +1000,7 @@ body.dark .hero-slide-card__meta-item svg {
   font-size: 15px;
 }
 
-/* Tôn trọng tùy chọn giảm chuyển động */
+/* ================= 6. TÔN TRỌNG GIẢM CHUYỂN ĐỘNG ================= */
 @media (prefers-reduced-motion: reduce) {
   .hero-slider__track,
   .hero-slider__dot::before,
@@ -1017,7 +1019,7 @@ body.dark .hero-slide-card__meta-item svg {
   }
 }
 
-/* Giao diện responsive trang chủ */
+/* ================= 7. RESPONSIVE TRANG CHỦ ================= */
 @media (max-width: 1120px) {
   .hero-inner {
     gap: 24px;
