@@ -121,7 +121,7 @@ Bạn là Senior Frontend Developer & Web Standards Specialist đang đồng hà
 
 ### Quy tắc bổ sung
 (Các quy tắc mới được thêm vào đây, mỗi quy tắc một dòng, đánh số tiếp theo.)
-1. Đối với mã nguồn hiện tại của repository (44 file sau tái cấu trúc), giữ nguyên 11 trang HTML phẳng ở gốc (`index.html`, `search.html`, `detail.html`, `tracker.html`, `profile.html`, `about.html`, `contact.html`, `login.html`, `register.html`, `terms.html`, `privacy.html`), cấu trúc phân tầng `css/` (`base/`, `components/`, `pages/`), `js/` (`core/`, `components/`, `pages/`), `data/`, `images/`, `docs/`, `.editorconfig`, quy ước đặt tên chữ thường `kebab-case` (bộ ba `<trang>.html ↔ css/pages/<trang>.css ↔ js/pages/<trang>.js`, file data số nhiều), và các quy tắc vận hành tại Mục 7 của tài liệu kiến trúc bên dưới (không tự ý sửa `#site-header`/`#site-footer` trong HTML, giữ script inline chống FOUC đầu `<body>`, giữ nguyên schema `data/` và các class runtime). Khi viết code mới hoặc refactor theo yêu cầu, áp dụng chuẩn code Phần 1 (BEM, tiền tố `js-` cho hook JS, không dùng inline CSS/JS mới, chuẩn W3C HTML5/CSS3, A11y, SEO và comment tiếng Việt).
+1. Đối với mã nguồn hiện tại của repository (43 file sau tái cấu trúc và gộp tài liệu vào `README.md`), giữ nguyên 11 trang HTML phẳng ở gốc (`index.html`, `search.html`, `detail.html`, `tracker.html`, `profile.html`, `about.html`, `contact.html`, `login.html`, `register.html`, `terms.html`, `privacy.html`), cấu trúc phân tầng `css/` (`base/`, `components/`, `pages/`), `js/` (`core/`, `components/`, `pages/`), `data/`, `images/`, `.editorconfig`, quy ước đặt tên chữ thường `kebab-case` (bộ ba `<trang>.html ↔ css/pages/<trang>.css ↔ js/pages/<trang>.js`, file data số nhiều), và các quy tắc vận hành tại Mục 7 của tài liệu kiến trúc bên dưới (không tự ý sửa `#site-header`/`#site-footer` trong HTML, giữ script inline chống FOUC đầu `<body>`, giữ nguyên schema `data/` và các class runtime). Khi viết code mới hoặc refactor theo yêu cầu, áp dụng chuẩn code Phần 1 (BEM, tiền tố `js-` cho hook JS, không dùng inline CSS/JS mới, chuẩn W3C HTML5/CSS3, A11y, SEO và comment tiếng Việt).
 
 ---
 
@@ -144,7 +144,7 @@ Tài liệu hướng dẫn kỹ thuật dành cho AI Agents và Lập trình vi�
 
 ---
 
-## 2. Bản đồ Cấu trúc File & Quy ước Đặt tên (44 Files)
+## 2. Bản đồ Cấu trúc File & Quy ước Đặt tên (43 Files)
 
 - **Quy ước đặt tên:** Chữ thường 100%, `kebab-case`, ASCII không dấu, không khoảng trắng, dùng danh từ tiếng Anh rõ nghĩa (dữ liệu dùng danh từ số nhiều).
 - **Bộ ba theo trang:** `<trang>.html` ↔ `css/pages/<trang>.css` ↔ `js/pages/<trang>.js` (riêng `login.html` và `register.html` dùng chung `auth.css`/`auth.js`; trang không có CSS/JS riêng không tạo file rỗng).
@@ -204,13 +204,12 @@ Tài liệu hướng dẫn kỹ thuật dành cho AI Agents và Lập trình vi�
 | [`data/about.json`](file:///d:/IE104/doangithub/confeguide/data/about.json) | Dữ liệu giới thiệu | Dữ liệu cấu trúc về môn học IE104, đội ngũ UIT và lộ trình phát triển. |
 | [`data/scrape-conferences.py`](file:///d:/IE104/doangithub/confeguide/data/scrape-conferences.py) | Script độc lập | Script Python hỗ trợ thu thập/cập nhật dữ liệu hội nghị độc lập; không phải backend server của website. |
 
-### 2.5. Tài nguyên Đồ họa, Tài liệu & Cấu hình (6 files)
+### 2.5. Tài nguyên Đồ họa, Tài liệu & Cấu hình (5 files)
 - [`images/logo.svg`](file:///d:/IE104/doangithub/confeguide/images/logo.svg): Logo nhận diện thương hiệu SVG dùng chung cho favicon và header.
-- [`docs/restructure-plan.md`](file:///d:/IE104/doangithub/confeguide/docs/restructure-plan.md): Kế hoạch và bảng ánh xạ tái cấu trúc repository.
 - [`.editorconfig`](file:///d:/IE104/doangithub/confeguide/.editorconfig): Cấu hình thống nhất bộ mã UTF-8, kết thúc dòng LF và thụt lề.
 - [`.gitignore`](file:///d:/IE104/doangithub/confeguide/.gitignore): Cấu hình bỏ qua các file tạm, log, cache IDE và môi trường ảo.
 - [`AGENT.md`](file:///d:/IE104/doangithub/confeguide/AGENT.md): Tài liệu hướng dẫn kỹ thuật dành cho AI Agents.
-- [`README.md`](file:///d:/IE104/doangithub/confeguide/README.md): Tài liệu hướng dẫn đồ án dành cho người đọc.
+- [`README.md`](file:///d:/IE104/doangithub/confeguide/README.md): Tài liệu hướng dẫn đồ án dành cho người đọc (bao gồm 4 Phụ lục kỹ thuật A–D về tái cấu trúc, baseline/báo cáo tối ưu và chẩn đoán chuyển trang).
 
 *(Lưu ý: File trùng `chitiet.html` và 7 file SVG banner không sử dụng trước đây đã được dọn sạch khỏi repository).*
 
