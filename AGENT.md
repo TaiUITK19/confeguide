@@ -176,7 +176,7 @@ Tài liệu hướng dẫn kỹ thuật dành cho AI Agents và Lập trình vi�
 | [`css/pages/search.css`](file:///d:/IE104/doangithub/confeguide/css/pages/search.css) | **Page** | Styles trang tra cứu (hero tìm kiếm, combobox, sidebar bộ lọc accordion, chip tags, thẻ kết quả). |
 | [`css/pages/detail.css`](file:///d:/IE104/doangithub/confeguide/css/pages/detail.css) | **Page** | Styles trang chi tiết hội nghị (hero banner, timeline 4 mốc, khối đánh giá sao, liên kết ngoài). |
 | [`css/pages/tracker.css`](file:///d:/IE104/doangithub/confeguide/css/pages/tracker.css) | **Page** | Styles trang theo dõi nộp bài (bảng hội nghị đã lưu, đếm ngược hạn, nút gỡ bỏ). |
-| [`css/pages/profile.css`](file:///d:/IE104/doangithub/confeguide/css/pages/profile.css) | **Page** | Styles trang hồ sơ cá nhân (thiết kế dual-surface, modal chỉnh sửa). |
+| [`css/pages/profile.css`](file:///d:/IE104/doangithub/confeguide/css/pages/profile.css) | **Page** | Styles trang hồ sơ cá nhân (Light Mode: dual-surface banner tối + thân sáng; Dark Mode: đồng bộ nền `--surface` tối; modal chỉnh sửa). |
 | [`css/pages/auth.css`](file:///d:/IE104/doangithub/confeguide/css/pages/auth.css) | **Page** | Styles dùng chung cho `login.html` và `register.html` (layout 2 cột, form nhập liệu). |
 | [`css/pages/about.css`](file:///d:/IE104/doangithub/confeguide/css/pages/about.css) | **Page** | Styles trang giới thiệu (giá trị cốt lõi, đội ngũ nghiên cứu, roadmap, modal đề xuất). |
 
@@ -280,7 +280,7 @@ Mỗi bản ghi hội nghị trong `data/conferences.json` có cấu trúc chu�
 - Cột 4 (Liên hệ & Góp ý): Email, hotline và ô gửi góp ý tức thì (chống spam với debounce 10 giây, lưu vào `confguide_feedback`).
 
 ### 4.3. Các Khác biệt Thiết kế Có chủ đích
-1. **Trang hồ sơ (`profile.html`)**: Thiết kế phân tầng kép (dual-surface): Banner phần đầu có nền tối (`--surface-dark`), phần thân thẻ thông tin người dùng có nền trắng/surface sáng. Đây là định dạng chủ đích, không phải lỗi hiển thị.
+1. **Trang hồ sơ (`profile.html`)**: Ở Light Mode dùng thiết kế phân tầng kép (dual-surface): banner phần đầu có nền tối (`--surface-dark`), phần thân thẻ thông tin người dùng có nền trắng/surface sáng (`--surface`); khi chuyển sang Dark Mode (`body.dark`), toàn bộ phần thân thẻ đồng bộ chuyển sang nền tối `--surface`.
 2. **Hiệu ứng Liquid Glass & Visual Tokens**: Thẻ kính mờ (`backdrop-filter: blur(12px)`), viền mỏng tinh tế (`--border`), bo góc đồng bộ qua biến CSS (`--radius-sm`, `--radius-md`, `--radius-lg`, `--radius-pill`).
 3. **Favicon**: Thống nhất `<link rel="icon" type="image/svg+xml" href="images/logo.svg">` trên toàn bộ 11 trang HTML.
 

@@ -260,7 +260,8 @@ body {
 }
 
 .profile-calendar__legend-past-sample {
-  opacity: 0.45;
+  /* Dùng token chữ dịu đạt WCAG AA + gạch ngang thay cho opacity thấp gây rớt tương phản */
+  color: var(--text-dim);
   text-decoration: line-through;
 }
 
@@ -321,11 +322,15 @@ body {
 
 .profile-calendar__day--outside {
   background: var(--surface-muted);
-  opacity: 0.58;
+}
+
+/* Ở Dark Mode dùng nền tối hơn --surface để ô ngoài tháng không sáng hơn ô trong tháng */
+body.dark .profile-calendar__day--outside {
+  background: var(--bg-secondary);
 }
 
 .profile-calendar__day--outside:hover {
-  opacity: 0.9;
+  background: var(--surface-alt);
 }
 
 .profile-calendar__day--today {
@@ -365,7 +370,7 @@ body {
 }
 
 .profile-calendar__day--outside .profile-calendar__day-num {
-  color: var(--text-muted);
+  color: var(--text-dim);
   font-weight: 600;
 }
 
@@ -411,7 +416,11 @@ body {
 }
 
 .profile-calendar__chip--past {
-  opacity: 0.48;
+  /* Giữ đủ tương phản WCAG AA trên cả ô thường lẫn ô ngoài tháng bằng bảng màu trạng thái đã qua */
+  background: var(--status-closed-bg);
+  color: var(--status-closed-text);
+  border-color: var(--status-closed-border);
+  text-decoration: line-through;
 }
 
 .profile-calendar__chip-mark {
@@ -537,7 +546,8 @@ body {
 }
 
 .profile-calendar__event-item--past {
-  opacity: 0.65;
+  background: var(--surface-muted);
+  border-color: var(--border);
 }
 
 .profile-calendar__event-badges {
@@ -831,6 +841,14 @@ body {
     border-right: 4.5px solid transparent;
     border-bottom: 8px solid var(--cal-tracker-dot);
     border-radius: 0;
+  }
+
+  .profile-calendar__chip--past:not(.profile-calendar__chip--tracker) {
+    background: var(--status-closed-dot);
+  }
+
+  .profile-calendar__chip--past.profile-calendar__chip--tracker {
+    border-bottom-color: var(--status-closed-dot);
   }
 
   .profile-calendar__more {

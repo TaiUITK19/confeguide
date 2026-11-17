@@ -47,29 +47,9 @@
   }
 }
 
-/* ================= 1. HERO PROFILE CARD (Phân tầng kép: Banner tối + Thẻ thông tin sáng ở cả hai chế độ) ================= */
-.profile-hero-card,
-body.dark .profile-hero-card {
-  --surface: var(--cg-neutral-0);
-  --surface-alt: var(--cg-neutral-50);
-  --surface-muted: var(--cg-neutral-100);
-  --surface-hover: color-mix(in oklch, var(--cg-neutral-0) 94%, var(--cg-neutral-text-light));
-  --bg-primary: var(--cg-neutral-25);
-  --border: var(--cg-neutral-200);
-  --border-strong: var(--cg-neutral-400);
-  --primary: var(--cg-blue-600);
-  --primary-hover: var(--cg-blue-700);
-  --primary-dark: var(--cg-blue-700);
-  --on-primary: var(--cg-neutral-0);
-  --primary-soft: color-mix(in oklch, var(--cg-blue-600) 12%, var(--cg-neutral-25));
-  --navy: var(--cg-blue-900);
-  --text: var(--cg-neutral-text-light);
-  --text-muted: var(--cg-neutral-600);
-  --text-dim: var(--cg-neutral-500);
-  --focus-ring: var(--cg-blue-600);
-  --status-open-solid-bg: var(--cg-green-600);
-  --conf-badge-border: color-mix(in oklch, var(--cg-blue-600) 28%, var(--cg-neutral-0));
-  background: var(--cg-neutral-25);
+/* ================= 1. HERO PROFILE CARD (Light Mode: phân tầng kép banner tối + thân sáng; Dark Mode: đồng bộ nền tối) ================= */
+.profile-hero-card {
+  background: var(--surface);
   color: var(--text);
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -77,41 +57,6 @@ body.dark .profile-hero-card {
   overflow: hidden;
   margin-bottom: 28px;
   position: relative;
-}
-
-@supports not (color: oklch(0.5 0.1 200)) {
-  .profile-hero-card,
-  body.dark .profile-hero-card {
-    --surface: #ffffff;
-    --surface-alt: #f8fbff;
-    --surface-muted: #f1f5fa;
-    --surface-hover: #f1f5fa;
-    --bg-primary: #ffffff;
-    --border: #dbe5f1;
-    --border-strong: #777c82;
-    --primary: #1268c9;
-    --primary-hover: #0d4e9a;
-    --primary-dark: #0d4e9a;
-    --on-primary: #ffffff;
-    --primary-soft: #eaf4ff;
-    --navy: #0b1f6b;
-    --text: #10264a;
-    --text-muted: #526380;
-    --text-dim: #586b86;
-    --focus-ring: #1268c9;
-    --status-open-solid-bg: #297922;
-    --conf-badge-border: rgba(18, 104, 201, 0.22);
-    background: #ffffff;
-  }
-}
-
-@supports (color: oklch(0.5 0.1 200)) and (not (background: color-mix(in oklch, red 50%, blue))) {
-  .profile-hero-card,
-  body.dark .profile-hero-card {
-    --surface-hover: #eef2f6;
-    --primary-soft: #e6effa;
-    --conf-badge-border: #b4cff0;
-  }
 }
 
 .profile-hero-banner {
@@ -146,7 +91,8 @@ body.dark .profile-hero-card {
   height: 100%;
   border-radius: 50%;
   background: var(--brand-gradient);
-  color: var(--on-primary);
+  /* Giữ chữ trắng trên nền gradient xanh thương hiệu ở cả Light Mode lẫn Dark Mode */
+  color: var(--on-brand);
   font-size: 42px;
   font-weight: 800;
   display: flex;
