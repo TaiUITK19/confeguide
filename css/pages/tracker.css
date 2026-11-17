@@ -191,19 +191,8 @@
   gap: 16px;
 }
 
-.tracker-avatar,
-.logo-badge {
+.tracker-avatar {
   flex: 0 0 auto;
-}
-
-.logo-badge.red {
-  color: var(--danger-text);
-  background: var(--danger-bg);
-}
-
-.logo-badge.yellow {
-  color: var(--gold-text);
-  background: var(--gold-bg);
 }
 
 .name-text {
@@ -285,8 +274,11 @@
   gap: 8px;
 }
 
+.tracker-table td.tracker-empty {
+  padding: 35px;
+}
+
 .tracker-empty {
-  padding: 35px !important;
   text-align: center;
   color: var(--text-muted);
   line-height: 1.6;
@@ -397,38 +389,6 @@
 
 .close-btn:hover {
   color: var(--text);
-}
-
-.tracker-modal-form label {
-  display: block;
-  margin: 14px 0 6px;
-  font-size: 13.5px;
-  color: var(--text);
-  font-weight: 600;
-}
-
-.tracker-modal-form input {
-  width: 100%;
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-sm);
-  padding: 10px 14px;
-  background: var(--bg-primary);
-  color: var(--text);
-  font-size: 14px;
-  box-sizing: border-box;
-  transition: all 160ms ease;
-}
-
-.tracker-modal-form input:focus {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--focus-ring);
-}
-
-.form-actions {
-  margin-top: 24px;
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
 }
 
 .cancel-btn {

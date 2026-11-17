@@ -197,14 +197,6 @@ body.dark {
   color: var(--navy);
 }
 
-.search-combobox__item-main {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  min-width: 0;
-  flex: 1;
-}
-
 .search-combobox__tag {
   font-size: 11px;
   padding: 2px 7px;
@@ -563,7 +555,6 @@ body.dark {
   flex-shrink: 0;
 }
 
-.accordion-head__selected,
 .filter-group__selected {
   display: inline-flex;
   align-items: center;
@@ -577,7 +568,6 @@ body.dark {
   white-space: nowrap;
 }
 
-.accordion-head__selected[hidden],
 .filter-group__selected[hidden] {
   display: none;
 }
@@ -1143,8 +1133,7 @@ body.dark {
 }
 
 /* Thanh chip hiển thị bộ lọc đang chọn (fieldset/legend hoặc ul/li) */
-.filter-chips-wrapper,
-.active-chips-bar {
+.filter-chips-wrapper {
   margin: 0 0 16px;
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
@@ -1156,9 +1145,7 @@ body.dark {
   gap: 8px;
 }
 
-.filter-chips-wrapper[hidden],
-.active-chips-bar[hidden],
-.active-chips-bar.is-hidden {
+.filter-chips-wrapper[hidden] {
   display: none;
 }
 
@@ -2110,8 +2097,6 @@ body.dark {
   .accordion-head,
   .accordion-head .chevron,
   .accordion-clear-btn,
-  .accordion-panel,
-  .accordion-panel__inner,
   .check-row,
   .rank-btn,
   .date-preset-chip,

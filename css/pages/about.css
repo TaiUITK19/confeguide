@@ -607,7 +607,7 @@ body.about-modal-open {
   border-radius: var(--radius-sm);
   border: 1px solid var(--border-strong);
   background: var(--surface-dark);
-  color: var(--on-surface-dark) !important;
+  color: var(--on-surface-dark);
   font-weight: 600;
   font-size: 14.5px;
   transition: all 180ms ease;
@@ -631,7 +631,7 @@ body.about-modal-open {
   padding: 11px 24px;
   border-radius: var(--radius-sm);
   background: var(--primary);
-  color: var(--on-primary) !important;
+  color: var(--on-primary);
   font-weight: 600;
   font-size: 14.5px;
   border: none;
