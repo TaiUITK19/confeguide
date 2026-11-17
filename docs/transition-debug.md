@@ -67,4 +67,17 @@ Do **Nguyên nhân 5 đã được chứng minh bằng pixel (`80.28%–80.51%` 
 
 1. **Chỉ `index.html` và `search.html`** khai báo `@view-transition { navigation: auto; types: search-morph; }` (nên Cross-Document View Transitions và morph `.search-box` chỉ chạy đúng cho cặp `index.html ↔ search.html`), kèm toàn bộ quy tắc Phương án A (`display: none` cho `old(site-nav)`, `isolation: auto`, `animation: none` cho `site-nav`) và bỏ `site-footer` khỏi snapshot tách rời.
 2. **Tất cả các cặp điều hướng khác** (và trên Firefox/`file:///`) hoàn toàn không đưa nav vào snapshot: `.site-header` luôn là DOM sống với `backdrop-filter: blur(14px)` nguyên vẹn 100%, chỉ `main` chạy exit ngắn bằng **Web Animations API (`130ms`, ease-in, `translate3d` + `opacity`)** và enter bằng **CSS `@keyframes` (`270ms`, `cubic-bezier(0.22, 1, 0.36, 1)`)**.
-3. Khắc phục đồng bộ các điểm ở Mục 3C: bỏ `defer` riêng cho `js/core/layout.js` để header luôn có mặt trước lần sơn đầu tiên; thêm `<link rel="prefetch">` chuẩn W3C + Speculation Rules runtime (`prerender` moderate cho nav, `prefetch` cho link phụ) + `prerenderingchange`; tạm dừng CSS animation vô hạn trong lúc chuyển trang; không dùng `setTimeout` cố định xóa class hướng trong khi animation còn chạy; dọn sạch mã thừa nhánh còn lại.
+3. Khắc phục đồng bộ các điểm ở Mục 3C: chuyển `<script src="js/core/layout.js" defer blocking="render"></script>` lên `<head>` (sau `page-transition.js`) để `#site-header`/`#site-footer` luôn có mặt trước `pagereveal`/lần sơn đầu tiên (`hdrReady: true` 12/12); dùng **Speculation Rules runtime** trong `page-transition.js` (`prerender` mức `moderate` cho `.main-nav a[href]`, `prefetch` mức `conservative` cho liên kết nội bộ an toàn, không dùng `<link rel="prefetch">` tĩnh để tránh nghẽn băng thông 4G ban đầu) kèm hỗ trợ `document.prerendering` / `prerenderingchange`; tạm dừng CSS animation vô hạn trong lúc chuyển trang; dọn class chuyển hướng theo `event.viewTransition.finished` (thay cho `setTimeout` cố định) và bắt `AbortError` sạch sẽ; xử lý `pageshow` (`bfcache`) / `pagehide`.
+
+## 6. Đối chiếu Sau Sửa (Trên commit cuối cùng của nhánh `fix/nav-transition`)
+
+- **Pixel thanh điều hướng (`verify_nav_fix.mjs`)**:
+  - Trước sửa (`y=260/300` cuộn xuống → `about.html`): Light Mode lệch `73.986 px` (`80,28%`, `maxDelta = 9`), Dark Mode lệch `74.200 px` (`80,51%`, `maxDelta = 19`).
+  - Sau sửa: **`0 px` sai lệch** trên toàn bộ `12/12` cặp điều hướng (`index`, `search`, `tracker`, `about` hai chiều, `hdrReady = true` 12/12) và **`0 px` sai lệch** trên cặp có cuộn `index.html → search.html` (VT-SearchMorph) ở cả Light Mode lẫn Dark Mode; trên nhánh WAAPI, `.site-header` giữ nguyên `opacity: 1` và `backdropFilter: blur(14px)` sống.
+- **Hiệu năng chuyển trang (CPU 4x throttling)**:
+  - `index.html → search.html` (VT-SearchMorph): tổng thời gian đo `1.014 ms` (giảm `211 ms` so với `1.225 ms` trước sửa), `0` long tasks, `20` layout (`54 ms`, giảm `31,6%` so với `79 ms`), `56` paints (`122 ms`), `70` draw frames.
+  - `index.html → about.html` (WAAPI): tổng thời gian `1.040 ms`, `0` long tasks, `4` layout (`46 ms`).
+- **Kiểm tra hồi quy & tương thích**:
+  - `prefers-reduced-motion: reduce`, Firefox fallback mô phỏng (`cap=false`, giữ `?q=SOICT` và focus `#searchInput`), giao thức `file:///`, Back/Forward (`bfcache`), double-click nhanh đều vượt qua với `0` lỗi console / `0` warning / `0` ngoại lệ / `0` 404.
+  - `baseline_cdp.mjs` / `compare_cdp.mjs`: `0` sai lệch computed style trên cả 11 trang, `0` sai lệch overflow, `55/66` ảnh PNG khớp tuyệt đối từng byte.
+  - Toàn bộ file trong `data/` giữ nguyên SHA-256 từng byte.
