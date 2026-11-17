@@ -16,5 +16,8 @@ env/
 Thumbs.db
 desktop.ini
 
+# Dependencies (nếu có công cụ kiểm thử cục bộ)
+node_modules/
+
 # Logs & temp
 *.log

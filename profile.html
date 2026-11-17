@@ -1,35 +1,40 @@
 <!DOCTYPE html>
+<!--
+  ConfGuide — Trang Hồ sơ Nghiên cứu Cá nhân (profile.html)
+  Hiển thị thông tin học thuật, lịch các mốc hội nghị/Tracker cá nhân và modal chỉnh sửa hồ sơ/avatar.
+-->
 <html lang="vi">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Hồ sơ nghiên cứu cá nhân, danh sách hội nghị đã lưu và tiến độ nộp bài | ConfGuide.">
   <title>Hồ sơ nghiên cứu | ConfGuide</title>
-  
+  <meta name="description" content="Hồ sơ nghiên cứu cá nhân, danh sách hội nghị đã lưu và tiến độ nộp bài | ConfGuide.">
+
   <link rel="icon" type="image/svg+xml" href="images/logo.svg">
-  
-  <link rel="stylesheet" href="css/base.css">
-  <link rel="stylesheet" href="css/profile.css">
-  <link rel="stylesheet" href="css/compare.css">
-  <link rel="stylesheet" href="css/calendar.css">
+  <link rel="stylesheet" href="css/base/base.css">
+  <link rel="stylesheet" href="css/pages/profile.css">
+  <link rel="stylesheet" href="css/components/compare.css">
+  <link rel="stylesheet" href="css/components/calendar.css">
+  <link rel="stylesheet" href="css/base/transition.css">
+  <script src="js/core/page-transition.js"></script>
+  <script src="js/core/layout.js" defer blocking="render"></script>
 </head>
 <body>
+  <!-- Áp dụng nhanh Dark Mode trước khi sơn giao diện để tránh nhấp nháy sáng/tối (anti-FOUC) -->
   <script>try { if (localStorage.getItem('confguide_theme') === 'dark') document.body.classList.add('dark'); } catch (e) {}</script>
 
-  <!-- Shared Header -->
+  <!-- Thanh điều hướng dùng chung -->
   <div id="site-header"></div>
 
-  <!-- Main Content -->
+  <!-- Nội dung chính -->
   <main class="profile-page-main">
     <div class="container">
-      
-      <!-- Banner & Thông báo trạng thái -->
+      <!-- Banner thông báo phản hồi thao tác hồ sơ -->
       <div class="profile-page-alert" id="pageAlert" role="alert" aria-live="polite"></div>
 
       <!-- ================= 1. HERO PROFILE CARD ================= -->
       <section class="profile-hero-card" aria-label="Thông tin hồ sơ nghiên cứu cá nhân">
         <div class="profile-hero-banner"></div>
-        
         <div class="profile-hero-content">
           <div class="profile-hero-top-row">
             
@@ -150,7 +155,7 @@
         </div>
 
         <div class="profile-calendar js-profile-calendar" id="profileCalendarRoot">
-          <!-- Nạp động bởi js/calendar.js -->
+          <!-- Nạp động bởi js/components/calendar.js -->
         </div>
       </section>
 
@@ -253,14 +258,13 @@
   <!-- File input ẩn dùng chung cho tải ảnh đại diện -->
   <input type="file" id="globalAvatarInput" class="is-hidden" accept="image/png, image/jpeg, image/webp, image/gif">
 
-  <!-- Shared Footer -->
+  <!-- Chân trang dùng chung -->
   <div id="site-footer"></div>
 
-  <!-- Scripts -->
-  <script src="js/layout.js"></script>
-  <script src="js/compare.js"></script>
-  <script src="js/calendar.js"></script>
-  <script src="js/profile.js"></script>
-
+  <!-- Script thành phần và nghiệp vụ trang Hồ sơ -->
+  <script src="js/components/compare.js" defer></script>
+  <script src="js/components/calendar.js" defer></script>
+  <script src="js/pages/profile.js" defer></script>
 </body>
 </html>
+

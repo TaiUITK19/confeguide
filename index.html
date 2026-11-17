@@ -1,17 +1,25 @@
 <!DOCTYPE html>
+<!--
+  ConfGuide — Trang chủ (index.html)
+  Giới thiệu nền tảng, thanh tìm kiếm nhanh chuyển hướng, slider 3 slide nổi bật và lưới hội nghị tiêu biểu.
+-->
 <html lang="vi">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="ConfGuide — Nền tảng tra cứu, đánh giá uy tín và gợi ý hội nghị khoa học hàng đầu theo chủ đề nghiên cứu.">
   <title>ConfGuide — Tra cứu & Khuyến nghị Hội nghị Khoa học</title>
+  <meta name="description" content="ConfGuide — Nền tảng tra cứu, đánh giá uy tín và gợi ý hội nghị khoa học hàng đầu theo chủ đề nghiên cứu.">
 
   <link rel="icon" type="image/svg+xml" href="images/logo.svg">
-  <link rel="stylesheet" href="css/base.css">
-  <link rel="stylesheet" href="css/home.css">
-  <link rel="stylesheet" href="css/compare.css">
+  <link rel="stylesheet" href="css/base/base.css">
+  <link rel="stylesheet" href="css/pages/index.css">
+  <link rel="stylesheet" href="css/components/compare.css">
+  <link rel="stylesheet" href="css/base/transition.css">
+  <script src="js/core/page-transition.js"></script>
+  <script src="js/core/layout.js" defer blocking="render"></script>
 </head>
 <body>
+  <!-- Áp dụng nhanh Dark Mode trước khi sơn giao diện để tránh nhấp nháy sáng/tối (anti-FOUC) -->
   <script>
     try {
       if (localStorage.getItem('confguide_theme') === 'dark') {
@@ -19,6 +27,8 @@
       }
     } catch (e) {}
   </script>
+
+  <!-- Thanh điều hướng dùng chung -->
   <div id="site-header"></div>
   <main id="mainContent">
     <!-- Giới thiệu, tìm kiếm nhanh & Slider nổi bật -->
@@ -94,21 +104,6 @@
                     “Research is to see what everybody else has seen, and to think what nobody else has thought.”
                   </blockquote>
                   <cite>— Albert Szent-Györgyi (Giải Nobel Y học)</cite>
-                </div>
-
-                <div class="hero-slider__summary" aria-label="Tóm tắt nhanh hệ thống">
-                  <div class="hero-slider__summary-item">
-                    <strong class="hero-slider__summary-val js-hero-summary-total">--</strong>
-                    <span class="hero-slider__summary-label">Hội nghị CNTT</span>
-                  </div>
-                  <div class="hero-slider__summary-item">
-                    <strong class="hero-slider__summary-val js-hero-summary-core">--</strong>
-                    <span class="hero-slider__summary-label">Hạng cao A* &amp; A</span>
-                  </div>
-                  <div class="hero-slider__summary-item">
-                    <strong class="hero-slider__summary-val js-hero-summary-open">--</strong>
-                    <span class="hero-slider__summary-label">Mở nộp (UTC+7)</span>
-                  </div>
                 </div>
               </div>
 
@@ -288,9 +283,11 @@
       </div>
     </section>
   </main>
+  <!-- Chân trang dùng chung -->
   <div id="site-footer"></div>
-  <script src="js/layout.js"></script>
-  <script src="js/compare.js"></script>
-  <script src="js/script.js"></script>
+
+  <!-- Script thành phần và trang chủ -->
+  <script src="js/components/compare.js" defer></script>
+  <script src="js/pages/index.js" defer></script>
 </body>
 </html>

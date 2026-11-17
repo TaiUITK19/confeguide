@@ -1,33 +1,41 @@
 <!DOCTYPE html>
+<!--
+  ConfGuide — Trang Chính sách Bảo mật Thông tin (privacy.html)
+  Giải thích phạm vi lưu trữ LocalStorage, mục đích sử dụng dữ liệu và quyền kiểm soát của người dùng.
+-->
 <html lang="vi">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Chính sách bảo mật thông tin và quyền riêng tư người dùng tại nền tảng ConfGuide.">
   <title>Chính sách bảo mật | ConfGuide</title>
-  
+  <meta name="description" content="Chính sách bảo mật thông tin và quyền riêng tư người dùng tại nền tảng ConfGuide.">
+
   <link rel="icon" type="image/svg+xml" href="images/logo.svg">
-  
-  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/base/base.css">
+  <link rel="stylesheet" href="css/base/transition.css">
+  <script src="js/core/page-transition.js"></script>
+  <script src="js/core/layout.js" defer blocking="render"></script>
 </head>
 <body>
+  <!-- Áp dụng nhanh Dark Mode trước khi sơn giao diện để tránh nhấp nháy sáng/tối (anti-FOUC) -->
   <script>try { if (localStorage.getItem('confguide_theme') === 'dark') document.body.classList.add('dark'); } catch (e) {}</script>
 
-  <!-- Shared Header -->
+  <!-- Thanh điều hướng dùng chung -->
   <div id="site-header"></div>
 
-  <!-- Main Content -->
+  <!-- Nội dung chính -->
   <main class="section-pad">
     <div class="container policy-container">
-      
+      <!-- Tiêu đề trang chính sách -->
       <div class="section-head policy-header">
         <span class="eyebrow">BẢO MẬT &amp; QUYỀN RIÊNG TƯ</span>
         <h1>Chính sách Bảo mật Thông tin ConfGuide</h1>
         <p>Cam kết bảo vệ dữ liệu cá nhân và trải nghiệm an toàn cho cộng đồng nghiên cứu khoa học.</p>
       </div>
 
+      <!-- Khung nội dung chính sách -->
       <div class="card-surface policy-card">
-        
+        <!-- 1. Thông tin thu thập -->
         <section class="policy-section">
           <h2>1. Thông tin Thu thập</h2>
           <p>
@@ -40,6 +48,7 @@
           </ul>
         </section>
 
+        <!-- 2. Mục đích sử dụng -->
         <section class="policy-section">
           <h2>2. Mục đích Sử dụng Thông tin</h2>
           <ul class="policy-list">
@@ -49,6 +58,7 @@
           </ul>
         </section>
 
+        <!-- 3. Lưu trữ & Bảo mật -->
         <section class="policy-section">
           <h2>3. Lưu trữ và Bảo mật Dữ liệu</h2>
           <p>
@@ -59,6 +69,7 @@
           </p>
         </section>
 
+        <!-- 4. Quyền của người dùng -->
         <section class="policy-section">
           <h2>4. Quyền của Người dùng</h2>
           <p>
@@ -71,22 +82,18 @@
           </ul>
         </section>
 
+        <!-- 5. Liên hệ bảo mật -->
         <section class="policy-section">
           <h2>5. Liên hệ về Bảo mật</h2>
           <p>
             Nếu bạn có bất kỳ câu hỏi hoặc khiếu nại nào liên quan đến chính sách bảo mật, vui lòng liên hệ ban quản trị ConfGuide qua email <a href="mailto:contact@confguide.vn">contact@confguide.vn</a> hoặc gửi phản hồi tại chân trang.
           </p>
         </section>
-
       </div>
-
     </div>
   </main>
 
-  <!-- Shared Footer -->
+  <!-- Chân trang dùng chung -->
   <div id="site-footer"></div>
-
-  <!-- Scripts -->
-  <script src="js/layout.js"></script>
 </body>
 </html>

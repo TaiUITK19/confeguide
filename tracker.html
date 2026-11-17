@@ -1,22 +1,33 @@
 <!DOCTYPE html>
+<!--
+  ConfGuide — Trang Theo dõi Nộp bài (tracker.html)
+  Quản lý danh sách hội nghị đã lưu, hiển thị hạn nộp gần nhất (UTC+7) và thao tác xóa nhanh.
+-->
 <html lang="vi">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Theo dõi tiến độ nộp bài và các mốc deadline của hội nghị khoa học quan tâm.">
   <title>Theo dõi hội nghị - ConfGuide</title>
-  
+  <meta name="description" content="Theo dõi tiến độ nộp bài và các mốc deadline của hội nghị khoa học quan tâm.">
+
   <link rel="icon" type="image/svg+xml" href="images/logo.svg">
-  
-  <link rel="stylesheet" href="css/base.css">
-  <link rel="stylesheet" href="css/tracker.css">
-  <link rel="stylesheet" href="css/compare.css">
+  <link rel="stylesheet" href="css/base/base.css">
+  <link rel="stylesheet" href="css/pages/tracker.css">
+  <link rel="stylesheet" href="css/components/compare.css">
+  <link rel="stylesheet" href="css/base/transition.css">
+  <script src="js/core/page-transition.js"></script>
+  <script src="js/core/layout.js" defer blocking="render"></script>
 </head>
 <body>
+  <!-- Áp dụng nhanh Dark Mode trước khi sơn giao diện để tránh nhấp nháy sáng/tối (anti-FOUC) -->
   <script>try { if (localStorage.getItem('confguide_theme') === 'dark') document.body.classList.add('dark'); } catch (e) {}</script>
+
+  <!-- Thanh điều hướng dùng chung (render bởi js/core/layout.js) -->
   <div id="site-header"></div>
 
+  <!-- Nội dung chính -->
   <main>
+    <!-- Banner tiêu đề trang theo dõi -->
     <section class="hero">
       <div class="hero-overlay"></div>
       <div class="hero-content">
@@ -30,7 +41,9 @@
       </div>
     </section>
 
+    <!-- Thẻ thống kê và bảng danh sách hội nghị đang theo dõi -->
     <section class="content-card">
+      <h2 class="sr-only">Danh sách hội nghị đang theo dõi</h2>
       <div class="toolbar">
         <div class="stat-box">
           <div>Tổng số hội nghị đang theo dõi</div>
@@ -54,6 +67,7 @@
       </div>
     </section>
 
+    <!-- Ghi chú phạm vi đồng bộ dữ liệu trên trình duyệt -->
     <div class="notice">
       <div class="notice-icon" aria-hidden="true">i</div>
       <div>
@@ -63,10 +77,11 @@
     </div>
   </main>
 
+  <!-- Chân trang dùng chung (render bởi js/core/layout.js) -->
   <div id="site-footer"></div>
 
-  <script src="js/layout.js"></script>
-  <script src="js/compare.js"></script>
-  <script src="js/tracker.js"></script>
+  <!-- Script thành phần và nghiệp vụ trang Theo dõi -->
+  <script src="js/components/compare.js" defer></script>
+  <script src="js/pages/tracker.js" defer></script>
 </body>
 </html>

@@ -1,33 +1,41 @@
 <!DOCTYPE html>
+<!--
+  ConfGuide — Trang Điều khoản & Điều kiện Sử dụng (terms.html)
+  Trình bày quy định sử dụng, tính chính xác dữ liệu AoE -> UTC+7 và quyền sở hữu trí tuệ.
+-->
 <html lang="vi">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Điều khoản và Điều kiện sử dụng nền tảng tra cứu hội nghị khoa học ConfGuide.">
   <title>Điều khoản &amp; Điều kiện | ConfGuide</title>
-  
+  <meta name="description" content="Điều khoản và Điều kiện sử dụng nền tảng tra cứu hội nghị khoa học ConfGuide.">
+
   <link rel="icon" type="image/svg+xml" href="images/logo.svg">
-  
-  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/base/base.css">
+  <link rel="stylesheet" href="css/base/transition.css">
+  <script src="js/core/page-transition.js"></script>
+  <script src="js/core/layout.js" defer blocking="render"></script>
 </head>
 <body>
+  <!-- Áp dụng nhanh Dark Mode trước khi sơn giao diện để tránh nhấp nháy sáng/tối (anti-FOUC) -->
   <script>try { if (localStorage.getItem('confguide_theme') === 'dark') document.body.classList.add('dark'); } catch (e) {}</script>
 
-  <!-- Shared Header -->
+  <!-- Thanh điều hướng dùng chung -->
   <div id="site-header"></div>
 
-  <!-- Main Content -->
+  <!-- Nội dung chính -->
   <main class="section-pad">
     <div class="container policy-container">
-      
+      <!-- Tiêu đề trang quy định -->
       <div class="section-head policy-header">
         <span class="eyebrow">QUY ĐỊNH SỬ DỤNG</span>
         <h1>Điều khoản &amp; Điều kiện Sử dụng ConfGuide</h1>
         <p>Cập nhật lần cuối: Tháng 10/2026. Áp dụng cho toàn bộ người dùng truy cập nền tảng ConfGuide.</p>
       </div>
 
+      <!-- Khung nội dung điều khoản -->
       <div class="card-surface policy-card">
-        
+        <!-- 1. Giới thiệu & Phạm vi -->
         <section class="policy-section">
           <h2>1. Giới thiệu &amp; Phạm vi Áp dụng</h2>
           <p>
@@ -38,6 +46,7 @@
           </p>
         </section>
 
+        <!-- 2. Quyền & Trách nhiệm -->
         <section class="policy-section">
           <h2>2. Quyền và Trách nhiệm của Người dùng</h2>
           <ul class="policy-list">
@@ -47,6 +56,7 @@
           </ul>
         </section>
 
+        <!-- 3. Dữ liệu hội nghị -->
         <section class="policy-section">
           <h2>3. Tính Chính xác của Dữ liệu Hội nghị</h2>
           <p>
@@ -57,6 +67,7 @@
           </p>
         </section>
 
+        <!-- 4. Sở hữu trí tuệ -->
         <section class="policy-section">
           <h2>4. Sở hữu Trí tuệ</h2>
           <p>
@@ -64,22 +75,18 @@
           </p>
         </section>
 
+        <!-- 5. Điều chỉnh & Liên hệ -->
         <section class="policy-section">
           <h2>5. Điều chỉnh và Liên hệ</h2>
           <p>
             ConfGuide có thể điều chỉnh điều khoản sử dụng theo thời gian để phản ánh những cập nhật về tính năng mới. Mọi câu hỏi hoặc đề xuất đóng góp xin vui lòng liên hệ nhóm qua trang <a href="contact.html">Liên hệ</a> hoặc gửi email về <a href="mailto:contact@confguide.vn">contact@confguide.vn</a>.
           </p>
         </section>
-
       </div>
-
     </div>
   </main>
 
-  <!-- Shared Footer -->
+  <!-- Chân trang dùng chung -->
   <div id="site-footer"></div>
-
-  <!-- Scripts -->
-  <script src="js/layout.js"></script>
 </body>
 </html>

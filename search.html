@@ -1,21 +1,26 @@
 <!DOCTYPE html>
 <!--
   ConfGuide — Trang Tra cứu & Lọc Hội nghị Khoa học (search.html)
-  Khung lọc hợp nhất đa tiêu chí dựa trên dữ liệu thực tế từ data/conference_data.json,
+  Khung lọc hợp nhất đa tiêu chí dựa trên dữ liệu thực tế từ data/conferences.json,
   hỗ trợ ngăn kéo bộ lọc (drawer) trên mobile/tablet, tô sáng từ khóa, skeleton loading và chuẩn WCAG 2.1 AA.
 -->
 <html lang="vi">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Tra cứu và lọc hội nghị khoa học công nghệ thông tin tại Việt Nam theo trạng thái hạn nộp bài, thời gian, địa điểm và chủ đề nghiên cứu | ConfGuide.">
   <title>ConfGuide - Tra cứu hội nghị khoa học</title>
+  <meta name="description" content="Tra cứu và lọc hội nghị khoa học công nghệ thông tin tại Việt Nam theo trạng thái hạn nộp bài, thời gian, địa điểm và chủ đề nghiên cứu | ConfGuide.">
+
   <link rel="icon" type="image/svg+xml" href="images/logo.svg">
-  <link rel="stylesheet" href="css/base.css">
-  <link rel="stylesheet" href="css/search.css">
-  <link rel="stylesheet" href="css/compare.css">
+  <link rel="stylesheet" href="css/base/base.css">
+  <link rel="stylesheet" href="css/pages/search.css">
+  <link rel="stylesheet" href="css/components/compare.css">
+  <link rel="stylesheet" href="css/base/transition.css">
+  <script src="js/core/page-transition.js"></script>
+  <script src="js/core/layout.js" defer blocking="render"></script>
 </head>
 <body>
+  <!-- Áp dụng nhanh Dark Mode trước khi sơn giao diện để tránh nhấp nháy sáng/tối (anti-FOUC) -->
   <script>
     try {
       if (localStorage.getItem('confguide_theme') === 'dark') {
@@ -26,7 +31,7 @@
     }
   </script>
 
-  <!-- Shared Header -->
+  <!-- Thanh điều hướng dùng chung -->
   <div id="site-header"></div>
 
   <main>
@@ -467,16 +472,16 @@
     </section>
   </main>
 
-  <!-- Shared Footer -->
+  <!-- Chân trang dùng chung -->
   <div id="site-footer"></div>
 
-  <!-- Toast notification -->
+  <!-- Thông báo Toast -->
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-  <!-- JavaScript -->
-  <script src="js/layout.js"></script>
-  <script src="js/compare.js"></script>
-  <script src="js/search-core.js"></script>
-  <script src="js/app.js"></script>
+  <!-- Script thành phần và trang Tra cứu -->
+  <script src="js/components/compare.js" defer></script>
+  <script src="js/components/search-core.js" defer></script>
+  <script src="js/pages/search.js" defer></script>
 </body>
 </html>
+
