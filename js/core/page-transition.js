@@ -413,6 +413,8 @@
 
     window.addEventListener('pageswap', event => {
       if (!event.viewTransition) return;
+      if (event.viewTransition.ready) event.viewTransition.ready.catch(() => {});
+      if (event.viewTransition.finished) event.viewTransition.finished.catch(() => {});
       const act = event.activation || null;
       const fromPage = extractPageName(window.location.href);
       const toPage = extractPageName(act && act.entry ? act.entry.url : '');
@@ -449,6 +451,11 @@
         return;
       }
 
+      if (event.viewTransition.ready) event.viewTransition.ready.catch(() => {});
+      const vtFinished = event.viewTransition.finished
+        ? event.viewTransition.finished.catch(() => {})
+        : Promise.resolve();
+
       const meta = readFreshTransitionMeta(toPage) || earlyMeta;
       const shouldFocusSearch = consumeSearchFocusFlag();
       const fromUrl = act && act.from ? act.from.url : '';
@@ -477,7 +484,7 @@
       }
 
       // Chỉ dọn class sau khi event.viewTransition.finished giải quyết xong (không xóa non giữa chừng)
-      const finishedPromise = event.viewTransition.finished.finally(clearTransientClasses);
+      const finishedPromise = vtFinished.finally(clearTransientClasses);
       if (shouldFocusSearch && toPage === 'search.html') {
         scheduleSearchInputFocus(finishedPromise);
       }
