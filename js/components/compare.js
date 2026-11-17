@@ -414,7 +414,7 @@
   }
 
   /**
-   * Tải và chuẩn hóa danh sách hội nghị từ data/conference_data.json (kèm dự phòng FALLBACK_CONFERENCES).
+   * Tải và chuẩn hóa danh sách hội nghị từ data/conferences.json (kèm dự phòng FALLBACK_CONFERENCES).
    * Tự động loại bỏ các ID trong sessionStorage không còn tồn tại trong dữ liệu.
    * @returns {Promise<Array<Object>>} Danh sách hội nghị đã chuẩn hóa.
    */
@@ -432,7 +432,7 @@
     conferencesPromise = (async () => {
       let normalizedList = [];
       try {
-        const res = await fetch('data/conference_data.json');
+        const res = await fetch('data/conferences.json');
         if (!res.ok) {
           throw new Error(`HTTP ${res.status}`);
         }

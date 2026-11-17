@@ -2833,7 +2833,7 @@
   }
 
   /**
-   * Tải dữ liệu hội nghị từ data/conference_data.json kèm try/catch fallback về FALLBACK_CONFERENCES.
+   * Tải dữ liệu hội nghị từ data/conferences.json kèm try/catch fallback về FALLBACK_CONFERENCES.
    */
   async function loadData() {
     const utils = getUtils();
@@ -2854,7 +2854,7 @@
 
     let rawList = [];
     try {
-      const response = await fetch('data/conference_data.json');
+      const response = await fetch('data/conferences.json');
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const data = await response.json();
       if (!Array.isArray(data) || data.length === 0) throw new Error('Dữ liệu trống');

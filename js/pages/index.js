@@ -935,7 +935,7 @@
     setLoadingState(true);
 
     try {
-      const response = await fetch('data/conference_data.json');
+      const response = await fetch('data/conferences.json');
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}`);
       }

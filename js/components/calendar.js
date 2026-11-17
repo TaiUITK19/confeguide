@@ -247,7 +247,7 @@
 
   /**
    * Trích xuất và chuẩn hóa danh sách các mốc deadline của một hội nghị đã lưu sang giờ Việt Nam (UTC+7).
-   * Hỗ trợ cả deadlines dạng mảng (data/conference_data.json) và object (FALLBACK_CONFERENCES).
+   * Hỗ trợ cả deadlines dạng mảng (data/conferences.json) và object (FALLBACK_CONFERENCES).
    * @param {Object} conf Đối tượng hội nghị đầy đủ.
    * @param {Object} details Thông tin hội nghị trả về từ resolveConferenceDetails.
    * @param {number} nowMs Mốc thời gian hiện tại (UTC epoch ms).
@@ -983,7 +983,7 @@
   }
 
   /**
-   * Hiển thị trạng thái đang tải dữ liệu lịch trong khi fetch conference_data.json.
+   * Hiển thị trạng thái đang tải dữ liệu lịch trong khi fetch conferences.json.
    * @param {HTMLElement} container Phần tử gốc chứa lịch.
    */
   function showLoading(container) {

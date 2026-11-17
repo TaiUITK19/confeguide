@@ -1226,7 +1226,7 @@
     let loadedFromJson = false;
 
     try {
-      const response = await fetch('data/conference_data.json');
+      const response = await fetch('data/conferences.json');
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}`);
       }
@@ -1238,7 +1238,7 @@
     } catch (err) {
       allConferences = fallbackList.map(c => utils.normalizeConference(c)).filter(Boolean);
       if (allConferences.length > 0) {
-        setFetchNotice('Không thể kết nối tệp dữ liệu máy chủ (data/conference_data.json). Hệ thống đang hiển thị từ dữ liệu dự phòng cục bộ.');
+        setFetchNotice('Không thể kết nối tệp dữ liệu máy chủ (data/conferences.json). Hệ thống đang hiển thị từ dữ liệu dự phòng cục bộ.');
       }
     }
 

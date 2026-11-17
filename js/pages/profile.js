@@ -641,7 +641,7 @@
     if (cachedConferencesData.length > 0) return cachedConferencesData;
 
     try {
-      const resp = await fetch('data/conference_data.json');
+      const resp = await fetch('data/conferences.json');
       if (resp.ok) {
         const json = await resp.json();
         if (Array.isArray(json) && json.length > 0) {

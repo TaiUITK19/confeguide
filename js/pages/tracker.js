@@ -183,7 +183,7 @@
     tbody.innerHTML = '<tr class="loading-row"><td colspan="4" class="loading-row">Đang tải dữ liệu hội nghị...</td></tr>';
 
     try {
-      const response = await fetch('data/conference_data.json');
+      const response = await fetch('data/conferences.json');
       if (response.ok) {
         const data = await response.json();
         if (Array.isArray(data) && data.length > 0) {
