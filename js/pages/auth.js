@@ -1,5 +1,5 @@
 /**
- * ConfGuide — Hệ thống Xác thực & Quản lý Người dùng (js/auth.js)
+ * ConfGuide — Hệ thống Xác thực & Quản lý Người dùng (js/pages/auth.js)
  * Xử lý đăng nhập, đăng ký, băm mật khẩu SHA-256, nạp 20 tài khoản thử nghiệm (fallback)
  * và chuyển đổi mềm giữa trang login.html / register.html.
  */

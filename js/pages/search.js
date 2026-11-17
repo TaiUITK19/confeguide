@@ -1,5 +1,5 @@
 /**
- * ConfGuide — Kịch bản Trang Tra cứu & Lọc Hội nghị (js/app.js)
+ * ConfGuide — Kịch bản Trang Tra cứu & Lọc Hội nghị (js/pages/search.js)
  * Quản lý trạng thái lọc phản ứng (filterState Proxy) theo kiến trúc một chiều,
  * tích hợp lõi tìm kiếm ConfGuideSearchCore (chuẩn hóa, khớp mờ Levenshtein, facet pre-counts),
  * hỗ trợ combobox gợi ý theo chuẩn W3C APG, ngăn kéo bộ lọc di động kèm bản nháp (draft),

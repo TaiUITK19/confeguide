@@ -1,5 +1,5 @@
 /**
- * ConfGuide — Module Lịch Các Mốc Hội nghị Cá nhân (js/calendar.js)
+ * ConfGuide — Module Lịch Các Mốc Hội nghị Cá nhân (js/components/calendar.js)
  * Chuẩn hóa 3 nguồn sự kiện (hạn nộp bài quy đổi UTC+7 từ AoE, ngày diễn ra hội nghị,
  * mốc Tracker từ localStorage 'confguides'), hiển thị lưới tháng 7 cột (T2..CN),
  * panel chi tiết theo ngày, danh sách 5 sự kiện sắp tới và hỗ trợ đầy đủ A11y / bàn phím.

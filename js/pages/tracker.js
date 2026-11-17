@@ -1,5 +1,5 @@
 /**
- * ConfGuide - Kịch bản Trang Theo dõi Hội nghị (js/tracker.js)
+ * ConfGuide - Kịch bản Trang Theo dõi Hội nghị (js/pages/tracker.js)
  * Hiển thị danh sách hội nghị người dùng đã lưu, tính hạn nộp gần nhất
  * và cho phép xóa hội nghị khỏi danh sách theo dõi.
  */

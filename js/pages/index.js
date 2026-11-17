@@ -1,5 +1,5 @@
 /**
- * ConfGuide - Kịch bản Trang chủ (js/script.js)
+ * ConfGuide - Kịch bản Trang chủ (js/pages/index.js)
  * Quản lý Hero 2 cột cân đối (cột trái tìm kiếm nhanh; cột phải Hero Slider 3 slide:
  * Danh ngôn & Tóm tắt nhanh, Hội nghị nổi bật Rank A* & A, Sắp hết hạn UTC+7),
  * nạp dữ liệu hội nghị (fetch + fallback file:///) và hiển thị 6 hội nghị kèm nút Lưu.
@@ -17,10 +17,10 @@
   /** Tổng số slide cố định trong Hero Slider */
   const SLIDER_TOTAL_SLIDES = 3;
 
-  /** Trọng số xếp hạng CORE đồng bộ theo trang Tra cứu (app.js) */
+  /** Trọng số xếp hạng CORE đồng bộ theo trang Tra cứu (js/pages/search.js) */
   const RANK_WEIGHT = { 'A*': 0, A: 1, B: 2, C: 3 };
 
-  /** Tập hợp giá trị Rank CORE hợp lệ đồng bộ theo app.js */
+  /** Tập hợp giá trị Rank CORE hợp lệ đồng bộ theo js/pages/search.js */
   const VALID_RANK_VALUES = new Set(['A*', 'A', 'B', 'C']);
 
   let allConferences = [];
@@ -86,7 +86,7 @@
   }
 
   /**
-   * Chuẩn hóa chuỗi thành mã slug URL khớp với layout.js / app.js / detail.js.
+   * Chuẩn hóa chuỗi thành mã slug URL khớp với js/core/layout.js / js/pages/search.js / js/pages/detail.js.
    * @param {string} text Chuỗi tên hội nghị.
    * @returns {string} Chuỗi slug chữ thường.
    */
@@ -141,7 +141,7 @@
   }
 
   /**
-   * Chuẩn hóa và kiểm tra tính hợp lệ của xếp hạng CORE từ dữ liệu hội nghị (khớp với app.js).
+   * Chuẩn hóa và kiểm tra tính hợp lệ của xếp hạng CORE từ dữ liệu hội nghị (khớp với js/pages/search.js).
    * @param {Object|null} conf Đối tượng hội nghị.
    * @returns {'A*'|'A'|'B'|'C'|''} Nhãn rank hợp lệ hoặc chuỗi rỗng nếu chưa có hạng.
    */
@@ -734,7 +734,7 @@
 
   /**
    * Xác định khóa localStorage lưu danh sách hội nghị đã lưu của người dùng hiện tại.
-   * Đồng bộ tuyệt đối với app.js và detail.js (confguide_saved_${userId} hoặc confguide_saved_guest).
+   * Đồng bộ tuyệt đối với js/pages/search.js và js/pages/detail.js (confguide_saved_${userId} hoặc confguide_saved_guest).
    * @returns {string} Khóa lưu trữ trong localStorage.
    */
   function getSavedStorageKey() {

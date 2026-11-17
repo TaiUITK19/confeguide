@@ -1,5 +1,5 @@
 /**
- * ConfGuide — Module So sánh Hội nghị Cạnh nhau (js/compare.js)
+ * ConfGuide — Module So sánh Hội nghị Cạnh nhau (js/components/compare.js)
  * Quản lý chọn tối đa 3 hội nghị qua sessionStorage (confguide_compare_ids),
  * hiển thị thanh nổi dưới đáy màn hình (.compare-bar) và hộp thoại bảng đối chiếu
  * 2 chiều (.compare-dialog) theo 3 nhóm / 8 tiêu chí chuẩn múi giờ UTC+7.

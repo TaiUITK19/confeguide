@@ -13,7 +13,7 @@
   <link rel="stylesheet" href="css/components/compare.css">
   <link rel="stylesheet" href="css/components/calendar.css">
   <link rel="stylesheet" href="css/base/transition.css">
-  <script src="js/page-transition.js"></script>
+  <script src="js/core/page-transition.js"></script>
 </head>
 <body>
   <script>try { if (localStorage.getItem('confguide_theme') === 'dark') document.body.classList.add('dark'); } catch (e) {}</script>
@@ -152,7 +152,7 @@
         </div>
 
         <div class="profile-calendar js-profile-calendar" id="profileCalendarRoot">
-          <!-- Nạp động bởi js/calendar.js -->
+          <!-- Nạp động bởi js/components/calendar.js -->
         </div>
       </section>
 
@@ -259,10 +259,10 @@
   <div id="site-footer"></div>
 
   <!-- Scripts -->
-  <script src="js/layout.js"></script>
-  <script src="js/compare.js"></script>
-  <script src="js/calendar.js"></script>
-  <script src="js/profile.js"></script>
+  <script src="js/core/layout.js"></script>
+  <script src="js/components/compare.js"></script>
+  <script src="js/components/calendar.js"></script>
+  <script src="js/pages/profile.js"></script>
 
 </body>
 </html>

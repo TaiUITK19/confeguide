@@ -1,5 +1,5 @@
 /**
- * ConfGuide — Quản lý Hồ sơ Nghiên cứu Cá nhân (js/profile.js)
+ * ConfGuide — Quản lý Hồ sơ Nghiên cứu Cá nhân (js/pages/profile.js)
  * Hiển thị thông tin học thuật, chỉnh sửa hồ sơ, tải/nén ảnh đại diện,
  * và quản lý danh sách hội nghị đã lưu / xem trước Tracker qua LocalStorage.
  */

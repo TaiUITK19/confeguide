@@ -1,5 +1,5 @@
 /**
- * ConfGuide — Lõi Tìm kiếm, Lọc Đa chiều & Khớp Mờ (js/search-core.js)
+ * ConfGuide — Lõi Tìm kiếm, Lọc Đa chiều & Khớp Mờ (js/components/search-core.js)
  * Cung cấp logic thuần túy (không truy cập DOM, không đọc URL/Storage):
  * chuẩn hóa văn bản, khoảng cách Damerau-Levenshtein, lập chỉ mục tìm kiếm,
  * tính điểm xếp hạng, phân đoạn từ khóa, đếm facet kết quả trước,

@@ -1,5 +1,5 @@
 /**
- * ConfGuide - Thành phần Bố cục & Tiện ích Dùng chung (js/layout.js)
+ * ConfGuide - Thành phần Bố cục & Tiện ích Dùng chung (js/core/layout.js)
  * Quản lý Header/Footer dùng chung, giao diện sáng/tối, modal toàn cục,
  * thông báo toast, hộp xác nhận tùy chỉnh và tiện ích xử lý hội nghị.
  */

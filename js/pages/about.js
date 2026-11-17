@@ -1,5 +1,5 @@
 /**
- * ConfGuide — Trang Giới thiệu Dự án & Đề xuất Hội nghị (js/about.js)
+ * ConfGuide — Trang Giới thiệu Dự án & Đề xuất Hội nghị (js/pages/about.js)
  * Tải nội dung giới thiệu từ data/about.json (kèm fallback khi mở offline file:///),
  * render 6 khu vực thông tin học thuật và quản lý modal Đề xuất hội nghị mới.
  */

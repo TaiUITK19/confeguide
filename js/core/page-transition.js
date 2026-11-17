@@ -1,5 +1,5 @@
 /* ==========================================================================
-   CONFGUIDE — MODULE ĐIỀU PHỐI HIỆU ỨNG CHUYỂN TRANG (js/page-transition.js)
+   CONFGUIDE — MODULE ĐIỀU PHỐI HIỆU ỨNG CHUYỂN TRANG (js/core/page-transition.js)
    - Nhánh 1 (Native MPA View Transitions): Dùng pageswap / pagereveal xác định
      hướng trượt theo nav và biến hình thanh tìm kiếm (index.html <-> search.html).
    - Nhánh 2 (Fallback): Trình duyệt chưa hỗ trợ @view-transition hoặc file:///

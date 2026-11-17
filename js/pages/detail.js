@@ -1,5 +1,5 @@
 /**
- * ConfGuide — Kịch bản Trang Chi tiết Hội nghị (js/detail.js)
+ * ConfGuide — Kịch bản Trang Chi tiết Hội nghị (js/pages/detail.js)
  * Quản lý tải dữ liệu hội nghị theo ?id=<slug>, hiển thị bố cục ưu tiên hành động chính,
  * đếm ngược mốc tiếp theo (1 bộ setInterval duy nhất), timeline 4 mốc kèm nhãn múi giờ UTC+7/AoE,
  * thông tin học thuật (<dl>), đánh giá & nhận xét hợp nhất (#danh-gia) và xuất lịch Google / .ics.
