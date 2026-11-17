@@ -396,11 +396,33 @@
       exportAllBtn.hidden = allMilestones.length === 0;
     }
 
+    const applyCountdownStatus = (status) => {
+      if (daysEl) {
+        daysEl.classList.remove(
+          'next-deadline-card__days--open',
+          'next-deadline-card__days--urgent',
+          'next-deadline-card__days--closed'
+        );
+        daysEl.classList.add(`next-deadline-card__days--${status}`);
+      }
+      if (tickerBox) {
+        tickerBox.classList.remove(
+          'next-deadline-card__ticker--open',
+          'next-deadline-card__ticker--urgent'
+        );
+        if (status === 'open' || status === 'urgent') {
+          tickerBox.classList.add(`next-deadline-card__ticker--${status}`);
+        }
+      }
+    };
+
     if (nextMilestone && !nextMilestone.isPassed) {
       if (nameEl) nameEl.textContent = nextMilestone.name;
 
       const leftDays = utils.daysLeft(nextMilestone.date);
+      const statusMod = (leftDays !== null && leftDays <= 14) ? 'urgent' : 'open';
       if (daysEl) daysEl.textContent = `Còn ${Math.max(0, leftDays ?? 0)} ngày`;
+      applyCountdownStatus(statusMod);
 
       const converted = utils.convertDeadlineToVn
         ? utils.convertDeadlineToVn(nextMilestone.date, { isDeadline: true })
@@ -425,6 +447,7 @@
         if (!tickerText || !rem) return;
         if (rem.isPassed) {
           tickerText.textContent = 'Đã hết thời gian nhận bài';
+          applyCountdownStatus('closed');
           stopCountdownTimer();
           return;
         }
@@ -436,6 +459,7 @@
     } else if (nextMilestone && nextMilestone.isPassed) {
       if (nameEl) nameEl.textContent = 'Đã hết hạn nộp bài';
       if (daysEl) daysEl.textContent = 'Đã đóng đợt nộp';
+      applyCountdownStatus('closed');
       if (exactEl) {
         const lastFormatted = utils.formatDeadlineVi
           ? utils.formatDeadlineVi(nextMilestone.date)
@@ -447,6 +471,7 @@
     } else {
       if (nameEl) nameEl.textContent = 'Chưa công bố mốc';
       if (daysEl) daysEl.textContent = 'Chưa cập nhật';
+      applyCountdownStatus('closed');
       if (exactEl) exactEl.textContent = 'Ban tổ chức chưa công bố lịch nộp bài cụ thể.';
       if (tickerBox) tickerBox.hidden = true;
       if (calGroup) calGroup.hidden = true;
@@ -501,7 +526,10 @@
         statusLabel = 'Đã qua';
         badgeContent = renderSpriteIcon('icon-check', 14);
       } else if (isActive) {
-        modifierClass = 'deadline-timeline__step--active';
+        const isUrgentActive = left !== null && left <= 14;
+        modifierClass = isUrgentActive
+          ? 'deadline-timeline__step--active deadline-timeline__step--urgent'
+          : 'deadline-timeline__step--active deadline-timeline__step--open';
         statusLabel = `Mốc tiếp theo · Còn ${Math.max(0, left)} ngày`;
       } else {
         statusLabel = `Sắp tới · Còn ${Math.max(0, left)} ngày`;

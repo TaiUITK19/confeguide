@@ -5,30 +5,30 @@
    Chuẩn WCAG 2.1 AA (:focus-within, vùng chạm >= 44px, prefers-reduced-motion)
    ========================================================= */
 
-:root {
-  --shadow-search: 0 4px 18px rgba(27, 67, 112, 0.06);
-  --search-focus-ring: rgba(18, 104, 201, 0.16);
+body {
+  --shadow-search: var(--shadow-md);
+  --search-focus-ring: var(--primary-ring);
 
-  /* Biến trạng thái hạn nộp CFP (Sáng) */
-  --cfp-open-bg: #ecfdf5;
-  --cfp-open-text: #047857;
-  --cfp-open-border: #a7f3d0;
-  --cfp-open-accent: #10b981;
+  /* Biến trạng thái hạn nộp CFP ánh xạ đồng bộ từ tokens nền tảng */
+  --cfp-open-bg: var(--status-open-bg);
+  --cfp-open-text: var(--status-open-text);
+  --cfp-open-border: var(--status-open-border);
+  --cfp-open-accent: var(--status-open-dot);
 
-  --cfp-closing-bg: #fffbeb;
-  --cfp-closing-text: #b45309;
-  --cfp-closing-border: #fde68a;
-  --cfp-closing-accent: #d97706;
+  --cfp-closing-bg: var(--status-warning-bg);
+  --cfp-closing-text: var(--status-warning-text);
+  --cfp-closing-border: var(--status-warning-border);
+  --cfp-closing-accent: var(--status-warning-dot);
 
-  --cfp-closed-bg: #f1f5f9;
-  --cfp-closed-text: #475569;
-  --cfp-closed-border: #cbd5e1;
-  --cfp-closed-accent: #94a3b8;
+  --cfp-closed-bg: var(--status-closed-bg);
+  --cfp-closed-text: var(--status-closed-text);
+  --cfp-closed-border: var(--status-closed-border);
+  --cfp-closed-accent: var(--status-closed-dot);
 
-  --cfp-unknown-bg: #f8fafc;
-  --cfp-unknown-text: #64748b;
-  --cfp-unknown-border: #e2e8f0;
-  --cfp-unknown-accent: #cbd5e1;
+  --cfp-unknown-bg: var(--surface-alt);
+  --cfp-unknown-text: var(--text-muted);
+  --cfp-unknown-border: var(--border-strong);
+  --cfp-unknown-accent: var(--border-strong);
 
   /* Biến chấm trạng thái CÒN đồng bộ badge hội nghị */
   --cfp-open: var(--cfp-open-accent);
@@ -36,87 +36,62 @@
   --cfp-closed: var(--cfp-closed-accent);
   --cfp-unknown: var(--cfp-unknown-accent);
 
-  /* Biến điều khiển thanh bên bộ lọc (Sáng — đạt tương phản WCAG AA) */
-  --filter-accent-text: #0d4e9a;
-  --filter-tag-bg: rgba(18, 104, 201, 0.1);
-  --filter-tag-text: #0d4e9a;
-  --filter-badge-bg: #1268c9;
-  --filter-badge-text: #ffffff;
-  --filter-cta-text: #ffffff;
-  --filter-preset-hover-bg: rgba(18, 104, 201, 0.08);
-  --filter-selected-border: #1268c9;
+  /* Biến điều khiển thanh bên bộ lọc (WCAG AA ở cả hai chế độ) */
+  --filter-accent-text: var(--primary-dark);
+  --filter-tag-bg: var(--primary-soft);
+  --filter-tag-text: var(--primary-dark);
+  --filter-badge-bg: var(--primary);
+  --filter-badge-text: var(--on-primary);
+  --filter-cta-text: var(--on-primary);
+  --filter-preset-hover-bg: var(--primary-soft);
+  --filter-selected-border: var(--primary);
 
-  /* Biến nút lưu, tô sáng <mark>, lỗi và skeleton (Sáng) */
-  --save-active-bg: #fffdf5;
-  --save-active-text: #b45309;
-  --save-active-border: #f5b301;
+  /* Biến nút lưu, tô sáng <mark>, lỗi và skeleton */
+  --save-active-bg: var(--gold-bg);
+  --save-active-text: var(--gold-text);
+  --save-active-border: var(--gold-stroke);
 
-  --mark-bg: #fef08a;
-  --mark-text: #0b1f6b;
-  --mark-border: #fde047;
+  --mark-bg: color-mix(in oklab, var(--gold) 28%, var(--surface));
+  --mark-text: var(--text);
+  --mark-border: var(--gold-border);
 
-  --error-surface-bg: rgba(224, 49, 49, 0.04);
-  --error-surface-border: rgba(224, 49, 49, 0.4);
-  --danger-hover-bg: rgba(224, 49, 49, 0.1);
+  --error-surface-bg: var(--danger-bg);
+  --error-surface-border: var(--danger-border);
+  --danger-hover-bg: var(--danger-bg);
 
-  --drawer-backdrop-bg: rgba(11, 31, 107, 0.5);
-  --skeleton-base: #e2e8f0;
-  --skeleton-highlight: #f1f5f9;
+  --drawer-backdrop-bg: var(--backdrop-scrim);
+  --skeleton-base: var(--surface-muted);
+  --skeleton-highlight: var(--surface-hover);
 }
 
 body.dark {
-  /* Biến trạng thái hạn nộp CFP (Tối) */
-  --cfp-open-bg: rgba(16, 185, 129, 0.16);
-  --cfp-open-text: #34d399;
-  --cfp-open-border: rgba(16, 185, 129, 0.38);
-  --cfp-open-accent: #34d399;
+  --filter-accent-text: var(--primary);
+  --filter-tag-text: var(--primary);
+  --mark-bg: color-mix(in oklab, var(--gold) 22%, var(--surface));
+}
 
-  --cfp-closing-bg: rgba(245, 158, 11, 0.16);
-  --cfp-closing-text: #fbbf24;
-  --cfp-closing-border: rgba(245, 158, 11, 0.38);
-  --cfp-closing-accent: #fbbf24;
+@supports not (color: oklch(0.5 0.1 200)) {
+  body {
+    --mark-bg: #fef08a;
+    --mark-text: #10264a;
+    --mark-border: #d9b672;
+  }
 
-  --cfp-closed-bg: rgba(100, 116, 139, 0.22);
-  --cfp-closed-text: #cbd5e1;
-  --cfp-closed-border: rgba(100, 116, 139, 0.42);
-  --cfp-closed-accent: #64748b;
+  body.dark {
+    --mark-bg: #3b3216;
+    --mark-text: #e5e8ec;
+    --mark-border: #88732a;
+  }
+}
 
-  --cfp-unknown-bg: rgba(71, 85, 105, 0.2);
-  --cfp-unknown-text: #94a3b8;
-  --cfp-unknown-border: rgba(100, 116, 139, 0.35);
-  --cfp-unknown-accent: #475569;
+@supports (color: oklch(0.5 0.1 200)) and (not (background: color-mix(in oklch, red 50%, blue))) {
+  body {
+    --mark-bg: #fdefb0;
+  }
 
-  --cfp-open: var(--cfp-open-accent);
-  --cfp-closing: var(--cfp-closing-accent);
-  --cfp-closed: var(--cfp-closed-accent);
-  --cfp-unknown: var(--cfp-unknown-accent);
-
-  /* Biến điều khiển thanh bên bộ lọc (Tối — đạt tương phản WCAG AA) */
-  --filter-accent-text: #8ec2ff;
-  --filter-tag-bg: rgba(142, 194, 255, 0.14);
-  --filter-tag-text: #8ec2ff;
-  --filter-badge-bg: #8ec2ff;
-  --filter-badge-text: #0b1320;
-  --filter-cta-text: #ffffff;
-  --filter-preset-hover-bg: rgba(142, 194, 255, 0.12);
-  --filter-selected-border: #8ec2ff;
-
-  /* Biến nút lưu, tô sáng <mark>, lỗi và skeleton (Tối) */
-  --save-active-bg: #252213;
-  --save-active-text: #f5b301;
-  --save-active-border: #f5b301;
-
-  --mark-bg: rgba(245, 179, 1, 0.28);
-  --mark-text: #fde68a;
-  --mark-border: rgba(245, 179, 1, 0.5);
-
-  --error-surface-bg: rgba(224, 49, 49, 0.08);
-  --error-surface-border: rgba(255, 107, 107, 0.35);
-  --danger-hover-bg: rgba(224, 49, 49, 0.2);
-
-  --drawer-backdrop-bg: rgba(4, 10, 22, 0.72);
-  --skeleton-base: #1e3458;
-  --skeleton-highlight: #294572;
+  body.dark {
+    --mark-bg: #3b3317;
+  }
 }
 
 /* ================= Khu vực Hero & Ô Tìm kiếm ================= */
@@ -250,7 +225,7 @@ body.dark {
 
 .search-box:focus-within {
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px var(--search-focus-ring);
+  box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--focus-ring);
 }
 
 .search-box svg {
@@ -262,16 +237,22 @@ body.dark {
   flex: 1;
   border: none;
   background: transparent;
-  outline: none;
   font-size: 15px;
   color: var(--text);
   min-width: 0;
   min-height: 40px;
 }
 
+.search-box input:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+  border-radius: 6px;
+  box-shadow: none;
+}
+
 .search-box button {
   background: var(--primary);
-  color: #ffffff;
+  color: var(--on-primary);
   padding: 10px 24px;
   border-radius: var(--radius-sm);
   font-weight: 600;
@@ -282,12 +263,13 @@ body.dark {
 }
 
 .search-box button:hover {
-  background: var(--primary-dark);
+  background: var(--primary-hover);
 }
 
 .search-box button:focus-visible {
-  outline: 2px solid var(--primary);
+  outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
+  box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--focus-ring);
 }
 
 /* Nhóm từ khóa gợi ý nhanh bọc bằng fieldset/legend */
@@ -314,7 +296,7 @@ body.dark {
 }
 
 .keyword {
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-strong);
   background: var(--surface);
   color: var(--text-muted);
   border-radius: var(--radius-pill);
@@ -772,7 +754,7 @@ body.dark {
   padding: 4px 6px;
   font-size: 12.5px;
   border-left: none;
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-strong);
   background: var(--surface-alt);
 }
 
@@ -843,7 +825,9 @@ body.dark {
 
 .check-row input:focus-visible,
 .filter-option__input:focus-visible {
-  outline: none;
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 2px var(--surface);
 }
 
 /* Chấm trạng thái CÒN (phân biệt bằng cả màu và hình dạng theo WCAG 1.4.1) */
@@ -1067,7 +1051,7 @@ body.dark {
   margin-top: 2px;
   padding: 5px 10px;
   border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-strong);
   background: var(--surface-alt);
   color: var(--filter-accent-text);
   font-size: 12.5px;
@@ -1569,62 +1553,38 @@ body.dark {
 .conference-card__badge--ongoing {
   background: var(--primary-soft);
   color: var(--primary);
-  border-color: var(--border-strong);
+  border-color: var(--conf-badge-border);
 }
 
 .conference-card__badge--ended {
-  background: var(--surface-muted);
-  color: var(--text-muted);
-  border-color: var(--border);
+  background: var(--status-closed-bg);
+  color: var(--status-closed-text);
+  border-color: var(--status-closed-border);
 }
 
-/* Huy hiệu phân hạng CORE trên thẻ hội nghị (đạt tương phản WCAG AA sáng & tối) */
+/* Huy hiệu phân hạng CORE trên thẻ hội nghị (tokens OKLCH đạt WCAG AA sáng & tối) */
 .conference-card__badge--rank-astar {
-  background: #fef3c7;
-  color: #92400e;
-  border-color: #fcd34d;
+  background: var(--gold-bg);
+  color: var(--gold-text);
+  border-color: var(--gold-border);
 }
 
 .conference-card__badge--rank-a {
-  background: #e6f0fc;
-  color: #0d4e9a;
-  border-color: #bfdbfe;
+  background: var(--primary-soft);
+  color: var(--filter-accent-text);
+  border-color: var(--conf-badge-border);
 }
 
 .conference-card__badge--rank-b {
-  background: #f0fdf4;
-  color: #166534;
-  border-color: #bbf7d0;
+  background: var(--status-open-bg);
+  color: var(--status-open-text);
+  border-color: var(--status-open-border);
 }
 
 .conference-card__badge--rank-c {
-  background: var(--surface-muted);
-  color: var(--text-muted);
-  border-color: var(--border-strong);
-}
-
-body.dark .conference-card__badge--rank-astar {
-  background: rgba(245, 158, 11, 0.16);
-  color: #fcd34d;
-  border-color: rgba(252, 211, 77, 0.35);
-}
-
-body.dark .conference-card__badge--rank-a {
-  background: rgba(59, 130, 246, 0.18);
-  color: #93c5fd;
-  border-color: rgba(147, 197, 253, 0.35);
-}
-
-body.dark .conference-card__badge--rank-b {
-  background: rgba(34, 197, 94, 0.16);
-  color: #86efac;
-  border-color: rgba(134, 239, 172, 0.35);
-}
-
-body.dark .conference-card__badge--rank-c {
-  background: var(--surface-muted);
-  color: var(--text-muted);
-  border-color: var(--border-strong);
+  background: var(--status-closed-bg);
+  color: var(--status-closed-text);
+  border-color: var(--status-closed-border);
 }
 
 /* Cắt dòng tên hội nghị dài (tối đa 2 dòng) */
@@ -1727,19 +1687,40 @@ body.dark .conference-card__badge--rank-c {
   color: var(--navy);
 }
 
+/* Đếm ngược hạn nộp thống nhất trạng thái: Đang mở (xanh lá) / Sắp hết hạn (cam) / Đã đóng (xám) */
 .deadline-countdown {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   font-size: 12.5px;
-  color: var(--primary);
+  color: var(--status-open-text);
   font-weight: 700;
 }
 
+.deadline-countdown::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--status-open-dot);
+}
+
 .deadline-countdown.urgent {
-  color: var(--cfp-closing-text);
+  color: var(--status-warning-text);
+}
+
+.deadline-countdown.urgent::before {
+  background: var(--status-warning-dot);
 }
 
 .deadline-countdown.closed {
-  color: var(--text-muted);
+  color: var(--status-closed-text);
   font-weight: 600;
+}
+
+.deadline-countdown.closed::before {
+  background: var(--status-closed-dot);
 }
 
 .card-buttons-group {
@@ -1749,27 +1730,32 @@ body.dark .conference-card__badge--rank-c {
   width: 100%;
 }
 
+/* Giảm bão hòa nút lặp trên từng thẻ để nhường 10% nhấn cho CTA chính & bộ lọc */
 .btn-card-detail {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   padding: 8px 14px;
   border-radius: var(--radius-sm);
-  background: var(--primary);
-  color: #ffffff;
+  background: var(--primary-soft);
+  color: var(--filter-accent-text);
+  border: 1px solid var(--conf-badge-border);
   font-size: 13px;
   font-weight: 600;
-  transition: background-color 180ms ease;
+  transition: background-color 180ms ease, color 180ms ease, border-color 180ms ease;
   text-decoration: none;
 }
 
 .btn-card-detail:hover {
-  background: var(--primary-dark);
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--on-primary);
 }
 
 .btn-card-detail:focus-visible {
-  outline: 2px solid var(--primary);
+  outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
+  box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--focus-ring);
 }
 
 .btn-card-save {
@@ -1795,9 +1781,15 @@ body.dark .conference-card__badge--rank-c {
   background: var(--save-active-bg);
 }
 
+.btn-card-save.saved svg {
+  fill: var(--gold);
+  stroke: var(--gold-stroke);
+}
+
 .btn-card-save:focus-visible {
-  outline: 2px solid var(--primary);
+  outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
+  box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--focus-ring);
 }
 
 /* ================= Thẻ Skeleton Loading (Giữ chiều cao chống CLS) ================= */
@@ -1983,7 +1975,7 @@ body.dark .conference-card__badge--rank-c {
   margin-top: 18px;
   padding: 10px 22px;
   background: var(--primary);
-  color: #ffffff;
+  color: var(--on-primary);
   border-radius: var(--radius-sm);
   font-weight: 600;
   font-size: 14px;
@@ -1993,12 +1985,13 @@ body.dark .conference-card__badge--rank-c {
 }
 
 .btn-reset-empty:hover {
-  background: var(--primary-dark);
+  background: var(--primary-hover);
 }
 
 .btn-reset-empty:focus-visible {
-  outline: 2px solid var(--primary);
+  outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
+  box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--focus-ring);
 }
 
 .search-error-state {
@@ -2089,8 +2082,9 @@ body.dark .conference-card__badge--rank-c {
   bottom: 24px;
   right: 24px;
   z-index: 999;
-  background: var(--navy);
-  color: #ffffff;
+  background: var(--toast-bg);
+  color: var(--toast-text);
+  border: 1px solid var(--border-strong);
   padding: 12px 20px;
   border-radius: var(--radius-sm);
   box-shadow: var(--shadow-lg);

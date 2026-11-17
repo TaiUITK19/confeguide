@@ -584,41 +584,12 @@
   }
 
   /**
-   * Cập nhật nhanh các chỉ số tóm tắt ở Slide 1 từ chính dữ liệu hội nghị đã tải.
-   * @param {Array<Object>} conferences Danh sách hội nghị đã chuẩn hóa.
-   */
-  function updateHeroQuickSummary(conferences) {
-    const list = Array.isArray(conferences) ? conferences : [];
-    const nowMs = Date.now();
-
-    let topRankCount = 0;
-    let openCount = 0;
-    list.forEach(conf => {
-      const rank = getNormalizedRank(conf);
-      if (rank === 'A*' || rank === 'A') topRankCount += 1;
-      const hasOpenDeadline = parseDeadlinesSafe(conf).some(
-        dl => dl && !dl.isPassed && dl.targetMs > nowMs
-      );
-      if (hasOpenDeadline) openCount += 1;
-    });
-
-    const totalEl = document.querySelector('.js-hero-summary-total');
-    const coreEl = document.querySelector('.js-hero-summary-core');
-    const openEl = document.querySelector('.js-hero-summary-open');
-
-    if (totalEl) totalEl.textContent = String(list.length);
-    if (coreEl) coreEl.textContent = String(topRankCount);
-    if (openEl) openEl.textContent = String(openCount);
-  }
-
-  /**
    * Đổ dữ liệu động vào các slide nổi bật và hạn nộp bài của Hero Slider sau khi tải JSON (hoặc fallback).
    */
   function renderHeroSlider() {
     const sliderEl = document.querySelector('.js-hero-slider');
     if (!sliderEl) return;
 
-    updateHeroQuickSummary(allConferences);
     renderFeaturedSliderCards(allConferences);
     renderDeadlineSliderCards(allConferences);
 
@@ -929,9 +900,14 @@
       searchForm.addEventListener('submit', function (e) {
         e.preventDefault();
         const query = searchInput.value.trim();
-        window.location.href = query
+        const targetUrl = query
           ? `search.html?q=${encodeURIComponent(query)}`
           : 'search.html';
+        if (window.ConfGuidePageTransition && typeof window.ConfGuidePageTransition.navigate === 'function') {
+          window.ConfGuidePageTransition.navigate(targetUrl, { searchFocus: true });
+        } else {
+          window.location.href = targetUrl;
+        }
       });
     }
   }
@@ -1029,6 +1005,7 @@
     grid.innerHTML = displayItems.map(item => {
       const nextDl = utils && utils.getNextDeadline ? utils.getNextDeadline(item) : null;
       let deadlineBadgeText = 'Chưa công bố';
+      let deadlineStatusMod = 'closed';
 
       if (nextDl) {
         const formattedDl = utils && utils.formatDeadlineVi
@@ -1036,8 +1013,10 @@
           : (nextDl.displayDate || nextDl.date);
         if (!nextDl.isPassed) {
           deadlineBadgeText = `${nextDl.shortName}: ${formattedDl} (còn ${nextDl.daysLeft} ngày)`;
+          deadlineStatusMod = nextDl.daysLeft <= 14 ? 'urgent' : 'open';
         } else {
           deadlineBadgeText = `${nextDl.shortName}: ${formattedDl} (Đã qua)`;
+          deadlineStatusMod = 'closed';
         }
       }
 
@@ -1080,7 +1059,7 @@
           </div>
 
           <div class="conf-footer">
-            <div class="conf-deadline-badge">
+            <div class="conf-deadline-badge conf-deadline-badge--${deadlineStatusMod}">
               <strong>${esc(deadlineBadgeText)}</strong>
             </div>
             <div class="conf-card-actions">

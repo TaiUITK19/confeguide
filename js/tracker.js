@@ -97,7 +97,7 @@
   function getDeadlineSummary(conf) {
     const utils = getUtils();
     const next = utils && utils.getNextDeadline ? utils.getNextDeadline(conf) : null;
-    if (!next) return { date: 'Chưa cập nhật', remaining: '' };
+    if (!next) return { date: 'Chưa cập nhật', remaining: '', status: 'closed' };
 
     const date = utils.formatDeadlineVi
       ? utils.formatDeadlineVi(next.date)
@@ -106,7 +106,10 @@
     const remaining = Number.isFinite(daysLeft)
       ? (daysLeft >= 0 ? `Còn ${daysLeft} ngày` : `Đã quá hạn ${Math.abs(daysLeft)} ngày`)
       : '';
-    return { date, remaining };
+    const status = Number.isFinite(daysLeft)
+      ? (daysLeft < 0 ? 'closed' : (daysLeft <= 14 ? 'urgent' : 'open'))
+      : 'closed';
+    return { date, remaining, status };
   }
 
   /**
@@ -150,7 +153,7 @@
       return `<tr>
         <td><div class="conference-name">${avatarHtml}<div class="name-text"><a href="detail.html?id=${encodeURIComponent(confId)}">${esc(conf.name || confId)}</a></div></div></td>
         <td><div class="tags">${fields || '<span class="tag">Chưa phân loại</span>'}</div></td>
-        <td><div class="deadline-cell"><div class="deadline">${esc(nearest.date)}</div>${nearest.remaining ? `<div class="deadline-remaining">${esc(nearest.remaining)}</div>` : ''}</div></td>
+        <td><div class="deadline-cell"><div class="deadline">${esc(nearest.date)}</div>${nearest.remaining ? `<div class="deadline-remaining deadline-remaining--${esc(nearest.status)}">${esc(nearest.remaining)}</div>` : ''}</div></td>
         <td><div class="actions">${compareBtnHtml}<button class="action-btn delete" type="button" data-remove="${esc(confId)}">Xóa</button></div></td>
       </tr>`;
     }).join('');

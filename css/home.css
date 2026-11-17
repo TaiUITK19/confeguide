@@ -12,7 +12,7 @@
 
 .hero-actions .btn-primary,
 .featured-cta-wrap .btn-primary {
-  box-shadow: 0 4px 14px rgba(18, 104, 201, 0.25);
+  box-shadow: 0 4px 14px var(--primary-shadow);
 }
 
 .hero-actions .btn-primary:hover,
@@ -20,7 +20,7 @@
 .featured-cta-wrap .btn-primary:hover,
 .featured-cta-wrap .btn-primary:focus-visible {
   transform: translateY(-1px);
-  box-shadow: 0 6px 18px rgba(18, 104, 201, 0.35);
+  box-shadow: var(--shadow-lg);
 }
 
 .hero-actions .btn-secondary:hover,
@@ -43,15 +43,11 @@
 /* Hero 2 cột cân đối: Cột trái cố định & Cột phải Slider nổi bật */
 .hero-section {
   position: relative;
-  background: linear-gradient(135deg, #deebfe 0%, #e9f2ff 55%, #d5e5fc 100%);
+  background: var(--bg-hero);
   border-bottom: 1px solid var(--border);
   padding: 36px 0 40px;
   overflow: hidden;
   scroll-margin-top: 80px;
-}
-
-body.dark .hero-section {
-  background: linear-gradient(135deg, #0b1424 0%, #0e1c33 60%, #091220 100%);
 }
 
 .hero-inner {
@@ -77,13 +73,8 @@ body.dark .hero-section {
   font-weight: 700;
   padding: 5px 14px;
   border-radius: var(--radius-pill);
-  border: 1px solid rgba(18, 104, 201, 0.2);
+  border: 1px solid var(--conf-badge-border);
   margin-bottom: 12px;
-}
-
-body.dark .hero-eyebrow {
-  color: var(--navy);
-  border-color: rgba(142, 194, 255, 0.3);
 }
 
 .hero-eyebrow span {
@@ -158,15 +149,14 @@ body.dark .hero-content h1 span {
   justify-content: space-between;
   gap: 8px;
   background: linear-gradient(180deg, var(--surface) 0%, var(--surface) 64%, var(--primary-soft) 100%);
-  border: 1px solid rgba(18, 104, 201, 0.25);
+  border: 1px solid var(--conf-badge-border);
   border-radius: var(--radius);
-  box-shadow: 0 16px 38px rgba(18, 104, 201, 0.14), 0 2px 6px rgba(11, 31, 107, 0.06);
+  box-shadow: var(--shadow-lg), var(--shadow-sm);
 }
 
 body.dark .hero-slider {
   background: linear-gradient(180deg, var(--surface) 0%, var(--surface) 64%, var(--surface-alt) 100%);
-  border-color: rgba(142, 194, 255, 0.28);
-  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.55), 0 2px 8px rgba(0, 0, 0, 0.35);
+  border-color: var(--border-strong);
 }
 
 /* 3 chấm phân trang đặt giữa đáy khung slider */
@@ -196,20 +186,12 @@ body.dark .hero-slider {
   width: 9px;
   height: 9px;
   border-radius: var(--radius-pill);
-  background: rgba(18, 104, 201, 0.38);
+  background: var(--border-strong);
   transition: width 180ms ease, background-color 180ms ease;
 }
 
-body.dark .hero-slider__dot::before {
-  background: rgba(142, 194, 255, 0.38);
-}
-
 .hero-slider__dot:hover::before {
-  background: rgba(18, 104, 201, 0.72);
-}
-
-body.dark .hero-slider__dot:hover::before {
-  background: rgba(142, 194, 255, 0.72);
+  background: var(--primary);
 }
 
 .hero-slider__dot--active::before,
@@ -219,20 +201,11 @@ body.dark .hero-slider__dot:hover::before {
   background: var(--primary);
 }
 
-body.dark .hero-slider__dot--active::before,
-body.dark .hero-slider__dot[aria-current="true"]::before {
-  background: var(--navy);
-}
-
 .hero-slider__dot:focus-visible,
 .hero-slide-card__link:focus-visible {
-  outline: 2px solid var(--primary);
+  outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
-}
-
-body.dark .hero-slider__dot:focus-visible,
-body.dark .hero-slide-card__link:focus-visible {
-  outline-color: var(--navy);
+  box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--focus-ring);
 }
 
 /* Khung trượt các slide */
@@ -277,7 +250,7 @@ body.dark .hero-slide-card__link:focus-visible {
   gap: 10px;
 }
 
-/* Slide 1: Danh ngôn học thuật & Tóm tắt nhanh */
+/* Slide 1: Danh ngôn học thuật */
 .hero-slider__quote-panel {
   flex: 1;
   display: flex;
@@ -288,16 +261,10 @@ body.dark .hero-slide-card__link:focus-visible {
   gap: 10px;
   padding: 16px 18px;
   background: var(--surface-alt);
-  border: 1px solid rgba(18, 104, 201, 0.22);
+  border: 1px solid var(--conf-badge-border);
   border-left: 4px solid var(--primary);
   border-radius: var(--radius);
-  box-shadow: 0 4px 14px rgba(18, 104, 201, 0.06);
-}
-
-body.dark .hero-slider__quote-panel {
-  background: var(--surface-alt);
-  border-color: rgba(142, 194, 255, 0.26);
-  border-left: 4px solid var(--navy);
+  box-shadow: var(--shadow-sm);
 }
 
 .hero-slider__quote-icon {
@@ -310,10 +277,6 @@ body.dark .hero-slider__quote-panel {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-}
-
-body.dark .hero-slider__quote-icon {
-  color: var(--navy);
 }
 
 .hero-slider__quote-panel blockquote {
@@ -330,48 +293,6 @@ body.dark .hero-slider__quote-icon {
   font-size: 13px;
   color: var(--text-muted);
   font-weight: 600;
-}
-
-.hero-slider__summary {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
-}
-
-.hero-slider__summary-item {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 10px 8px;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-}
-
-body.dark .hero-slider__summary-item {
-  background: var(--surface-alt);
-  border-color: var(--border-strong);
-}
-
-.hero-slider__summary-val {
-  font-size: 19px;
-  font-weight: 800;
-  color: var(--primary);
-  line-height: 1.2;
-  font-variant-numeric: tabular-nums;
-}
-
-body.dark .hero-slider__summary-val {
-  color: var(--navy);
-}
-
-.hero-slider__summary-label {
-  font-size: 11.5px;
-  font-weight: 600;
-  color: var(--text-muted);
-  line-height: 1.3;
 }
 
 /* Tiêu đề dùng chung của Slide 2 & 3 (badge cân sang phải để không trống góc trên) */
@@ -460,9 +381,9 @@ body.dark .hero-slider__slide-badge {
   padding: 11px 14px;
   border-radius: var(--radius);
   background: var(--surface);
-  border: 1px solid rgba(18, 104, 201, 0.25);
+  border: 1px solid var(--conf-badge-border);
   border-left: 4px solid var(--primary);
-  box-shadow: 0 5px 14px rgba(18, 104, 201, 0.08), 0 1px 4px rgba(11, 31, 107, 0.04);
+  box-shadow: var(--shadow-sm);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -473,19 +394,14 @@ body.dark .hero-slider__slide-badge {
 
 body.dark .hero-slide-card {
   background: var(--surface-alt);
-  border-color: rgba(142, 194, 255, 0.28);
-  border-left: 4px solid var(--navy);
+  border-color: var(--border-strong);
+  border-left: 4px solid var(--primary);
   box-shadow: var(--shadow-sm);
 }
 
 .hero-slide-card:hover {
   transform: translateY(-2px);
   border-color: var(--primary);
-  box-shadow: 0 10px 22px rgba(18, 104, 201, 0.16), 0 3px 8px rgba(11, 31, 107, 0.08);
-}
-
-body.dark .hero-slide-card:hover {
-  border-color: var(--navy);
   box-shadow: var(--shadow-md);
 }
 
@@ -506,51 +422,36 @@ body.dark .hero-slide-card:hover {
   min-width: 0;
 }
 
-/* Huy hiệu Rank: A* nền --gold chữ tối; A nền --primary chữ trắng; hạng khác giữ nền dịu */
+/* Huy hiệu Rank đồng bộ toàn hệ thống: tiết chế độ bão hòa theo tỷ lệ 60:30:10 */
 .hero-slide-card__rank {
   flex-shrink: 0;
   padding: 4px 11px;
   border-radius: var(--radius-pill);
   font-size: 12px;
   font-weight: 800;
-  background: var(--gold);
-  color: #10264a;
-  border: 1px solid rgba(180, 125, 0, 0.45);
+  background: var(--gold-bg);
+  color: var(--gold-text);
+  border: 1px solid var(--gold-border);
   white-space: nowrap;
 }
 
 .hero-slide-card__rank--a {
-  background: var(--primary);
-  color: #ffffff;
-  border-color: var(--primary);
+  background: var(--primary-soft);
+  color: var(--primary);
+  border-color: var(--conf-badge-border);
 }
 
 .hero-slide-card__rank--other {
-  background: var(--primary-soft);
-  color: var(--primary);
+  background: var(--surface-muted);
+  color: var(--text-muted);
   border-color: var(--border-strong);
 }
 
-body.dark .hero-slide-card__rank {
-  background: var(--gold);
-  color: #10264a;
-  border-color: rgba(245, 179, 1, 0.7);
-}
-
-body.dark .hero-slide-card__rank--a {
-  background: var(--primary);
-  color: #ffffff;
-  border-color: var(--navy);
-}
-
-body.dark .hero-slide-card__rank--other {
-  background: rgba(142, 194, 255, 0.16);
-  color: var(--navy);
-  border-color: rgba(142, 194, 255, 0.36);
-}
-
-/* Nhãn đếm ngược kèm phân mức khẩn cấp rõ bằng cả chữ lẫn màu */
+/* Nhãn đếm ngược kèm chấm trạng thái & phân mức khẩn cấp đồng bộ */
 .hero-slide-card__countdown {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   flex-shrink: 0;
   padding: 4px 11px;
   border-radius: var(--radius-pill);
@@ -560,28 +461,32 @@ body.dark .hero-slide-card__rank--other {
   border: 1px solid transparent;
 }
 
+.hero-slide-card__countdown::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
 .hero-slide-card__countdown--urgent {
-  background: #fee2e2;
-  color: #991b1b;
-  border-color: #fca5a5;
+  background: var(--status-warning-bg);
+  color: var(--status-warning-text);
+  border-color: var(--status-warning-border);
+}
+
+.hero-slide-card__countdown--urgent::before {
+  background: var(--status-warning-dot);
 }
 
 .hero-slide-card__countdown--normal {
-  background: #dcfce7;
-  color: #065f46;
-  border-color: rgba(16, 185, 129, 0.4);
+  background: var(--status-open-bg);
+  color: var(--status-open-text);
+  border-color: var(--status-open-border);
 }
 
-body.dark .hero-slide-card__countdown--urgent {
-  background: rgba(224, 49, 49, 0.24);
-  color: #fecaca;
-  border-color: rgba(248, 113, 113, 0.45);
-}
-
-body.dark .hero-slide-card__countdown--normal {
-  background: rgba(16, 185, 129, 0.20);
-  color: #6ee7b7;
-  border-color: rgba(16, 185, 129, 0.45);
+.hero-slide-card__countdown--normal::before {
+  background: var(--status-open-dot);
 }
 
 .hero-slide-card__fullname {
@@ -644,12 +549,18 @@ body.dark .hero-slide-card__meta-item svg {
   padding: 6px 12px;
   font-size: 13px;
   font-weight: 700;
-  box-shadow: 0 4px 12px rgba(18, 104, 201, 0.22);
+  background: var(--primary-soft);
+  color: var(--primary);
+  border-color: var(--conf-badge-border);
+  box-shadow: none;
 }
 
 .hero-slide-card__link:hover,
 .hero-slide-card__link:focus-visible {
-  box-shadow: 0 6px 16px rgba(18, 104, 201, 0.30);
+  background: var(--primary);
+  color: var(--on-primary);
+  border-color: var(--primary);
+  box-shadow: var(--shadow-sm);
 }
 
 /* Trạng thái rỗng Slide 3 khi không còn deadline tương lai */
@@ -687,12 +598,7 @@ body.dark .hero-slide-card__meta-item svg {
 
 .search-box:focus-within {
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(18, 104, 201, 0.22), 0 8px 24px rgba(18, 104, 201, 0.22);
-}
-
-body.dark .search-box:focus-within {
-  border-color: var(--navy);
-  box-shadow: 0 0 0 3px rgba(142, 194, 255, 0.28), 0 8px 24px rgba(0, 0, 0, 0.45);
+  box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--focus-ring), var(--shadow-md);
 }
 
 .search-box svg {
@@ -705,10 +611,16 @@ body.dark .search-box:focus-within {
   flex: 1;
   min-width: 0;
   border: none;
-  outline: none;
   background: transparent;
   font-size: 15px;
   color: var(--text);
+}
+
+.search-box input:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+  border-radius: 6px;
+  box-shadow: none;
 }
 
 .search-box button {
@@ -719,8 +631,9 @@ body.dark .search-box:focus-within {
 }
 
 .search-box button:focus-visible {
-  outline: 2px solid var(--navy);
+  outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
+  box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--focus-ring);
 }
 
 /* Tính năng */
@@ -833,7 +746,7 @@ body.dark .search-box:focus-within {
 .tab-btn:hover {
   background: var(--surface);
   color: var(--primary);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow-sm);
 }
 
 .results-status {
@@ -940,7 +853,7 @@ body.dark .search-box:focus-within {
   flex-wrap: wrap;
 }
 
-/* Nút Lưu hội nghị dạng icon (đồng bộ màu sao vàng với trang tra cứu & chi tiết) */
+/* Nút Lưu hội nghị dạng icon (sao đạt tương phản >= 3:1 ở cả hai trạng thái và chế độ) */
 .conf-save-btn {
   width: 40px;
   height: 40px;
@@ -957,21 +870,17 @@ body.dark .search-box:focus-within {
   transition: border-color 160ms ease, color 160ms ease, background-color 160ms ease;
 }
 
-.conf-save-btn:hover {
-  border-color: var(--gold);
-  color: #b45309;
-  background: #fffdf5;
+.conf-save-btn:hover,
+.conf-save-btn--saved {
+  border-color: var(--gold-stroke);
+  color: var(--gold-text);
+  background: var(--gold-bg);
 }
 
 .conf-save-btn:focus-visible {
-  outline: 2px solid var(--primary);
+  outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
-}
-
-.conf-save-btn--saved {
-  border-color: var(--gold);
-  color: #b45309;
-  background: #fffdf5;
+  box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--focus-ring);
 }
 
 .conf-save-btn__icon {
@@ -987,21 +896,10 @@ body.dark .search-box:focus-within {
 
 .conf-save-btn--saved .conf-save-btn__icon {
   fill: var(--gold);
-  stroke: #b45309;
+  stroke: var(--gold-stroke);
 }
 
-body.dark .conf-save-btn:hover,
-body.dark .conf-save-btn--saved {
-  border-color: var(--gold);
-  color: var(--gold);
-  background: #252213;
-}
-
-body.dark .conf-save-btn--saved .conf-save-btn__icon {
-  fill: var(--gold);
-  stroke: var(--gold);
-}
-
+/* Nhãn hạn chót thống nhất: Mở = xanh lá, Gấp = cam, Đóng = xám trung tính */
 .conf-deadline-badge {
   display: flex;
   flex-direction: column;
@@ -1010,13 +908,45 @@ body.dark .conf-save-btn--saved .conf-save-btn__icon {
 }
 
 .conf-deadline-badge strong {
-  font-size: 13px;
-  color: #c2410c;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  color: var(--status-warning-text);
   font-weight: 700;
 }
 
-body.dark .conf-deadline-badge strong {
-  color: #fdba74;
+.conf-deadline-badge strong::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--status-warning-dot);
+}
+
+.conf-deadline-badge--open strong {
+  color: var(--status-open-text);
+}
+
+.conf-deadline-badge--open strong::before {
+  background: var(--status-open-dot);
+}
+
+.conf-deadline-badge--urgent strong {
+  color: var(--status-warning-text);
+}
+
+.conf-deadline-badge--urgent strong::before {
+  background: var(--status-warning-dot);
+}
+
+.conf-deadline-badge--closed strong {
+  color: var(--status-closed-text);
+}
+
+.conf-deadline-badge--closed strong::before {
+  background: var(--status-closed-dot);
 }
 
 .btn-detail {
@@ -1037,7 +967,7 @@ body.dark .conf-deadline-badge strong {
 
 .btn-detail:hover {
   background: var(--primary);
-  color: #ffffff;
+  color: var(--on-primary);
 }
 
 .empty-box {
@@ -1171,7 +1101,7 @@ body.dark .conf-deadline-badge strong {
     width: 100%;
     min-height: 40px;
     padding: 8px 12px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-strong);
     border-radius: var(--radius-sm);
     background: var(--surface-alt);
   }
@@ -1186,18 +1116,6 @@ body.dark .conf-deadline-badge strong {
   }
   .hero-slider {
     padding: 12px 2px 12px;
-  }
-  .hero-slider__summary {
-    gap: 6px;
-  }
-  .hero-slider__summary-item {
-    padding: 8px 4px;
-  }
-  .hero-slider__summary-val {
-    font-size: 16px;
-  }
-  .hero-slider__summary-label {
-    font-size: 11px;
   }
   .hero-actions {
     width: 100%;

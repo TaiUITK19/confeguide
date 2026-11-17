@@ -654,8 +654,9 @@
                 ? '<span class="compare-table__nearest-badge">Gần nhất</span>'
                 : '';
               const textVal = `Còn ${d} ngày`;
+              const statusMod = d <= 14 ? 'urgent' : 'open';
               return {
-                html: `<div class="compare-table__days-wrap"><span class="compare-table__days">${esc(textVal)}</span>${nearestBadge}</div>`,
+                html: `<div class="compare-table__days-wrap"><span class="compare-table__days compare-table__days--${statusMod}">${esc(textVal)}</span>${nearestBadge}</div>`,
                 normVal: normalizeCompareValue(textVal)
               };
             })

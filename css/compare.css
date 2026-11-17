@@ -6,32 +6,48 @@
    ========================================================= */
 
 /* Biến màu nền đặc (opaque) cho cột sticky và hàng khác biệt ở chế độ Sáng & Tối */
-:root {
-  --compare-sticky-head-bg: #f1f5fb;
-  --compare-sticky-bg: #ffffff;
-  --compare-sticky-diff-bg: #eff6ff;
-  --compare-diff-cell-bg: #f8fbff;
-  --compare-group-bg: #eef3fb;
-  --compare-nearest-bg: #ecfdf5;
-  --compare-nearest-text: #047857;
-  --compare-nearest-border: #a7f3d0;
-  --compare-diff-badge-bg: #fff8e6;
-  --compare-diff-badge-text: #b45309;
-  --compare-diff-badge-border: #fde68a;
+body {
+  --compare-sticky-head-bg: var(--surface-alt);
+  --compare-sticky-bg: var(--surface);
+  --compare-sticky-diff-bg: color-mix(in oklch, var(--primary) 8%, var(--surface));
+  --compare-diff-cell-bg: color-mix(in oklch, var(--primary) 4%, var(--surface));
+  --compare-group-bg: var(--surface-muted);
+  --compare-nearest-bg: var(--status-open-bg);
+  --compare-nearest-text: var(--status-open-text);
+  --compare-nearest-border: var(--status-open-border);
+  --compare-diff-badge-bg: var(--gold-bg);
+  --compare-diff-badge-text: var(--gold-text);
+  --compare-diff-badge-border: var(--gold-border);
 }
 
-body.dark {
-  --compare-sticky-head-bg: #0f172a;
-  --compare-sticky-bg: #162032;
-  --compare-sticky-diff-bg: #172946;
-  --compare-diff-cell-bg: #14233c;
-  --compare-group-bg: #0f1a2c;
-  --compare-nearest-bg: rgba(16, 185, 129, 0.18);
-  --compare-nearest-text: #34d399;
-  --compare-nearest-border: rgba(16, 185, 129, 0.38);
-  --compare-diff-badge-bg: rgba(245, 179, 1, 0.16);
-  --compare-diff-badge-text: #fcd34d;
-  --compare-diff-badge-border: rgba(245, 179, 1, 0.36);
+@supports not (color: oklch(0.5 0.1 200)) {
+  body {
+    --compare-sticky-head-bg: #f1f5fb;
+    --compare-sticky-bg: #ffffff;
+    --compare-sticky-diff-bg: #eff6ff;
+    --compare-diff-cell-bg: #f8fbff;
+    --compare-group-bg: #eef3fb;
+  }
+
+  body.dark {
+    --compare-sticky-head-bg: #0f172a;
+    --compare-sticky-bg: #162032;
+    --compare-sticky-diff-bg: #172946;
+    --compare-diff-cell-bg: #14233c;
+    --compare-group-bg: #0f1a2c;
+  }
+}
+
+@supports (color: oklch(0.5 0.1 200)) and (not (background: color-mix(in oklch, red 50%, blue))) {
+  body {
+    --compare-sticky-diff-bg: #eef3fa;
+    --compare-diff-cell-bg: #f6f9fd;
+  }
+
+  body.dark {
+    --compare-sticky-diff-bg: #222d3a;
+    --compare-diff-cell-bg: #1e2731;
+  }
 }
 
 /* Chừa khoảng trống đáy trang khi thanh so sánh nổi đang hiển thị */
@@ -75,8 +91,9 @@ body.has-compare-bar .toast {
 }
 
 .compare-toggle:focus-visible {
-  outline: 2px solid var(--primary);
+  outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
+  box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--focus-ring);
 }
 
 .compare-toggle.is-selected,
@@ -85,13 +102,13 @@ body.has-compare-bar .toast {
   color: var(--primary);
   border-color: var(--primary);
   font-weight: 700;
-  box-shadow: 0 0 0 1px rgba(18, 104, 201, 0.16);
+  box-shadow: 0 0 0 1px var(--primary-ring);
 }
 
 .compare-toggle.is-selected:hover,
 .compare-toggle[aria-pressed="true"]:hover {
   background: var(--primary);
-  color: #ffffff;
+  color: var(--on-primary);
   border-color: var(--primary);
 }
 
@@ -119,7 +136,7 @@ body.has-compare-bar .toast {
   z-index: 1200;
   background: var(--surface);
   border-top: 1.5px solid var(--border-strong);
-  box-shadow: 0 -8px 28px rgba(11, 31, 107, 0.14);
+  box-shadow: var(--shadow-lg);
   padding: 12px 0 calc(12px + env(safe-area-inset-bottom, 0px));
 }
 
@@ -213,13 +230,14 @@ body.has-compare-bar .toast {
 }
 
 .compare-bar__chip-remove:hover {
-  background: var(--red);
-  color: #ffffff;
+  background: var(--danger-solid-bg);
+  color: var(--on-primary);
 }
 
 .compare-bar__chip-remove:focus-visible {
-  outline: 2px solid var(--primary);
+  outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
+  box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--focus-ring);
 }
 
 .compare-bar__actions {
@@ -244,14 +262,15 @@ body.has-compare-bar .toast {
 }
 
 .compare-bar__clear:hover {
-  background: rgba(224, 49, 49, 0.1);
-  color: var(--red);
-  border-color: var(--red);
+  background: var(--danger-bg);
+  color: var(--danger-text);
+  border-color: var(--danger-dot);
 }
 
 .compare-bar__clear:focus-visible {
-  outline: 2px solid var(--primary);
+  outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
+  box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--focus-ring);
 }
 
 .compare-bar__submit {
@@ -263,7 +282,7 @@ body.has-compare-bar .toast {
   border-radius: var(--radius-sm);
   border: 1.5px solid var(--primary);
   background: var(--primary);
-  color: #ffffff;
+  color: var(--on-primary);
   font-family: inherit;
   font-size: 13.5px;
   font-weight: 700;
@@ -274,13 +293,14 @@ body.has-compare-bar .toast {
 }
 
 .compare-bar__submit:hover:not(:disabled) {
-  background: var(--primary-dark);
-  border-color: var(--primary-dark);
+  background: var(--primary-hover);
+  border-color: var(--primary-hover);
 }
 
 .compare-bar__submit:focus-visible {
-  outline: 2px solid var(--primary);
+  outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
+  box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--focus-ring);
 }
 
 .compare-bar__submit:disabled {
@@ -314,7 +334,7 @@ body.is-compare-open {
 }
 
 .compare-dialog::backdrop {
-  background: rgba(11, 31, 107, 0.55);
+  background: var(--backdrop-scrim);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
 }
@@ -383,8 +403,9 @@ body.is-compare-open {
 }
 
 .compare-dialog__close:focus-visible {
-  outline: 2px solid var(--primary);
+  outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
+  box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--focus-ring);
 }
 
 /* Gợi ý vuốt ngang trên màn hình hẹp (chỉ hiện trên mobile <= 767px) */
@@ -511,7 +532,7 @@ body.is-compare-open {
 }
 
 .compare-table__conf-link:focus-visible {
-  outline: 2px solid var(--primary);
+  outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
   border-radius: 3px;
 }
@@ -550,14 +571,15 @@ body.is-compare-open {
 }
 
 .compare-table__remove-btn:hover {
-  background: rgba(224, 49, 49, 0.1);
-  color: var(--red);
-  border-color: var(--red);
+  background: var(--danger-bg);
+  color: var(--danger-text);
+  border-color: var(--danger-dot);
 }
 
 .compare-table__remove-btn:focus-visible {
-  outline: 2px solid var(--primary);
+  outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
+  box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--focus-ring);
 }
 
 /* Hàng tiêu đề nhóm tiêu chí (Học thuật | Thời hạn (UTC+7) | Tổ chức) */
@@ -660,13 +682,37 @@ body.is-compare-open {
 }
 
 .compare-table__days {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   font-weight: 800;
-  color: var(--primary);
+  color: var(--status-open-text);
+}
+
+.compare-table__days::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--status-open-dot);
+}
+
+.compare-table__days--urgent {
+  color: var(--status-warning-text);
+}
+
+.compare-table__days--urgent::before {
+  background: var(--status-warning-dot);
 }
 
 .compare-table__days--passed {
-  color: var(--text-muted);
+  color: var(--status-closed-text);
   font-weight: 600;
+}
+
+.compare-table__days--passed::before {
+  background: var(--status-closed-dot);
 }
 
 .compare-table__nearest-badge {
