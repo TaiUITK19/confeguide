@@ -121,7 +121,7 @@ Bạn là Senior Frontend Developer & Web Standards Specialist đang đồng hà
 
 ### Quy tắc bổ sung
 (Các quy tắc mới được thêm vào đây, mỗi quy tắc một dòng, đánh số tiếp theo.)
-1. Đối với mã nguồn hiện tại của repository (35 file), giữ nguyên cấu trúc thư mục phẳng hiện có (`index.html`, `search.html`, `detail.html`, `tracker.html`, `profile.html`, `about.html`, `contact.html`, `login.html`, `register.html`, `terms.html`, `privacy.html`, `css/`, `js/`, `data/`, `images/`) và các quy tắc vận hành tại Mục 7 của tài liệu kiến trúc hiện hành bên dưới (không tự ý sửa `#site-header`/`#site-footer` trong HTML, giữ script inline chống FOUC đầu `<body>`, giữ nguyên schema `data/` và các class runtime). Khi viết code mới hoặc refactor theo yêu cầu, áp dụng chuẩn code Phần 1 (BEM, tiền tố `js-` cho hook JS, không dùng inline CSS/JS mới, chuẩn W3C HTML5/CSS3, A11y, SEO và comment tiếng Việt), trừ khi người dùng yêu cầu tái cấu trúc toàn bộ dự án.
+1. Đối với mã nguồn hiện tại của repository (44 file sau tái cấu trúc), giữ nguyên 11 trang HTML phẳng ở gốc (`index.html`, `search.html`, `detail.html`, `tracker.html`, `profile.html`, `about.html`, `contact.html`, `login.html`, `register.html`, `terms.html`, `privacy.html`), cấu trúc phân tầng `css/` (`base/`, `components/`, `pages/`), `js/` (`core/`, `components/`, `pages/`), `data/`, `images/`, `docs/`, `.editorconfig`, quy ước đặt tên chữ thường `kebab-case` (bộ ba `<trang>.html ↔ css/pages/<trang>.css ↔ js/pages/<trang>.js`, file data số nhiều), và các quy tắc vận hành tại Mục 7 của tài liệu kiến trúc bên dưới (không tự ý sửa `#site-header`/`#site-footer` trong HTML, giữ script inline chống FOUC đầu `<body>`, giữ nguyên schema `data/` và các class runtime). Khi viết code mới hoặc refactor theo yêu cầu, áp dụng chuẩn code Phần 1 (BEM, tiền tố `js-` cho hook JS, không dùng inline CSS/JS mới, chuẩn W3C HTML5/CSS3, A11y, SEO và comment tiếng Việt).
 
 ---
 
@@ -139,65 +139,76 @@ Tài liệu hướng dẫn kỹ thuật dành cho AI Agents và Lập trình vi�
 - **Phạm vi sản phẩm**: Dự án định hướng phục vụ tra cứu các hội nghị khoa học CNTT được tổ chức tại Việt Nam.
 - **Ràng buộc tương thích file:/// & Web Server tĩnh**:
   - Mã nguồn tương thích khi chạy qua máy chủ HTTP tĩnh (Live Server, `python -m http.server`) cũng như khi mở trực tiếp file HTML từ ổ đĩa qua giao thức `file:///`.
-  - Không tải template HTML bằng `fetch()`; toàn bộ Header và Footer được render động bằng JavaScript template string trong [`js/layout.js`](file:///d:/IE104/doangithub/confeguide/js/layout.js).
+  - Không tải template HTML bằng `fetch()`; toàn bộ Header và Footer được render động bằng JavaScript template string trong [`js/core/layout.js`](file:///d:/IE104/doangithub/confeguide/js/core/layout.js).
   - Mọi thao tác nạp dữ liệu từ thư mục `data/` qua `fetch()` đều có khối `try/catch` với dữ liệu dự phòng tĩnh (`FALLBACK_CONFERENCES`, `SEED_USERS`, `DEFAULT_UTILS`) phòng trường hợp trình duyệt chặn CORS trên giao thức `file:///`.
 
 ---
 
-## 2. Bản đồ Cấu trúc File (File Map — 35 Files)
+## 2. Bản đồ Cấu trúc File & Quy ước Đặt tên (44 Files)
 
-Dự án gồm 35 file chính thức, được phân định rõ ràng giữa tài nguyên dùng chung và module riêng cho từng trang:
+- **Quy ước đặt tên:** Chữ thường 100%, `kebab-case`, ASCII không dấu, không khoảng trắng, dùng danh từ tiếng Anh rõ nghĩa (dữ liệu dùng danh từ số nhiều).
+- **Bộ ba theo trang:** `<trang>.html` ↔ `css/pages/<trang>.css` ↔ `js/pages/<trang>.js` (riêng `login.html` và `register.html` dùng chung `auth.css`/`auth.js`; trang không có CSS/JS riêng không tạo file rỗng).
+- **Phân tầng tài nguyên:** `css/base/` → `css/components/` → `css/pages/` (giữ nguyên thứ tự `<link>` cascade); `js/core/` → `js/components/` → `js/pages/` (giữ nguyên thứ tự thực thi). Thư mục con chỉ tạo khi có từ 2 tệp trở lên (`images/` chỉ có `logo.svg` nên giữ phẳng).
 
-### 2.1. Các Trang HTML (HTML Pages — 11 trang)
-| File | Mục đích | Script & Style đi kèm |
+### 2.1. Các Trang HTML (HTML Pages — 11 trang, đặt phẳng ở gốc)
+| File | Mục đích | Style & Script đi kèm |
 |---|---|---|
-| [`index.html`](file:///d:/IE104/doangithub/confeguide/index.html) | Trang chủ & Cổng tìm kiếm nhanh (Search Gateway, danh sách 6 hội nghị tiêu biểu sắp diễn ra, gợi ý chủ đề) | `css/base.css`, `css/home.css`, `js/layout.js`, `js/script.js` |
-| [`search.html`](file:///d:/IE104/doangithub/confeguide/search.html) | Tra cứu nâng cao: bộ lọc accordion đa chiều (Rank CORE, Hình thức, Lĩnh vực, NXB, Trạng thái, Deadline), đồng bộ URL parameters, chip tags | `css/base.css`, `css/search.css`, `js/layout.js`, `js/app.js` |
-| [`detail.html`](file:///d:/IE104/doangithub/confeguide/detail.html) | Chi tiết hội nghị theo `?id=<slug>`, timeline 4 mốc hạn AoE, đánh giá sao cộng đồng, lưu theo dõi | `css/base.css`, `css/detail.css`, `js/layout.js`, `js/detail.js` |
-| [`tracker.html`](file:///d:/IE104/doangithub/confeguide/tracker.html) | Theo dõi hội nghị: quản lý danh sách hội nghị đã lưu theo người dùng qua LocalStorage | `css/base.css`, `css/tracker.css`, `js/layout.js`, `js/tracker.js` |
-| [`profile.html`](file:///d:/IE104/doangithub/confeguide/profile.html) | Hồ sơ cá nhân: thông tin nghiên cứu, chỉnh sửa hồ sơ, đổi avatar, đồng bộ LocalStorage (bảo vệ bởi auth guard) | `css/base.css`, `css/profile.css`, `js/layout.js`, `js/profile.js` |
-| [`about.html`](file:///d:/IE104/doangithub/confeguide/about.html) | Giới thiệu đồ án môn học IE104, đội ngũ UIT, roadmap và modal đề xuất hội nghị mới | `css/base.css`, `css/about.css`, `js/layout.js`, `js/about.js` |
-| [`contact.html`](file:///d:/IE104/doangithub/confeguide/contact.html) | Liên hệ & đóng góp thông tin hội nghị | `css/base.css`, `js/layout.js` |
-| [`login.html`](file:///d:/IE104/doangithub/confeguide/login.html) | Đăng nhập tài khoản (hỗ trợ chuyển hướng `?redirect=<url>`) | `css/base.css`, `css/auth.css`, `js/layout.js`, `js/auth.js` |
-| [`register.html`](file:///d:/IE104/doangithub/confeguide/register.html) | Đăng ký tài khoản người dùng mới | `css/base.css`, `css/auth.css`, `js/layout.js`, `js/auth.js` |
-| [`terms.html`](file:///d:/IE104/doangithub/confeguide/terms.html) | Điều khoản & Điều kiện sử dụng website | `css/base.css`, `js/layout.js` |
-| [`privacy.html`](file:///d:/IE104/doangithub/confeguide/privacy.html) | Chính sách bảo mật thông tin và quyền riêng tư | `css/base.css`, `js/layout.js` |
+| [`index.html`](file:///d:/IE104/doangithub/confeguide/index.html) | Trang chủ & Cổng tìm kiếm nhanh (Hero Slider, danh sách 6 hội nghị sắp diễn ra, so sánh) | `css/base/base.css`, `css/pages/index.css`, `css/components/compare.css`, `css/base/transition.css`, `js/core/page-transition.js`, `js/core/layout.js`, `js/components/compare.js`, `js/pages/index.js` |
+| [`search.html`](file:///d:/IE104/doangithub/confeguide/search.html) | Tra cứu nâng cao: bộ lọc accordion đa chiều (Rank CORE, Hình thức, Lĩnh vực, NXB, Trạng thái, Deadline), đồng bộ URL parameters, chip tags | `css/base/base.css`, `css/pages/search.css`, `css/components/compare.css`, `css/base/transition.css`, `js/core/page-transition.js`, `js/core/layout.js`, `js/components/compare.js`, `js/components/search-core.js`, `js/pages/search.js` |
+| [`detail.html`](file:///d:/IE104/doangithub/confeguide/detail.html) | Chi tiết hội nghị theo `?id=<slug>`, timeline 4 mốc hạn AoE/UTC+7, đánh giá cộng đồng, lưu theo dõi | `css/base/base.css`, `css/pages/detail.css`, `css/components/compare.css`, `css/base/transition.css`, `js/core/page-transition.js`, `js/core/layout.js`, `js/components/compare.js`, `js/pages/detail.js` |
+| [`tracker.html`](file:///d:/IE104/doangithub/confeguide/tracker.html) | Theo dõi hội nghị: quản lý danh sách hội nghị đã lưu theo người dùng qua LocalStorage | `css/base/base.css`, `css/pages/tracker.css`, `css/components/compare.css`, `css/base/transition.css`, `js/core/page-transition.js`, `js/core/layout.js`, `js/components/compare.js`, `js/pages/tracker.js` |
+| [`profile.html`](file:///d:/IE104/doangithub/confeguide/profile.html) | Hồ sơ cá nhân: thông tin nghiên cứu, lịch mốc hạn cá nhân, chỉnh sửa hồ sơ, đổi avatar (bảo vệ bởi auth guard) | `css/base/base.css`, `css/pages/profile.css`, `css/components/compare.css`, `css/components/calendar.css`, `css/base/transition.css`, `js/core/page-transition.js`, `js/core/layout.js`, `js/components/compare.js`, `js/components/calendar.js`, `js/pages/profile.js` |
+| [`about.html`](file:///d:/IE104/doangithub/confeguide/about.html) | Giới thiệu đồ án môn học IE104, đội ngũ UIT, roadmap và modal đề xuất hội nghị mới | `css/base/base.css`, `css/pages/about.css`, `css/base/transition.css`, `js/core/page-transition.js`, `js/core/layout.js`, `js/pages/about.js` |
+| [`contact.html`](file:///d:/IE104/doangithub/confeguide/contact.html) | Liên hệ & đóng góp thông tin hội nghị | `css/base/base.css`, `css/base/transition.css`, `js/core/page-transition.js`, `js/core/layout.js` |
+| [`login.html`](file:///d:/IE104/doangithub/confeguide/login.html) | Đăng nhập tài khoản (hỗ trợ chuyển hướng `?redirect=<url>`) | `css/base/base.css`, `css/pages/auth.css`, `css/base/transition.css`, `js/core/page-transition.js`, `js/core/layout.js`, `js/pages/auth.js` |
+| [`register.html`](file:///d:/IE104/doangithub/confeguide/register.html) | Đăng ký tài khoản người dùng mới | `css/base/base.css`, `css/pages/auth.css`, `css/base/transition.css`, `js/core/page-transition.js`, `js/core/layout.js`, `js/pages/auth.js` |
+| [`terms.html`](file:///d:/IE104/doangithub/confeguide/terms.html) | Điều khoản & Điều kiện sử dụng website | `css/base/base.css`, `css/base/transition.css`, `js/core/page-transition.js`, `js/core/layout.js` |
+| [`privacy.html`](file:///d:/IE104/doangithub/confeguide/privacy.html) | Chính sách bảo mật thông tin và quyền riêng tư | `css/base/base.css`, `css/base/transition.css`, `js/core/page-transition.js`, `js/core/layout.js` |
 
-### 2.2. Kiểu dáng & Giao diện (CSS — 8 files)
-| File | Vai trò | Mô tả |
+### 2.2. Kiểu dáng & Giao diện (CSS — 11 files)
+| File | Tầng / Vai trò | Mô tả |
 |---|---|---|
-| [`css/base.css`](file:///d:/IE104/doangithub/confeguide/css/base.css) | **[DÙNG CHUNG]** | Hệ thống design tokens tỷ lệ 60:30:10, bảng màu Dark Mode, typography, header chung (72px, 4 nav items, theme toggle, avatar/auth), footer 4 cột, modals toàn cục, toast notifications và layout chung cho các trang chính sách. Nạp ở mọi trang. |
-| [`css/home.css`](file:///d:/IE104/doangithub/confeguide/css/home.css) | **[MODULE RIÊNG]** | Styles trang chủ (hero section, ô tìm kiếm gateway, suggestion chips, grid thẻ hội nghị tiêu biểu, 3 feature cards). |
-| [`css/search.css`](file:///d:/IE104/doangithub/confeguide/css/search.css) | **[MODULE RIÊNG]** | Styles trang tra cứu (thanh tìm kiếm kèm ví dụ gợi ý, sidebar bộ lọc accordion đóng/mở, thanh active chips, grid kết quả tra cứu). |
-| [`css/detail.css`](file:///d:/IE104/doangithub/confeguide/css/detail.css) | **[MODULE RIÊNG]** | Styles trang chi tiết hội nghị (hero banner hội nghị, timeline AoE 4 mốc, khối đánh giá sao, liên kết ngoài). |
-| [`css/tracker.css`](file:///d:/IE104/doangithub/confeguide/css/tracker.css) | **[MODULE RIÊNG]** | Styles trang theo dõi nộp bài (bảng dữ liệu hội nghị đã lưu, đếm ngược hạn, nút gỡ bỏ). |
-| [`css/profile.css`](file:///d:/IE104/doangithub/confeguide/css/profile.css) | **[MODULE RIÊNG]** | Styles trang hồ sơ cá nhân (thiết kế dual-surface: banner tối ở trên và card thông tin nền trắng/surface ở dưới, modal chỉnh sửa). |
-| [`css/auth.css`](file:///d:/IE104/doangithub/confeguide/css/auth.css) | **[MODULE RIÊNG]** | Styles màn hình đăng nhập và đăng ký (layout 2 cột, banner giới thiệu bên trái, form nhập liệu bên phải). |
-| [`css/about.css`](file:///d:/IE104/doangithub/confeguide/css/about.css) | **[MODULE RIÊNG]** | Styles trang giới thiệu (giá trị cốt lõi, đội ngũ nghiên cứu, timeline roadmap, modal form đề xuất). |
+| [`css/base/base.css`](file:///d:/IE104/doangithub/confeguide/css/base/base.css) | **Base** | Hệ thống design tokens OKLCH tỷ lệ 60:30:10, Dark Mode, typography, header chung (72px), footer 4 cột, modal toàn cục, toast. |
+| [`css/base/transition.css`](file:///d:/IE104/doangithub/confeguide/css/base/transition.css) | **Base** | CSS `@view-transition`, `view-transition-name`, shared-element thanh tìm kiếm và fallback `is-entering` / `is-leaving`. |
+| [`css/components/calendar.css`](file:///d:/IE104/doangithub/confeguide/css/components/calendar.css) | **Component** | Styles lưới lịch hạn nộp bài cá nhân (UTC+7) trên `profile.html`. |
+| [`css/components/compare.css`](file:///d:/IE104/doangithub/confeguide/css/components/compare.css) | **Component** | Styles thanh nổi dưới đáy và modal bảng đối chiếu cạnh nhau tối đa 3 hội nghị. |
+| [`css/pages/index.css`](file:///d:/IE104/doangithub/confeguide/css/pages/index.css) | **Page** | Styles trang chủ (hero 2 cột, Hero Slider, ô tìm kiếm nhanh, lưới thẻ hội nghị tiêu biểu, 3 feature cards). |
+| [`css/pages/search.css`](file:///d:/IE104/doangithub/confeguide/css/pages/search.css) | **Page** | Styles trang tra cứu (hero tìm kiếm, combobox, sidebar bộ lọc accordion, chip tags, thẻ kết quả). |
+| [`css/pages/detail.css`](file:///d:/IE104/doangithub/confeguide/css/pages/detail.css) | **Page** | Styles trang chi tiết hội nghị (hero banner, timeline 4 mốc, khối đánh giá sao, liên kết ngoài). |
+| [`css/pages/tracker.css`](file:///d:/IE104/doangithub/confeguide/css/pages/tracker.css) | **Page** | Styles trang theo dõi nộp bài (bảng hội nghị đã lưu, đếm ngược hạn, nút gỡ bỏ). |
+| [`css/pages/profile.css`](file:///d:/IE104/doangithub/confeguide/css/pages/profile.css) | **Page** | Styles trang hồ sơ cá nhân (thiết kế dual-surface, modal chỉnh sửa). |
+| [`css/pages/auth.css`](file:///d:/IE104/doangithub/confeguide/css/pages/auth.css) | **Page** | Styles dùng chung cho `login.html` và `register.html` (layout 2 cột, form nhập liệu). |
+| [`css/pages/about.css`](file:///d:/IE104/doangithub/confeguide/css/pages/about.css) | **Page** | Styles trang giới thiệu (giá trị cốt lõi, đội ngũ nghiên cứu, roadmap, modal đề xuất). |
 
-### 2.3. Logic Ứng dụng (JavaScript — 8 files)
-| File | Vai trò | Mô tả |
+### 2.3. Logic Ứng dụng (JavaScript — 12 files)
+| File | Tầng / Vai trò | Mô tả |
 |---|---|---|
-| [`js/layout.js`](file:///d:/IE104/doangithub/confeguide/js/layout.js) | **[DÙNG CHUNG]** | Render Header và Footer động vào `#site-header` và `#site-footer`. Xử lý đồng bộ `confguide_theme` (sáng/tối), quản lý session đăng nhập, auth guard (`profile.html`), các modal toàn cục (Cài đặt, Trợ giúp, Báo cáo sự cố) và form góp ý chân trang (debounce 10s). |
-| [`js/script.js`](file:///d:/IE104/doangithub/confeguide/js/script.js) | **[MODULE RIÊNG]** | Logic trang chủ: điều hướng tìm kiếm sang `search.html?q=...`, xử lý click chip gợi ý chủ đề, nạp và hiển thị tối đa 6 thẻ hội nghị sắp tới. |
-| [`js/app.js`](file:///d:/IE104/doangithub/confeguide/js/app.js) | **[MODULE RIÊNG]** | Logic trang tra cứu: nạp dữ liệu, lọc đa tiêu chí (Rank, Hình thức, Lĩnh vực, NXB, Trạng thái, Deadline), đồng bộ 2 chiều URL parameters (`history.replaceState`), active filter chips, lưu hội nghị theo người dùng. |
-| [`js/detail.js`](file:///d:/IE104/doangithub/confeguide/js/detail.js) | **[MODULE RIÊNG]** | Logic chi tiết hội nghị: đọc `?id=<slug>`, hiển thị dữ liệu hội nghị, timeline 4 mốc (kèm fallback an toàn), đánh giá sao cộng đồng, nút lưu bookmark. |
-| [`js/tracker.js`](file:///d:/IE104/doangithub/confeguide/js/tracker.js) | **[MODULE RIÊNG]** | Logic quản lý danh sách hội nghị đã theo dõi qua LocalStorage theo user ID (hiển thị, xóa khỏi danh sách). |
-| [`js/profile.js`](file:///d:/IE104/doangithub/confeguide/js/profile.js) | **[MODULE RIÊNG]** | Logic hồ sơ cá nhân: hiển thị thông tin user, mở modal cập nhật thông tin, cập nhật avatar, đồng bộ LocalStorage. |
-| [`js/auth.js`](file:///d:/IE104/doangithub/confeguide/js/auth.js) | **[MODULE RIÊNG]** | Logic xác thực đăng nhập/đăng ký: mã hóa SHA-256 (Web Crypto API), nạp seed 20 tài khoản mẫu không trùng lặp, xử lý tham số `?redirect=`. |
-| [`js/about.js`](file:///d:/IE104/doangithub/confeguide/js/about.js) | **[MODULE RIÊNG]** | Logic trang giới thiệu: nạp dữ liệu từ `data/about.json`, xử lý modal đề xuất hội nghị mới lưu vào `confguide_proposals`. |
+| [`js/core/layout.js`](file:///d:/IE104/doangithub/confeguide/js/core/layout.js) | **Core** | Render Header/Footer động vào `#site-header`/`#site-footer`, quản lý `confguide_theme`, session, auth guard, modal toàn cục và góp ý chân trang. |
+| [`js/core/page-transition.js`](file:///d:/IE104/doangithub/confeguide/js/core/page-transition.js) | **Core** | Điều phối View Transitions (`pageswap`/`pagereveal`), focus `#searchInput` sau chuyển trang và fallback `is-leaving`/`is-entering`. |
+| [`js/components/calendar.js`](file:///d:/IE104/doangithub/confeguide/js/components/calendar.js) | **Component** | Logic thành phần lịch các mốc hội nghị cá nhân trên `profile.html`. |
+| [`js/components/compare.js`](file:///d:/IE104/doangithub/confeguide/js/components/compare.js) | **Component** | Logic chọn tối đa 3 hội nghị qua `sessionStorage` và dựng bảng so sánh cạnh nhau. |
+| [`js/components/search-core.js`](file:///d:/IE104/doangithub/confeguide/js/components/search-core.js) | **Component** | Lõi tìm kiếm thuần túy (chuẩn hóa văn bản, khớp mờ Levenshtein, tính điểm và facet pre-counts). |
+| [`js/pages/index.js`](file:///d:/IE104/doangithub/confeguide/js/pages/index.js) | **Page** | Logic trang chủ: điều hướng tìm kiếm sang `search.html?q=...`, Hero Slider và hiển thị 6 hội nghị sắp tới. |
+| [`js/pages/search.js`](file:///d:/IE104/doangithub/confeguide/js/pages/search.js) | **Page** | Logic trang tra cứu: lọc đa tiêu chí, đồng bộ 2 chiều URL parameters, active filter chips, lưu hội nghị. |
+| [`js/pages/detail.js`](file:///d:/IE104/doangithub/confeguide/js/pages/detail.js) | **Page** | Logic chi tiết hội nghị: đọc `?id=<slug>`, timeline 4 mốc, đánh giá cộng đồng, nút lưu bookmark, xuất lịch. |
+| [`js/pages/tracker.js`](file:///d:/IE104/doangithub/confeguide/js/pages/tracker.js) | **Page** | Logic quản lý danh sách hội nghị đã theo dõi qua LocalStorage theo user ID. |
+| [`js/pages/profile.js`](file:///d:/IE104/doangithub/confeguide/js/pages/profile.js) | **Page** | Logic hồ sơ cá nhân: hiển thị thông tin user, modal cập nhật hồ sơ, đổi avatar, đồng bộ LocalStorage. |
+| [`js/pages/auth.js`](file:///d:/IE104/doangithub/confeguide/js/pages/auth.js) | **Page** | Logic xác thực cho `login.html` và `register.html` (SHA-256, seed users, `?redirect=`). |
+| [`js/pages/about.js`](file:///d:/IE104/doangithub/confeguide/js/pages/about.js) | **Page** | Logic trang giới thiệu: nạp dữ liệu từ `data/about.json`, modal đề xuất hội nghị lưu vào `confguide_proposals`. |
 
 ### 2.4. Dữ liệu & Script Phụ trợ (Data — 4 files)
 | File | Vai trò | Mô tả |
 |---|---|---|
-| [`data/conference_data.json`](file:///d:/IE104/doangithub/confeguide/data/conference_data.json) | Dữ liệu chính | Mảng 36 hội nghị khoa học CNTT tại Việt Nam (kèm địa điểm, thời gian, deadlines, website). |
-| [`data/users.json`](file:///d:/IE104/doangithub/confeguide/data/users.json) | Dữ liệu seed | Mảng 20 tài khoản người dùng mẫu phục vụ chạy thử nghiệm và kiểm thử đăng nhập. |
-| [`data/about.json`](file:///d:/IE104/doangithub/confeguide/data/about.json) | Dữ liệu giới thiệu | Dữ liệu cấu trúc về môn học IE104, đội ngũ phát triển UIT và lộ trình phát triển. |
-| [`data/main.py`](file:///d:/IE104/doangithub/confeguide/data/main.py) | Script độc lập | Script Python hỗ trợ thu thập/cập nhật dữ liệu hội nghị độc lập; không phải backend server của website. |
+| [`data/conferences.json`](file:///d:/IE104/doangithub/confeguide/data/conferences.json) | Dữ liệu chính | Mảng hội nghị khoa học CNTT tại Việt Nam (địa điểm, thời gian, deadlines, website). |
+| [`data/users.json`](file:///d:/IE104/doangithub/confeguide/data/users.json) | Dữ liệu seed | Mảng 20 tài khoản người dùng mẫu phục vụ kiểm thử đăng nhập. |
+| [`data/about.json`](file:///d:/IE104/doangithub/confeguide/data/about.json) | Dữ liệu giới thiệu | Dữ liệu cấu trúc về môn học IE104, đội ngũ UIT và lộ trình phát triển. |
+| [`data/scrape-conferences.py`](file:///d:/IE104/doangithub/confeguide/data/scrape-conferences.py) | Script độc lập | Script Python hỗ trợ thu thập/cập nhật dữ liệu hội nghị độc lập; không phải backend server của website. |
 
-### 2.5. Tài nguyên Đồ họa & Tài liệu Cấu hình (4 files)
+### 2.5. Tài nguyên Đồ họa, Tài liệu & Cấu hình (6 files)
 - [`images/logo.svg`](file:///d:/IE104/doangithub/confeguide/images/logo.svg): Logo nhận diện thương hiệu SVG dùng chung cho favicon và header.
-- [`.gitignore`](file:///d:/IE104/doangithub/confeguide/.gitignore): Cấu hình bỏ qua các file tạm, log, cache môi trường ảo.
+- [`docs/restructure-plan.md`](file:///d:/IE104/doangithub/confeguide/docs/restructure-plan.md): Kế hoạch và bảng ánh xạ tái cấu trúc repository.
+- [`.editorconfig`](file:///d:/IE104/doangithub/confeguide/.editorconfig): Cấu hình thống nhất bộ mã UTF-8, kết thúc dòng LF và thụt lề.
+- [`.gitignore`](file:///d:/IE104/doangithub/confeguide/.gitignore): Cấu hình bỏ qua các file tạm, log, cache IDE và môi trường ảo.
 - [`AGENT.md`](file:///d:/IE104/doangithub/confeguide/AGENT.md): Tài liệu hướng dẫn kỹ thuật dành cho AI Agents.
 - [`README.md`](file:///d:/IE104/doangithub/confeguide/README.md): Tài liệu hướng dẫn đồ án dành cho người đọc.
 
@@ -207,8 +218,8 @@ Dự án gồm 35 file chính thức, được phân định rõ ràng giữa t�
 
 ## 3. Kiến trúc Dữ liệu & Cơ chế Đọc (Data Architecture)
 
-### 3.1. Cấu trúc Bản ghi Hội nghị (`conference_data.json`)
-Mỗi bản ghi hội nghị trong `data/conference_data.json` có cấu trúc chuẩn như sau:
+### 3.1. Cấu trúc Bản ghi Hội nghị (`conferences.json`)
+Mỗi bản ghi hội nghị trong `data/conferences.json` có cấu trúc chuẩn như sau:
 ```json
 {
   "name": "SOICT 2026",
@@ -238,7 +249,7 @@ Mỗi bản ghi hội nghị trong `data/conference_data.json` có cấu trúc c
 ```
 
 ### 3.2. Cơ chế Đọc Dữ liệu (Load Strategy)
-- Các file JavaScript (`script.js`, `app.js`, `detail.js`) gọi `fetch('data/conference_data.json')`.
+- Các file JavaScript (`js/pages/index.js`, `js/pages/search.js`, `js/pages/detail.js`, `js/pages/tracker.js`, `js/pages/profile.js`, `js/components/compare.js`) gọi `fetch('data/conferences.json')`.
 - Khi fetch thành công: Dữ liệu JSON được parse và hiển thị.
 - Khi fetch thất bại (ví dụ duyệt qua `file:///` bị trình duyệt chặn): Cơ chế `catch` kích hoạt, tự động gán sang hằng số `FALLBACK_CONFERENCES` nhúng sẵn trong file JS để giao diện không bị trắng hoặc crash.
 
@@ -247,7 +258,7 @@ Mỗi bản ghi hội nghị trong `data/conference_data.json` có cấu trúc c
 ## 4. Quy tắc Điều hướng & Giao diện (Navigation & UI Conventions)
 
 ### 4.1. Điều hướng Header (Sticky 72px)
-Được quản lý hoàn toàn tự động qua [`js/layout.js`](file:///d:/IE104/doangithub/confeguide/js/layout.js):
+Được quản lý hoàn toàn tự động qua [`js/core/layout.js`](file:///d:/IE104/doangithub/confeguide/js/core/layout.js):
 - **Trang Auth (`login.html`, `register.html`)**:
   - `<body>` được gắn class `auth-page`.
   - Header **không có thanh điều hướng 4 mục**, **không có footer**.
@@ -304,7 +315,7 @@ Mỗi bản ghi hội nghị trong `data/conference_data.json` có cấu trúc c
     ```
     (hoặc `python3 -m http.server 8000` tùy hệ điều hành).
   - Mở trình duyệt tại: `http://localhost:8000/`.
-- **Lưu ý về `data/main.py`**: Đây là script độc lập dùng để cào/cập nhật dữ liệu từ các nguồn hội nghị; không phải máy chủ backend và không cần chạy script này để vận hành website.
+- **Lưu ý về `data/scrape-conferences.py`**: Đây là script độc lập dùng để cào/cập nhật dữ liệu từ các nguồn hội nghị; không phải máy chủ backend và không cần chạy script này để vận hành website.
 
 ### 6.2. Kiểm tra Tính toàn vẹn (Manual Checklist)
 - Mở `index.html`: Header và Footer hiển thị đủ, tìm kiếm chuyển hướng sang `search.html?q=...`, click chip gợi ý lọc đúng từ khóa.
@@ -317,11 +328,11 @@ Mỗi bản ghi hội nghị trong `data/conference_data.json` có cấu trúc c
 ## 7. Bẫy Thường Gặp & Những Điều Cần Tránh (Fragile Code Traps)
 
 1. **TUYỆT ĐỐI KHÔNG sửa Header và Footer trong các file HTML riêng lẻ**:
-   - Khối `<div id="site-header"></div>` và `<div id="site-footer"></div>` phải để rỗng trong HTML. Toàn bộ markup được sinh động bởi `js/layout.js`. Mọi chỉnh sửa HTML thủ công ở hai khối này sẽ bị ghi đè khi trang tải.
+   - Khối `<div id="site-header"></div>` và `<div id="site-footer"></div>` phải để rỗng trong HTML. Toàn bộ markup được sinh động bởi `js/core/layout.js`. Mọi chỉnh sửa HTML thủ công ở hai khối này sẽ bị ghi đè khi trang tải.
 2. **KHÔNG tự ý xóa class CSS "có vẻ không dùng" trong HTML**:
    - Rất nhiều class được tạo hoặc gắn động bằng JavaScript trong thời gian chạy (runtime).
    - Ví dụ các class quan trọng: `.dark`, `.show`, `.open`, `.active`, `.has-avatar-photo`, `.user-dropdown-menu`, `.layout-modal`, `.modal-alert`, `.footer-feedback-status`, `.chip-keyword`, `.conference-card`, `.timeline-step`, `.accordion-head`, `.accordion-body`, `.keyword`, v.v.
 3. **KHÔNG chỉnh sửa cấu trúc thư mục `data/` mà không đối chiếu logic JS**:
-   - `data/conference_data.json` được đọc bởi nhiều module (`script.js`, `app.js`, `detail.js`). Việc đổi tên trường dữ liệu (ví dụ `date_happen`, `deadlines`, `summarization`) sẽ dẫn đến lỗi hiển thị thẻ hội nghị hoặc timeline.
+   - `data/conferences.json` được đọc bởi nhiều module (`js/pages/index.js`, `js/pages/search.js`, `js/pages/detail.js`, `js/pages/tracker.js`, `js/pages/profile.js`, `js/components/compare.js`). Việc đổi tên trường dữ liệu (ví dụ `date_happen`, `deadlines`, `summarization`) sẽ dẫn đến lỗi hiển thị thẻ hội nghị hoặc timeline.
 4. **Giữ nguyên thẻ script chống FOUC đầu thẻ `<body>`**:
    - Đoạn script inline đọc `confguide_theme` ở đầu thẻ `<body>` giúp kích hoạt class `dark` trước khi CSS render, ngăn chặn hiện tượng nhấp nháy màn hình trắng khi người dùng đang ở chế độ nền tối.
