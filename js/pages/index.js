@@ -738,6 +738,10 @@
    * @returns {string} Khóa lưu trữ trong localStorage.
    */
   function getSavedStorageKey() {
+    const utils = getUtils();
+    if (utils && typeof utils.getSavedStorageKey === 'function') {
+      return utils.getSavedStorageKey(false);
+    }
     const user = readStorageSafe('confguide_current_user', null);
     return user && user.id ? `confguide_saved_${user.id}` : 'confguide_saved_guest';
   }
@@ -935,11 +939,13 @@
     setLoadingState(true);
 
     try {
-      const response = await fetch('data/conferences.json');
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
-      const data = await response.json();
+      const data = utils && typeof utils.fetchJsonCached === 'function'
+        ? await utils.fetchJsonCached('data/conferences.json')
+        : await (async () => {
+          const response = await fetch('data/conferences.json');
+          if (!response.ok) throw new Error(`HTTP ${response.status}`);
+          return response.json();
+        })();
       allConferences = Array.isArray(data) && data.length > 0
         ? data.map(normalize).filter(Boolean)
         : fallback;

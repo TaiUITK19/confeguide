@@ -641,14 +641,17 @@
     if (cachedConferencesData.length > 0) return cachedConferencesData;
 
     try {
-      const resp = await fetch('data/conferences.json');
-      if (resp.ok) {
-        const json = await resp.json();
-        if (Array.isArray(json) && json.length > 0) {
-          cachedConferencesData = typeof utils.normalizeConference === 'function'
-            ? json.map(item => utils.normalizeConference(item)).filter(Boolean)
-            : json;
-        }
+      const json = typeof utils.fetchJsonCached === 'function'
+        ? await utils.fetchJsonCached('data/conferences.json')
+        : await (async () => {
+          const resp = await fetch('data/conferences.json');
+          if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+          return resp.json();
+        })();
+      if (Array.isArray(json) && json.length > 0) {
+        cachedConferencesData = typeof utils.normalizeConference === 'function'
+          ? json.map(item => utils.normalizeConference(item)).filter(Boolean)
+          : json;
       }
     } catch {
       // Dự phòng khi trình duyệt chặn fetch trên giao thức file:///
@@ -817,27 +820,32 @@
       </div>
     `;
     }).join('');
-
-    container.querySelectorAll('.js-remove-saved-btn').forEach(btn => {
-      btn.addEventListener('click', function () {
-        const idToRemove = this.getAttribute('data-id') || '';
-        const current = getSavedList().filter(
-          item => String(item).trim().toLowerCase() !== idToRemove.trim().toLowerCase()
-        );
-        setSavedList(current);
-        renderSavedConferences(filterKeyword);
-        showSavedAlert('Đã bỏ lưu hội nghị khỏi danh sách theo dõi.');
-      });
-    });
   }
 
   /**
    * Khởi tạo bộ lọc tìm kiếm và nút Xóa tất cả cho khu vực hội nghị đã lưu.
    */
   function initSavedSection() {
+    const savedListEl = document.getElementById('savedConferencesList');
+    const searchInput = document.getElementById('savedSearchInput');
+
+    if (savedListEl) {
+      // Event delegation một lần trên container thay vì gắn lại listener sau mỗi lần render
+      savedListEl.addEventListener('click', event => {
+        const btn = event.target instanceof Element ? event.target.closest('.js-remove-saved-btn') : null;
+        if (!btn || !savedListEl.contains(btn)) return;
+        const idToRemove = btn.getAttribute('data-id') || '';
+        const current = getSavedList().filter(
+          item => String(item).trim().toLowerCase() !== idToRemove.trim().toLowerCase()
+        );
+        setSavedList(current);
+        renderSavedConferences(searchInput ? searchInput.value : '');
+        showSavedAlert('Đã bỏ lưu hội nghị khỏi danh sách theo dõi.');
+      });
+    }
+
     renderSavedConferences();
 
-    const searchInput = document.getElementById('savedSearchInput');
     if (searchInput) {
       searchInput.addEventListener('input', function () {
         renderSavedConferences(this.value);

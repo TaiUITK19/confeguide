@@ -278,16 +278,18 @@
     }
 
     try {
-      const res = await fetch('data/about.json');
-      if (res.ok) {
-        const json = await res.json();
-        if (json && json.hero) {
-          data = normalizeAboutDataForDisplay(json);
-        }
+      const json = typeof utils.fetchJsonCached === 'function'
+        ? await utils.fetchJsonCached('data/about.json')
+        : await (async () => {
+          const res = await fetch('data/about.json');
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          return res.json();
+        })();
+      if (json && json.hero) {
+        data = normalizeAboutDataForDisplay(json);
       }
     } catch {
       // Dùng bộ dữ liệu dự phòng khi trình duyệt chặn fetch trên giao thức file:///
-      console.info('[ConfGuide] Sử dụng bộ dữ liệu dự phòng chuẩn hóa cho About Us.');
     } finally {
       if (descEl) descEl.setAttribute('aria-busy', 'false');
     }

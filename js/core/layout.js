@@ -259,6 +259,35 @@
     }
   }
 
+  // Bộ nhớ đệm Promise theo URL trong phạm vi trang hiện tại để gộp các lần fetch JSON trùng nhau
+  const jsonFetchCache = new Map();
+
+  /**
+   * Tải và giải mã tệp JSON có dùng chung Promise cache trong phạm vi trang,
+   * giúp các module (trang chính, compare.js...) tái sử dụng một yêu cầu mạng duy nhất.
+   * @param {string} url Đường dẫn tệp JSON cần tải.
+   * @returns {Promise<*>} Dữ liệu JSON đã giải mã.
+   */
+  function fetchJsonCached(url) {
+    if (jsonFetchCache.has(url)) {
+      return jsonFetchCache.get(url);
+    }
+    const requestPromise = fetch(url)
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+        return response.json();
+      })
+      .catch(err => {
+        // Xóa cache khi thất bại để thao tác thử lại (retry) vẫn gọi lại mạng
+        jsonFetchCache.delete(url);
+        throw err;
+      });
+    jsonFetchCache.set(url, requestPromise);
+    return requestPromise;
+  }
+
   /**
    * Chuyển đổi tên hội nghị thành định danh slug chuẩn URL.
    * @param {string} text Chuỗi tên hoặc nhãn bất kỳ.
@@ -945,6 +974,18 @@
    */
   function getCurrentUser() {
     return readStorage('confguide_current_user', null);
+  }
+
+  /**
+   * Tạo khóa lưu trữ danh sách hội nghị đã lưu gắn theo người dùng hiện tại.
+   * @param {boolean} [useEmailFallback=false] Cho phép fallback theo email khi user chưa có id.
+   * @returns {string} Tên khóa lưu trữ trong localStorage.
+   */
+  function getSavedStorageKey(useEmailFallback = false) {
+    const user = getCurrentUser();
+    if (!user) return 'confguide_saved_guest';
+    const userKey = user.id || (useEmailFallback ? user.email : '');
+    return userKey ? `confguide_saved_${userKey}` : 'confguide_saved_guest';
   }
 
   /**
@@ -2125,6 +2166,9 @@
     escapeHtml: escapeHtml,
     readStorage: readStorage,
     writeStorage: writeStorage,
+    fetchJsonCached: fetchJsonCached,
+    getCurrentUser: getCurrentUser,
+    getSavedStorageKey: getSavedStorageKey,
     slugify: slugify,
     getConferenceId: getConferenceId,
     normalizeConference: normalizeConference,

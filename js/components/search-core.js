@@ -692,11 +692,14 @@
   }
 
   /**
-   * Thoát ký tự đặc biệt HTML chống XSS.
+   * Thoát ký tự đặc biệt HTML chống XSS (tái sử dụng ConfGuideUtils.escapeHtml nếu sẵn có).
    * @param {*} val
    * @returns {string}
    */
   function escapeHtml(val) {
+    if (typeof window !== 'undefined' && window.ConfGuideUtils && typeof window.ConfGuideUtils.escapeHtml === 'function') {
+      return window.ConfGuideUtils.escapeHtml(val);
+    }
     if (val === null || val === undefined) return '';
     return String(val)
       .replace(/&/g, '&amp;')

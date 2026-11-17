@@ -126,8 +126,8 @@
       const hashBuffer = await crypto.subtle.digest('SHA-256', data);
       const hashArray = Array.from(new Uint8Array(hashBuffer));
       return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-    } catch (err) {
-      console.warn('Web Crypto không khả dụng, dùng fallback hash:', err);
+    } catch {
+      // Web Crypto không khả dụng: dùng hàm băm dự phòng tương thích ngoại tuyến
       let hash = 0;
       for (let i = 0; i < plainText.length; i++) {
         hash = (hash << 5) - hash + plainText.charCodeAt(i);

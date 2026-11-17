@@ -628,6 +628,9 @@
    */
   function getSavedStorageKey() {
     const utils = getUtils();
+    if (utils && typeof utils.getSavedStorageKey === 'function') {
+      return utils.getSavedStorageKey(false);
+    }
     const user = utils && utils.readStorage
       ? utils.readStorage('confguide_current_user', null)
       : null;
@@ -1892,32 +1895,24 @@
       lastRenderedConferenceIds = currentIds;
       const savedIds = getSavedList();
       const fragment = document.createDocumentFragment();
+      // Dùng <template> gộp HTML parser thay vì tạo N phần tử <div> rời rạc trong vòng lặp
+      const batchTemplate = document.createElement('template');
 
       if (pageItems.length > 60) {
         const BATCH_RENDER = 60;
         for (let i = 0; i < pageItems.length; i += BATCH_RENDER) {
           if (currentToken !== renderToken) return;
           const batch = pageItems.slice(i, i + BATCH_RENDER);
-          batch.forEach(conf => {
-            const temp = document.createElement('div');
-            temp.innerHTML = renderCardMarkup(conf, savedIds, filterState.q).trim();
-            if (temp.firstElementChild) {
-              fragment.appendChild(temp.firstElementChild);
-            }
-          });
+          batchTemplate.innerHTML = batch.map(conf => renderCardMarkup(conf, savedIds, filterState.q).trim()).join('');
+          fragment.appendChild(batchTemplate.content);
           if (i + BATCH_RENDER < pageItems.length) {
             await getCore().yieldToMain();
           }
         }
       } else {
-        pageItems.forEach(conf => {
-          if (currentToken !== renderToken) return;
-          const temp = document.createElement('div');
-          temp.innerHTML = renderCardMarkup(conf, savedIds, filterState.q).trim();
-          if (temp.firstElementChild) {
-            fragment.appendChild(temp.firstElementChild);
-          }
-        });
+        if (currentToken !== renderToken) return;
+        batchTemplate.innerHTML = pageItems.map(conf => renderCardMarkup(conf, savedIds, filterState.q).trim()).join('');
+        fragment.appendChild(batchTemplate.content);
       }
 
       if (currentToken === renderToken) {
@@ -2684,7 +2679,7 @@
       if (window.innerWidth >= 768 && isFilterDrawerOpen) {
         closeFiltersDrawer(false);
       }
-    });
+    }, { passive: true });
 
     // 6. Event Delegation trên Thanh chip
     if (chipsWrapper) {
@@ -2854,9 +2849,14 @@
 
     let rawList = [];
     try {
-      const response = await fetch('data/conferences.json');
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      const data = await response.json();
+      const utils = getUtils();
+      const data = utils && typeof utils.fetchJsonCached === 'function'
+        ? await utils.fetchJsonCached('data/conferences.json')
+        : await (async () => {
+          const response = await fetch('data/conferences.json');
+          if (!response.ok) throw new Error(`HTTP ${response.status}`);
+          return response.json();
+        })();
       if (!Array.isArray(data) || data.length === 0) throw new Error('Dữ liệu trống');
       rawList = data;
       isDataLoaded = true;

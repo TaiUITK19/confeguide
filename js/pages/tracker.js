@@ -45,6 +45,10 @@
    * @returns {string}
    */
   function savedKey() {
+    const utils = getUtils();
+    if (utils && typeof utils.getSavedStorageKey === 'function') {
+      return utils.getSavedStorageKey(true);
+    }
     const user = currentUser();
     return user && (user.id || user.email) ? `confguide_saved_${user.id || user.email}` : 'confguide_saved_guest';
   }
@@ -157,17 +161,6 @@
         <td><div class="actions">${compareBtnHtml}<button class="action-btn delete" type="button" data-remove="${esc(confId)}">Xóa</button></div></td>
       </tr>`;
     }).join('');
-
-    tbody.querySelectorAll('[data-remove]').forEach(button => {
-      button.addEventListener('click', () => {
-        const targetId = button.dataset.remove;
-        setSaved(getSaved().filter(item => String(item) !== targetId));
-        render();
-        if (utils && utils.showToast) {
-          utils.showToast('Đã xóa hội nghị khỏi danh sách theo dõi.', 'info');
-        }
-      });
-    });
   }
 
   /**
@@ -180,15 +173,30 @@
     const utils = getUtils();
     const normalize = utils && utils.normalizeConference ? utils.normalizeConference : item => item;
 
+    // Event delegation một lần trên tbody thay vì gắn lại listener cho từng hàng sau mỗi lần render
+    tbody.addEventListener('click', event => {
+      const btn = event.target instanceof Element ? event.target.closest('[data-remove]') : null;
+      if (!btn || !tbody.contains(btn)) return;
+      const targetId = btn.dataset.remove;
+      setSaved(getSaved().filter(item => String(item) !== targetId));
+      render();
+      if (utils && utils.showToast) {
+        utils.showToast('Đã xóa hội nghị khỏi danh sách theo dõi.', 'info');
+      }
+    });
+
     tbody.innerHTML = '<tr class="loading-row"><td colspan="4" class="loading-row">Đang tải dữ liệu hội nghị...</td></tr>';
 
     try {
-      const response = await fetch('data/conferences.json');
-      if (response.ok) {
-        const data = await response.json();
-        if (Array.isArray(data) && data.length > 0) {
-          window.ConfGuideTrackerConferences = data.map(normalize).filter(Boolean);
-        }
+      const data = utils && typeof utils.fetchJsonCached === 'function'
+        ? await utils.fetchJsonCached('data/conferences.json')
+        : await (async () => {
+          const response = await fetch('data/conferences.json');
+          if (!response.ok) throw new Error(`HTTP ${response.status}`);
+          return response.json();
+        })();
+      if (Array.isArray(data) && data.length > 0) {
+        window.ConfGuideTrackerConferences = data.map(normalize).filter(Boolean);
       }
     } catch (e) {
       // Sử dụng dữ liệu dự phòng từ ConfGuideUtils khi chạy ngoại tuyến

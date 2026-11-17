@@ -72,6 +72,9 @@
    */
   function getSavedStorageKey() {
     const utils = getDetailUtils();
+    if (typeof utils.getSavedStorageKey === 'function') {
+      return utils.getSavedStorageKey(false);
+    }
     const user = utils.readStorage('confguide_current_user', null);
     return user && user.id ? `confguide_saved_${user.id}` : 'confguide_saved_guest';
   }
@@ -1226,11 +1229,13 @@
     let loadedFromJson = false;
 
     try {
-      const response = await fetch('data/conferences.json');
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
-      const data = await response.json();
+      const data = typeof utils.fetchJsonCached === 'function'
+        ? await utils.fetchJsonCached('data/conferences.json')
+        : await (async () => {
+          const response = await fetch('data/conferences.json');
+          if (!response.ok) throw new Error(`HTTP ${response.status}`);
+          return response.json();
+        })();
       if (Array.isArray(data) && data.length > 0) {
         allConferences = data.map(c => utils.normalizeConference(c)).filter(Boolean);
         loadedFromJson = true;
@@ -1268,6 +1273,14 @@
 
     setPageState('content');
   }
+
+  // Dọn dẹp bộ đếm ngược khi rời trang và khôi phục nếu người dùng quay lại qua bfcache
+  window.addEventListener('pagehide', stopCountdownTimer);
+  window.addEventListener('pageshow', event => {
+    if (event.persisted && currentConference) {
+      renderNextDeadlineCard(currentConference);
+    }
+  });
 
   document.addEventListener('DOMContentLoaded', initDetailPage);
 })();
