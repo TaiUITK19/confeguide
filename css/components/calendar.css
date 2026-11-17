@@ -1,49 +1,49 @@
 /* =========================================================
-   ConfGuide — Stylesheet Lịch Mốc Hội nghị Cá nhân (css/calendar.css)
-   Chuẩn BEM (.profile-calendar__*), dùng Design Tokens từ css/base.css,
+   ConfGuide — Stylesheet Lịch Mốc Hội nghị Cá nhân (css/components/calendar.css)
+   Chuẩn BEM (.profile-calendar__*), dùng Design Tokens từ css/base/base.css,
    hỗ trợ Dark Mode (body.dark), responsive >=1024px / 768px / 375-430px
    và tôn trọng tùy chọn prefers-reduced-motion.
    ========================================================= */
 
-/* Biến cục bộ cho trạng thái 3 loại sự kiện trên lịch (Sáng & Tối) */
-:root {
+/* Biến cục bộ cho trạng thái 3 loại sự kiện trên lịch ánh xạ từ base.css */
+body {
   --cal-deadline-bg: var(--primary-soft);
   --cal-deadline-text: var(--primary-dark);
-  --cal-deadline-border: rgba(18, 104, 201, 0.28);
+  --cal-deadline-border: var(--conf-badge-border);
   --cal-deadline-dot: var(--primary);
 
-  --cal-event-bg: rgba(16, 185, 129, 0.12);
-  --cal-event-text: #047857;
-  --cal-event-border: rgba(16, 185, 129, 0.32);
-  --cal-event-dot: var(--green);
+  --cal-event-bg: var(--status-open-bg);
+  --cal-event-text: var(--status-open-text);
+  --cal-event-border: var(--status-open-border);
+  --cal-event-dot: var(--status-open-dot);
 
-  --cal-tracker-bg: rgba(245, 179, 1, 0.16);
-  --cal-tracker-text: #92400e;
-  --cal-tracker-border: rgba(245, 179, 1, 0.42);
-  --cal-tracker-dot: var(--gold);
+  --cal-tracker-bg: var(--status-warning-bg);
+  --cal-tracker-text: var(--status-warning-text);
+  --cal-tracker-border: var(--status-warning-border);
+  --cal-tracker-dot: var(--status-warning-dot);
 
-  --cal-today-bg: rgba(18, 104, 201, 0.08);
-  --cal-selected-ring: rgba(18, 104, 201, 0.22);
+  --cal-today-bg: color-mix(in oklch, var(--primary) 8%, var(--surface));
+  --cal-selected-ring: var(--primary-ring);
 }
 
-body.dark {
-  --cal-deadline-bg: rgba(18, 104, 201, 0.22);
-  --cal-deadline-text: #93c5fd;
-  --cal-deadline-border: rgba(147, 197, 253, 0.32);
-  --cal-deadline-dot: #60a5fa;
+@supports not (color: oklch(0.5 0.1 200)) {
+  body {
+    --cal-today-bg: rgba(18, 104, 201, 0.08);
+  }
 
-  --cal-event-bg: rgba(16, 185, 129, 0.18);
-  --cal-event-text: #6ee7b7;
-  --cal-event-border: rgba(110, 231, 183, 0.34);
-  --cal-event-dot: #34d399;
+  body.dark {
+    --cal-today-bg: rgba(18, 104, 201, 0.18);
+  }
+}
 
-  --cal-tracker-bg: rgba(245, 179, 1, 0.18);
-  --cal-tracker-text: #fcd34d;
-  --cal-tracker-border: rgba(252, 211, 77, 0.36);
-  --cal-tracker-dot: var(--gold);
+@supports (color: oklch(0.5 0.1 200)) and (not (background: color-mix(in oklch, red 50%, blue))) {
+  body {
+    --cal-today-bg: #eef4fc;
+  }
 
-  --cal-today-bg: rgba(18, 104, 201, 0.18);
-  --cal-selected-ring: rgba(147, 197, 253, 0.28);
+  body.dark {
+    --cal-today-bg: #1e2a38;
+  }
 }
 
 /* ================= 1. KHỐI CHỨA LỊCH & TRẠNG THÁI ================= */
@@ -260,7 +260,8 @@ body.dark {
 }
 
 .profile-calendar__legend-past-sample {
-  opacity: 0.45;
+  /* Dùng token chữ dịu đạt WCAG AA + gạch ngang thay cho opacity thấp gây rớt tương phản */
+  color: var(--text-dim);
   text-decoration: line-through;
 }
 
@@ -321,11 +322,15 @@ body.dark {
 
 .profile-calendar__day--outside {
   background: var(--surface-muted);
-  opacity: 0.58;
+}
+
+/* Ở Dark Mode dùng nền tối hơn --surface để ô ngoài tháng không sáng hơn ô trong tháng */
+body.dark .profile-calendar__day--outside {
+  background: var(--bg-secondary);
 }
 
 .profile-calendar__day--outside:hover {
-  opacity: 0.9;
+  background: var(--surface-alt);
 }
 
 .profile-calendar__day--today {
@@ -361,11 +366,11 @@ body.dark {
 
 .profile-calendar__day--today .profile-calendar__day-num {
   background: var(--primary);
-  color: #ffffff;
+  color: var(--on-primary);
 }
 
 .profile-calendar__day--outside .profile-calendar__day-num {
-  color: var(--text-muted);
+  color: var(--text-dim);
   font-weight: 600;
 }
 
@@ -411,7 +416,11 @@ body.dark {
 }
 
 .profile-calendar__chip--past {
-  opacity: 0.48;
+  /* Giữ đủ tương phản WCAG AA trên cả ô thường lẫn ô ngoài tháng bằng bảng màu trạng thái đã qua */
+  background: var(--status-closed-bg);
+  color: var(--status-closed-text);
+  border-color: var(--status-closed-border);
+  text-decoration: line-through;
 }
 
 .profile-calendar__chip-mark {
@@ -537,7 +546,8 @@ body.dark {
 }
 
 .profile-calendar__event-item--past {
-  opacity: 0.65;
+  background: var(--surface-muted);
+  border-color: var(--border);
 }
 
 .profile-calendar__event-badges {
@@ -831,6 +841,14 @@ body.dark {
     border-right: 4.5px solid transparent;
     border-bottom: 8px solid var(--cal-tracker-dot);
     border-radius: 0;
+  }
+
+  .profile-calendar__chip--past:not(.profile-calendar__chip--tracker) {
+    background: var(--status-closed-dot);
+  }
+
+  .profile-calendar__chip--past.profile-calendar__chip--tracker {
+    border-bottom-color: var(--status-closed-dot);
   }
 
   .profile-calendar__more {

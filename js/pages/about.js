@@ -1,5 +1,5 @@
 /**
- * ConfGuide — Trang Giới thiệu Dự án & Đề xuất Hội nghị (js/about.js)
+ * ConfGuide — Trang Giới thiệu Dự án & Đề xuất Hội nghị (js/pages/about.js)
  * Tải nội dung giới thiệu từ data/about.json (kèm fallback khi mở offline file:///),
  * render 6 khu vực thông tin học thuật và quản lý modal Đề xuất hội nghị mới.
  */
@@ -162,58 +162,22 @@
     info: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>'
   };
 
-  /**
-   * Thoát ký tự HTML đặc biệt để phòng tránh XSS khi ghép dữ liệu từ JSON.
-   * @param {string} str - Chuỗi đầu vào.
-   * @returns {string} Chuỗi đã được thoát ký tự HTML.
-   */
+  /** Thoát ký tự HTML đặc biệt (tái sử dụng ConfGuideUtils.escapeHtml). */
   function escapeHtml(str) {
-    if (typeof utils.escapeHtml === 'function') {
-      return utils.escapeHtml(str);
-    }
-    if (!str) return '';
-    return String(str)
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#039;');
+    if (typeof utils.escapeHtml === 'function') return utils.escapeHtml(str);
+    return String(str || '').replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[ch]));
   }
 
-  /**
-   * Đọc dữ liệu JSON từ localStorage an toàn.
-   * @param {string} key - Khóa lưu trữ.
-   * @param {*} fallback - Giá trị trả về mặc định khi lỗi hoặc rỗng.
-   * @returns {*} Dữ liệu đã phân tích hoặc fallback.
-   */
+  /** Đọc JSON từ localStorage an toàn (tái sử dụng ConfGuideUtils.readStorage). */
   function readStorage(key, fallback) {
-    if (typeof utils.readStorage === 'function') {
-      return utils.readStorage(key, fallback);
-    }
-    try {
-      const raw = localStorage.getItem(key);
-      return raw ? JSON.parse(raw) : fallback;
-    } catch {
-      return fallback;
-    }
+    if (typeof utils.readStorage === 'function') return utils.readStorage(key, fallback);
+    try { const raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : fallback; } catch { return fallback; }
   }
 
-  /**
-   * Ghi dữ liệu JSON vào localStorage có bắt lỗi.
-   * @param {string} key - Khóa lưu trữ.
-   * @param {*} value - Dữ liệu cần lưu.
-   * @returns {boolean} True nếu lưu thành công.
-   */
+  /** Ghi JSON vào localStorage an toàn (tái sử dụng ConfGuideUtils.writeStorage). */
   function writeStorage(key, value) {
-    if (typeof utils.writeStorage === 'function') {
-      return utils.writeStorage(key, value);
-    }
-    try {
-      localStorage.setItem(key, JSON.stringify(value));
-      return true;
-    } catch {
-      return false;
-    }
+    if (typeof utils.writeStorage === 'function') return utils.writeStorage(key, value);
+    try { localStorage.setItem(key, JSON.stringify(value)); return true; } catch { return false; }
   }
 
   /**
@@ -278,16 +242,14 @@
     }
 
     try {
-      const res = await fetch('data/about.json');
-      if (res.ok) {
-        const json = await res.json();
-        if (json && json.hero) {
-          data = normalizeAboutDataForDisplay(json);
-        }
+      const json = typeof utils.fetchJsonCached === 'function'
+        ? await utils.fetchJsonCached('data/about.json')
+        : await fetch('data/about.json').then(r => { if (!r.ok) throw new Error(r.status); return r.json(); });
+      if (json && json.hero) {
+        data = normalizeAboutDataForDisplay(json);
       }
     } catch {
       // Dùng bộ dữ liệu dự phòng khi trình duyệt chặn fetch trên giao thức file:///
-      console.info('[ConfGuide] Sử dụng bộ dữ liệu dự phòng chuẩn hóa cho About Us.');
     } finally {
       if (descEl) descEl.setAttribute('aria-busy', 'false');
     }
@@ -510,7 +472,149 @@
   }
 
   /**
-   * Khởi tạo Modal Đề xuất Hội nghị mới với Focus Trap, phím Escape, kiểm tra Regex và lưu LocalStorage.
+   * Xóa toàn bộ trạng thái báo lỗi trên form đề xuất hội nghị.
+   * @param {HTMLFormElement} form - Biểu mẫu đề xuất hội nghị.
+   */
+  function clearProposalErrors(form) {
+    form.querySelectorAll('.about-form-input').forEach(inp => {
+      inp.classList.remove('invalid');
+      inp.setAttribute('aria-invalid', 'false');
+    });
+    form.querySelectorAll('.about-field-error').forEach(err => {
+      err.textContent = '';
+      err.classList.remove('show');
+    });
+  }
+
+  /**
+   * Gắn thông báo lỗi cho một trường nhập liệu trong form đề xuất.
+   * @param {string} fieldId - ID của ô nhập.
+   * @param {string} errorMsg - Nội dung lỗi.
+   */
+  function setProposalFieldError(fieldId, errorMsg) {
+    const input = document.getElementById(fieldId);
+    const errorEl = document.getElementById(`${fieldId}Error`);
+    if (input) {
+      input.classList.add('invalid');
+      input.setAttribute('aria-invalid', 'true');
+    }
+    if (errorEl) {
+      errorEl.textContent = errorMsg;
+      errorEl.classList.add('show');
+    }
+  }
+
+  /**
+   * Kiểm tra tính hợp lệ của một trường trong modal đề xuất bằng Regex.
+   * @param {string} fieldId - ID của trường cần kiểm tra.
+   * @returns {boolean} True nếu hợp lệ.
+   */
+  function validateProposalField(fieldId) {
+    const input = document.getElementById(fieldId);
+    if (!input) return true;
+
+    const val = input.value.trim();
+    const errorEl = document.getElementById(`${fieldId}Error`);
+
+    let errorMessage = '';
+    if (fieldId === 'propName') {
+      if (!val) errorMessage = 'Vui lòng nhập tên hội nghị.';
+      else if (val.length < 2) errorMessage = 'Tên hội nghị quá ngắn (tối thiểu 2 ký tự).';
+    } else if (fieldId === 'propUrl') {
+      if (!val) errorMessage = 'Vui lòng cung cấp liên kết website chính thức.';
+      else if (!/^https?:\/\/[^\s/$.?#].[^\s]*$/i.test(val)) {
+        errorMessage = 'Website phải bắt đầu bằng http:// hoặc https:// hợp lệ.';
+      }
+    } else if (fieldId === 'propEmail' && val && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) {
+      errorMessage = 'Email liên hệ không đúng định dạng.';
+    }
+
+    if (errorMessage) {
+      setProposalFieldError(fieldId, errorMessage);
+      return false;
+    }
+
+    input.classList.remove('invalid');
+    input.setAttribute('aria-invalid', 'false');
+    if (errorEl) {
+      errorEl.textContent = '';
+      errorEl.classList.remove('show');
+    }
+    return true;
+  }
+
+  /**
+   * Giữ vòng lặp phím Tab nằm bên trong hộp thoại khi modal đề xuất đang mở.
+   * @param {KeyboardEvent} e - Sự kiện bàn phím.
+   * @param {HTMLElement} backdrop - Lớp nền modal đề xuất.
+   * @param {HTMLElement|null} dialog - Khung hộp thoại chính.
+   */
+  function trapModalFocus(e, backdrop, dialog) {
+    if (e.key !== 'Tab' || !backdrop.classList.contains('open') || !dialog) return;
+
+    const selector = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+    const focusables = Array.from(dialog.querySelectorAll(selector)).filter(
+      el => !el.disabled && el.offsetParent !== null
+    );
+    if (focusables.length === 0) return;
+
+    const firstEl = focusables[0];
+    const lastEl = focusables[focusables.length - 1];
+    if (e.shiftKey && document.activeElement === firstEl) {
+      e.preventDefault();
+      lastEl.focus();
+    } else if (!e.shiftKey && document.activeElement === lastEl) {
+      e.preventDefault();
+      firstEl.focus();
+    }
+  }
+
+  /**
+   * Xử lý lưu đề xuất hội nghị mới vào localStorage và hiển thị thông báo thành công.
+   * @param {SubmitEvent} e - Sự kiện submit của biểu mẫu đề xuất.
+   * @param {HTMLFormElement} form - Biểu mẫu đề xuất hội nghị.
+   * @param {HTMLElement|null} successBox - Hộp thông báo thành công.
+   * @param {HTMLElement|null} closeSuccessBtn - Nút đóng trên hộp thành công.
+   */
+  function handleProposalSubmit(e, form, successBox, closeSuccessBtn) {
+    e.preventDefault();
+    clearProposalErrors(form);
+
+    const validName = validateProposalField('propName');
+    const validUrl = validateProposalField('propUrl');
+    const validEmail = validateProposalField('propEmail');
+    if (!validName || !validUrl || !validEmail) {
+      const firstInvalid = form.querySelector('.about-form-input.invalid');
+      if (firstInvalid) firstInvalid.focus();
+      return;
+    }
+
+    const readVal = id => document.getElementById(id)?.value.trim() || '';
+    const proposalData = {
+      id: `prop_${Date.now()}`,
+      name: readVal('propName'),
+      website: readVal('propUrl'),
+      field: readVal('propField'),
+      deadline: document.getElementById('propDeadline')?.value || '',
+      email: readVal('propEmail'),
+      submittedAt: new Date().toISOString()
+    };
+
+    const existing = readStorage('confguide_proposals', []);
+    const proposals = Array.isArray(existing) ? existing : [];
+    proposals.push(proposalData);
+    writeStorage('confguide_proposals', proposals);
+
+    form.reset();
+    form.classList.add('is-hidden');
+    if (successBox) {
+      successBox.classList.add('show');
+      if (closeSuccessBtn) closeSuccessBtn.focus();
+    }
+  }
+
+  /**
+   * Khởi tạo Modal Đề xuất Hội nghị mới với Focus Trap, Escape, validate Regex và lưu LocalStorage.
    */
   function setupProposalModal() {
     const openBtn = document.getElementById('openProposalModalBtn');
@@ -526,10 +630,7 @@
 
     let lastFocusedElement = null;
 
-    /**
-     * Mở modal đề xuất, khóa cuộn nền qua CSS class và đưa focus vào ô đầu tiên.
-     */
-    function openModal() {
+    const openModal = () => {
       lastFocusedElement = document.activeElement;
       backdrop.removeAttribute('hidden');
       backdrop.classList.add('open');
@@ -537,18 +638,13 @@
 
       form.classList.remove('is-hidden');
       if (successBox) successBox.classList.remove('show');
-      clearFormErrors();
+      clearProposalErrors(form);
 
       const firstInput = document.getElementById('propName');
-      if (firstInput) {
-        setTimeout(() => firstInput.focus(), 80);
-      }
-    }
+      if (firstInput) setTimeout(() => firstInput.focus(), 80);
+    };
 
-    /**
-     * Đóng modal đề xuất, mở lại cuộn nền và khôi phục focus.
-     */
-    function closeModal() {
+    const closeModal = () => {
       backdrop.classList.remove('open');
       document.body.classList.remove('about-modal-open');
       setTimeout(() => {
@@ -557,197 +653,33 @@
           lastFocusedElement.focus();
         }
       }, 200);
-    }
+    };
 
-    /**
-     * Giữ vòng lặp phím Tab nằm bên trong hộp thoại khi modal đang mở.
-     * @param {KeyboardEvent} e - Sự kiện bàn phím.
-     */
-    function handleFocusTrap(e) {
-      if (e.key !== 'Tab' || !backdrop.classList.contains('open') || !dialog) return;
-
-      const focusableSelectors = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
-      const focusables = Array.from(dialog.querySelectorAll(focusableSelectors)).filter(
-        el => !el.disabled && el.offsetParent !== null
-      );
-
-      if (focusables.length === 0) return;
-
-      const firstEl = focusables[0];
-      const lastEl = focusables[focusables.length - 1];
-
-      if (e.shiftKey) {
-        if (document.activeElement === firstEl) {
-          e.preventDefault();
-          lastEl.focus();
-        }
-      } else if (document.activeElement === lastEl) {
-        e.preventDefault();
-        firstEl.focus();
-      }
-    }
-
-    /**
-     * Đóng modal khi bấm Escape hoặc xử lý focus trap.
-     * @param {KeyboardEvent} e - Sự kiện bàn phím.
-     */
-    function handleKeyDown(e) {
+    openBtn.addEventListener('click', openModal);
+    [closeBtn, cancelBtn, closeSuccessBtn].forEach(btn => {
+      if (btn) btn.addEventListener('click', closeModal);
+    });
+    backdrop.addEventListener('click', e => {
+      if (e.target === backdrop) closeModal();
+    });
+    window.addEventListener('keydown', e => {
       if (e.key === 'Escape' && backdrop.classList.contains('open')) {
         e.preventDefault();
         closeModal();
       }
-      handleFocusTrap(e);
-    }
-
-    openBtn.addEventListener('click', openModal);
-    if (closeBtn) closeBtn.addEventListener('click', closeModal);
-    if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
-    if (closeSuccessBtn) closeSuccessBtn.addEventListener('click', closeModal);
-
-    backdrop.addEventListener('click', e => {
-      if (e.target === backdrop) {
-        closeModal();
-      }
+      trapModalFocus(e, backdrop, dialog);
     });
-
-    window.addEventListener('keydown', handleKeyDown);
-
-    /**
-     * Xóa toàn bộ trạng thái báo lỗi trên form đề xuất.
-     */
-    function clearFormErrors() {
-      form.querySelectorAll('.about-form-input').forEach(inp => {
-        inp.classList.remove('invalid');
-        inp.setAttribute('aria-invalid', 'false');
-      });
-      form.querySelectorAll('.about-field-error').forEach(err => {
-        err.textContent = '';
-        err.classList.remove('show');
-      });
-    }
-
-    /**
-     * Gắn thông báo lỗi cho một trường nhập liệu trong form đề xuất.
-     * @param {string} fieldId - ID của ô nhập.
-     * @param {string} errorMsg - Nội dung lỗi.
-     */
-    function setFieldError(fieldId, errorMsg) {
-      const input = document.getElementById(fieldId);
-      const errorEl = document.getElementById(`${fieldId}Error`);
-      if (input) {
-        input.classList.add('invalid');
-        input.setAttribute('aria-invalid', 'true');
-      }
-      if (errorEl) {
-        errorEl.textContent = errorMsg;
-        errorEl.classList.add('show');
-      }
-    }
-
-    /**
-     * Kiểm tra tính hợp lệ của một trường trong modal đề xuất bằng Regex.
-     * @param {string} fieldId - ID của trường cần kiểm tra.
-     * @returns {boolean} True nếu hợp lệ.
-     */
-    function validateField(fieldId) {
-      const input = document.getElementById(fieldId);
-      if (!input) return true;
-
-      const val = input.value.trim();
-      const errorEl = document.getElementById(`${fieldId}Error`);
-
-      if (fieldId === 'propName') {
-        if (!val) {
-          setFieldError('propName', 'Vui lòng nhập tên hội nghị.');
-          return false;
-        }
-        if (val.length < 2) {
-          setFieldError('propName', 'Tên hội nghị quá ngắn (tối thiểu 2 ký tự).');
-          return false;
-        }
-      }
-
-      if (fieldId === 'propUrl') {
-        if (!val) {
-          setFieldError('propUrl', 'Vui lòng cung cấp liên kết website chính thức.');
-          return false;
-        }
-        const urlPattern = /^https?:\/\/[^\s/$.?#].[^\s]*$/i;
-        if (!urlPattern.test(val)) {
-          setFieldError('propUrl', 'Website phải bắt đầu bằng http:// hoặc https:// hợp lệ.');
-          return false;
-        }
-      }
-
-      if (fieldId === 'propEmail' && val) {
-        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailPattern.test(val)) {
-          setFieldError('propEmail', 'Email liên hệ không đúng định dạng.');
-          return false;
-        }
-      }
-
-      input.classList.remove('invalid');
-      input.setAttribute('aria-invalid', 'false');
-      if (errorEl) {
-        errorEl.textContent = '';
-        errorEl.classList.remove('show');
-      }
-      return true;
-    }
 
     ['propName', 'propUrl', 'propEmail'].forEach(id => {
       const el = document.getElementById(id);
-      if (el) {
-        el.addEventListener('blur', () => validateField(id));
-        el.addEventListener('input', () => {
-          if (el.classList.contains('invalid')) validateField(id);
-        });
-      }
+      if (!el) return;
+      el.addEventListener('blur', () => validateProposalField(id));
+      el.addEventListener('input', () => {
+        if (el.classList.contains('invalid')) validateProposalField(id);
+      });
     });
 
-    form.addEventListener('submit', e => {
-      e.preventDefault();
-      clearFormErrors();
-
-      const validName = validateField('propName');
-      const validUrl = validateField('propUrl');
-      const validEmail = validateField('propEmail');
-
-      if (!validName || !validUrl || !validEmail) {
-        const firstInvalid = form.querySelector('.about-form-input.invalid');
-        if (firstInvalid) firstInvalid.focus();
-        return;
-      }
-
-      const nameEl = document.getElementById('propName');
-      const urlEl = document.getElementById('propUrl');
-      const fieldEl = document.getElementById('propField');
-      const deadlineEl = document.getElementById('propDeadline');
-      const emailEl = document.getElementById('propEmail');
-
-      const proposalData = {
-        id: `prop_${Date.now()}`,
-        name: nameEl ? nameEl.value.trim() : '',
-        website: urlEl ? urlEl.value.trim() : '',
-        field: fieldEl ? fieldEl.value.trim() : '',
-        deadline: deadlineEl ? deadlineEl.value : '',
-        email: emailEl ? emailEl.value.trim() : '',
-        submittedAt: new Date().toISOString()
-      };
-
-      const existing = readStorage('confguide_proposals', []);
-      const proposals = Array.isArray(existing) ? existing : [];
-      proposals.push(proposalData);
-      writeStorage('confguide_proposals', proposals);
-
-      form.reset();
-      form.classList.add('is-hidden');
-      if (successBox) {
-        successBox.classList.add('show');
-        if (closeSuccessBtn) closeSuccessBtn.focus();
-      }
-    });
+    form.addEventListener('submit', e => handleProposalSubmit(e, form, successBox, closeSuccessBtn));
   }
 
   // Khởi chạy trang Giới thiệu khi DOM đã sẵn sàng

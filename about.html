@@ -1,20 +1,27 @@
 <!DOCTYPE html>
+<!--
+  ConfGuide — Trang Về chúng tôi (about.html)
+  Giới thiệu sứ mệnh, giá trị cốt lõi, nguồn dữ liệu học thuật, đội ngũ thực hiện và modal đề xuất hội nghị.
+-->
 <html lang="vi">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Về chúng tôi — Nền tảng tra cứu và theo dõi hội nghị khoa học ConfGuide. Đồ án môn học IE104, Trường Đại học Công nghệ Thông tin (ĐHQG-HCM).">
   <title>Về chúng tôi - ConfGuide</title>
-  
+  <meta name="description" content="Về chúng tôi — Nền tảng tra cứu và theo dõi hội nghị khoa học ConfGuide. Đồ án môn học IE104, Trường Đại học Công nghệ Thông tin (ĐHQG-HCM).">
+
   <link rel="icon" type="image/svg+xml" href="images/logo.svg">
-  
-  <link rel="stylesheet" href="css/base.css">
-  <link rel="stylesheet" href="css/about.css">
+  <link rel="stylesheet" href="css/base/base.css">
+  <link rel="stylesheet" href="css/pages/about.css">
+  <link rel="stylesheet" href="css/base/transition.css">
+  <script src="js/core/page-transition.js"></script>
+  <script src="js/core/layout.js" defer blocking="render"></script>
 </head>
 <body>
+  <!-- Áp dụng nhanh Dark Mode trước khi sơn giao diện để tránh nhấp nháy sáng/tối (anti-FOUC) -->
   <script>try { if (localStorage.getItem('confguide_theme') === 'dark') document.body.classList.add('dark'); } catch (e) {}</script>
 
-  <!-- Shared Header -->
+  <!-- Thanh điều hướng dùng chung -->
   <div id="site-header"></div>
 
   <!-- Main Content (6 Sections) -->
@@ -183,11 +190,11 @@
     </div>
   </div>
 
-  <!-- Shared Footer -->
+  <!-- Chân trang dùng chung -->
   <div id="site-footer"></div>
 
-  <!-- Scripts -->
-  <script src="js/layout.js"></script>
-  <script src="js/about.js"></script>
+  <!-- Script nghiệp vụ trang Giới thiệu -->
+  <script src="js/pages/about.js" defer></script>
 </body>
 </html>
+

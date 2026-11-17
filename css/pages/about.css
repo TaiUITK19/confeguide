@@ -70,7 +70,7 @@
   letter-spacing: 0.8px;
   text-transform: uppercase;
   margin-bottom: 16px;
-  border: 1px solid rgba(18, 104, 201, 0.2);
+  border: 1px solid var(--conf-badge-border);
 }
 
 .about-hero-title {
@@ -158,7 +158,7 @@
 }
 
 .about-mission-box {
-  background: linear-gradient(135deg, rgba(18, 104, 201, 0.08) 0%, rgba(11, 31, 107, 0.04) 100%);
+  background: var(--primary-soft);
   border-left: 4px solid var(--primary);
   border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
   padding: 18px 24px;
@@ -349,13 +349,13 @@
   width: 56px;
   height: 56px;
   border-radius: 14px;
-  background: linear-gradient(135deg, #1268c9, #0b1f6b);
-  color: #ffffff;
+  background: var(--brand-gradient);
+  color: var(--on-brand);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  box-shadow: 0 4px 12px rgba(18, 104, 201, 0.25);
+  box-shadow: 0 4px 12px var(--primary-shadow);
 }
 
 .about-advisor-info {
@@ -426,8 +426,8 @@
   width: 52px;
   height: 52px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #1268c9, #0b1f6b);
-  color: #ffffff;
+  background: var(--brand-gradient);
+  color: var(--on-brand);
   font-size: 16px;
   font-weight: 800;
   display: flex;
@@ -435,7 +435,7 @@
   justify-content: center;
   margin-bottom: 14px;
   letter-spacing: 0.5px;
-  box-shadow: 0 4px 10px rgba(18, 104, 201, 0.2);
+  box-shadow: var(--shadow-sm);
 }
 
 .about-member-name {
@@ -516,9 +516,9 @@
 }
 
 .milestone-current .about-milestone-badge {
-  background: #ecfdf5;
-  color: #047857;
-  border: 1px solid #a7f3d0;
+  background: var(--status-open-bg);
+  color: var(--status-open-text);
+  border: 1px solid var(--status-open-border);
 }
 
 body.about-modal-open {
@@ -530,9 +530,9 @@ body.about-modal-open {
 }
 
 .milestone-future .about-milestone-badge {
-  background: var(--surface-muted);
-  color: var(--text-muted);
-  border: 1px solid var(--border);
+  background: var(--status-closed-bg);
+  color: var(--status-closed-text);
+  border: 1px solid var(--status-closed-border);
 }
 
 .about-milestone-title {
@@ -605,8 +605,9 @@ body.about-modal-open {
   gap: 8px;
   padding: 11px 24px;
   border-radius: var(--radius-sm);
-  background: #182230;
-  color: #ffffff !important;
+  border: 1px solid var(--border-strong);
+  background: var(--surface-dark);
+  color: var(--on-surface-dark);
   font-weight: 600;
   font-size: 14.5px;
   transition: all 180ms ease;
@@ -614,9 +615,9 @@ body.about-modal-open {
 }
 
 .btn-github:hover {
-  background: #0f1722;
+  background: var(--surface-dark-2);
   transform: translateY(-2px);
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+  box-shadow: var(--shadow-md);
 }
 
 .btn-github svg {
@@ -630,7 +631,7 @@ body.about-modal-open {
   padding: 11px 24px;
   border-radius: var(--radius-sm);
   background: var(--primary);
-  color: #ffffff !important;
+  color: var(--on-primary);
   font-weight: 600;
   font-size: 14.5px;
   border: none;
@@ -639,16 +640,16 @@ body.about-modal-open {
 }
 
 .btn-propose:hover {
-  background: var(--primary-dark);
+  background: var(--primary-hover);
   transform: translateY(-2px);
-  box-shadow: 0 4px 14px rgba(18, 104, 201, 0.3);
+  box-shadow: 0 4px 14px var(--primary-shadow);
 }
 
 /* ================= MODAL ĐỀ XUẤT HỘI NGHỊ MỚI ================= */
 .about-modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(11, 31, 107, 0.45);
+  background: var(--backdrop-scrim);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
   z-index: 2000;
@@ -753,13 +754,13 @@ body.about-modal-open {
 }
 
 .about-form-label .req {
-  color: var(--red);
+  color: var(--danger-text);
 }
 
 .about-form-input {
   width: 100%;
   padding: 10px 14px;
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-strong);
   border-radius: var(--radius-sm);
   background: var(--surface);
   color: var(--text);
@@ -769,19 +770,18 @@ body.about-modal-open {
 }
 
 .about-form-input:focus {
-  outline: none;
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(18, 104, 201, 0.15);
+  box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--focus-ring);
 }
 
 .about-form-input.invalid {
-  border-color: var(--red);
-  background: rgba(224, 49, 49, 0.03);
+  border-color: var(--danger-dot);
+  background: var(--danger-bg);
 }
 
 .about-field-error {
   font-size: 12px;
-  color: var(--red);
+  color: var(--danger-text);
   margin-top: 4px;
   min-height: 16px;
   display: none;
@@ -822,7 +822,7 @@ body.about-modal-open {
   border-radius: var(--radius-sm);
   border: none;
   background: var(--primary);
-  color: #ffffff;
+  color: var(--on-primary);
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
@@ -830,21 +830,22 @@ body.about-modal-open {
 }
 
 .about-btn-submit:hover {
-  background: var(--primary-dark);
+  background: var(--primary-hover);
 }
 
 .about-btn-submit:focus-visible,
 .about-btn-cancel:focus-visible {
-  outline: 2px solid var(--primary);
+  outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
+  box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--focus-ring);
 }
 
 /* Success Box inside modal */
 .about-success-box {
   padding: 24px;
   border-radius: var(--radius-sm);
-  background: #ecfdf5;
-  border: 1px solid #a7f3d0;
+  background: var(--status-open-bg);
+  border: 1px solid var(--status-open-border);
   text-align: center;
   display: none;
 }
@@ -857,8 +858,8 @@ body.about-modal-open {
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: #10b981;
-  color: #ffffff;
+  background: var(--status-open-solid-bg);
+  color: var(--on-primary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -868,13 +869,13 @@ body.about-modal-open {
 .about-success-title {
   font-size: 16.5px;
   font-weight: 700;
-  color: #065f46;
+  color: var(--status-open-text);
   margin-bottom: 8px;
 }
 
 .about-success-desc {
   font-size: 14px;
-  color: #047857;
+  color: var(--status-open-text);
   line-height: 1.6;
   margin-bottom: 18px;
 }
@@ -885,61 +886,15 @@ body.dark .about-hero-section {
   border-bottom-color: var(--border);
 }
 
-body.dark .about-eyebrow {
-  background: var(--primary-soft);
-  color: #93c5fd;
-  border-color: rgba(147, 197, 253, 0.25);
-}
-
 body.dark .about-challenge-item,
 body.dark .about-item-row {
   background: var(--surface-alt);
   border-color: var(--border);
 }
 
-body.dark .about-mission-box {
-  background: rgba(18, 104, 201, 0.12);
-  border-left-color: var(--primary);
-}
-
-body.dark .about-update-frequency {
-  background: rgba(18, 104, 201, 0.15);
-  border-color: var(--border-strong);
-  color: #93c5fd;
-}
-
 body.dark .about-advisor-card {
   background: var(--surface);
   border-color: var(--border-strong);
-}
-
-body.dark .milestone-current .about-milestone-badge {
-  background: rgba(16, 185, 129, 0.18);
-  color: #34d399;
-  border-color: rgba(16, 185, 129, 0.35);
-}
-
-body.dark .milestone-future .about-milestone-badge {
-  background: rgba(100, 116, 139, 0.2);
-  color: #94a3b8;
-  border-color: rgba(100, 116, 139, 0.35);
-}
-
-body.dark .about-modal-backdrop {
-  background: rgba(0, 0, 0, 0.65);
-}
-
-body.dark .about-success-box {
-  background: rgba(16, 185, 129, 0.12);
-  border-color: rgba(16, 185, 129, 0.3);
-}
-
-body.dark .about-success-title {
-  color: #34d399;
-}
-
-body.dark .about-success-desc {
-  color: #a7f3d0;
 }
 
 /* ================= RESPONSIVE ================= */

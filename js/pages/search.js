@@ -1,10 +1,11 @@
 /**
- * ConfGuide — Kịch bản Trang Tra cứu & Lọc Hội nghị (js/app.js)
- * Quản lý trạng thái lọc phản ứng (filterState Proxy) theo kiến trúc một chiều,
- * tích hợp lõi tìm kiếm ConfGuideSearchCore (chuẩn hóa, khớp mờ Levenshtein, facet pre-counts),
- * hỗ trợ combobox gợi ý theo chuẩn W3C APG, ngăn kéo bộ lọc di động kèm bản nháp (draft),
- * kết xuất DocumentFragment chống giật giao diện (INP), thẻ chip quản lý focus bàn phím,
- * khối trạng thái rỗng có đường phục hồi và đồng bộ URL 2 chiều an toàn.
+ * ConfGuide — Kịch bản Trang Tra cứu & Lọc Hội nghị (js/pages/search.js)
+ * Trang sử dụng: search.html
+ * Phụ thuộc: js/core/page-transition.js, js/core/layout.js, js/components/search-core.js, js/components/compare.js
+ * Chức năng: Quản lý trạng thái lọc phản ứng (`filterState` Proxy) theo kiến trúc một chiều,
+ * tích hợp lõi tìm kiếm `ConfGuideSearchCore` (chuẩn hóa, khớp mờ Levenshtein, facet pre-counts),
+ * combobox gợi ý W3C APG, ngăn kéo bộ lọc di động (draft state), kết xuất `DocumentFragment`
+ * chống giật INP, thanh chip quản lý focus bàn phím và đồng bộ URL 2 chiều an toàn.
  */
 
 (function () {
@@ -237,23 +238,11 @@
     };
   }
 
-  /**
-   * Thoát ký tự đặc biệt HTML chống tấn công XSS.
-   * @param {*} val
-   * @returns {string}
-   */
+  /** Thoát ký tự đặc biệt HTML chống XSS (tái sử dụng ConfGuideUtils.escapeHtml). */
   function escapeHtml(val) {
     const utils = getUtils();
-    if (utils && typeof utils.escapeHtml === 'function') {
-      return utils.escapeHtml(val);
-    }
-    if (val === null || val === undefined) return '';
-    return String(val)
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#039;');
+    if (utils && typeof utils.escapeHtml === 'function') return utils.escapeHtml(val);
+    return String(val ?? '').replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[ch]));
   }
 
   /**
@@ -523,100 +512,88 @@
    * @param {Object} raw
    * @returns {Object|null}
    */
+  /**
+   * Đánh giá trạng thái CFP (open, closingSoon, closed, unknown) và mốc hạn nộp tiếp theo/cuối cùng.
+   * @param {Array<Object>} submissionDeadlines - Danh sách các mốc nộp bài đã sắp xếp tăng dần.
+   * @returns {{ cfpStatus: string, nextDeadline: Object|null, lastDeadline: Object|null }}
+   */
+  function evaluateSubmissionStatus(submissionDeadlines) {
+    if (!submissionDeadlines.length) {
+      return { cfpStatus: 'unknown', nextDeadline: null, lastDeadline: null };
+    }
+    const last = submissionDeadlines[submissionDeadlines.length - 1];
+    const lastDeadline = { name: last.name, date: last.date, daysLeft: last.daysLeft };
+    const upcoming = submissionDeadlines.find(d => d.daysLeft >= 0) || null;
+    if (!upcoming) {
+      return { cfpStatus: 'closed', nextDeadline: null, lastDeadline };
+    }
+    const nextDeadline = { name: upcoming.name, date: upcoming.date, daysLeft: upcoming.daysLeft };
+    const cfpStatus = upcoming.daysLeft <= CLOSING_SOON_DAYS ? 'closingSoon' : 'open';
+    return { cfpStatus, nextDeadline, lastDeadline };
+  }
+
+  /**
+   * Suy luận giai đoạn diễn ra của hội nghị (`upcoming`, `ongoing`, `ended`, `unknown`).
+   * @param {string} startDate - Ngày bắt đầu ISO YYYY-MM-DD.
+   * @param {string} endDate - Ngày kết thúc ISO YYYY-MM-DD.
+   * @param {string} todayIso - Ngày hiện tại ISO YYYY-MM-DD.
+   * @returns {string} Giai đoạn diễn ra hội nghị.
+   */
+  function resolveEventPhase(startDate, endDate, todayIso) {
+    if (!startDate || !endDate) return 'unknown';
+    if (todayIso < startDate) return 'upcoming';
+    if (todayIso > endDate) return 'ended';
+    return 'ongoing';
+  }
+
+  /**
+   * Chuẩn hóa một bản ghi hội nghị đầy đủ các thuộc tính camelCase một lần duy nhất.
+   * @param {Object} raw - Dữ liệu thô một hội nghị từ JSON.
+   * @returns {Object|null} Bản ghi đã chuẩn hóa hoặc null nếu không hợp lệ.
+   */
   function normalizeConference(raw) {
     if (!raw || typeof raw !== 'object') return null;
 
     const todayIso = getTodayIso();
     const id = resolveConferenceId(raw);
     const rawName = String(raw.name || '').trim();
-    const isDuplicate = DUPLICATE_RAW_NAMES.has(rawName);
-
-    const hasNullFullName = raw.full_name === null && !raw.fullName;
-    let dataQuality = 'full';
-    if (hasNullFullName) {
-      dataQuality = 'empty';
-    } else if (raw.status === 'partial') {
-      dataQuality = 'partial';
-    }
+    const dataQuality = (raw.full_name === null && !raw.fullName)
+      ? 'empty'
+      : (raw.status === 'partial' ? 'partial' : 'full');
 
     const fullNameText = raw.full_name !== undefined && raw.full_name !== null
       ? String(raw.full_name).trim()
       : String(raw.fullName || '').trim();
 
-    const cityKey = extractCityKey(raw.location);
-    const topics = extractTopics(raw);
     const deadlinesWithKind = normalizeDeadlinesArray(raw);
-
     const submissionDeadlines = deadlinesWithKind
-      .map(d => ({
-        name: d.name,
-        date: d.date,
-        kind: d.kind,
-        daysLeft: diffCalendarDays(d.date, todayIso)
-      }))
+      .map(d => ({ name: d.name, date: d.date, kind: d.kind, daysLeft: diffCalendarDays(d.date, todayIso) }))
       .filter(d => d.kind === 'submission' && d.daysLeft !== null)
       .sort((a, b) => a.date.localeCompare(b.date));
 
-    let cfpStatus = 'unknown';
-    let nextDeadline = null;
-    let lastDeadline = null;
-
-    if (submissionDeadlines.length > 0) {
-      lastDeadline = {
-        name: submissionDeadlines[submissionDeadlines.length - 1].name,
-        date: submissionDeadlines[submissionDeadlines.length - 1].date,
-        daysLeft: submissionDeadlines[submissionDeadlines.length - 1].daysLeft
-      };
-
-      const upcomingSubmission = submissionDeadlines.find(d => d.daysLeft >= 0) || null;
-      if (upcomingSubmission) {
-        nextDeadline = {
-          name: upcomingSubmission.name,
-          date: upcomingSubmission.date,
-          daysLeft: upcomingSubmission.daysLeft
-        };
-        cfpStatus = upcomingSubmission.daysLeft <= CLOSING_SOON_DAYS ? 'closingSoon' : 'open';
-      } else {
-        cfpStatus = 'closed';
-      }
-    }
-
+    const { cfpStatus, nextDeadline, lastDeadline } = evaluateSubmissionStatus(submissionDeadlines);
     const startDate = normalizeIsoDate(raw.start_date || raw.startDate);
     const endDate = normalizeIsoDate(raw.end_date || raw.endDate) || startDate;
-    const eventMonth = startDate ? startDate.slice(0, 7) : 'unknown';
-
-    let eventPhase = 'unknown';
-    if (startDate && endDate) {
-      if (todayIso < startDate) {
-        eventPhase = 'upcoming';
-      } else if (todayIso > endDate) {
-        eventPhase = 'ended';
-      } else {
-        eventPhase = 'ongoing';
-      }
-    }
-
     const rawRank = String(raw.rank || '').trim().toUpperCase();
-    const rank = VALID_RANK_VALUES.has(rawRank) ? rawRank : '';
 
     return Object.assign({}, raw, {
       id,
-      rank,
+      rank: VALID_RANK_VALUES.has(rawRank) ? rawRank : '',
       fullName: fullNameText || rawName,
       website: raw.website_url || raw.website || '',
       startDate,
       endDate,
-      eventMonth,
-      isDuplicate,
+      eventMonth: startDate ? startDate.slice(0, 7) : 'unknown',
+      isDuplicate: DUPLICATE_RAW_NAMES.has(rawName),
       dataQuality,
-      cityKey,
-      topics,
+      cityKey: extractCityKey(raw.location),
+      topics: extractTopics(raw),
       deadlines: deadlinesWithKind,
       submissionDeadlines,
       cfpStatus,
       nextDeadline,
       lastDeadline,
-      eventPhase
+      eventPhase: resolveEventPhase(startDate, endDate, todayIso)
     });
   }
 
@@ -628,6 +605,9 @@
    */
   function getSavedStorageKey() {
     const utils = getUtils();
+    if (utils && typeof utils.getSavedStorageKey === 'function') {
+      return utils.getSavedStorageKey(false);
+    }
     const user = utils && utils.readStorage
       ? utils.readStorage('confguide_current_user', null)
       : null;
@@ -731,48 +711,49 @@
   /**
    * Đọc tham số URL an toàn vào filterState khi khởi tạo.
    */
+  /**
+   * Trích xuất và lọc danh sách giá trị đa chọn (phân tách dấu phẩy) từ URLSearchParams.
+   * @param {URLSearchParams} params - Tập tham số truy vấn URL hiện tại.
+   * @param {string} paramName - Tên tham số (`rank` hoặc `topic`).
+   * @param {Set<string>} validSet - Tập giá trị hợp lệ được phép nhận.
+   * @param {boolean} [toUpper=false] - Có chuyển chữ hoa trước khi kiểm tra hay không.
+   * @returns {Array<string>} Danh sách giá trị duy nhất hợp lệ.
+   */
+  function parseMultiUrlParam(params, paramName, validSet, toUpper = false) {
+    const parsed = [];
+    params.getAll(paramName).forEach(chunk => {
+      String(chunk || '')
+        .split(',')
+        .map(item => (toUpper ? item.trim().toUpperCase() : item.trim()))
+        .forEach(val => {
+          if (validSet.has(val) && !parsed.includes(val)) parsed.push(val);
+        });
+    });
+    return parsed;
+  }
+
+  /**
+   * Đọc tham số URL an toàn vào filterState khi khởi tạo.
+   */
   function readUrlIntoFilterState() {
     resetFilterStateValues();
     const params = new URLSearchParams(window.location.search);
 
     const rawQ = params.get('q');
-    if (rawQ && rawQ.trim()) {
-      rawFilterState.q = rawQ.trim().slice(0, 100);
-    }
-
-    if (ENABLED_FILTER_GROUPS.rank) {
-      const rawRanks = params.getAll('rank');
-      const parsedRanks = [];
-      rawRanks.forEach(chunk => {
-        String(chunk || '')
-          .split(',')
-          .map(item => item.trim().toUpperCase())
-          .forEach(rVal => {
-            if (VALID_RANK_VALUES.has(rVal) && !parsedRanks.includes(rVal)) {
-              parsedRanks.push(rVal);
-            }
-          });
-      });
-      rawFilterState.ranks = parsedRanks;
-    }
+    if (rawQ && rawQ.trim()) rawFilterState.q = rawQ.trim().slice(0, 100);
+    if (ENABLED_FILTER_GROUPS.rank) rawFilterState.ranks = parseMultiUrlParam(params, 'rank', VALID_RANK_VALUES, true);
 
     if (ENABLED_FILTER_GROUPS.cfp) {
       const rawCfp = (params.get('cfp') || '').trim();
-      if (VALID_CFP_VALUES.has(rawCfp)) {
-        rawFilterState.cfp = rawCfp;
-      }
+      if (VALID_CFP_VALUES.has(rawCfp)) rawFilterState.cfp = rawCfp;
     }
 
     if (ENABLED_FILTER_GROUPS.when) {
       const rawMonth = (params.get('month') || '').trim();
-      if (rawMonth === 'unknown' || /^\d{4}-\d{2}$/.test(rawMonth)) {
-        rawFilterState.month = rawMonth;
-      }
+      if (rawMonth === 'unknown' || /^\d{4}-\d{2}$/.test(rawMonth)) rawFilterState.month = rawMonth;
 
       const rawOngoing = (params.get('ongoing') || '').trim().toLowerCase();
-      if (rawOngoing === '1' || rawOngoing === 'true') {
-        rawFilterState.ongoing = true;
-      }
+      if (rawOngoing === '1' || rawOngoing === 'true') rawFilterState.ongoing = true;
 
       const rawFrom = normalizeIsoDate(params.get('from') || params.get('dateFrom') || '');
       if (rawFrom) rawFilterState.dateFrom = rawFrom;
@@ -783,39 +764,17 @@
 
     if (ENABLED_FILTER_GROUPS.where) {
       let rawCity = (params.get('city') || '').trim();
-      if (rawCity === 'da-nang' || rawCity === 'unknown') {
-        rawCity = 'other';
-      }
-      if (VALID_CITY_VALUES.has(rawCity)) {
-        rawFilterState.city = rawCity;
-      }
+      if (rawCity === 'da-nang' || rawCity === 'unknown') rawCity = 'other';
+      if (VALID_CITY_VALUES.has(rawCity)) rawFilterState.city = rawCity;
     }
 
-    if (ENABLED_FILTER_GROUPS.what) {
-      const rawTopics = params.getAll('topic');
-      const parsedTopics = [];
-      rawTopics.forEach(chunk => {
-        String(chunk || '')
-          .split(',')
-          .map(item => item.trim())
-          .forEach(key => {
-            if (VALID_TOPIC_VALUES.has(key) && !parsedTopics.includes(key)) {
-              parsedTopics.push(key);
-            }
-          });
-      });
-      rawFilterState.topics = parsedTopics;
-    }
+    if (ENABLED_FILTER_GROUPS.what) rawFilterState.topics = parseMultiUrlParam(params, 'topic', VALID_TOPIC_VALUES, false);
 
     const rawSort = (params.get('sort') || '').trim();
-    if (VALID_SORT_VALUES.has(rawSort)) {
-      rawFilterState.sort = rawSort;
-    }
+    if (VALID_SORT_VALUES.has(rawSort)) rawFilterState.sort = rawSort;
 
     const rawPage = Number.parseInt(params.get('page') || '1', 10);
-    if (Number.isFinite(rawPage) && rawPage >= 1) {
-      rawFilterState.page = rawPage;
-    }
+    if (Number.isFinite(rawPage) && rawPage >= 1) rawFilterState.page = rawPage;
   }
 
   /**
@@ -930,111 +889,88 @@
    * @param {Object} state
    * @returns {Array<{id: string, groupKey: string, label: string, clear: Function}>}
    */
+  /**
+   * Tạo đối tượng mô tả một chip bộ lọc đang áp dụng kèm hàm xóa tương ứng.
+   * @param {string} id - Mã định danh chip.
+   * @param {string} groupKey - Khóa nhóm bộ lọc.
+   * @param {string} label - Nhãn hiển thị của chip.
+   * @param {Function} resetFn - Hàm đặt lại trường trạng thái tương ứng.
+   * @returns {{ id: string, groupKey: string, label: string, clear: Function }}
+   */
+  function createActiveChip(id, groupKey, label, resetFn) {
+    return {
+      id,
+      groupKey,
+      label,
+      clear: () => {
+        resetFn();
+        filterState.page = 1;
+      }
+    };
+  }
+
+  /**
+   * Danh sách các chip bộ lọc đang áp dụng.
+   * @param {Object} state - Trạng thái bộ lọc hiện tại.
+   * @returns {Array<{id: string, groupKey: string, label: string, clear: Function}>}
+   */
   function getActiveFilterChips(state) {
     const chips = [];
 
     if (state.q) {
-      chips.push({
-        id: 'q',
-        groupKey: 'query',
-        label: `Từ khóa: "${state.q}"`,
-        clear: () => {
-          const input = document.getElementById('searchInput');
-          if (input) input.value = '';
-          filterState.q = '';
-          filterState.page = 1;
-        }
-      });
+      chips.push(createActiveChip('q', 'query', `Từ khóa: "${state.q}"`, () => {
+        const input = document.getElementById('searchInput');
+        if (input) input.value = '';
+        filterState.q = '';
+      }));
     }
 
     if (Array.isArray(state.ranks)) {
       state.ranks.forEach(rVal => {
-        chips.push({
-          id: `rank:${rVal}`,
-          groupKey: 'rank',
-          label: `Phân hạng: ${rVal}`,
-          clear: () => {
-            filterState.ranks = filterState.ranks.filter(item => item !== rVal);
-            filterState.page = 1;
-          }
-        });
+        chips.push(createActiveChip(`rank:${rVal}`, 'rank', `Phân hạng: ${rVal}`, () => {
+          filterState.ranks = filterState.ranks.filter(item => item !== rVal);
+        }));
       });
     }
 
     if (state.cfp && state.cfp !== 'all') {
-      chips.push({
-        id: `cfp:${state.cfp}`,
-        groupKey: 'cfp',
-        label: `Hạn nộp: ${CFP_LABEL_MAP[state.cfp] || state.cfp}`,
-        clear: () => {
-          filterState.cfp = 'all';
-          filterState.page = 1;
-        }
-      });
+      chips.push(createActiveChip(`cfp:${state.cfp}`, 'cfp', `Hạn nộp: ${CFP_LABEL_MAP[state.cfp] || state.cfp}`, () => {
+        filterState.cfp = 'all';
+      }));
     }
 
     if (state.month) {
-      chips.push({
-        id: `month:${state.month}`,
-        groupKey: 'when',
-        label: `Tháng: ${formatMonthLabel(state.month)}`,
-        clear: () => {
-          filterState.month = '';
-          filterState.page = 1;
-        }
-      });
+      chips.push(createActiveChip(`month:${state.month}`, 'when', `Tháng: ${formatMonthLabel(state.month)}`, () => {
+        filterState.month = '';
+      }));
     }
 
     if (state.ongoing) {
-      chips.push({
-        id: 'ongoing',
-        groupKey: 'when',
-        label: 'Đang diễn ra',
-        clear: () => {
-          filterState.ongoing = false;
-          filterState.page = 1;
-        }
-      });
+      chips.push(createActiveChip('ongoing', 'when', 'Đang diễn ra', () => {
+        filterState.ongoing = false;
+      }));
     }
 
     if (state.dateFrom || state.dateTo) {
       const fromText = state.dateFrom ? formatIsoToDdMmYyyy(state.dateFrom) : '...';
       const toText = state.dateTo ? formatIsoToDdMmYyyy(state.dateTo) : '...';
-      chips.push({
-        id: 'dateRange',
-        groupKey: 'when',
-        label: `Hạn nộp: ${fromText} – ${toText}`,
-        clear: () => {
-          filterState.dateFrom = '';
-          filterState.dateTo = '';
-          filterState.page = 1;
-        }
-      });
+      chips.push(createActiveChip('dateRange', 'when', `Hạn nộp: ${fromText} – ${toText}`, () => {
+        filterState.dateFrom = '';
+        filterState.dateTo = '';
+      }));
     }
 
     if (state.city && state.city !== 'all') {
-      chips.push({
-        id: `city:${state.city}`,
-        groupKey: 'where',
-        label: `Địa điểm: ${CITY_LABEL_MAP[state.city] || state.city}`,
-        clear: () => {
-          filterState.city = 'all';
-          filterState.page = 1;
-        }
-      });
+      chips.push(createActiveChip(`city:${state.city}`, 'where', `Địa điểm: ${CITY_LABEL_MAP[state.city] || state.city}`, () => {
+        filterState.city = 'all';
+      }));
     }
 
     if (Array.isArray(state.topics)) {
       state.topics.forEach(tKey => {
-        chips.push({
-          id: `topic:${tKey}`,
-          groupKey: 'what',
-          label: `Chủ đề: ${TOPIC_LABEL_MAP[tKey] || tKey}`,
-          clear: () => {
-            filterState.topics = filterState.topics.filter(item => item !== tKey);
-            filterState.page = 1;
-          }
-        });
+        chips.push(createActiveChip(`topic:${tKey}`, 'what', `Chủ đề: ${TOPIC_LABEL_MAP[tKey] || tKey}`, () => {
+          filterState.topics = filterState.topics.filter(item => item !== tKey);
+        }));
       });
     }
 
@@ -1159,6 +1095,92 @@
   /* ================= 9. LUỒNG THỰC THI CHÍNH (PIPELINE) ================= */
 
   /**
+   * Kiểm tra một hội nghị có thỏa mãn từ khóa + bộ lọc hiện tại và lưu điểm số nếu khớp.
+   * @param {Object} conf - Đối tượng hội nghị.
+   * @param {Object} effectiveState - Trạng thái bộ lọc đang áp dụng.
+   * @param {Array<string>} queryTokens - Token tìm kiếm.
+   * @param {Map<string, number>} scoreMap - Bảng lưu điểm số theo ID hội nghị.
+   * @param {Object} core - Tham chiếu window.ConfGuideSearchCore.
+   * @returns {boolean} True nếu hội nghị thỏa mãn tất cả điều kiện.
+   */
+  function matchesPipelineConference(conf, effectiveState, queryTokens, scoreMap, core) {
+    if (queryTokens.length > 0) {
+      const matchRes = core.scoreConference(conf, queryTokens, effectiveState.q);
+      if (!matchRes.matched) return false;
+      scoreMap.set(conf.id, matchRes.score);
+    }
+    return core.matchesFilters(conf, effectiveState, ENABLED_FILTER_GROUPS);
+  }
+
+  /**
+   * Lọc toàn bộ tập hội nghị (chia lô 200 kèm yieldToMain nếu > 500 bản ghi để giữ INP mượt).
+   * @param {Object} effectiveState - Trạng thái lọc đang áp dụng.
+   * @param {Array<string>} queryTokens - Danh sách token tìm kiếm.
+   * @param {Map<string, number>} scoreMap - Bản đồ điểm xếp hạng.
+   * @param {boolean} isDateValid - Cờ hợp lệ của khoảng ngày lọc.
+   * @param {number} currentToken - Mã lượt render hiện tại để hủy nếu có thay đổi mới.
+   * @param {Object} core - Tham chiếu ConfGuideSearchCore.
+   * @returns {Promise<Array<Object>|null>} Danh sách hội nghị khớp hoặc null nếu lượt bị hủy.
+   */
+  async function filterConferencesForPipeline(
+    effectiveState,
+    queryTokens,
+    scoreMap,
+    isDateValid,
+    currentToken,
+    core
+  ) {
+    if (!isDateValid) return [];
+    if (baseSearchConferences.length <= 500) {
+      return baseSearchConferences.filter(conf =>
+        matchesPipelineConference(conf, effectiveState, queryTokens, scoreMap, core)
+      );
+    }
+
+    const filtered = [];
+    const BATCH_SIZE = 200;
+    for (let i = 0; i < baseSearchConferences.length; i += BATCH_SIZE) {
+      if (currentToken !== renderToken) return null;
+      const chunk = baseSearchConferences.slice(i, i + BATCH_SIZE);
+      chunk.forEach(conf => {
+        if (matchesPipelineConference(conf, effectiveState, queryTokens, scoreMap, core)) {
+          filtered.push(conf);
+        }
+      });
+      if (i + BATCH_SIZE < baseSearchConferences.length) {
+        await core.yieldToMain();
+      }
+    }
+    return currentToken === renderToken ? filtered : null;
+  }
+
+  /**
+   * Sắp xếp kết quả lọc theo tiêu chí đã chọn, kết hợp điểm liên quan khi có từ khóa.
+   * @param {Array<Object>} list - Danh sách hội nghị sau khi lọc.
+   * @param {Object} effectiveState - Trạng thái lọc hiện tại.
+   * @param {Array<string>} queryTokens - Token từ khóa.
+   * @param {Map<string, number>} scoreMap - Bảng điểm tìm kiếm theo ID.
+   */
+  function sortConferencesForPipeline(list, effectiveState, queryTokens, scoreMap) {
+    const comparator = SORT_COMPARATORS[effectiveState.sort] || SORT_COMPARATORS.deadline;
+    const prioritizeScoreFirst = queryTokens.length > 0
+      && (effectiveState.sort === 'relevance' || effectiveState.sort === 'deadline');
+
+    list.sort((a, b) => {
+      if (prioritizeScoreFirst) {
+        const scoreDiff = (scoreMap.get(b.id) || 0) - (scoreMap.get(a.id) || 0);
+        if (scoreDiff !== 0) return scoreDiff;
+      }
+      const primaryCmp = comparator(a, b);
+      if (primaryCmp !== 0) return primaryCmp;
+      if (queryTokens.length > 0 && !prioritizeScoreFirst) {
+        return (scoreMap.get(b.id) || 0) - (scoreMap.get(a.id) || 0);
+      }
+      return 0;
+    });
+  }
+
+  /**
    * Luồng xử lý một chiều tập trung:
    * lọc -> tính facet pre-counts -> render danh sách -> render chips -> cập nhật status -> sync URL.
    * Hỗ trợ nhường luồng yieldToMain khi chỉ mục > 500 bản ghi (lọc theo lô 200).
@@ -1175,68 +1197,19 @@
     const queryTokens = core.tokenizeQuery(effectiveState.q);
     const scoreMap = new Map();
 
-    // 1. Lọc và tính điểm hội nghị (chia lô 200 nếu > 500 bản ghi nhằm duy trì INP <= 200ms)
-    if (baseSearchConferences.length > 500) {
-      const filtered = [];
-      const BATCH_SIZE = 200;
-      for (let i = 0; i < baseSearchConferences.length; i += BATCH_SIZE) {
-        if (currentToken !== renderToken) return;
-        const chunk = baseSearchConferences.slice(i, i + BATCH_SIZE);
-        for (let j = 0; j < chunk.length; j++) {
-          const conf = chunk[j];
-          if (!isDateValid) continue;
-          if (queryTokens.length > 0) {
-            const matchRes = core.scoreConference(conf, queryTokens, effectiveState.q);
-            if (!matchRes.matched) continue;
-            scoreMap.set(conf.id, matchRes.score);
-          }
-          if (core.matchesFilters(conf, effectiveState, ENABLED_FILTER_GROUPS)) {
-            filtered.push(conf);
-          }
-        }
-        if (i + BATCH_SIZE < baseSearchConferences.length) {
-          await core.yieldToMain();
-        }
-      }
-      if (currentToken !== renderToken) return;
-      filteredConferences = filtered;
-    } else {
-      filteredConferences = baseSearchConferences.filter(conf => {
-        if (!isDateValid) return false;
+    const filtered = await filterConferencesForPipeline(
+      effectiveState,
+      queryTokens,
+      scoreMap,
+      isDateValid,
+      currentToken,
+      core
+    );
+    if (!filtered || currentToken !== renderToken) return;
 
-        if (queryTokens.length > 0) {
-          const matchRes = core.scoreConference(conf, queryTokens, effectiveState.q);
-          if (!matchRes.matched) return false;
-          scoreMap.set(conf.id, matchRes.score);
-        }
+    filteredConferences = filtered;
+    sortConferencesForPipeline(filteredConferences, effectiveState, queryTokens, scoreMap);
 
-        return core.matchesFilters(conf, effectiveState, ENABLED_FILTER_GROUPS);
-      });
-    }
-
-    if (currentToken !== renderToken) return;
-
-    // 2. Sắp xếp kết quả theo tiêu chí đã chọn (ưu tiên điểm từ khóa ở chế độ relevance/mặc định)
-    const comparator = SORT_COMPARATORS[effectiveState.sort] || SORT_COMPARATORS.deadline;
-    const prioritizeScoreFirst = queryTokens.length > 0 && (effectiveState.sort === 'relevance' || effectiveState.sort === 'deadline');
-
-    filteredConferences.sort((a, b) => {
-      if (prioritizeScoreFirst) {
-        const sA = scoreMap.get(a.id) || 0;
-        const sB = scoreMap.get(b.id) || 0;
-        if (sB !== sA) return sB - sA;
-      }
-      const primaryCmp = comparator(a, b);
-      if (primaryCmp !== 0) return primaryCmp;
-      if (queryTokens.length > 0 && !prioritizeScoreFirst) {
-        const sA = scoreMap.get(a.id) || 0;
-        const sB = scoreMap.get(b.id) || 0;
-        if (sB !== sA) return sB - sA;
-      }
-      return 0;
-    });
-
-    // 3. Tính số đếm Facet kết quả trước cho từng lựa chọn
     const facetCounts = core.computeFacetCounts(
       baseSearchConferences,
       effectiveState,
@@ -1245,21 +1218,17 @@
       effectiveState.q
     );
 
-    // 4. Đồng bộ điều khiển và cập nhật giao diện thanh bên (Sidebar)
     syncSidebarInputsFromState(effectiveState);
     updateSidebarUI(effectiveState, facetCounts);
 
-    // 5. Nếu đang mở ngăn kéo di động thì chỉ cập nhật số đếm trên nút "Áp dụng", không vẽ lại danh sách
+    // Khi đang mở drawer trên di động thì chỉ cập nhật bộ đếm nháp, chưa vẽ lại danh sách nền
     if (isFilterDrawerOpen) {
       updateDraftButtonCount();
       return;
     }
 
-    // 6. Cập nhật thanh chip bộ lọc đang áp dụng
-    const activeChips = getActiveFilterChips(effectiveState);
-    renderFilterChipsUI(activeChips);
+    renderFilterChipsUI(getActiveFilterChips(effectiveState));
 
-    // 7. Cập nhật thông số tóm tắt số lượng
     const totalCount = baseSearchConferences.length;
     const matchCount = filteredConferences.length;
     const summaryTextEl = document.getElementById('resultsSummaryText');
@@ -1268,30 +1237,24 @@
     if (resultCountEl) resultCountEl.textContent = String(matchCount);
     if (totalCountEl) totalCountEl.textContent = String(totalCount);
     if (summaryTextEl) {
-      summaryTextEl.innerHTML = `Hiển thị <strong id="resultCount">${matchCount}</strong> / <span id="totalCount">${totalCount}</span> hội nghị`;
+      summaryTextEl.innerHTML =
+        `Hiển thị <strong id="resultCount">${matchCount}</strong>`
+        + ` / <span id="totalCount">${totalCount}</span> hội nghị`;
     }
 
-    // 8. Render danh sách thẻ hoặc trạng thái rỗng
     await renderConferenceListUI(filteredConferences, currentToken);
-
-    // 9. Thông báo bộ đọc màn hình (Screen Reader) với debounce 500ms
     announceStatusDebounced(matchCount);
-
-    // 10. Đồng bộ URL tham số
     syncUrlDebounced();
   }
 
   /* ================= 10. KẾT XUẤT GIAO DIỆN THANH BÊN (SIDEBAR) ================= */
 
   /**
-   * Cập nhật số đếm trước, trạng thái vô hiệu hóa và nhãn cho toàn bộ thanh bên.
-   * @param {Object} state
-   * @param {Object} facetCounts
+   * Cập nhật số đếm kết quả trước (facet count) và trạng thái vô hiệu hóa cho từng lựa chọn lọc.
+   * @param {Object<string, number>} facetCounts - Bản đồ số đếm theo khóa facet.
+   * @param {number} total - Tổng số hội nghị trong chỉ mục hiện hành.
    */
-  function updateSidebarUI(state, facetCounts) {
-    const total = baseSearchConferences.length;
-
-    // Cập nhật số đếm bên cạnh từng lựa chọn (bao gồm nút Rank và checkbox)
+  function updateSidebarOptionRows(facetCounts, total) {
     document.querySelectorAll('.js-option-row').forEach(row => {
       const key = row.getAttribute('data-option-key') || '';
       const inputEl = row.querySelector('.js-filter-input');
@@ -1312,71 +1275,65 @@
       const shouldDisable = countVal === 0 && !isChecked;
       row.classList.toggle('is-empty', shouldDisable);
       row.classList.toggle('is-disabled', shouldDisable);
-      if (inputEl) {
-        inputEl.disabled = shouldDisable;
-      } else if (row instanceof HTMLButtonElement) {
-        row.disabled = shouldDisable;
-      }
+      if (inputEl) inputEl.disabled = shouldDisable;
+      else if (row instanceof HTMLButtonElement) row.disabled = shouldDisable;
     });
+  }
 
-    // Cập nhật nhãn số lựa chọn đang bật bằng CHỮ trên tiêu đề nhóm
-    const groupCounts = getGroupActiveCounts(state);
+  /**
+   * Cập nhật nhãn số lượng lựa chọn đang bật theo từng nhóm và nút Xóa nhóm / Đặt lại.
+   * @param {Object} state - Trạng thái bộ lọc.
+   * @param {Object} groupCounts - Kết quả từ `getGroupActiveCounts(state)`.
+   */
+  function updateSidebarGroupCounters(state, groupCounts) {
     document.querySelectorAll('.js-group-selected-count').forEach(badge => {
-      const groupKey = badge.getAttribute('data-group-count') || '';
-      const count = groupCounts[groupKey] || 0;
-      if (count > 0) {
-        badge.textContent = `(${count})`;
-        badge.removeAttribute('hidden');
-      } else {
-        badge.textContent = '';
-        badge.setAttribute('hidden', '');
-      }
+      const count = groupCounts[badge.getAttribute('data-group-count') || ''] || 0;
+      badge.textContent = count > 0 ? `(${count})` : '';
+      if (count > 0) badge.removeAttribute('hidden');
+      else badge.setAttribute('hidden', '');
     });
 
-    // Cập nhật nút "Xóa nhóm"
     document.querySelectorAll('.js-clear-group').forEach(btn => {
-      const groupKey = btn.getAttribute('data-clear-group') || '';
-      const count = groupCounts[groupKey] || 0;
-      if (count > 0) {
-        btn.removeAttribute('hidden');
-      } else {
-        btn.setAttribute('hidden', '');
-      }
+      const count = groupCounts[btn.getAttribute('data-clear-group') || ''] || 0;
+      if (count > 0) btn.removeAttribute('hidden');
+      else btn.setAttribute('hidden', '');
     });
 
-    // Cập nhật huy hiệu tổng số bộ lọc trên tiêu đề thanh bên
     document.querySelectorAll('.js-panel-filter-count').forEach(badge => {
       badge.textContent = String(groupCounts.total);
       if (groupCounts.total > 0) badge.removeAttribute('hidden');
       else badge.setAttribute('hidden', '');
     });
 
-    // Cập nhật trạng thái nút "Đặt lại" trên thanh bên
     const hasAnyActive = groupCounts.total > 0 || Boolean(state.q);
     document.querySelectorAll('.js-filter-reset').forEach(btn => {
       btn.disabled = !hasAnyActive;
       btn.classList.toggle('is-active', hasAnyActive);
     });
+  }
 
-    // Cập nhật chip chọn nhanh ngày nộp bài
+  /**
+   * Cập nhật số đếm trước, trạng thái vô hiệu hóa và nhãn cho toàn bộ thanh bên.
+   * @param {Object} state - Trạng thái bộ lọc hiện tại.
+   * @param {Object} facetCounts - Bản đồ số đếm kết quả trước theo khóa facet.
+   */
+  function updateSidebarUI(state, facetCounts) {
+    updateSidebarOptionRows(facetCounts, baseSearchConferences.length);
+
+    const groupCounts = getGroupActiveCounts(state);
+    updateSidebarGroupCounters(state, groupCounts);
+
     document.querySelectorAll('.js-date-preset').forEach(chip => {
-      const presetKey = chip.getAttribute('data-preset') || '';
-      const range = getDatePresetRange(presetKey);
-      const isPresetActive = Boolean(
-        range && state.dateFrom === range.from && state.dateTo === range.to
-      );
+      const range = getDatePresetRange(chip.getAttribute('data-preset') || '');
+      const isPresetActive = Boolean(range && state.dateFrom === range.from && state.dateTo === range.to);
       chip.classList.toggle('is-active', isPresetActive);
       chip.setAttribute('aria-pressed', isPresetActive ? 'true' : 'false');
     });
 
-    // Cập nhật trạng thái thu gọn/mở rộng chủ đề
     syncTopicOverflowToggle();
 
-    // Cập nhật nhãn nút mở bộ lọc di động
     const mobileFilterLabel = document.getElementById('mobileFilterBtnLabel');
-    if (mobileFilterLabel) {
-      mobileFilterLabel.textContent = `Bộ lọc (${groupCounts.total})`;
-    }
+    if (mobileFilterLabel) mobileFilterLabel.textContent = `Bộ lọc (${groupCounts.total})`;
   }
 
   /**
@@ -1713,28 +1670,63 @@
    * @param {string} rawQuery
    * @returns {string}
    */
-  function renderCardMarkup(conf, savedIds, rawQuery) {
-    const core = getCore();
-    const confId = conf.id;
-    const isSaved = savedIds.includes(confId);
+  /**
+   * Trích xuất thông tin tiêu đề, ngày và nhãn đếm ngược hạn nộp bài cho thẻ kết quả tìm kiếm.
+   * @param {Object} conf - Đối tượng hội nghị chuẩn hóa.
+   * @returns {{ deadlineHeader: string, deadlineDateHtml: string, countdownText: string, countdownClass: string }}
+   */
+  function resolveCardDeadlineSummary(conf) {
+    if ((conf.cfpStatus === 'open' || conf.cfpStatus === 'closingSoon') && conf.nextDeadline) {
+      const formattedNext = formatIsoToDdMmYyyy(conf.nextDeadline.date);
+      return {
+        deadlineHeader: conf.nextDeadline.name || 'Hạn nộp tiếp theo',
+        deadlineDateHtml:
+          `Hạn: <time datetime="${escapeHtml(conf.nextDeadline.date)}">${escapeHtml(formattedNext)}</time>`,
+        countdownText: `Còn ${conf.nextDeadline.daysLeft} ngày`,
+        countdownClass: conf.cfpStatus === 'closingSoon' ? 'deadline-countdown urgent' : 'deadline-countdown'
+      };
+    }
 
-    const cfpModifierMap = {
-      open: 'open',
-      closingSoon: 'closing-soon',
-      closed: 'closed',
-      unknown: 'unknown'
+    if (conf.cfpStatus === 'closed' && conf.lastDeadline) {
+      const formattedLast = formatIsoToDdMmYyyy(conf.lastDeadline.date);
+      const passedDays = Math.abs(conf.lastDeadline.daysLeft || 0);
+      return {
+        deadlineHeader: conf.lastDeadline.name || 'Hạn nộp cuối',
+        deadlineDateHtml:
+          `Đã đóng ngày <time datetime="${escapeHtml(conf.lastDeadline.date)}">${escapeHtml(formattedLast)}</time>`,
+        countdownText: passedDays > 0 ? `Đã qua ${passedDays} ngày` : 'Đã qua hạn nộp bài',
+        countdownClass: 'deadline-countdown closed'
+      };
+    }
+
+    return {
+      deadlineHeader: 'Hạn nộp bài',
+      deadlineDateHtml: '<span>Chưa công bố hạn nộp</span>',
+      countdownText: 'Chưa công bố hạn nộp',
+      countdownClass: 'deadline-countdown closed'
     };
-    const cfpMod = cfpModifierMap[conf.cfpStatus] || 'unknown';
+  }
 
-    // Tạo avatar hội nghị thuần HTML/CSS đồng bộ theo phong cách trang chủ (không tải ảnh mạng)
+  /**
+   * Tạo chuỗi HTML phần đầu thẻ hội nghị (avatar, tên, nhãn Rank / CFP / giai đoạn).
+   * @param {Object} conf - Đối tượng hội nghị chuẩn hóa.
+   * @param {Object} core - Tham chiếu window.ConfGuideSearchCore.
+   * @param {string} rawQuery - Từ khóa tìm kiếm thô để tô sáng.
+   * @returns {string} Chuỗi HTML `.conference-card__head`.
+   */
+  function buildCardHeadHtml(conf, core, rawQuery) {
+    const fallbackBadge =
+      `<div class="conf-badge-logo conference-card__avatar" aria-hidden="true">`
+      + `${escapeHtml((conf.name || 'CG').slice(0, 4).toUpperCase())}</div>`;
     const avatarHtml = window.ConfGuideUtils && typeof window.ConfGuideUtils.renderConferenceAvatar === 'function'
       ? window.ConfGuideUtils.renderConferenceAvatar(conf, 'conference-card__avatar')
-      : `<div class="conf-badge-logo conference-card__avatar" aria-hidden="true">${escapeHtml((conf.name || 'CG').slice(0, 4).toUpperCase())}</div>`;
+      : fallbackBadge;
 
     const rankSlugMap = { 'A*': 'astar', A: 'a', B: 'b', C: 'c' };
     const rankMod = conf.rank ? rankSlugMap[conf.rank] : '';
+    const rankBadgeCls = `conference-card__badge conference-card__badge--rank conference-card__badge--rank-${rankMod}`;
     const rankBadgeHtml = conf.rank && rankMod
-      ? `<span class="conference-card__badge conference-card__badge--rank conference-card__badge--rank-${rankMod}">Rank ${escapeHtml(conf.rank)}</span>`
+      ? `<span class="${rankBadgeCls}">Rank ${escapeHtml(conf.rank)}</span>`
       : '';
 
     const cfpBadgeHtml = renderCfpBadgeHtml(conf);
@@ -1745,27 +1737,43 @@
       phaseBadgeHtml = '<span class="conference-card__badge conference-card__badge--ended">Đã kết thúc</span>';
     }
 
-    let deadlineHeader = 'Hạn nộp bài';
-    let deadlineDateHtml = '<span>Chưa công bố hạn nộp</span>';
-    let countdownText = 'Chưa công bố hạn nộp';
-    let countdownClass = 'deadline-countdown closed';
+    const fullTitleText = conf.fullName || conf.name || 'Chưa cập nhật';
+    return `
+      <div class="conference-card__head">
+        ${avatarHtml}
+        <div class="conference-card__title-block">
+          <div class="card-title-row">
+            <h3>
+              <a href="detail.html?id=${encodeURIComponent(conf.id)}">${core.highlightMatches(conf.name, rawQuery)}</a>
+            </h3>
+            <div class="conference-card__badges">
+              ${rankBadgeHtml}
+              ${cfpBadgeHtml}
+              ${phaseBadgeHtml}
+            </div>
+          </div>
+          <div class="card-full-name" title="${escapeHtml(fullTitleText)}">
+            ${core.highlightMatches(fullTitleText, rawQuery)}
+          </div>
+        </div>
+      </div>
+    `;
+  }
 
-    if ((conf.cfpStatus === 'open' || conf.cfpStatus === 'closingSoon') && conf.nextDeadline) {
-      deadlineHeader = conf.nextDeadline.name || 'Hạn nộp tiếp theo';
-      const formattedNext = formatIsoToDdMmYyyy(conf.nextDeadline.date);
-      deadlineDateHtml = `Hạn: <time datetime="${escapeHtml(conf.nextDeadline.date)}">${escapeHtml(formattedNext)}</time>`;
-      countdownText = `Còn ${conf.nextDeadline.daysLeft} ngày`;
-      countdownClass = conf.cfpStatus === 'closingSoon'
-        ? 'deadline-countdown urgent'
-        : 'deadline-countdown';
-    } else if (conf.cfpStatus === 'closed' && conf.lastDeadline) {
-      deadlineHeader = conf.lastDeadline.name || 'Hạn nộp cuối';
-      const formattedLast = formatIsoToDdMmYyyy(conf.lastDeadline.date);
-      deadlineDateHtml = `Đã đóng ngày <time datetime="${escapeHtml(conf.lastDeadline.date)}">${escapeHtml(formattedLast)}</time>`;
-      const passedDays = Math.abs(conf.lastDeadline.daysLeft || 0);
-      countdownText = passedDays > 0 ? `Đã qua ${passedDays} ngày` : 'Đã qua hạn nộp bài';
-      countdownClass = 'deadline-countdown closed';
-    }
+  /**
+   * Tạo chuỗi HTML thẻ hội nghị hoàn chỉnh.
+   * @param {Object} conf - Đối tượng hội nghị chuẩn hóa.
+   * @param {Array<string>} savedIds - Danh sách ID hội nghị đã lưu.
+   * @param {string} rawQuery - Từ khóa tìm kiếm thô để tô sáng khớp từ khóa.
+   * @returns {string} Chuỗi HTML `<article class="conference-card ...">`.
+   */
+  function renderCardMarkup(conf, savedIds, rawQuery) {
+    const core = getCore();
+    const confId = conf.id;
+    const isSaved = savedIds.includes(confId);
+    const cfpModifierMap = { open: 'open', closingSoon: 'closing-soon', closed: 'closed', unknown: 'unknown' };
+    const cfpMod = cfpModifierMap[conf.cfpStatus] || 'unknown';
+    const deadlineMeta = resolveCardDeadlineSummary(conf);
 
     const topicsHtml = Array.isArray(conf.topics) && conf.topics.length > 0
       ? conf.topics.map(tKey => {
@@ -1777,9 +1785,7 @@
     const locationText = conf.location && String(conf.location).trim() !== ''
       ? String(conf.location).trim()
       : 'Chưa rõ';
-    const fullTitleText = conf.fullName || conf.name || 'Chưa cập nhật';
     const eventDateText = formatEventDateRange(conf.startDate, conf.endDate);
-
     const compareBtnHtml = window.ConfGuideCompare && typeof window.ConfGuideCompare.renderToggleButton === 'function'
       ? window.ConfGuideCompare.renderToggleButton(conf)
       : '';
@@ -1787,33 +1793,20 @@
     return `
       <article class="conference-card search-conf-card conference-card--cfp-${cfpMod}" data-id="${escapeHtml(confId)}">
         <div class="card-main-col">
-          <div class="conference-card__head">
-            ${avatarHtml}
-            <div class="conference-card__title-block">
-              <div class="card-title-row">
-                <h3>
-                  <a href="detail.html?id=${encodeURIComponent(confId)}">${core.highlightMatches(conf.name, rawQuery)}</a>
-                </h3>
-                <div class="conference-card__badges">
-                  ${rankBadgeHtml}
-                  ${cfpBadgeHtml}
-                  ${phaseBadgeHtml}
-                </div>
-              </div>
-              <div class="card-full-name" title="${escapeHtml(fullTitleText)}">${core.highlightMatches(fullTitleText, rawQuery)}</div>
-            </div>
-          </div>
+          ${buildCardHeadHtml(conf, core, rawQuery)}
 
           <div class="card-meta-row">
             <span class="card-meta-item">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2" aria-hidden="true">
                 <path d="M12 2a8 8 0 0 0-8 8c0 5.25 8 12 8 12s8-6.75 8-12a8 8 0 0 0-8-8z"></path>
                 <circle cx="12" cy="10" r="3"></circle>
               </svg>
               <span>${core.highlightMatches(locationText, rawQuery)}</span>
             </span>
             <span class="card-meta-item">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2" aria-hidden="true">
                 <rect x="3" y="4" width="18" height="18" rx="2"></rect>
                 <path d="M16 2v4M8 2v4M3 10h18"></path>
               </svg>
@@ -1821,24 +1814,27 @@
             </span>
           </div>
 
-          <div class="card-tags">
-            ${topicsHtml}
-          </div>
+          <div class="card-tags">${topicsHtml}</div>
         </div>
 
         <div class="card-action-col">
           <div class="deadline-indicator">
-            <span class="deadline-label" title="${escapeHtml(deadlineHeader)}">${escapeHtml(deadlineHeader)}</span>
-            <span class="deadline-val">${deadlineDateHtml}</span>
-            <span class="${countdownClass}">${escapeHtml(countdownText)}</span>
+            <span class="deadline-label" title="${escapeHtml(deadlineMeta.deadlineHeader)}">
+              ${escapeHtml(deadlineMeta.deadlineHeader)}
+            </span>
+            <span class="deadline-val">${deadlineMeta.deadlineDateHtml}</span>
+            <span class="${deadlineMeta.countdownClass}">${escapeHtml(deadlineMeta.countdownText)}</span>
           </div>
 
           <div class="card-buttons-group">
             <a href="detail.html?id=${encodeURIComponent(confId)}" class="btn-card-detail">
               Xem chi tiết &rarr;
             </a>
-            <button type="button" class="btn-card-save js-card-save ${isSaved ? 'saved' : ''}" data-save-id="${escapeHtml(confId)}" aria-pressed="${isSaved ? 'true' : 'false'}">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="${isSaved ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <button type="button" class="btn-card-save js-card-save ${isSaved ? 'saved' : ''}"
+              data-save-id="${escapeHtml(confId)}" aria-pressed="${isSaved ? 'true' : 'false'}">
+              <svg width="14" height="14" viewBox="0 0 24 24"
+                fill="${isSaved ? 'currentColor' : 'none'}" stroke="currentColor"
+                stroke-width="2" aria-hidden="true">
                 <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
               </svg>
               <span>${isSaved ? 'Đã lưu' : 'Lưu lại'}</span>
@@ -1851,15 +1847,42 @@
   }
 
   /**
-   * Kết xuất danh sách thẻ hội nghị hoặc trạng thái rỗng không ngõ cụt.
-   * @param {Array<Object>} conferences
-   * @param {number} currentToken
+   * Kết xuất các thẻ hội nghị vào DocumentFragment theo lô (chống giật khi danh sách > 60 thẻ).
+   * @param {Array<Object>} pageItems - Các hội nghị trong trang hiện tại.
+   * @param {Array<string>} savedIds - ID các hội nghị đã lưu.
+   * @param {number} currentToken - Mã lượt render hiện hành.
+   * @returns {Promise<DocumentFragment|null>} Fragment chứa các thẻ hoặc null nếu lượt bị hủy.
    */
+  async function buildConferenceCardsFragment(pageItems, savedIds, currentToken) {
+    const fragment = document.createDocumentFragment();
+    const batchTemplate = document.createElement('template');
+    const BATCH_RENDER = 60;
+
+    if (pageItems.length <= BATCH_RENDER) {
+      if (currentToken !== renderToken) return null;
+      batchTemplate.innerHTML = pageItems.map(conf => renderCardMarkup(conf, savedIds, filterState.q).trim()).join('');
+      fragment.appendChild(batchTemplate.content);
+      return fragment;
+    }
+
+    for (let i = 0; i < pageItems.length; i += BATCH_RENDER) {
+      if (currentToken !== renderToken) return null;
+      const batch = pageItems.slice(i, i + BATCH_RENDER);
+      batchTemplate.innerHTML = batch.map(conf => renderCardMarkup(conf, savedIds, filterState.q).trim()).join('');
+      fragment.appendChild(batchTemplate.content);
+      if (i + BATCH_RENDER < pageItems.length) {
+        await getCore().yieldToMain();
+      }
+    }
+    return fragment;
+  }
+
   /**
    * Kết xuất danh sách thẻ hội nghị hoặc trạng thái rỗng không ngõ cụt.
    * Hỗ trợ nhường luồng yieldToMain khi số lượng thẻ > 60 (vẽ theo lô 60).
-   * @param {Array<Object>} conferences
-   * @param {number} currentToken
+   * @param {Array<Object>} conferences - Danh sách hội nghị đã lọc và sắp xếp.
+   * @param {number} currentToken - Mã lượt render hiện hành.
+   * @returns {Promise<void>}
    */
   async function renderConferenceListUI(conferences, currentToken) {
     const container = document.getElementById('conferenceList');
@@ -1880,57 +1903,25 @@
     container.removeAttribute('hidden');
     container.setAttribute('aria-busy', 'false');
 
-    // Phân trang
     const pageCount = Math.ceil(conferences.length / PAGE_SIZE);
     filterState.page = Math.min(Math.max(1, filterState.page), pageCount);
     const startIdx = (filterState.page - 1) * PAGE_SIZE;
     const pageItems = conferences.slice(startIdx, startIdx + PAGE_SIZE);
 
-    // Tối ưu INP: Bỏ qua dựng lại DOM nếu danh sách ID hiển thị không đổi
+    // Tối ưu INP: bỏ qua dựng lại DOM nếu danh sách ID hiển thị không đổi
     const currentIds = pageItems.map(c => c.id).join(',');
     if (currentIds !== lastRenderedConferenceIds) {
       lastRenderedConferenceIds = currentIds;
-      const savedIds = getSavedList();
-      const fragment = document.createDocumentFragment();
-
-      if (pageItems.length > 60) {
-        const BATCH_RENDER = 60;
-        for (let i = 0; i < pageItems.length; i += BATCH_RENDER) {
-          if (currentToken !== renderToken) return;
-          const batch = pageItems.slice(i, i + BATCH_RENDER);
-          batch.forEach(conf => {
-            const temp = document.createElement('div');
-            temp.innerHTML = renderCardMarkup(conf, savedIds, filterState.q).trim();
-            if (temp.firstElementChild) {
-              fragment.appendChild(temp.firstElementChild);
-            }
-          });
-          if (i + BATCH_RENDER < pageItems.length) {
-            await getCore().yieldToMain();
-          }
-        }
-      } else {
-        pageItems.forEach(conf => {
-          if (currentToken !== renderToken) return;
-          const temp = document.createElement('div');
-          temp.innerHTML = renderCardMarkup(conf, savedIds, filterState.q).trim();
-          if (temp.firstElementChild) {
-            fragment.appendChild(temp.firstElementChild);
-          }
-        });
-      }
-
-      if (currentToken === renderToken) {
+      const fragment = await buildConferenceCardsFragment(pageItems, getSavedList(), currentToken);
+      if (fragment && currentToken === renderToken) {
         container.replaceChildren(fragment);
       }
     }
 
-    // Đồng bộ nút so sánh
     if (window.ConfGuideCompare && typeof window.ConfGuideCompare.syncAllUi === 'function') {
       window.ConfGuideCompare.syncAllUi();
     }
 
-    // Render thanh phân trang
     if (pagination) {
       if (pageCount <= 1) {
         pagination.setAttribute('hidden', '');
@@ -2059,26 +2050,15 @@
   /* ================= 13. COMBOBOX TÌM KIẾM THEO CHUẨN W3C APG ================= */
 
   /**
-   * Cập nhật danh sách gợi ý của combobox khi người dùng gõ từ khóa.
-   * @param {string} rawInput
+   * Thu thập tối đa 8 gợi ý (chủ đề + hội nghị) khớp với chuỗi nhập trong combobox.
+   * @param {string} trimmed - Từ khóa người dùng đã trim.
+   * @param {Object} core - Tham chiếu window.ConfGuideSearchCore.
+   * @returns {Array<Object>} Danh sách gợi ý để hiển thị trong danh sách thả xuống.
    */
-  function updateComboboxSuggestions(rawInput) {
-    const listEl = document.getElementById('searchComboboxList');
-    const inputEl = document.getElementById('searchInput');
-    const statusEl = document.querySelector('.js-combobox-status');
-    if (!listEl || !inputEl) return;
-
-    const trimmed = (rawInput || '').trim();
-    if (trimmed.length < 2) {
-      closeCombobox();
-      return;
-    }
-
-    const core = getCore();
+  function collectComboboxSuggestions(trimmed, core) {
     const normQ = core.normalizeText(trimmed);
     const qTokens = core.tokenizeQuery(trimmed);
 
-    // Gợi ý hội nghị phù hợp
     const confMatches = [];
     indexedConferences.forEach(conf => {
       const res = core.scoreConference(conf, qTokens, trimmed);
@@ -2093,27 +2073,31 @@
     });
     confMatches.sort((a, b) => b.score - a.score);
 
-    // Gợi ý chủ đề phù hợp
-    const topicMatches = [];
-    TOPIC_RULES.forEach(rule => {
-      const normLabel = core.normalizeText(rule.label);
-      if (normLabel.includes(normQ) || rule.key.includes(normQ)) {
-        topicMatches.push({
-          type: 'topic',
-          key: rule.key,
-          label: rule.label
-        });
-      }
-    });
+    const topicMatches = TOPIC_RULES
+      .filter(rule => core.normalizeText(rule.label).includes(normQ) || rule.key.includes(normQ))
+      .map(rule => ({ type: 'topic', key: rule.key, label: rule.label }));
 
-    comboboxSuggestions = [];
-    topicMatches.forEach(t => {
-      if (comboboxSuggestions.length < 8) comboboxSuggestions.push(t);
-    });
-    confMatches.forEach(c => {
-      if (comboboxSuggestions.length < 8) comboboxSuggestions.push(c);
-    });
+    return [...topicMatches, ...confMatches].slice(0, 8);
+  }
 
+  /**
+   * Cập nhật danh sách gợi ý của combobox khi người dùng gõ từ khóa.
+   * @param {string} rawInput - Chuỗi văn bản thô trong ô tìm kiếm.
+   */
+  function updateComboboxSuggestions(rawInput) {
+    const listEl = document.getElementById('searchComboboxList');
+    const inputEl = document.getElementById('searchInput');
+    const statusEl = document.querySelector('.js-combobox-status');
+    if (!listEl || !inputEl) return;
+
+    const trimmed = (rawInput || '').trim();
+    if (trimmed.length < 2) {
+      closeCombobox();
+      return;
+    }
+
+    const core = getCore();
+    comboboxSuggestions = collectComboboxSuggestions(trimmed, core);
     if (comboboxSuggestions.length === 0) {
       closeCombobox();
       return;
@@ -2132,26 +2116,17 @@
       li.setAttribute('aria-selected', 'false');
       li.dataset.index = String(idx);
 
-      if (item.type === 'conference') {
-        li.innerHTML = `
-          <span class="search-combobox__name">${core.highlightMatches(item.name, trimmed)}</span>
-          <span class="search-combobox__sub">${escapeHtml(item.fullName)}</span>
-        `;
-      } else {
-        li.innerHTML = `
-          <span class="search-combobox__tag">Chủ đề:</span>
-          <span class="search-combobox__name">${core.highlightMatches(item.label, trimmed)}</span>
-        `;
-      }
+      li.innerHTML = item.type === 'conference'
+        ? `<span class="search-combobox__name">${core.highlightMatches(item.name, trimmed)}</span>`
+          + `<span class="search-combobox__sub">${escapeHtml(item.fullName)}</span>`
+        : `<span class="search-combobox__tag">Chủ đề:</span>`
+          + `<span class="search-combobox__name">${core.highlightMatches(item.label, trimmed)}</span>`;
       fragment.appendChild(li);
     });
 
     listEl.replaceChildren(fragment);
     listEl.removeAttribute('hidden');
-
-    if (statusEl) {
-      statusEl.textContent = `Có ${comboboxSuggestions.length} gợi ý`;
-    }
+    if (statusEl) statusEl.textContent = `Có ${comboboxSuggestions.length} gợi ý`;
   }
 
   /**
@@ -2366,25 +2341,66 @@
   /* ================= 15. GẮN SỰ KIỆN TĨNH & EVENT DELEGATION ================= */
 
   /**
-   * Khởi tạo toàn bộ sự kiện của trang bằng kỹ thuật Event Delegation trên các phần tử tĩnh.
+   * Đồng bộ số đếm trước và nút Áp dụng nháp khi ngăn kéo bộ lọc di động đang mở.
+   * @param {Object} targetState - Trạng thái bộ lọc đang thao tác.
    */
-  function initStaticEvents() {
+  function refreshDrawerDraftUI(targetState) {
+    if (!isFilterDrawerOpen) return;
+    const core = getCore();
+    const qTokens = core.tokenizeQuery(targetState.q);
+    const counts = core.computeFacetCounts(
+      baseSearchConferences,
+      targetState,
+      ALL_FACET_KEYS,
+      qTokens,
+      targetState.q
+    );
+    updateSidebarUI(targetState, counts);
+    updateDraftButtonCount();
+  }
+
+  /**
+   * Điều phối các phím điều hướng ARIA Combobox trên `#searchInput`.
+   * @param {KeyboardEvent} event - Sự kiện bàn phím.
+   * @param {HTMLInputElement} searchInput - Ô nhập tìm kiếm.
+   */
+  function handleComboboxKeydown(event, searchInput) {
+    const isExpanded = searchInput.getAttribute('aria-expanded') === 'true';
+    const len = comboboxSuggestions.length;
+    if (event.key === 'ArrowDown') {
+      if (!isExpanded) updateComboboxSuggestions(searchInput.value);
+      else { event.preventDefault(); highlightComboboxItem((activeComboboxIndex + 1) % len); }
+    } else if (event.key === 'ArrowUp' && isExpanded) {
+      event.preventDefault();
+      highlightComboboxItem(activeComboboxIndex <= 0 ? len - 1 : activeComboboxIndex - 1);
+    } else if (event.key === 'Home' && isExpanded && activeComboboxIndex >= 0) {
+      event.preventDefault();
+      highlightComboboxItem(0);
+    } else if (event.key === 'End' && isExpanded && activeComboboxIndex >= 0) {
+      event.preventDefault();
+      highlightComboboxItem(len - 1);
+    } else if (event.key === 'Enter' && isExpanded && activeComboboxIndex >= 0) {
+      event.preventDefault();
+      selectComboboxItem(activeComboboxIndex);
+    } else if (event.key === 'Escape' && isExpanded) {
+      event.preventDefault();
+      closeCombobox();
+    }
+  }
+
+  /**
+   * Gắn sự kiện ô tìm kiếm, combobox gợi ý và chip từ khóa gợi ý nhanh.
+   */
+  function bindSearchComboboxEvents() {
     const searchForm = document.getElementById('searchForm');
     const searchInput = document.getElementById('searchInput');
     const comboboxList = document.getElementById('searchComboboxList');
-    const sidebar = document.getElementById('filtersSidebar');
-    const chipsWrapper = document.getElementById('filterChipsWrapper');
-    const confList = document.getElementById('conferenceList');
-    const emptyState = document.getElementById('emptyState');
-    const pagination = document.getElementById('pagination');
 
-    // 1. Ô tìm kiếm & Combobox
     if (searchForm) {
       searchForm.addEventListener('submit', event => {
         event.preventDefault();
         if (searchDebounceTimer) clearTimeout(searchDebounceTimer);
-        const qVal = searchInput ? searchInput.value.trim() : '';
-        filterState.q = qVal;
+        filterState.q = searchInput ? searchInput.value.trim() : '';
         filterState.page = 1;
         closeCombobox();
       });
@@ -2394,73 +2410,26 @@
       searchInput.addEventListener('input', () => {
         if (searchDebounceTimer) clearTimeout(searchDebounceTimer);
         searchDebounceTimer = setTimeout(() => {
-          const val = searchInput.value;
-          updateComboboxSuggestions(val);
-          filterState.q = val.trim();
+          updateComboboxSuggestions(searchInput.value);
+          filterState.q = searchInput.value.trim();
           filterState.page = 1;
         }, DEBOUNCE_SEARCH_MS);
       });
-
-      searchInput.addEventListener('keydown', event => {
-        const isExpanded = searchInput.getAttribute('aria-expanded') === 'true';
-
-        if (event.key === 'ArrowDown') {
-          if (!isExpanded) {
-            updateComboboxSuggestions(searchInput.value);
-          } else {
-            event.preventDefault();
-            const nextIdx = (activeComboboxIndex + 1) % comboboxSuggestions.length;
-            highlightComboboxItem(nextIdx);
-          }
-        } else if (event.key === 'ArrowUp') {
-          if (isExpanded) {
-            event.preventDefault();
-            const prevIdx = activeComboboxIndex <= 0 ? comboboxSuggestions.length - 1 : activeComboboxIndex - 1;
-            highlightComboboxItem(prevIdx);
-          }
-        } else if (event.key === 'Home') {
-          if (isExpanded && activeComboboxIndex >= 0) {
-            event.preventDefault();
-            highlightComboboxItem(0);
-          }
-        } else if (event.key === 'End') {
-          if (isExpanded && activeComboboxIndex >= 0) {
-            event.preventDefault();
-            highlightComboboxItem(comboboxSuggestions.length - 1);
-          }
-        } else if (event.key === 'Enter') {
-          if (isExpanded && activeComboboxIndex >= 0) {
-            event.preventDefault();
-            selectComboboxItem(activeComboboxIndex);
-          }
-        } else if (event.key === 'Escape') {
-          if (isExpanded) {
-            event.preventDefault();
-            closeCombobox();
-          }
-        }
-      });
+      searchInput.addEventListener('keydown', event => handleComboboxKeydown(event, searchInput));
     }
 
     if (comboboxList) {
       comboboxList.addEventListener('click', event => {
         const itemEl = event.target.closest('.js-combobox-item');
-        if (itemEl) {
-          const idx = Number.parseInt(itemEl.dataset.index, 10);
-          if (Number.isFinite(idx)) {
-            selectComboboxItem(idx);
-          }
-        }
+        const idx = itemEl ? Number.parseInt(itemEl.dataset.index, 10) : NaN;
+        if (Number.isFinite(idx)) selectComboboxItem(idx);
       });
     }
 
     document.addEventListener('click', event => {
-      if (searchForm && !searchForm.contains(event.target)) {
-        closeCombobox();
-      }
+      if (searchForm && !searchForm.contains(event.target)) closeCombobox();
     });
 
-    // 2. Chip từ khóa gợi ý nhanh trên Hero Gateway
     document.querySelectorAll('.js-search-keyword').forEach(btn => {
       btn.addEventListener('click', () => {
         const kw = (btn.getAttribute('data-keyword') || '').trim();
@@ -2470,208 +2439,111 @@
         filterState.page = 1;
       });
     });
+  }
 
-    // 3. Event Delegation trên Thanh bên Bộ lọc (Sidebar)
-    if (sidebar) {
-      /**
-       * Cập nhật số đếm trước và nút áp dụng nháp khi ngăn kéo di động đang mở.
-       * @param {Object} targetState Trạng thái lọc đang thao tác
-       */
-      const refreshDrawerDraftUI = targetState => {
-        if (!isFilterDrawerOpen) return;
-        const core = getCore();
-        const qTokens = core.tokenizeQuery(targetState.q);
-        const counts = core.computeFacetCounts(baseSearchConferences, targetState, ALL_FACET_KEYS, qTokens, targetState.q);
-        updateSidebarUI(targetState, counts);
-        updateDraftButtonCount();
-      };
+  /**
+   * Xử lý thay đổi điều khiển đầu vào (checkbox, select, date) bên trong thanh bên bộ lọc.
+   * @param {Event} event - Sự kiện change từ `#filtersSidebar`.
+   * @param {HTMLElement} sidebar - Phần tử `#filtersSidebar`.
+   */
+  function handleSidebarChangeEvent(event, sidebar) {
+    const target = event.target;
+    if (!(target instanceof HTMLElement)) return;
+    const targetState = isFilterDrawerOpen && draftFilterState ? draftFilterState : filterState;
 
-      sidebar.addEventListener('change', event => {
-        const target = event.target;
-        if (!(target instanceof HTMLElement)) return;
-
-        const targetState = (isFilterDrawerOpen && draftFilterState) ? draftFilterState : filterState;
-
-        // Thay đổi nhóm Hạn nộp bài (CFP)
-        if (target.classList.contains('js-filter-cfp') && target instanceof HTMLInputElement) {
-          if (target.value === 'all') {
-            targetState.cfp = 'all';
-          } else {
-            targetState.cfp = target.checked ? target.value : 'all';
-          }
-          targetState.page = 1;
-          syncSidebarInputsFromState(targetState);
-          refreshDrawerDraftUI(targetState);
-          return;
-        }
-
-        // Thay đổi Tháng diễn ra
-        if (target.classList.contains('js-filter-month') && target instanceof HTMLSelectElement) {
-          targetState.month = target.value;
-          targetState.page = 1;
-          refreshDrawerDraftUI(targetState);
-          return;
-        }
-
-        // Thay đổi Đang diễn ra
-        if (target.classList.contains('js-filter-ongoing') && target instanceof HTMLInputElement) {
-          targetState.ongoing = target.checked;
-          targetState.page = 1;
-          syncSidebarInputsFromState(targetState);
-          refreshDrawerDraftUI(targetState);
-          return;
-        }
-
-        // Thay đổi Từ ngày
-        if (target.classList.contains('js-date-from') && target instanceof HTMLInputElement) {
-          targetState.dateFrom = normalizeIsoDate(target.value) || '';
-          targetState.page = 1;
-          refreshDrawerDraftUI(targetState);
-          return;
-        }
-
-        // Thay đổi Đến ngày
-        if (target.classList.contains('js-date-to') && target instanceof HTMLInputElement) {
-          targetState.dateTo = normalizeIsoDate(target.value) || '';
-          targetState.page = 1;
-          refreshDrawerDraftUI(targetState);
-          return;
-        }
-
-        // Thay đổi Địa điểm (city)
-        if (target.classList.contains('js-filter-city') && target instanceof HTMLInputElement) {
-          if (target.value === 'all') {
-            targetState.city = 'all';
-          } else {
-            targetState.city = target.checked ? target.value : 'all';
-          }
-          targetState.page = 1;
-          syncSidebarInputsFromState(targetState);
-          refreshDrawerDraftUI(targetState);
-          return;
-        }
-
-        // Thay đổi Chủ đề (topics)
-        if (target.classList.contains('js-filter-topic') && target instanceof HTMLInputElement) {
-          const checked = [...sidebar.querySelectorAll('.js-filter-topic:checked')]
-            .map(cb => cb.value)
-            .filter(v => VALID_TOPIC_VALUES.has(v));
-          targetState.topics = checked;
-          targetState.page = 1;
-          syncSidebarInputsFromState(targetState);
-          refreshDrawerDraftUI(targetState);
-        }
-      });
-
-      sidebar.addEventListener('click', event => {
-        const target = event.target;
-        if (!(target instanceof HTMLElement)) return;
-
-        // Bật/tắt Accordion
-        const toggleBtn = target.closest('.js-filter-toggle');
-        if (toggleBtn) {
-          const accGroup = toggleBtn.closest('.js-filter-accordion');
-          if (accGroup) {
-            const isOpen = accGroup.classList.contains('open');
-            setAccordionOpen(accGroup, !isOpen);
-          }
-          return;
-        }
-
-        // Xóa nhóm
-        const clearBtn = target.closest('.js-clear-group');
-        if (clearBtn) {
-          const groupKey = clearBtn.getAttribute('data-clear-group') || '';
-          clearFilterGroup(groupKey);
-          return;
-        }
-
-        // Nút lọc Xếp hạng (Rank A* / A / B / C)
-        const rankBtn = target.closest('.js-filter-rank');
-        if (rankBtn instanceof HTMLButtonElement) {
-          if (rankBtn.disabled) return;
-          const rankVal = rankBtn.getAttribute('data-rank') || '';
-          if (!VALID_RANK_VALUES.has(rankVal)) return;
-          const targetState = (isFilterDrawerOpen && draftFilterState) ? draftFilterState : filterState;
-          const currentSet = new Set(Array.isArray(targetState.ranks) ? targetState.ranks : []);
-          if (currentSet.has(rankVal)) {
-            currentSet.delete(rankVal);
-          } else {
-            currentSet.add(rankVal);
-          }
-          // Tạo mảng mới theo thứ tự chuẩn để Proxy filterState kích hoạt render lại
-          targetState.ranks = RANK_VALUES.filter(r => currentSet.has(r));
-          targetState.page = 1;
-          syncSidebarInputsFromState(targetState);
-          refreshDrawerDraftUI(targetState);
-          return;
-        }
-
-        // Chip chọn nhanh khoảng ngày
-        const presetBtn = target.closest('.js-date-preset');
-        if (presetBtn) {
-          const presetKey = presetBtn.getAttribute('data-preset') || '';
-          const range = getDatePresetRange(presetKey);
-          if (range) {
-            const targetState = (isFilterDrawerOpen && draftFilterState) ? draftFilterState : filterState;
-            const isAlreadyActive = targetState.dateFrom === range.from && targetState.dateTo === range.to;
-            if (isAlreadyActive) {
-              targetState.dateFrom = '';
-              targetState.dateTo = '';
-            } else {
-              targetState.dateFrom = range.from;
-              targetState.dateTo = range.to;
-            }
-            targetState.page = 1;
-            syncSidebarInputsFromState(targetState);
-            refreshDrawerDraftUI(targetState);
-          }
-          return;
-        }
-
-        // Xem thêm / Thu gọn chủ đề
-        const toggleTopicsBtn = target.closest('.js-toggle-more-topics');
-        if (toggleTopicsBtn) {
-          isTopicsExpanded = !isTopicsExpanded;
-          syncTopicOverflowToggle();
-          return;
-        }
-
-        // Nút đặt lại toàn bộ trên thanh bên
-        const resetBtn = target.closest('.js-filter-reset');
-        if (resetBtn) {
-          clearAllFilters();
-          return;
-        }
-
-        // Nút đóng drawer
-        const closeBtn = target.closest('.js-close-filters-drawer');
-        if (closeBtn) {
-          closeFiltersDrawer(false);
-          return;
-        }
-
-        // Nút áp dụng trên drawer
-        const applyBtn = target.closest('.js-apply-filters');
-        if (applyBtn) {
-          closeFiltersDrawer(true);
-        }
-      });
+    if (target.classList.contains('js-filter-cfp') && target instanceof HTMLInputElement) {
+      targetState.cfp = target.value === 'all' ? 'all' : (target.checked ? target.value : 'all');
+    } else if (target.classList.contains('js-filter-month') && target instanceof HTMLSelectElement) {
+      targetState.month = target.value;
+    } else if (target.classList.contains('js-filter-ongoing') && target instanceof HTMLInputElement) {
+      targetState.ongoing = target.checked;
+    } else if (target.classList.contains('js-date-from') && target instanceof HTMLInputElement) {
+      targetState.dateFrom = normalizeIsoDate(target.value) || '';
+    } else if (target.classList.contains('js-date-to') && target instanceof HTMLInputElement) {
+      targetState.dateTo = normalizeIsoDate(target.value) || '';
+    } else if (target.classList.contains('js-filter-city') && target instanceof HTMLInputElement) {
+      targetState.city = target.value === 'all' ? 'all' : (target.checked ? target.value : 'all');
+    } else if (target.classList.contains('js-filter-topic') && target instanceof HTMLInputElement) {
+      targetState.topics = [...sidebar.querySelectorAll('.js-filter-topic:checked')]
+        .map(cb => cb.value)
+        .filter(v => VALID_TOPIC_VALUES.has(v));
+    } else {
+      return;
     }
 
-    // 4. Mở drawer trên di động
+    targetState.page = 1;
+    syncSidebarInputsFromState(targetState);
+    refreshDrawerDraftUI(targetState);
+  }
+
+  /**
+   * Xử lý click accordion, nút Rank, preset ngày, xóa nhóm và điều khiển drawer trên thanh bên.
+   * @param {MouseEvent} event - Sự kiện click từ `#filtersSidebar`.
+   */
+  function handleSidebarClickEvent(event) {
+    const target = event.target;
+    if (!(target instanceof HTMLElement)) return;
+
+    const toggleBtn = target.closest('.js-filter-toggle');
+    if (toggleBtn) {
+      const accGroup = toggleBtn.closest('.js-filter-accordion');
+      if (accGroup) setAccordionOpen(accGroup, !accGroup.classList.contains('open'));
+      return;
+    }
+
+    const clearBtn = target.closest('.js-clear-group');
+    if (clearBtn) { clearFilterGroup(clearBtn.getAttribute('data-clear-group') || ''); return; }
+
+    const rankBtn = target.closest('.js-filter-rank');
+    if (rankBtn instanceof HTMLButtonElement) {
+      if (rankBtn.disabled) return;
+      const rankVal = rankBtn.getAttribute('data-rank') || '';
+      if (!VALID_RANK_VALUES.has(rankVal)) return;
+      const targetState = isFilterDrawerOpen && draftFilterState ? draftFilterState : filterState;
+      const currentSet = new Set(Array.isArray(targetState.ranks) ? targetState.ranks : []);
+      if (currentSet.has(rankVal)) currentSet.delete(rankVal);
+      else currentSet.add(rankVal);
+      targetState.ranks = RANK_VALUES.filter(r => currentSet.has(r));
+      targetState.page = 1;
+      syncSidebarInputsFromState(targetState);
+      refreshDrawerDraftUI(targetState);
+      return;
+    }
+
+    const presetBtn = target.closest('.js-date-preset');
+    if (presetBtn) {
+      const range = getDatePresetRange(presetBtn.getAttribute('data-preset') || '');
+      if (!range) return;
+      const targetState = isFilterDrawerOpen && draftFilterState ? draftFilterState : filterState;
+      const isActive = targetState.dateFrom === range.from && targetState.dateTo === range.to;
+      targetState.dateFrom = isActive ? '' : range.from;
+      targetState.dateTo = isActive ? '' : range.to;
+      targetState.page = 1;
+      syncSidebarInputsFromState(targetState);
+      refreshDrawerDraftUI(targetState);
+      return;
+    }
+
+    if (target.closest('.js-toggle-more-topics')) {
+      isTopicsExpanded = !isTopicsExpanded;
+      syncTopicOverflowToggle();
+      return;
+    }
+    if (target.closest('.js-filter-reset')) { clearAllFilters(); return; }
+    if (target.closest('.js-close-filters-drawer')) { closeFiltersDrawer(false); return; }
+    if (target.closest('.js-apply-filters')) closeFiltersDrawer(true);
+  }
+
+  /**
+   * Gắn sự kiện mở/đóng và tự thu hồi drawer bộ lọc khi đổi kích thước màn hình trên di động.
+   */
+  function bindFilterDrawerLifecycleEvents() {
     const openDrawerBtn = document.getElementById('btnOpenFiltersDrawer');
-    if (openDrawerBtn) {
-      openDrawerBtn.addEventListener('click', openFiltersDrawer);
-    }
+    if (openDrawerBtn) openDrawerBtn.addEventListener('click', openFiltersDrawer);
 
-    // 5. Backdrop đóng drawer
     const drawerBackdrop = document.getElementById('filtersBackdrop');
-    if (drawerBackdrop) {
-      drawerBackdrop.addEventListener('click', () => closeFiltersDrawer(false));
-    }
+    if (drawerBackdrop) drawerBackdrop.addEventListener('click', () => closeFiltersDrawer(false));
 
-    // Phím Escape đóng drawer
     document.addEventListener('keydown', event => {
       if (event.key === 'Escape' && isFilterDrawerOpen) {
         event.preventDefault();
@@ -2679,66 +2551,50 @@
       }
     });
 
-    // Xoay màn hình >= 768px tự động gỡ trạng thái drawer
     window.addEventListener('resize', () => {
-      if (window.innerWidth >= 768 && isFilterDrawerOpen) {
-        closeFiltersDrawer(false);
-      }
-    });
+      if (window.innerWidth >= 768 && isFilterDrawerOpen) closeFiltersDrawer(false);
+    }, { passive: true });
+  }
 
-    // 6. Event Delegation trên Thanh chip
+  /**
+   * Gắn sự kiện trên thanh chip, danh sách thẻ hội nghị, trạng thái rỗng, phân trang và sắp xếp.
+   */
+  function bindResultsAreaDelegation() {
+    const chipsWrapper = document.getElementById('filterChipsWrapper');
     if (chipsWrapper) {
       chipsWrapper.addEventListener('click', event => {
-        const target = event.target;
-        if (!(target instanceof HTMLElement)) return;
-
+        const target = event.target instanceof HTMLElement ? event.target : null;
+        if (!target) return;
         const removeBtn = target.closest('.js-remove-chip');
-        if (removeBtn) {
-          const idx = Number.parseInt(removeBtn.getAttribute('data-chip-index') || '0', 10);
-          handleChipRemove(idx);
-          return;
-        }
-
-        const clearAllBtn = target.closest('.js-filter-reset');
-        if (clearAllBtn) {
-          clearAllFilters();
-        }
+        if (removeBtn) handleChipRemove(Number.parseInt(removeBtn.getAttribute('data-chip-index') || '0', 10));
+        else if (target.closest('.js-filter-reset')) clearAllFilters();
       });
     }
 
-    // 7. Event Delegation trên Danh sách hội nghị
+    const confList = document.getElementById('conferenceList');
     if (confList) {
       confList.addEventListener('click', event => {
-        const target = event.target;
-        if (!(target instanceof HTMLElement)) return;
-
-        const saveBtn = target.closest('.js-card-save');
-        if (saveBtn) {
-          const confId = saveBtn.getAttribute('data-save-id') || '';
-          toggleSaveConference(confId, saveBtn);
-        }
+        const saveBtn = event.target instanceof HTMLElement ? event.target.closest('.js-card-save') : null;
+        if (saveBtn) toggleSaveConference(saveBtn.getAttribute('data-save-id') || '', saveBtn);
       });
     }
 
-    // 8. Event Delegation trên Khối trạng thái rỗng
+    const emptyState = document.getElementById('emptyState');
     if (emptyState) {
       emptyState.addEventListener('click', event => {
-        const target = event.target;
-        if (!(target instanceof HTMLElement)) return;
-
+        const target = event.target instanceof HTMLElement ? event.target : null;
+        if (!target) return;
         const relaxBtn = target.closest('.js-relax-filter');
         if (relaxBtn) {
-          const groupKey = relaxBtn.dataset.groupKey;
-          if (groupKey === 'query') {
+          if (relaxBtn.dataset.groupKey === 'query') {
             const input = document.getElementById('searchInput');
             if (input) input.value = '';
             filterState.q = '';
           } else {
-            clearFilterGroup(groupKey);
+            clearFilterGroup(relaxBtn.dataset.groupKey);
           }
           return;
         }
-
         const spellBtn = target.closest('.js-spelling-suggestion');
         if (spellBtn) {
           const sug = spellBtn.dataset.suggestion || spellBtn.textContent;
@@ -2747,44 +2603,31 @@
           filterState.q = sug;
           return;
         }
-
-        const resetBtn = target.closest('.js-filter-reset');
-        if (resetBtn) {
-          clearAllFilters();
-        }
+        if (target.closest('.js-filter-reset')) clearAllFilters();
       });
     }
 
-    // 9. Event Delegation trên Phân trang
+    const pagination = document.getElementById('pagination');
     if (pagination) {
       pagination.addEventListener('click', event => {
-        const target = event.target;
-        if (!(target instanceof HTMLElement)) return;
-
-        const stepBtn = target.closest('.js-page-step');
-        if (stepBtn) {
-          const delta = Number.parseInt(stepBtn.getAttribute('data-page-step') || '0', 10);
-          goToPage(filterState.page + delta);
-        }
+        const stepBtn = event.target instanceof HTMLElement ? event.target.closest('.js-page-step') : null;
+        if (stepBtn) goToPage(filterState.page + Number.parseInt(stepBtn.getAttribute('data-page-step') || '0', 10));
       });
-
       pagination.addEventListener('change', event => {
-        const target = event.target;
-        if (target instanceof HTMLInputElement && target.classList.contains('js-page-jump')) {
-          goToPage(target.value);
+        if (event.target instanceof HTMLInputElement && event.target.classList.contains('js-page-jump')) {
+          goToPage(event.target.value);
         }
       });
-
       pagination.addEventListener('keydown', event => {
-        const target = event.target;
-        if (event.key === 'Enter' && target instanceof HTMLInputElement && target.classList.contains('js-page-jump')) {
+        if (event.key === 'Enter'
+          && event.target instanceof HTMLInputElement
+          && event.target.classList.contains('js-page-jump')) {
           event.preventDefault();
-          goToPage(target.value);
+          goToPage(event.target.value);
         }
       });
     }
 
-    // 10. Chọn chế độ sắp xếp kết quả
     const sortSelect = document.getElementById('sortSelect');
     if (sortSelect) {
       sortSelect.addEventListener('change', () => {
@@ -2793,11 +2636,24 @@
       });
     }
 
-    // 11. Nút thử tải lại khi có lỗi mạng
     const retryBtn = document.getElementById('btnRetryLoad');
-    if (retryBtn) {
-      retryBtn.addEventListener('click', loadData);
+    if (retryBtn) retryBtn.addEventListener('click', loadData);
+  }
+
+  /**
+   * Khởi tạo toàn bộ sự kiện của trang bằng kỹ thuật Event Delegation trên các phần tử tĩnh.
+   */
+  function initStaticEvents() {
+    bindSearchComboboxEvents();
+
+    const sidebar = document.getElementById('filtersSidebar');
+    if (sidebar) {
+      sidebar.addEventListener('change', event => handleSidebarChangeEvent(event, sidebar));
+      sidebar.addEventListener('click', handleSidebarClickEvent);
     }
+
+    bindFilterDrawerLifecycleEvents();
+    bindResultsAreaDelegation();
   }
 
   /* ================= 16. NẠP DỮ LIỆU & KHỞI TẠO HỆ THỐNG ================= */
@@ -2833,7 +2689,7 @@
   }
 
   /**
-   * Tải dữ liệu hội nghị từ data/conference_data.json kèm try/catch fallback về FALLBACK_CONFERENCES.
+   * Tải dữ liệu hội nghị từ data/conferences.json kèm try/catch fallback về FALLBACK_CONFERENCES.
    */
   async function loadData() {
     const utils = getUtils();
@@ -2854,9 +2710,10 @@
 
     let rawList = [];
     try {
-      const response = await fetch('data/conference_data.json');
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      const data = await response.json();
+      const utils = getUtils();
+      const data = utils && typeof utils.fetchJsonCached === 'function'
+        ? await utils.fetchJsonCached('data/conferences.json')
+        : await fetch('data/conferences.json').then(r => { if (!r.ok) throw new Error(r.status); return r.json(); });
       if (!Array.isArray(data) || data.length === 0) throw new Error('Dữ liệu trống');
       rawList = data;
       isDataLoaded = true;

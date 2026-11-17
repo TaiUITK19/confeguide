@@ -1,5 +1,5 @@
 /* =========================================================
-   ConfGuide — Profile Stylesheet (profile.css)
+   ConfGuide — Profile Stylesheet (css/pages/profile.css)
    Hồ sơ học thuật | Thống kê | Hội nghị đã lưu | Tracker Preview
    ========================================================= */
 
@@ -25,27 +25,15 @@
 }
 
 .profile-page-alert.success {
-  background: rgba(16, 185, 129, 0.12);
-  color: #065f46;
-  border: 1px solid rgba(16, 185, 129, 0.3);
-}
-
-body.dark .profile-page-alert.success {
-  background: rgba(16, 185, 129, 0.18);
-  color: #6ee7b7;
-  border-color: rgba(16, 185, 129, 0.4);
+  background: var(--status-open-bg);
+  color: var(--status-open-text);
+  border: 1px solid var(--status-open-border);
 }
 
 .profile-page-alert.error {
-  background: rgba(224, 49, 49, 0.1);
-  color: #991b1b;
-  border: 1px solid rgba(224, 49, 49, 0.25);
-}
-
-body.dark .profile-page-alert.error {
-  background: rgba(224, 49, 49, 0.18);
-  color: #fca5a5;
-  border-color: rgba(224, 49, 49, 0.4);
+  background: var(--danger-bg);
+  color: var(--danger-text);
+  border: 1px solid var(--danger-border);
 }
 
 @keyframes profileFadeIn {
@@ -60,8 +48,10 @@ body.dark .profile-page-alert.error {
 }
 
 /* ================= 1. HERO PROFILE CARD ================= */
+/* Light Mode dùng banner tối kết hợp thân sáng tạo chiều sâu; Dark Mode đồng bộ surface */
 .profile-hero-card {
   background: var(--surface);
+  color: var(--text);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   box-shadow: var(--shadow-sm);
@@ -72,12 +62,8 @@ body.dark .profile-page-alert.error {
 
 .profile-hero-banner {
   height: 120px;
-  background: linear-gradient(135deg, rgba(18, 104, 201, 0.25) 0%, rgba(11, 31, 107, 0.5) 100%);
+  background: linear-gradient(135deg, var(--surface-dark) 0%, var(--surface-dark-2) 100%);
   border-bottom: 1px solid var(--border);
-}
-
-body.dark .profile-hero-banner {
-  background: linear-gradient(135deg, rgba(18, 104, 201, 0.35) 0%, rgba(15, 23, 42, 0.8) 100%);
 }
 
 .profile-hero-content {
@@ -105,15 +91,16 @@ body.dark .profile-hero-banner {
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--primary), var(--navy));
-  color: #ffffff;
+  background: var(--brand-gradient);
+  /* Giữ chữ trắng trên nền gradient xanh thương hiệu ở cả Light Mode lẫn Dark Mode */
+  color: var(--on-brand);
   font-size: 42px;
   font-weight: 800;
   display: flex;
   align-items: center;
   justify-content: center;
   border: 4px solid var(--surface);
-  box-shadow: 0 8px 24px rgba(18, 104, 201, 0.3);
+  box-shadow: 0 8px 24px var(--primary-shadow);
   user-select: none;
   overflow: hidden;
 }
@@ -135,11 +122,11 @@ body.dark .profile-hero-banner {
   border-radius: 50%;
   background: var(--surface);
   color: var(--primary);
-  border: 2px solid var(--surface);
+  border: 2px solid var(--border-strong);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-sm);
   cursor: pointer;
   transition: all 160ms ease;
   z-index: 2;
@@ -148,7 +135,8 @@ body.dark .profile-hero-banner {
 
 .profile-avatar-upload-btn:hover {
   background: var(--primary);
-  color: #ffffff;
+  border-color: var(--primary);
+  color: var(--on-primary);
   transform: scale(1.08);
 }
 
@@ -159,13 +147,13 @@ body.dark .profile-hero-banner {
   width: 26px;
   height: 26px;
   border-radius: 50%;
-  background: var(--green);
-  color: #ffffff;
+  background: var(--status-open-solid-bg);
+  color: var(--on-primary);
   display: flex;
   align-items: center;
   justify-content: center;
   border: 2px solid var(--surface);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-sm);
   z-index: 1;
 }
 
@@ -222,13 +210,14 @@ body.dark .profile-hero-banner {
 .profile-scholar-chip {
   color: var(--primary);
   background: var(--primary-soft);
-  border-color: rgba(18, 104, 201, 0.2);
+  border-color: var(--conf-badge-border);
   transition: all 160ms ease;
 }
 
 .profile-scholar-chip:hover {
   text-decoration: underline;
-  background: rgba(18, 104, 201, 0.18);
+  background: var(--surface-hover);
+  border-color: var(--primary);
 }
 
 .profile-fields-wrap {
@@ -258,15 +247,9 @@ body.dark .profile-hero-banner {
   font-weight: 600;
   padding: 4px 10px;
   border-radius: 6px;
-  background: rgba(11, 31, 107, 0.08);
+  background: var(--primary-soft);
   color: var(--navy);
-  border: 1px solid rgba(11, 31, 107, 0.15);
-}
-
-body.dark .profile-field-pill {
-  background: rgba(18, 104, 201, 0.15);
-  color: #93c5fd;
-  border-color: rgba(18, 104, 201, 0.3);
+  border: 1px solid var(--conf-badge-border);
 }
 
 .profile-bio-box {
@@ -328,27 +311,18 @@ body.dark .profile-field-pill {
 }
 
 .stat-icon-navy {
-  background: rgba(11, 31, 107, 0.1);
+  background: var(--primary-soft);
   color: var(--navy);
 }
 
-body.dark .stat-icon-navy {
-  background: rgba(147, 197, 253, 0.12);
-  color: #93c5fd;
-}
-
 .stat-icon-green {
-  background: rgba(16, 185, 129, 0.12);
-  color: var(--green);
+  background: var(--status-open-bg);
+  color: var(--status-open-text);
 }
 
 .stat-icon-amber {
-  background: rgba(245, 179, 1, 0.15);
-  color: #b45309;
-}
-
-body.dark .stat-icon-amber {
-  color: var(--gold);
+  background: var(--gold-bg);
+  color: var(--gold-text);
 }
 
 .stat-content {
@@ -441,7 +415,7 @@ body.dark .stat-icon-amber {
   width: 100%;
   padding: 9px 12px 9px 38px;
   border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-strong);
   background: var(--bg-primary);
   color: var(--text);
   font-size: 13.5px;
@@ -450,9 +424,8 @@ body.dark .stat-icon-amber {
 }
 
 .saved-search-input:focus {
-  outline: none;
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(18, 104, 201, 0.15);
+  box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--focus-ring);
 }
 
 /* Danh sách hội nghị đã lưu */
@@ -512,8 +485,9 @@ body.dark .stat-icon-amber {
   font-weight: 700;
   padding: 2px 7px;
   border-radius: 4px;
-  background: var(--gold);
-  color: #000000;
+  background: var(--gold-bg);
+  color: var(--gold-text);
+  border: 1px solid var(--gold-border);
   display: inline-block;
 }
 
@@ -590,27 +564,23 @@ body.dark .stat-icon-amber {
 }
 
 .status-draft {
-  background: rgba(148, 163, 184, 0.2);
-  color: var(--text-muted);
+  background: var(--status-closed-bg);
+  color: var(--status-closed-text);
 }
 
 .status-submitted {
-  background: rgba(18, 104, 201, 0.15);
+  background: var(--primary-soft);
   color: var(--primary);
 }
 
 .status-review {
-  background: rgba(245, 179, 1, 0.2);
-  color: #b45309;
-}
-
-body.dark .status-review {
-  color: var(--gold);
+  background: var(--status-warning-bg);
+  color: var(--status-warning-text);
 }
 
 .status-accepted {
-  background: rgba(16, 185, 129, 0.15);
-  color: var(--green);
+  background: var(--status-open-bg);
+  color: var(--status-open-text);
 }
 
 .tracker-card-bottom {
@@ -646,13 +616,13 @@ body.dark .status-review {
   height: 100%;
   border-radius: 50%;
   background: linear-gradient(135deg, var(--primary), var(--navy));
-  color: #ffffff;
+  color: var(--on-primary);
   font-size: 26px;
   font-weight: 800;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 2px solid var(--border);
+  border: 2px solid var(--border-strong);
   overflow: hidden;
   user-select: none;
 }
@@ -679,7 +649,64 @@ body.dark .status-review {
   flex-wrap: wrap;
 }
 
-/* ================= RESPONSIVE ================= */
+/* ================= 5. LỚP BỔ TRỢ GIAO DIỆN (PROFILE UTILITIES) ================= */
+.stat-num--timezone {
+  font-size: 18px;
+}
+
+.stat-num--status {
+  font-size: 16px;
+}
+
+.modal-hint--spaced {
+  margin-top: 6px;
+}
+
+.req-mark {
+  color: var(--danger-text);
+}
+
+.profile-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.empty-state-box--compact {
+  padding: 28px 20px;
+}
+
+.empty-state-title {
+  margin: 0 0 6px;
+  font-size: 15px;
+  color: var(--text);
+}
+
+.empty-state-desc {
+  margin: 0 0 14px;
+  font-size: 13.5px;
+  color: var(--text-muted);
+}
+
+.btn--compact-md {
+  padding: 8px 14px;
+  font-size: 13px;
+}
+
+.tracker-preview-hint {
+  margin: 12px 0 0;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.tracker-preview-link {
+  color: var(--primary);
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+/* ================= 6. RESPONSIVE ================= */
 @media (max-width: 991px) {
   .profile-stats-grid {
     grid-template-columns: repeat(2, 1fr);
@@ -727,61 +754,4 @@ body.dark .status-review {
     width: 100%;
     justify-content: flex-end;
   }
-}
-
-/* Lớp bổ trợ thay thế inline style cho profile.html & profile.js */
-.stat-num--timezone {
-  font-size: 18px;
-}
-
-.stat-num--status {
-  font-size: 16px;
-}
-
-.modal-hint--spaced {
-  margin-top: 6px;
-}
-
-.req-mark {
-  color: var(--red);
-}
-
-.profile-modal-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  margin-top: 18px;
-}
-
-.empty-state-box--compact {
-  padding: 28px 20px;
-}
-
-.empty-state-title {
-  margin: 0 0 6px;
-  font-size: 15px;
-  color: var(--text);
-}
-
-.empty-state-desc {
-  margin: 0 0 14px;
-  font-size: 13.5px;
-  color: var(--text-muted);
-}
-
-.btn--compact-md {
-  padding: 8px 14px;
-  font-size: 13px;
-}
-
-.tracker-preview-hint {
-  margin: 12px 0 0;
-  font-size: 13px;
-  color: var(--text-muted);
-}
-
-.tracker-preview-link {
-  color: var(--primary);
-  font-weight: 600;
-  text-decoration: underline;
 }

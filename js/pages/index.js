@@ -1,12 +1,16 @@
 /**
- * ConfGuide - Kịch bản Trang chủ (js/script.js)
- * Quản lý Hero 2 cột cân đối (cột trái tìm kiếm nhanh; cột phải Hero Slider 3 slide:
+ * ConfGuide — Kịch bản Trang chủ (js/pages/index.js)
+ * Trang sử dụng: index.html
+ * Phụ thuộc: js/core/page-transition.js, js/core/layout.js (ConfGuideUtils), js/components/compare.js
+ * Chức năng: Quản lý Hero 2 cột cân đối (cột trái tìm kiếm nhanh; cột phải Hero Slider 3 slide:
  * Danh ngôn & Tóm tắt nhanh, Hội nghị nổi bật Rank A* & A, Sắp hết hạn UTC+7),
- * nạp dữ liệu hội nghị (fetch + fallback file:///) và hiển thị 6 hội nghị kèm nút Lưu.
+ * nạp dữ liệu hội nghị (fetch + fallback file:///) và hiển thị 6 hội nghị tiêu biểu kèm nút Lưu.
  */
 
 (function () {
   'use strict';
+
+  /* ================= 1. HẰNG SỐ & TRẠNG THÁI TRANG CHỦ ================= */
 
   /** Khoảng thời gian tự động chuyển slide (mili-giây) */
   const SLIDER_AUTOPLAY_MS = 6000;
@@ -17,10 +21,17 @@
   /** Tổng số slide cố định trong Hero Slider */
   const SLIDER_TOTAL_SLIDES = 3;
 
-  /** Trọng số xếp hạng CORE đồng bộ theo trang Tra cứu (app.js) */
+  /** Số lượng hội nghị nổi bật tối đa trên lưới Trang chủ */
+  const FEATURED_HOME_LIMIT = 6;
+
+  /** Ngưỡng ngày đánh dấu hạn nộp khẩn cấp trên thẻ hội nghị và slider */
+  const HOME_URGENT_DAYS = 14;
+  const SLIDER_URGENT_DAYS = 7;
+
+  /** Trọng số xếp hạng CORE đồng bộ theo trang Tra cứu (js/pages/search.js) */
   const RANK_WEIGHT = { 'A*': 0, A: 1, B: 2, C: 3 };
 
-  /** Tập hợp giá trị Rank CORE hợp lệ đồng bộ theo app.js */
+  /** Tập hợp giá trị Rank CORE hợp lệ đồng bộ theo js/pages/search.js */
   const VALID_RANK_VALUES = new Set(['A*', 'A', 'B', 'C']);
 
   let allConferences = [];
@@ -38,6 +49,8 @@
     eventsBound: false
   };
 
+  /* ================= 2. HÀM HỖ TRỢ STORAGE, NGÀY THÁNG & XẾP HẠNG ================= */
+
   /**
    * Lấy đối tượng tiện ích dùng chung từ layout.js.
    * @returns {Object|null} Tham chiếu tới window.ConfGuideUtils.
@@ -47,50 +60,47 @@
   }
 
   /**
-   * Đọc dữ liệu JSON từ localStorage an toàn kèm giá trị mặc định.
-   * @param {string} key Khóa lưu trữ trong localStorage.
-   * @param {*} fallback Giá trị trả về khi không có hoặc bị chặn.
-   * @returns {*} Dữ liệu đã parse hoặc giá trị fallback.
+   * Đọc JSON từ localStorage an toàn (tái sử dụng ConfGuideUtils.readStorage).
+   * @param {string} key - Khóa cần đọc.
+   * @param {*} fallback - Giá trị mặc định khi lỗi hoặc chưa lưu.
+   * @returns {*} Dữ liệu đã giải mã hoặc fallback.
    */
   function readStorageSafe(key, fallback) {
     const utils = getUtils();
-    if (utils && typeof utils.readStorage === 'function') {
-      return utils.readStorage(key, fallback);
-    }
+    if (utils && typeof utils.readStorage === 'function') return utils.readStorage(key, fallback);
     try {
       const raw = window.localStorage.getItem(key);
-      if (raw === null) return fallback;
-      return JSON.parse(raw);
-    } catch (e) {
+      return raw === null ? fallback : JSON.parse(raw);
+    } catch {
       return fallback;
     }
   }
 
   /**
-   * Ghi dữ liệu JSON vào localStorage an toàn, không gây lỗi console khi bị chặn.
-   * @param {string} key Khóa lưu trữ.
-   * @param {*} value Giá trị cần lưu.
-   * @returns {boolean} True nếu lưu thành công, false nếu thất bại.
+   * Ghi JSON vào localStorage an toàn (tái sử dụng ConfGuideUtils.writeStorage).
+   * @param {string} key - Khóa lưu trữ.
+   * @param {*} value - Giá trị cần lưu.
+   * @returns {boolean} True nếu ghi thành công.
    */
   function writeStorageSafe(key, value) {
     const utils = getUtils();
-    if (utils && typeof utils.writeStorage === 'function') {
-      return utils.writeStorage(key, value);
-    }
+    if (utils && typeof utils.writeStorage === 'function') return utils.writeStorage(key, value);
     try {
       window.localStorage.setItem(key, JSON.stringify(value));
       return true;
-    } catch (e) {
+    } catch {
       return false;
     }
   }
 
   /**
-   * Chuẩn hóa chuỗi thành mã slug URL khớp với layout.js / app.js / detail.js.
-   * @param {string} text Chuỗi tên hội nghị.
-   * @returns {string} Chuỗi slug chữ thường.
+   * Chuẩn hóa chuỗi thành mã slug URL (tái sử dụng ConfGuideUtils.slugify).
+   * @param {string} text - Chuỗi đầu vào.
+   * @returns {string} Chuỗi slug chữ thường an toàn cho URL.
    */
   function fallbackSlugify(text) {
+    const utils = getUtils();
+    if (utils && typeof utils.slugify === 'function') return utils.slugify(text);
     return String(text || '')
       .toLowerCase()
       .normalize('NFD')
@@ -141,7 +151,7 @@
   }
 
   /**
-   * Chuẩn hóa và kiểm tra tính hợp lệ của xếp hạng CORE từ dữ liệu hội nghị (khớp với app.js).
+   * Chuẩn hóa và kiểm tra tính hợp lệ của xếp hạng CORE từ dữ liệu hội nghị (khớp với js/pages/search.js).
    * @param {Object|null} conf Đối tượng hội nghị.
    * @returns {'A*'|'A'|'B'|'C'|''} Nhãn rank hợp lệ hoặc chuỗi rỗng nếu chưa có hạng.
    */
@@ -201,86 +211,83 @@
   }
 
   /**
+   * Phân loại giai đoạn diễn ra hội nghị (0: sắp diễn ra, 1: đang diễn ra, 2: đã qua, 3: chưa rõ).
+   * @param {Object} conf - Đối tượng hội nghị.
+   * @param {string} todayVnIso - Ngày hiện tại YYYY-MM-DD (UTC+7).
+   * @returns {{ group: number, sortDate: string }} Nhóm ưu tiên và khóa ngày sắp xếp.
+   */
+  function classifyEventGroup(conf, todayVnIso) {
+    const startIso = normalizeDateIsoLocal(conf.startDate || conf.start_date);
+    const endIso = normalizeDateIsoLocal(conf.endDate || conf.end_date) || startIso;
+    if (!startIso) return { group: 3, sortDate: '9999-99-99' };
+    if (startIso >= todayVnIso) return { group: 0, sortDate: startIso };
+    if (endIso >= todayVnIso) return { group: 1, sortDate: endIso };
+    return { group: 2, sortDate: startIso };
+  }
+
+  /**
+   * So sánh thứ tự ưu tiên giữa hai hội nghị khi chọn cặp nổi bật cho Slide 2.
+   * @param {Object} a - Hội nghị thứ nhất.
+   * @param {Object} b - Hội nghị thứ hai.
+   * @param {string} todayVnIso - Ngày hiện tại YYYY-MM-DD (UTC+7).
+   * @returns {number} Giá trị âm/dương phục vụ Array.prototype.sort.
+   */
+  function compareFeaturedCandidates(a, b, todayVnIso) {
+    const rankDiff = getConferenceRankWeight(a) - getConferenceRankWeight(b);
+    if (rankDiff !== 0) return rankDiff;
+
+    const hasCompleteMeta = conf => Boolean(
+      normalizeDateIsoLocal(conf.startDate || conf.start_date) && String(conf.location || '').trim()
+    );
+    const completeDiff = Number(hasCompleteMeta(b)) - Number(hasCompleteMeta(a));
+    if (completeDiff !== 0) return completeDiff;
+
+    const evA = classifyEventGroup(a, todayVnIso);
+    const evB = classifyEventGroup(b, todayVnIso);
+    if (evA.group !== evB.group) return evA.group - evB.group;
+    if ((evA.group === 0 || evA.group === 1) && evA.sortDate !== evB.sortDate) {
+      return evA.sortDate.localeCompare(evB.sortDate);
+    }
+    if (evA.group === 2 && evA.sortDate !== evB.sortDate) {
+      return evB.sortDate.localeCompare(evA.sortDate);
+    }
+
+    const ratingDiff = (b.rating || 0) - (a.rating || 0);
+    return ratingDiff !== 0
+      ? ratingDiff
+      : String(a.name || '').localeCompare(String(b.name || ''), 'vi', { sensitivity: 'base' });
+  }
+
+  /**
    * Chọn cặp 2 hội nghị nổi bật cho Slide 2: ưu tiên 1 hội nghị Rank A* và 1 hội nghị Rank A.
    * Nếu thiếu A* hoặc A trong dữ liệu hiện tại, bù bằng hội nghị có rank cao nhất kế tiếp.
-   * @param {Array<Object>} conferences Danh sách hội nghị đã chuẩn hóa.
+   * @param {Array<Object>} conferences - Danh sách hội nghị đã chuẩn hóa.
    * @returns {Array<Object>} Tối đa 2 hội nghị tiêu biểu (không trùng lặp).
    */
   function selectFeaturedPair(conferences) {
-    const validConfs = (conferences || []).filter(conf => {
-      const id = resolveConferenceId(conf);
-      return Boolean(id && conf && conf.name);
-    });
+    const validConfs = (conferences || []).filter(conf => Boolean(conf && conf.name && resolveConferenceId(conf)));
     if (validConfs.length === 0) return [];
 
     const todayVnIso = getTodayVnIso();
-
-    const getEventGroup = conf => {
-      const startIso = normalizeDateIsoLocal(conf.startDate || conf.start_date);
-      const endIso = normalizeDateIsoLocal(conf.endDate || conf.end_date) || startIso;
-      if (!startIso) return { group: 3, sortDate: '9999-99-99' };
-      if (startIso >= todayVnIso) return { group: 0, sortDate: startIso };
-      if (endIso >= todayVnIso) return { group: 1, sortDate: endIso };
-      return { group: 2, sortDate: startIso };
-    };
-
-    const hasCompleteMeta = conf => {
-      const hasStart = Boolean(normalizeDateIsoLocal(conf.startDate || conf.start_date));
-      const hasLocation = Boolean(String(conf.location || '').trim());
-      return hasStart && hasLocation;
-    };
-
-    const sorted = validConfs.slice().sort((a, b) => {
-      const rankDiff = getConferenceRankWeight(a) - getConferenceRankWeight(b);
-      if (rankDiff !== 0) return rankDiff;
-
-      // Trong cùng nhóm rank, ưu tiên hội nghị có đủ địa điểm và ngày diễn ra
-      const completeDiff = Number(hasCompleteMeta(b)) - Number(hasCompleteMeta(a));
-      if (completeDiff !== 0) return completeDiff;
-
-      const evA = getEventGroup(a);
-      const evB = getEventGroup(b);
-      if (evA.group !== evB.group) return evA.group - evB.group;
-
-      if (evA.group === 0 || evA.group === 1) {
-        if (evA.sortDate !== evB.sortDate) return evA.sortDate.localeCompare(evB.sortDate);
-      } else if (evA.group === 2) {
-        if (evA.sortDate !== evB.sortDate) return evB.sortDate.localeCompare(evA.sortDate);
-      }
-
-      const ratingDiff = (b.rating || 0) - (a.rating || 0);
-      if (ratingDiff !== 0) return ratingDiff;
-
-      return String(a.name || '').localeCompare(String(b.name || ''), 'vi', { sensitivity: 'base' });
-    });
-
+    const sorted = validConfs.slice().sort((a, b) => compareFeaturedCandidates(a, b, todayVnIso));
     const selected = [];
     const usedIds = new Set();
 
-    const pickByRank = targetRank => {
-      const match = sorted.find(conf => {
-        const id = resolveConferenceId(conf);
-        return getNormalizedRank(conf) === targetRank && !usedIds.has(id);
-      });
+    ['A*', 'A'].forEach(targetRank => {
+      const match = sorted.find(conf => getNormalizedRank(conf) === targetRank && !usedIds.has(resolveConferenceId(conf)));
       if (match) {
         usedIds.add(resolveConferenceId(match));
         selected.push(match);
       }
-    };
+    });
 
-    pickByRank('A*');
-    pickByRank('A');
-
-    // Nếu thiếu A* hoặc A, bổ sung từ các hội nghị xếp hạng cao nhất còn lại để đủ 2 thẻ
     for (let i = 0; i < sorted.length && selected.length < 2; i++) {
-      const conf = sorted[i];
-      const id = resolveConferenceId(conf);
+      const id = resolveConferenceId(sorted[i]);
       if (!usedIds.has(id)) {
         usedIds.add(id);
-        selected.push(conf);
+        selected.push(sorted[i]);
       }
     }
-
     return selected;
   }
 
@@ -363,57 +370,64 @@
   }
 
   /**
+   * Trích xuất thông tin mốc deadline gần nhất sắp tới của một hội nghị (phục vụ Slide 3).
+   * @param {Object} conf - Đối tượng hội nghị chuẩn hóa.
+   * @param {number} nowMs - Thời điểm hiện tại (UTC epoch ms).
+   * @param {Object|null} utils - Đối tượng tiện ích ConfGuideUtils.
+   * @returns {Object|null} Bản ghi hiển thị hoặc null nếu không còn hạn mở.
+   */
+  function buildUpcomingDeadlineCandidate(conf, nowMs, utils) {
+    const confId = resolveConferenceId(conf);
+    if (!confId || !conf || !conf.name) return null;
+
+    const futureDeadlines = parseDeadlinesSafe(conf).filter(
+      dl => dl && !dl.isPassed && dl.targetMs > nowMs && Number.isFinite(dl.daysLeft) && dl.daysLeft >= 0
+    );
+    if (futureDeadlines.length === 0) return null;
+
+    futureDeadlines.sort((a, b) => a.targetMs - b.targetMs);
+    const nearest = futureDeadlines[0];
+    const converted = utils && typeof utils.convertDeadlineToVn === 'function'
+      ? utils.convertDeadlineToVn(nearest.date, { isDeadline: true })
+      : null;
+
+    const dateLabel = converted
+      ? `${converted.vnTimeVi ? `${converted.vnTimeVi} ` : ''}${converted.vnDateVi} (UTC+7)`
+      : nearest.displayDate;
+    const fullDateTitle = utils && typeof utils.formatDeadlineVi === 'function'
+      ? utils.formatDeadlineVi(nearest.date, { includeAoEOrigin: true })
+      : dateLabel;
+
+    const safeDays = Math.max(0, nearest.daysLeft);
+    const isUrgent = safeDays <= SLIDER_URGENT_DAYS;
+    return {
+      id: confId,
+      name: String(conf.name).trim(),
+      milestoneName: String(nearest.name || nearest.shortName || 'Hạn nộp bài').trim(),
+      rankWeight: getConferenceRankWeight(conf),
+      targetMs: nearest.targetMs,
+      datetimeAttr: (converted && converted.vnIsoDate) || nearest.vnDate || nearest.date,
+      dateLabel,
+      fullDateTitle,
+      urgencyClass: isUrgent ? 'hero-slide-card__countdown--urgent' : 'hero-slide-card__countdown--normal',
+      countdownText: isUrgent ? `Gấp · Còn ${safeDays} ngày` : `Đang mở · Còn ${safeDays} ngày`,
+      locationText: String(conf.location || '').trim() || 'Chưa cập nhật địa điểm',
+      detailUrl: `detail.html?id=${encodeURIComponent(confId)}`
+    };
+  }
+
+  /**
    * Thu thập tối đa 2-3 hội nghị có mốc deadline gần nhất còn ở tương lai, sắp xếp tăng dần theo thời gian.
-   * @param {Array<Object>} conferences Danh sách hội nghị đã chuẩn hóa.
-   * @param {number} [limit=2] Số lượng hội nghị tối đa cần hiển thị.
+   * @param {Array<Object>} conferences - Danh sách hội nghị đã chuẩn hóa.
+   * @param {number} [limit=2] - Số lượng hội nghị tối đa cần hiển thị.
    * @returns {Array<Object>} Danh sách mốc hạn nộp bài gần nhất ở tương lai.
    */
   function getNearestUpcomingDeadlines(conferences, limit = 2) {
     const utils = getUtils();
     const nowMs = Date.now();
-    const candidates = [];
-
-    (conferences || []).forEach(conf => {
-      const confId = resolveConferenceId(conf);
-      if (!confId || !conf || !conf.name) return;
-
-      const futureDeadlines = parseDeadlinesSafe(conf).filter(
-        dl => dl && !dl.isPassed && dl.targetMs > nowMs && Number.isFinite(dl.daysLeft) && dl.daysLeft >= 0
-      );
-      if (futureDeadlines.length === 0) return;
-
-      futureDeadlines.sort((a, b) => a.targetMs - b.targetMs);
-      const nearest = futureDeadlines[0];
-
-      const converted = utils && typeof utils.convertDeadlineToVn === 'function'
-        ? utils.convertDeadlineToVn(nearest.date, { isDeadline: true })
-        : null;
-
-      const dateLabel = converted
-        ? `${converted.vnTimeVi ? `${converted.vnTimeVi} ` : ''}${converted.vnDateVi} (UTC+7)`
-        : nearest.displayDate;
-
-      const fullDateTitle = utils && typeof utils.formatDeadlineVi === 'function'
-        ? utils.formatDeadlineVi(nearest.date, { includeAoEOrigin: true })
-        : dateLabel;
-
-      const safeDays = Math.max(0, nearest.daysLeft);
-      const isUrgent = safeDays <= 7;
-      candidates.push({
-        id: confId,
-        name: String(conf.name).trim(),
-        milestoneName: String(nearest.name || nearest.shortName || 'Hạn nộp bài').trim(),
-        rankWeight: getConferenceRankWeight(conf),
-        targetMs: nearest.targetMs,
-        datetimeAttr: (converted && converted.vnIsoDate) || nearest.vnDate || nearest.date,
-        dateLabel: dateLabel,
-        fullDateTitle: fullDateTitle,
-        urgencyClass: isUrgent ? 'hero-slide-card__countdown--urgent' : 'hero-slide-card__countdown--normal',
-        countdownText: isUrgent ? `Gấp · Còn ${safeDays} ngày` : `Đang mở · Còn ${safeDays} ngày`,
-        locationText: String(conf.location || '').trim() || 'Chưa cập nhật địa điểm',
-        detailUrl: `detail.html?id=${encodeURIComponent(confId)}`
-      });
-    });
+    const candidates = (conferences || [])
+      .map(conf => buildUpcomingDeadlineCandidate(conf, nowMs, utils))
+      .filter(Boolean);
 
     candidates.sort((a, b) => {
       if (a.targetMs !== b.targetMs) return a.targetMs - b.targetMs;
@@ -519,9 +533,26 @@
   }
 
   /**
+   * Đồng bộ trạng thái active, inert và tabindex cho từng slide để tránh focus lọt vào slide ẩn.
+   * @param {HTMLElement} slideEl - Phần tử DOM của một slide.
+   * @param {boolean} isCurrent - True nếu slide đang được hiển thị.
+   */
+  function syncSlideAccessibility(slideEl, isCurrent) {
+    slideEl.classList.toggle('hero-slider__slide--active', isCurrent);
+    slideEl.setAttribute('aria-hidden', isCurrent ? 'false' : 'true');
+    if (isCurrent) slideEl.removeAttribute('inert');
+    else slideEl.setAttribute('inert', '');
+
+    slideEl.querySelectorAll('a, button, input, select, textarea').forEach(el => {
+      if (isCurrent) el.removeAttribute('tabindex');
+      else el.setAttribute('tabindex', '-1');
+    });
+  }
+
+  /**
    * Chuyển đến slide chỉ định, cập nhật vị trí track, chấm điều hướng và quản lý inert/tabindex.
-   * @param {number} nextIndex Chỉ số slide đích.
-   * @param {'init'|'auto'|'user'} [source='user'] Nguồn kích hoạt chuyển slide.
+   * @param {number} nextIndex - Chỉ số slide đích.
+   * @param {'init'|'auto'|'user'} [source='user'] - Nguồn kích hoạt chuyển slide.
    */
   function goToSlide(nextIndex, source = 'user') {
     const sliderEl = document.querySelector('.js-hero-slider');
@@ -537,78 +568,23 @@
 
     const trackEl = sliderEl.querySelector('.js-slider-track');
     const viewportEl = sliderEl.querySelector('.js-slider-viewport');
-    if (viewportEl && viewportEl.scrollLeft !== 0) {
-      viewportEl.scrollLeft = 0;
-    }
+    if (viewportEl && viewportEl.scrollLeft !== 0) viewportEl.scrollLeft = 0;
+
     if (trackEl) {
-      for (let i = 0; i < total; i++) {
-        trackEl.classList.remove(`hero-slider__track--step-${i}`);
-      }
+      for (let i = 0; i < total; i++) trackEl.classList.remove(`hero-slider__track--step-${i}`);
       trackEl.classList.add(`hero-slider__track--step-${targetIndex}`);
     }
 
-    slideEls.forEach((slideEl, idx) => {
-      const isCurrent = idx === targetIndex;
-      slideEl.classList.toggle('hero-slider__slide--active', isCurrent);
-      slideEl.setAttribute('aria-hidden', isCurrent ? 'false' : 'true');
+    slideEls.forEach((slideEl, idx) => syncSlideAccessibility(slideEl, idx === targetIndex));
 
-      if (isCurrent) {
-        slideEl.removeAttribute('inert');
-      } else {
-        slideEl.setAttribute('inert', '');
-      }
-
-      // Dự phòng tabindex cho toàn bộ phần tử tương tác trong slide không hiển thị
-      const focusables = slideEl.querySelectorAll('a, button, input, select, textarea');
-      focusables.forEach(el => {
-        if (isCurrent) {
-          el.removeAttribute('tabindex');
-        } else {
-          el.setAttribute('tabindex', '-1');
-        }
-      });
-    });
-
-    const dotEls = sliderEl.querySelectorAll('.js-slider-dot');
-    dotEls.forEach((dotEl, idx) => {
+    sliderEl.querySelectorAll('.js-slider-dot').forEach((dotEl, idx) => {
       const isActive = idx === targetIndex;
       dotEl.classList.toggle('hero-slider__dot--active', isActive);
-      if (isActive) {
-        dotEl.setAttribute('aria-current', 'true');
-      } else {
-        dotEl.removeAttribute('aria-current');
-      }
+      if (isActive) dotEl.setAttribute('aria-current', 'true');
+      else dotEl.removeAttribute('aria-current');
     });
 
     updateSliderLiveMode(source);
-  }
-
-  /**
-   * Cập nhật nhanh các chỉ số tóm tắt ở Slide 1 từ chính dữ liệu hội nghị đã tải.
-   * @param {Array<Object>} conferences Danh sách hội nghị đã chuẩn hóa.
-   */
-  function updateHeroQuickSummary(conferences) {
-    const list = Array.isArray(conferences) ? conferences : [];
-    const nowMs = Date.now();
-
-    let topRankCount = 0;
-    let openCount = 0;
-    list.forEach(conf => {
-      const rank = getNormalizedRank(conf);
-      if (rank === 'A*' || rank === 'A') topRankCount += 1;
-      const hasOpenDeadline = parseDeadlinesSafe(conf).some(
-        dl => dl && !dl.isPassed && dl.targetMs > nowMs
-      );
-      if (hasOpenDeadline) openCount += 1;
-    });
-
-    const totalEl = document.querySelector('.js-hero-summary-total');
-    const coreEl = document.querySelector('.js-hero-summary-core');
-    const openEl = document.querySelector('.js-hero-summary-open');
-
-    if (totalEl) totalEl.textContent = String(list.length);
-    if (coreEl) coreEl.textContent = String(topRankCount);
-    if (openEl) openEl.textContent = String(openCount);
   }
 
   /**
@@ -618,7 +594,6 @@
     const sliderEl = document.querySelector('.js-hero-slider');
     if (!sliderEl) return;
 
-    updateHeroQuickSummary(allConferences);
     renderFeaturedSliderCards(allConferences);
     renderDeadlineSliderCards(allConferences);
 
@@ -627,6 +602,97 @@
 
     goToSlide(sliderState.currentIndex, 'init');
     syncSliderAutoplay();
+  }
+
+  /**
+   * Lắng nghe tùy chọn `prefers-reduced-motion` của hệ thống cho Hero Slider.
+   */
+  function bindSliderReducedMotion() {
+    const motionQuery = typeof window.matchMedia === 'function'
+      ? window.matchMedia('(prefers-reduced-motion: reduce)')
+      : null;
+    if (!motionQuery) return;
+
+    sliderState.prefersReducedMotion = motionQuery.matches;
+    const handleMotionChange = event => {
+      sliderState.prefersReducedMotion = Boolean(event.matches);
+      updateSliderLiveMode('motion-change');
+      syncSliderAutoplay();
+    };
+    if (typeof motionQuery.addEventListener === 'function') {
+      motionQuery.addEventListener('change', handleMotionChange);
+    } else if (typeof motionQuery.addListener === 'function') {
+      motionQuery.addListener(handleMotionChange);
+    }
+  }
+
+  /**
+   * Gắn sự kiện click dot, hover, focus và phím mũi tên điều hướng cho khung slider.
+   * @param {HTMLElement} sliderEl - Phần tử gốc `.js-hero-slider`.
+   */
+  function bindSliderNavigationEvents(sliderEl) {
+    sliderEl.addEventListener('click', event => {
+      const dotBtn = event.target instanceof Element ? event.target.closest('.js-slider-dot') : null;
+      if (!dotBtn) return;
+      const idx = Number.parseInt(dotBtn.getAttribute('data-slide-index') || '0', 10);
+      if (Number.isFinite(idx)) {
+        goToSlide(idx, 'user');
+        syncSliderAutoplay();
+      }
+    });
+
+    sliderEl.addEventListener('mouseenter', () => { sliderState.isHovered = true; syncSliderAutoplay(); });
+    sliderEl.addEventListener('mouseleave', () => { sliderState.isHovered = false; syncSliderAutoplay(); });
+    sliderEl.addEventListener('focusin', () => { sliderState.isFocusedWithin = true; syncSliderAutoplay(); });
+    sliderEl.addEventListener('focusout', event => {
+      if (event.relatedTarget instanceof Node && sliderEl.contains(event.relatedTarget)) return;
+      sliderState.isFocusedWithin = false;
+      syncSliderAutoplay();
+    });
+
+    sliderEl.addEventListener('keydown', event => {
+      if (sliderState.totalSlides <= 1) return;
+      if (event.target instanceof Element && event.target.closest('input, textarea, select')) return;
+      if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+
+      event.preventDefault();
+      goToSlide(sliderState.currentIndex + (event.key === 'ArrowLeft' ? -1 : 1), 'user');
+      syncSliderAutoplay();
+    });
+  }
+
+  /**
+   * Gắn sự kiện vuốt ngang cảm ứng bằng Pointer Events cho viewport slider.
+   * @param {HTMLElement} sliderEl - Phần tử gốc `.js-hero-slider`.
+   */
+  function bindSliderSwipeEvents(sliderEl) {
+    const viewportEl = sliderEl.querySelector('.js-slider-viewport');
+    if (!viewportEl) return;
+
+    let activePointerId = null;
+    let startX = 0;
+    let startY = 0;
+
+    viewportEl.addEventListener('pointerdown', event => {
+      if (sliderState.totalSlides <= 1 || (event.pointerType === 'mouse' && event.button !== 0)) return;
+      activePointerId = event.pointerId;
+      startX = event.clientX;
+      startY = event.clientY;
+    });
+
+    viewportEl.addEventListener('pointerup', event => {
+      if (activePointerId === null || event.pointerId !== activePointerId) return;
+      const dx = event.clientX - startX;
+      const dy = event.clientY - startY;
+      activePointerId = null;
+
+      if (Math.abs(dx) >= SLIDER_SWIPE_THRESHOLD_PX && Math.abs(dx) > Math.abs(dy)) {
+        goToSlide(sliderState.currentIndex + (dx < 0 ? 1 : -1), 'user');
+        syncSliderAutoplay();
+      }
+    });
+
+    viewportEl.addEventListener('pointercancel', () => { activePointerId = null; });
   }
 
   /**
@@ -641,119 +707,14 @@
     const slideEls = sliderEl.querySelectorAll('.js-slider-slide');
     sliderState.totalSlides = slideEls.length || SLIDER_TOTAL_SLIDES;
 
-    // Theo dõi tùy chọn giảm chuyển động của hệ điều hành
-    const motionQuery = typeof window.matchMedia === 'function'
-      ? window.matchMedia('(prefers-reduced-motion: reduce)')
-      : null;
+    bindSliderReducedMotion();
+    bindSliderNavigationEvents(sliderEl);
+    bindSliderSwipeEvents(sliderEl);
 
-    if (motionQuery) {
-      sliderState.prefersReducedMotion = motionQuery.matches;
-      const handleMotionChange = event => {
-        sliderState.prefersReducedMotion = Boolean(event.matches);
-        updateSliderLiveMode('motion-change');
-        syncSliderAutoplay();
-      };
-      if (typeof motionQuery.addEventListener === 'function') {
-        motionQuery.addEventListener('change', handleMotionChange);
-      } else if (typeof motionQuery.addListener === 'function') {
-        motionQuery.addListener(handleMotionChange);
-      }
-    }
-
-    // Ủy quyền click cho các chấm phân trang trong slider
-    sliderEl.addEventListener('click', event => {
-      const target = event.target;
-      if (!(target instanceof Element)) return;
-
-      const dotBtn = target.closest('.js-slider-dot');
-      if (dotBtn) {
-        const idx = Number.parseInt(dotBtn.getAttribute('data-slide-index') || '0', 10);
-        if (Number.isFinite(idx)) {
-          goToSlide(idx, 'user');
-          syncSliderAutoplay();
-        }
-      }
-    });
-
-    // Tạm dừng khi rê chuột hoặc focus nằm trong khung slider
-    sliderEl.addEventListener('mouseenter', () => {
-      sliderState.isHovered = true;
-      syncSliderAutoplay();
-    });
-
-    sliderEl.addEventListener('mouseleave', () => {
-      sliderState.isHovered = false;
-      syncSliderAutoplay();
-    });
-
-    sliderEl.addEventListener('focusin', () => {
-      sliderState.isFocusedWithin = true;
-      syncSliderAutoplay();
-    });
-
-    sliderEl.addEventListener('focusout', event => {
-      const nextTarget = event.relatedTarget;
-      if (nextTarget instanceof Node && sliderEl.contains(nextTarget)) return;
-      sliderState.isFocusedWithin = false;
-      syncSliderAutoplay();
-    });
-
-    // Hỗ trợ điều hướng bằng phím mũi tên trái/phải khi focus nằm trong slider
-    sliderEl.addEventListener('keydown', event => {
-      if (sliderState.totalSlides <= 1) return;
-      const target = event.target;
-      if (target instanceof Element && target.closest('input, textarea, select')) return;
-
-      if (event.key === 'ArrowLeft') {
-        event.preventDefault();
-        goToSlide(sliderState.currentIndex - 1, 'user');
-        syncSliderAutoplay();
-      } else if (event.key === 'ArrowRight') {
-        event.preventDefault();
-        goToSlide(sliderState.currentIndex + 1, 'user');
-        syncSliderAutoplay();
-      }
-    });
-
-    // Vuốt ngang trên thiết bị cảm ứng bằng Pointer Events
-    const viewportEl = sliderEl.querySelector('.js-slider-viewport');
-    if (viewportEl) {
-      let activePointerId = null;
-      let startX = 0;
-      let startY = 0;
-
-      viewportEl.addEventListener('pointerdown', event => {
-        if (sliderState.totalSlides <= 1) return;
-        if (event.pointerType === 'mouse' && event.button !== 0) return;
-        activePointerId = event.pointerId;
-        startX = event.clientX;
-        startY = event.clientY;
-      });
-
-      viewportEl.addEventListener('pointerup', event => {
-        if (activePointerId === null || event.pointerId !== activePointerId) return;
-        const dx = event.clientX - startX;
-        const dy = event.clientY - startY;
-        activePointerId = null;
-
-        if (Math.abs(dx) >= SLIDER_SWIPE_THRESHOLD_PX && Math.abs(dx) > Math.abs(dy)) {
-          goToSlide(sliderState.currentIndex + (dx < 0 ? 1 : -1), 'user');
-          syncSliderAutoplay();
-        }
-      });
-
-      viewportEl.addEventListener('pointercancel', () => {
-        activePointerId = null;
-      });
-    }
-
-    // Tạm dừng khi tab trình duyệt bị ẩn
     document.addEventListener('visibilitychange', () => {
       sliderState.isPageHidden = Boolean(document.hidden);
       syncSliderAutoplay();
     });
-
-    // Dọn dẹp timer khi rời trang
     window.addEventListener('pagehide', stopSliderAutoplay);
     window.addEventListener('beforeunload', stopSliderAutoplay);
 
@@ -763,10 +724,14 @@
 
   /**
    * Xác định khóa localStorage lưu danh sách hội nghị đã lưu của người dùng hiện tại.
-   * Đồng bộ tuyệt đối với app.js và detail.js (confguide_saved_${userId} hoặc confguide_saved_guest).
+   * Đồng bộ tuyệt đối với js/pages/search.js và js/pages/detail.js (confguide_saved_${userId} hoặc confguide_saved_guest).
    * @returns {string} Khóa lưu trữ trong localStorage.
    */
   function getSavedStorageKey() {
+    const utils = getUtils();
+    if (utils && typeof utils.getSavedStorageKey === 'function') {
+      return utils.getSavedStorageKey(false);
+    }
     const user = readStorageSafe('confguide_current_user', null);
     return user && user.id ? `confguide_saved_${user.id}` : 'confguide_saved_guest';
   }
@@ -929,9 +894,14 @@
       searchForm.addEventListener('submit', function (e) {
         e.preventDefault();
         const query = searchInput.value.trim();
-        window.location.href = query
+        const targetUrl = query
           ? `search.html?q=${encodeURIComponent(query)}`
           : 'search.html';
+        if (window.ConfGuidePageTransition && typeof window.ConfGuidePageTransition.navigate === 'function') {
+          window.ConfGuidePageTransition.navigate(targetUrl, { searchFocus: true });
+        } else {
+          window.location.href = targetUrl;
+        }
       });
     }
   }
@@ -959,11 +929,9 @@
     setLoadingState(true);
 
     try {
-      const response = await fetch('data/conference_data.json');
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
-      const data = await response.json();
+      const data = utils && typeof utils.fetchJsonCached === 'function'
+        ? await utils.fetchJsonCached('data/conferences.json')
+        : await fetch('data/conferences.json').then(r => { if (!r.ok) throw new Error(r.status); return r.json(); });
       allConferences = Array.isArray(data) && data.length > 0
         ? data.map(normalize).filter(Boolean)
         : fallback;
@@ -977,6 +945,94 @@
   }
 
   /**
+   * Tạo mã HTML một thẻ hội nghị nổi bật trên lưới Trang chủ.
+   * @param {Object} item - Đối tượng hội nghị chuẩn hóa.
+   * @param {Array<string>} savedIds - Mảng ID hội nghị đã lưu.
+   * @param {Object|null} utils - Đối tượng tiện ích ConfGuideUtils.
+   * @returns {string} Chuỗi HTML `<article class="conf-card card-surface">`.
+   */
+  function buildFeaturedConferenceCardHtml(item, savedIds, utils) {
+    const esc = utils && utils.escapeHtml ? utils.escapeHtml : val => String(val ?? '');
+    const nextDl = utils && utils.getNextDeadline ? utils.getNextDeadline(item) : null;
+    let deadlineBadgeText = 'Chưa công bố';
+    let deadlineStatusMod = 'closed';
+
+    if (nextDl) {
+      const formattedDl = utils && utils.formatDeadlineVi
+        ? utils.formatDeadlineVi(nextDl.date)
+        : (nextDl.displayDate || nextDl.date);
+      if (!nextDl.isPassed) {
+        deadlineBadgeText = `${nextDl.shortName}: ${formattedDl} (còn ${nextDl.daysLeft} ngày)`;
+        deadlineStatusMod = nextDl.daysLeft <= HOME_URGENT_DAYS ? 'urgent' : 'open';
+      } else {
+        deadlineBadgeText = `${nextDl.shortName}: ${formattedDl} (Đã qua)`;
+      }
+    }
+
+    const confId = resolveConferenceId(item);
+    const confName = String(item.name || confId).trim();
+    const isSaved = Boolean(confId && savedIds.includes(confId));
+    const rankBadge = item.rank ? `Rank ${item.rank}` : 'Rank A';
+    const dateRange = utils && utils.formatRangeVi
+      ? (utils.formatRangeVi(item.startDate, item.endDate) || item.date_happen || '2026')
+      : (item.date_happen || '2026');
+    const descText = item.summarization || item.fullName || item.full_name || 'Hội nghị khoa học công nghệ thông tin uy tín.';
+    const saveBtnHtml = renderSaveButtonHtml(confId, confName, isSaved);
+    const compareBtnHtml = window.ConfGuideCompare ? window.ConfGuideCompare.renderToggleButton(item) : '';
+    const avatarHtml = utils && utils.renderConferenceAvatar
+      ? utils.renderConferenceAvatar(item)
+      : `<div class="conf-badge-logo" aria-hidden="true">${esc((item.name || 'CG').slice(0, 4).toUpperCase())}</div>`;
+
+    return `
+      <article class="conf-card card-surface" data-id="${esc(confId)}">
+        <div>
+          <div class="conf-top">
+            ${avatarHtml}
+            <div class="conf-title-wrap">
+              <h3>${esc(item.name)}</h3>
+              <span class="conf-rank">${esc(rankBadge)}</span>
+            </div>
+          </div>
+
+          <p class="conf-desc">${esc(descText)}</p>
+
+          <div class="conf-meta">
+            <div class="conf-meta-item">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                aria-hidden="true">
+                <path d="M12 2a8 8 0 0 0-8 8c0 5.25 8 12 8 12s8-6.75 8-12a8 8 0 0 0-8-8z"/>
+                <circle cx="12" cy="10" r="3"/>
+              </svg>
+              <span>${esc(item.location || 'Chưa xác định')}</span>
+            </div>
+            <div class="conf-meta-item">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                aria-hidden="true">
+                <rect x="3" y="4" width="18" height="18" rx="2"/>
+                <path d="M16 2v4M8 2v4M3 10h18"/>
+              </svg>
+              <span>${esc(dateRange)}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="conf-footer">
+          <div class="conf-deadline-badge conf-deadline-badge--${deadlineStatusMod}">
+            <strong>${esc(deadlineBadgeText)}</strong>
+          </div>
+          <div class="conf-card-actions">
+            ${saveBtnHtml}
+            ${compareBtnHtml}
+            <a href="detail.html?id=${encodeURIComponent(confId)}" class="btn-detail">
+              Xem chi tiết &rarr;
+            </a>
+          </div>
+        </div>
+      </article>
+    `;
+  }
+
+  /**
    * Hiển thị tối đa 6 hội nghị tiêu biểu lên lưới trang chủ.
    */
   function renderFeaturedConferences() {
@@ -985,33 +1041,27 @@
     const resultsStatus = document.getElementById('resultsCount');
     const btnViewAll = document.getElementById('btnViewAll');
     const utils = getUtils();
-    const esc = utils && utils.escapeHtml ? utils.escapeHtml : val => String(val ?? '');
 
     if (!grid) return;
 
     if (btnViewAll) {
       btnViewAll.innerHTML = `
         <span>Xem tất cả ${allConferences.length} hội nghị trên hệ thống</span>
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+          stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <line x1="5" y1="12" x2="19" y2="12"></line>
           <polyline points="12 5 19 12 12 19"></polyline>
         </svg>
       `;
     }
 
-    // Danh sách hội nghị hiển thị
-    const filtered = allConferences.slice();
-
-    // Sắp xếp theo năm và điểm đánh giá
-    filtered.sort((a, b) => {
+    const filtered = allConferences.slice().sort((a, b) => {
       const yearA = parseInt(a.year || '2026', 10);
       const yearB = parseInt(b.year || '2026', 10);
-      if (yearB !== yearA) return yearB - yearA;
-      return (b.rating || 0) - (a.rating || 0);
+      return yearB !== yearA ? yearB - yearA : (b.rating || 0) - (a.rating || 0);
     });
 
-    const displayItems = filtered.slice(0, 6);
-
+    const displayItems = filtered.slice(0, FEATURED_HOME_LIMIT);
     if (resultsStatus) {
       resultsStatus.innerHTML = `Hiển thị <strong>${displayItems.length}</strong> hội nghị tiêu biểu`;
     }
@@ -1023,77 +1073,8 @@
     }
 
     if (emptyState) emptyState.hidden = true;
-
     const savedIds = getSavedConferenceIds();
-
-    grid.innerHTML = displayItems.map(item => {
-      const nextDl = utils && utils.getNextDeadline ? utils.getNextDeadline(item) : null;
-      let deadlineBadgeText = 'Chưa công bố';
-
-      if (nextDl) {
-        const formattedDl = utils && utils.formatDeadlineVi
-          ? utils.formatDeadlineVi(nextDl.date)
-          : (nextDl.displayDate || nextDl.date);
-        if (!nextDl.isPassed) {
-          deadlineBadgeText = `${nextDl.shortName}: ${formattedDl} (còn ${nextDl.daysLeft} ngày)`;
-        } else {
-          deadlineBadgeText = `${nextDl.shortName}: ${formattedDl} (Đã qua)`;
-        }
-      }
-
-      const confId = resolveConferenceId(item);
-      const confName = String(item.name || confId).trim();
-      const isSaved = Boolean(confId && savedIds.includes(confId));
-      const rankBadge = item.rank ? `Rank ${item.rank}` : 'Rank A';
-      const dateRange = utils && utils.formatRangeVi
-        ? (utils.formatRangeVi(item.startDate, item.endDate) || item.date_happen || '2026')
-        : (item.date_happen || '2026');
-      const saveBtnHtml = renderSaveButtonHtml(confId, confName, isSaved);
-      const compareBtnHtml = window.ConfGuideCompare ? window.ConfGuideCompare.renderToggleButton(item) : '';
-      const avatarHtml = utils && utils.renderConferenceAvatar
-        ? utils.renderConferenceAvatar(item)
-        : `<div class="conf-badge-logo" aria-hidden="true">${esc((item.name || 'CG').slice(0, 4).toUpperCase())}</div>`;
-
-      return `
-        <article class="conf-card card-surface" data-id="${esc(confId)}">
-          <div>
-            <div class="conf-top">
-              ${avatarHtml}
-              <div class="conf-title-wrap">
-                <h3>${esc(item.name)}</h3>
-                <span class="conf-rank">${esc(rankBadge)}</span>
-              </div>
-            </div>
-
-            <p class="conf-desc">${esc(item.summarization || item.fullName || item.full_name || 'Hội nghị khoa học công nghệ thông tin uy tín.')}</p>
-
-            <div class="conf-meta">
-              <div class="conf-meta-item">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 2a8 8 0 0 0-8 8c0 5.25 8 12 8 12s8-6.75 8-12a8 8 0 0 0-8-8z"/><circle cx="12" cy="10" r="3"/></svg>
-                <span>${esc(item.location || 'Chưa xác định')}</span>
-              </div>
-              <div class="conf-meta-item">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
-                <span>${esc(dateRange)}</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="conf-footer">
-            <div class="conf-deadline-badge">
-              <strong>${esc(deadlineBadgeText)}</strong>
-            </div>
-            <div class="conf-card-actions">
-              ${saveBtnHtml}
-              ${compareBtnHtml}
-              <a href="detail.html?id=${encodeURIComponent(confId)}" class="btn-detail">
-                Xem chi tiết &rarr;
-              </a>
-            </div>
-          </div>
-        </article>
-      `;
-    }).join('');
+    grid.innerHTML = displayItems.map(item => buildFeaturedConferenceCardHtml(item, savedIds, utils)).join('');
   }
 
   /**
@@ -1111,11 +1092,18 @@
     });
   }
 
-  document.addEventListener('DOMContentLoaded', function () {
+  /* ================= 6. KHỞI TẠO TRANG CHỦ ================= */
+
+  /**
+   * Điểm khởi chạy duy nhất cho các module trên Trang chủ khi DOM sẵn sàng.
+   */
+  function initIndexPage() {
     initSearchGateway();
     initHeroSliderEvents();
     initSaveConferences();
     initTabs();
     loadData();
-  });
+  }
+
+  document.addEventListener('DOMContentLoaded', initIndexPage);
 })();
