@@ -4,7 +4,7 @@
 > **Môn học:** Internet và Công nghệ Web (IE104)  
 > **Đơn vị:** Trường Đại học Công nghệ Thông tin – ĐHQG TP.HCM (UIT)
 
-**ConfGuide** là nền tảng web tĩnh thuần (Vanilla HTML5, CSS3, JavaScript ES6+) hỗ trợ sinh viên, giảng viên và nhà nghiên cứu tra cứu, đối chiếu phân hạng học thuật (CORE, Scopus), quy đổi hạn nộp bài theo giờ Việt Nam (`UTC+7` từ chuẩn `AoE / UTC-12`) và theo dõi tiến độ nộp bài các hội nghị khoa học Công nghệ thông tin tại Việt Nam.
+**ConfGuide** là nền tảng web tĩnh thuần (Vanilla HTML5, CSS3, JavaScript ES6+) hỗ trợ sinh viên, giảng viên và nhà nghiên cứu tra cứu, khuyến nghị, đối chiếu phân hạng học thuật (CORE, Scopus), quy đổi hạn nộp bài theo giờ Việt Nam (`UTC+7` từ chuẩn `AoE / UTC-12`) và theo dõi tiến độ nộp bài các hội nghị khoa học Công nghệ thông tin diễn ra tại Việt Nam (bao gồm cả hội nghị quốc tế được tổ chức tại Việt Nam).
 
 ---
 
@@ -26,6 +26,7 @@
 - [13. Công cụ thu thập dữ liệu](#13-công-cụ-thu-thập-dữ-liệu)
 - [14. Quy trình làm việc nhóm](#14-quy-trình-làm-việc-nhóm)
 - [15. Lời cảm ơn và nguồn dữ liệu](#15-lời-cảm-ơn-và-nguồn-dữ-liệu)
+- [16. Định hướng phát triển](#16-định-hướng-phát-triển)
 - [Phụ lục A: Bảng ánh xạ tái cấu trúc](#phụ-lục-a-bảng-ánh-xạ-tái-cấu-trúc)
 - [Phụ lục B: Số liệu đo ban đầu trước tối ưu](#phụ-lục-b-số-liệu-đo-ban-đầu-trước-tối-ưu)
 - [Phụ lục C: Báo cáo tối ưu mã nguồn chi tiết](#phụ-lục-c-báo-cáo-tối-ưu-mã-nguồn-chi-tiết)
@@ -78,10 +79,10 @@
 Theo nội dung đặc tả tại [`data/about.json`](data/about.json), người nghiên cứu tại Việt Nam thường gặp ba rào cản khi tìm nơi công bố công trình khoa học:
 1. **Thông tin phân tán:** Các thông báo Call for Papers (CFP) nằm rải rác trên nhiều website ban tổ chức và diễn đàn khác nhau, gây tốn thời gian tổng hợp và đối chiếu.
 2. **Khó đối chiếu phân hạng:** Các thước đo uy tín như CORE Rankings (`A*`, `A`, `B`, `C`) hay Scopus chưa được quy tụ thống nhất theo tiểu ngành CNTT.
-3. **Lệch chuẩn múi giờ quốc tế:** Hạn nộp bài thường công bố theo múi giờ Anywhere on Earth (`AoE`, `UTC-12`) hoặc giờ địa phương ban tổ chức, dễ gây nhầm lẫn khi tính sang giờ Việt Nam (`ICT`, `UTC+7`).
+3. **Lệch chuẩn múi giờ nộp bài:** Hạn nộp bài thường công bố theo múi giờ Anywhere on Earth (`AoE`, `UTC-12`) hoặc giờ địa phương ban tổ chức, dễ gây nhầm lẫn khi tính sang giờ Việt Nam (`Asia/Ho_Chi_Minh`, `UTC+7`).
 
 ### Mục tiêu & Đối tượng sử dụng
-- **Mục tiêu:** Cung cấp nền tảng tập trung giúp tìm kiếm nhanh theo từ khóa/chủ đề, lọc đa tiêu chí, đồng bộ bộ lọc qua URL, quy đổi hạn nộp sang `UTC+7` theo thời gian thực, đối chiếu cạnh nhau nhiều hội nghị và lập lịch hạn nộp cá nhân.
+- **Mục tiêu:** Cung cấp nền tảng tập trung phục vụ tra cứu và khuyến nghị hội nghị khoa học Công nghệ thông tin diễn ra tại Việt Nam (bao gồm cả hội nghị quốc tế được tổ chức tại Việt Nam), hỗ trợ tìm kiếm nhanh theo từ khóa/chủ đề, lọc đa tiêu chí, đồng bộ bộ lọc qua URL, quy đổi hạn nộp sang `UTC+7` theo thời gian thực, đối chiếu cạnh nhau nhiều hội nghị và lập lịch hạn nộp cá nhân.
 - **Đối tượng sử dụng:** Sinh viên, học viên cao học, nghiên cứu sinh, giảng viên và các nhóm nghiên cứu lĩnh vực Công nghệ thông tin.
 
 ---
@@ -111,7 +112,7 @@ Tất cả các tính năng dưới đây đã được kiểm chứng trực ti
   - Đăng nhập/đăng ký sử dụng hàm băm SHA-256 (Web Crypto API), 20 tài khoản seed từ [`data/users.json`](data/users.json) (và mảng `SEED_USERS` dự phòng), hỗ trợ `?redirect=<url>` an toàn chống open-redirect.
   - Trang Giới thiệu đọc nội dung từ [`data/about.json`](data/about.json) kèm modal Đề xuất hội nghị mới (`confguide_proposals`). Header/Footer dùng chung tích hợp modal Cài đặt & Quyền riêng tư, Trợ giúp FAQ, Báo cáo sự cố (`confguide_reports`) và form góp ý chân trang (`confguide_feedback`, debounce `10s`).
 - **Hệ thống màu sắc & Chuyển trang ([`css/base/base.css`](css/base/base.css), [`css/base/transition.css`](css/base/transition.css), [`js/core/page-transition.js`](js/core/page-transition.js)):**
-  - Hệ Design Tokens **OKLCH** 2 tầng theo tỷ lệ **60:30:10** (kèm fallback `@supports` cho trình duyệt cũ), hiệu ứng Liquid Glass trên Header/thẻ kính, Light/Dark Mode đồng bộ qua `confguide_theme` có script chống FOUC ở đầu `<body>`.
+  - Hệ Design Tokens **OKLCH** 2 tầng theo tỷ lệ **60:30:10** (kèm fallback `@supports` cho trình duyệt cũ), hiệu ứng kính mờ (`backdrop-filter`) trên thanh điều hướng nổi, Light/Dark Mode đồng bộ qua `confguide_theme` có script chống FOUC ở đầu `<body>`.
   - Chuyển trang mượt không mờ thanh điều hướng nhờ cơ chế 2 nhánh kết hợp Speculation Rules.
 
 ---
@@ -423,6 +424,16 @@ Repository có sẵn script Python độc lập [`data/scrape-conferences.py`](d
 - **Lời cảm ơn:** Nhóm xin chân thành cảm ơn **ThS. Võ Tấn Khoa** (Khoa Khoa học và Kỹ thuật Thông tin, Trường Đại học Công nghệ Thông tin – ĐHQG TP.HCM) đã hướng dẫn, góp ý cấu trúc và tiêu chuẩn kỹ thuật xuyên suốt đồ án môn học **IE104**.
 - **Nguồn dữ liệu học thuật:** Thông tin đối chiếu phân hạng và dữ liệu hội nghị tham khảo từ **CORE (Computing Research & Education)**, **DBLP Computer Science Bibliography**, **WikiCFP**, **Scopus (Elsevier)** và website chính thức của từng hội nghị khoa học CNTT tại Việt Nam.
 - **Giấy phép:** `[CẦN ĐIỀN: Bổ sung tệp LICENSE nếu nhóm phát hành mã nguồn mở]` *(repository hiện chưa có tệp `LICENSE`)*.
+
+---
+
+## 16. Định hướng phát triển
+
+Trong các phiên bản nâng cấp tiếp theo sau giai đoạn MVP môn học IE104, dự án dự kiến mở rộng các hạng mục sau:
+
+- **Thiết kế giao diện Liquid Glass (phong cách iOS 26):** Áp dụng ngôn ngữ thiết kế kính lỏng kiểu **iOS 26** với độ khúc xạ ánh sáng, chiều sâu lớp nổi và chuyển động vi mô đồng bộ cho thanh điều hướng, thẻ hội nghị và hộp thoại tương tác (hiện tại phiên bản MVP chưa triển khai hiệu ứng Liquid Glass này).
+- **Khuyến nghị hội nghị bằng AI:** Gợi ý tự động các hội nghị CNTT phù hợp diễn ra tại Việt Nam dựa trên nội dung tóm tắt (*Abstract*) bài báo của tác giả.
+- **Đồng bộ lịch tự động & Thông báo:** Tự động đồng bộ mốc hạn nộp (`UTC+7`) sang Google Calendar / Outlook Calendar và gửi thông báo đẩy (*Push Notifications*) khi có đợt nhận bài mới.
 
 ---
 

@@ -7,6 +7,24 @@
 (function () {
   'use strict';
 
+  /** Cấu hình múi giờ chuẩn Việt Nam (UTC+7 / Asia/Ho_Chi_Minh) và độ lệch AoE (UTC-12) */
+  const VN_TIMEZONE_ID = 'Asia/Ho_Chi_Minh';
+  const VN_TIMEZONE_LABEL = 'UTC+7 (giờ Việt Nam)';
+  const VN_UTC_OFFSET_MS = 7 * 3600000;
+  const AOE_TO_UTC_OFFSET_MS = 12 * 3600000;
+
+  /**
+   * Lấy ngày lịch hiện tại dạng ISO YYYY-MM-DD theo múi giờ cố định Asia/Ho_Chi_Minh (UTC+7).
+   * @returns {string} Chuỗi ngày YYYY-MM-DD tại UTC+7.
+   */
+  function getTodayVnIso() {
+    const vnNow = new Date(Date.now() + VN_UTC_OFFSET_MS);
+    const year = vnNow.getUTCFullYear();
+    const month = String(vnNow.getUTCMonth() + 1).padStart(2, '0');
+    const day = String(vnNow.getUTCDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
   /** Các mốc thời gian chuẩn của một hội nghị khoa học */
   const MILESTONE_DEFINITIONS = [
     { key: 'abstract', name: 'Nộp bản tóm tắt (Abstract)', shortName: 'Abstract' },
@@ -330,10 +348,10 @@
   }
 
   /**
-   * Quy đổi mốc thời hạn nộp bài từ chuẩn AoE (UTC-12) sang giờ Việt Nam cố định (Asia/Ho_Chi_Minh, UTC+7).
-   * Công thức: AoE (UTC-12) + 19 giờ = UTC+7 (ví dụ 23:59 AoE ngày D thành 18:59 ngày D+1 theo UTC+7).
-   * Giữ nguyên AoE khi dữ liệu không phải hạn nộp có giờ chuẩn hoặc khi tùy chọn hasExplicitTime = false.
-   * @param {string} dateStr Chuỗi ngày hạn nộp (YYYY-MM-DD hoặc chuỗi có kèm giờ).
+   * Quy đổi mốc thời hạn nộp bài từ chuẩn AoE (UTC-12) hoặc chuỗi ISO có múi giờ sang giờ Việt Nam (Asia/Ho_Chi_Minh, UTC+7).
+   * Công thức mặc định cho deadline chỉ có ngày: 23:59 AoE (UTC-12) + 19 giờ = 18:59 ngày D+1 theo UTC+7.
+   * Khi dữ liệu không phải hạn nộp hoặc không có đủ thông tin giờ/múi giờ (hasExplicitTime = false), giữ nguyên giá trị ngày thô.
+   * @param {string} dateStr Chuỗi ngày hạn nộp (YYYY-MM-DD hoặc chuỗi có kèm giờ/múi giờ).
    * @param {Object} [options={}] Tùy chọn quy đổi ({ isDeadline: boolean, hasExplicitTime: boolean }).
    * @returns {Object|null} Thông tin mốc thời gian đã quy đổi kèm nhãn múi giờ rõ ràng hoặc null nếu không hợp lệ.
    */
@@ -355,38 +373,44 @@
 
     const aoeDateVi = `${String(day).padStart(2, '0')}/${String(month).padStart(2, '0')}/${year}`;
 
-    // Nếu không phải hạn nộp bài hoặc dữ liệu chỉ có ngày thuần túy không kèm quy ước giờ AoE (như ngày người dùng tự nhập)
+    // Nếu không phải hạn nộp bài hoặc dữ liệu chỉ có ngày thuần túy không đủ thông tin giờ/múi giờ nguồn: giữ nguyên ngày thô
     if (!isDeadline || !hasExplicitTime) {
-      const fallbackTargetMs = Date.UTC(year, month - 1, day, 23, 59, 59) + 12 * 3600000;
+      const fallbackTargetMs = Date.UTC(year, month - 1, day, 23, 59, 59) - VN_UTC_OFFSET_MS;
       return {
         rawDate: iso,
         aoeDateVi: aoeDateVi,
         vnIsoDate: iso,
         vnDateVi: aoeDateVi,
         vnTimeVi: '',
-        timezoneLabel: 'AoE',
+        timezoneLabel: VN_TIMEZONE_LABEL,
         converted: false,
         targetMs: fallbackTargetMs,
-        displayText: `${aoeDateVi} (AoE)`
+        displayText: aoeDateVi
       };
     }
 
-    // Kiểm tra xem chuỗi có ghi giờ cụ thể hay áp dụng quy ước 23:59:59 AoE (UTC-12) của hạn nộp hội nghị
-    let hourAoE = 23;
-    let minuteAoE = 59;
-    let secondAoE = 59;
-    const timeMatch = trimmed.match(/[T\s](\d{1,2}):(\d{2})(?::(\d{2}))?/);
-    if (timeMatch) {
-      hourAoE = Number(timeMatch[1]);
-      minuteAoE = Number(timeMatch[2]);
-      secondAoE = timeMatch[3] ? Number(timeMatch[3]) : 0;
+    // Kiểm tra xem chuỗi có ghi kèm múi giờ ISO tường minh hay mặc định theo chuẩn 23:59:59 AoE (UTC-12)
+    let targetMs = NaN;
+    if (/[T\s]\d{1,2}:\d{2}(?::\d{2})?(?:\.\d+)?\s*(Z|[+-]\d{2}:?\d{2})$/i.test(trimmed)) {
+      targetMs = Date.parse(trimmed.replace(/\s+/, 'T'));
     }
 
-    // Mốc thời gian tuyệt đối (UTC epoch ms): giờ AoE (UTC-12) tương đương cộng 12 giờ để về UTC+0
-    const targetMs = Date.UTC(year, month - 1, day, hourAoE, minuteAoE, secondAoE) + 12 * 3600000;
+    if (!Number.isFinite(targetMs)) {
+      let hourAoE = 23;
+      let minuteAoE = 59;
+      let secondAoE = 59;
+      const timeMatch = trimmed.match(/[T\s](\d{1,2}):(\d{2})(?::(\d{2}))?/);
+      if (timeMatch) {
+        hourAoE = Number(timeMatch[1]);
+        minuteAoE = Number(timeMatch[2]);
+        secondAoE = timeMatch[3] ? Number(timeMatch[3]) : 0;
+      }
+      // Mốc thời gian tuyệt đối (UTC epoch ms): giờ AoE (UTC-12) cộng 12 giờ để về UTC+0
+      targetMs = Date.UTC(year, month - 1, day, hourAoE, minuteAoE, secondAoE) + AOE_TO_UTC_OFFSET_MS;
+    }
 
-    // Quy đổi sang múi giờ cố định Asia/Ho_Chi_Minh (UTC+7): cộng đúng 7 giờ từ UTC+0 (tức AoE + 19 giờ)
-    const vnWallClockMs = targetMs + 7 * 3600000;
+    // Quy đổi sang múi giờ cố định Asia/Ho_Chi_Minh (UTC+7): cộng 7 giờ từ UTC+0
+    const vnWallClockMs = targetMs + VN_UTC_OFFSET_MS;
     const vnDateObj = new Date(vnWallClockMs);
 
     const vnYear = vnDateObj.getUTCFullYear();
@@ -398,7 +422,7 @@
     const vnIsoDate = `${vnYear}-${vnMonth}-${vnDay}`;
     const vnDateVi = `${vnDay}/${vnMonth}/${vnYear}`;
     const vnTimeVi = `${vnHour}:${vnMin}`;
-    const timezoneLabel = 'UTC+7 (giờ Việt Nam)';
+    const timezoneLabel = VN_TIMEZONE_LABEL;
 
     return {
       rawDate: iso,
@@ -414,7 +438,7 @@
   }
 
   /**
-   * Định dạng chuỗi hiển thị hạn nộp bài kèm nhãn múi giờ rõ ràng ("UTC+7 (giờ Việt Nam)" hoặc "AoE").
+   * Định dạng chuỗi hiển thị hạn nộp bài theo UTC+7 (giờ Việt Nam) hoặc giữ ngày thô khi thiếu thông tin quy đổi.
    * @param {string} dateStr Chuỗi ngày hạn nộp.
    * @param {Object} [options={}] Tùy chọn ({ isDeadline: boolean, hasExplicitTime: boolean, includeAoEOrigin: boolean }).
    * @returns {string} Chuỗi ngày giờ kèm nhãn múi giờ minh bạch.
@@ -757,7 +781,7 @@
   }
 
   /**
-   * Tạo đường dẫn thêm sự kiện hạn nộp sang Google Calendar (theo ngày đã quy đổi UTC+7).
+   * Tạo đường dẫn thêm sự kiện hạn nộp sang Google Calendar theo ngày giờ đã quy đổi UTC+7 (Asia/Ho_Chi_Minh).
    * @param {string} title Tiêu đề sự kiện.
    * @param {string} description Nội dung mô tả chi tiết.
    * @param {string} location Địa điểm tổ chức.
@@ -769,16 +793,24 @@
     const iso = converted ? converted.vnIsoDate : normalizeDateIso(dateStr);
     if (!iso) return 'https://calendar.google.com/calendar/render';
     const compact = iso.replace(/-/g, '');
-    const nextDate = new Date(Date.parse(`${iso}T00:00:00Z`) + 86400000);
-    const nextCompact = nextDate.toISOString().slice(0, 10).replace(/-/g, '');
+    let datesParam = '';
+
+    if (converted && converted.converted && converted.vnTimeVi) {
+      const compactTime = `${converted.vnTimeVi.replace(/:/g, '')}00`;
+      datesParam = `${compact}T${compactTime}/${compact}T${compactTime}`;
+    } else {
+      const nextDate = new Date(Date.parse(`${iso}T00:00:00Z`) + 86400000);
+      const nextCompact = nextDate.toISOString().slice(0, 10).replace(/-/g, '');
+      datesParam = `${compact}/${nextCompact}`;
+    }
 
     const params = new URLSearchParams({
       action: 'TEMPLATE',
       text: title || 'ConfGuide Deadline',
-      dates: `${compact}/${nextCompact}`,
+      dates: datesParam,
       details: description || '',
       location: location || '',
-      ctz: 'Asia/Ho_Chi_Minh'
+      ctz: VN_TIMEZONE_ID
     });
     return `https://calendar.google.com/calendar/render?${params.toString()}`;
   }
@@ -797,7 +829,7 @@
   }
 
   /**
-   * Sinh nội dung tệp iCalendar (.ics) chứa danh sách các mốc sự kiện kèm nhắc nhở theo giờ Việt Nam (UTC+7).
+   * Sinh nội dung tệp iCalendar (.ics) chứa danh sách các mốc sự kiện kèm nhắc nhở theo giờ Việt Nam (UTC+7 / Asia/Ho_Chi_Minh).
    * @param {Array<Object>} events Danh sách sự kiện { title, description, location, date }.
    * @returns {string} Chuỗi nội dung file .ics.
    */
@@ -808,7 +840,17 @@
       'VERSION:2.0',
       'PRODID:-//ConfGuide//Academic Conference Deadlines//VI',
       'CALSCALE:GREGORIAN',
-      'METHOD:PUBLISH'
+      'METHOD:PUBLISH',
+      'BEGIN:VTIMEZONE',
+      `TZID:${VN_TIMEZONE_ID}`,
+      `X-LIC-LOCATION:${VN_TIMEZONE_ID}`,
+      'BEGIN:STANDARD',
+      'TZOFFSETFROM:+0700',
+      'TZOFFSETTO:+0700',
+      'TZNAME:+07',
+      'DTSTART:19700101T000000',
+      'END:STANDARD',
+      'END:VTIMEZONE'
     ];
 
     (events || []).forEach((ev, index) => {
@@ -816,15 +858,26 @@
       const iso = converted ? converted.vnIsoDate : normalizeDateIso(ev && ev.date);
       if (!iso) return;
       const startCompact = iso.replace(/-/g, '');
-      const endCompact = new Date(Date.parse(`${iso}T00:00:00Z`) + 86400000)
-        .toISOString().slice(0, 10).replace(/-/g, '');
+      let dtStartLine = '';
+      let dtEndLine = '';
+
+      if (converted && converted.converted && converted.vnTimeVi) {
+        const timeCompact = `${converted.vnTimeVi.replace(/:/g, '')}00`;
+        dtStartLine = `DTSTART;TZID=${VN_TIMEZONE_ID}:${startCompact}T${timeCompact}`;
+        dtEndLine = `DTEND;TZID=${VN_TIMEZONE_ID}:${startCompact}T${timeCompact}`;
+      } else {
+        const endCompact = new Date(Date.parse(`${iso}T00:00:00Z`) + 86400000)
+          .toISOString().slice(0, 10).replace(/-/g, '');
+        dtStartLine = `DTSTART;VALUE=DATE:${startCompact}`;
+        dtEndLine = `DTEND;VALUE=DATE:${endCompact}`;
+      }
 
       lines.push(
         'BEGIN:VEVENT',
         `UID:${stamp}-${index}-${Math.random().toString(36).slice(2, 8)}@confguide.vn`,
         `DTSTAMP:${stamp}`,
-        `DTSTART;VALUE=DATE:${startCompact}`,
-        `DTEND;VALUE=DATE:${endCompact}`,
+        dtStartLine,
+        dtEndLine,
         `SUMMARY:${escapeIcsText(ev.title || 'ConfGuide Deadline')}`,
         `DESCRIPTION:${escapeIcsText(ev.description || '')}`,
         `LOCATION:${escapeIcsText(ev.location || '')}`,
@@ -2091,8 +2144,8 @@
               <div>
                 ${renderBrandHtml('footer-brand')}
                 <p class="footer-brand-desc">
-                  Nền tảng hỗ trợ tìm kiếm, kết nối và quản lý các hội nghị khoa học uy tín,
-                  giúp các nhà nghiên cứu tìm đúng nơi gửi gắm công trình của mình.
+                  Nền tảng hỗ trợ tra cứu, khuyến nghị và theo dõi các hội nghị khoa học Công nghệ thông tin
+                  diễn ra tại Việt Nam (bao gồm cả hội nghị quốc tế được tổ chức tại Việt Nam).
                 </p>
               </div>
               <div class="footer-copyright">
@@ -2293,6 +2346,10 @@
   };
 
   window.ConfGuideUtils = {
+    VN_TIMEZONE_ID: VN_TIMEZONE_ID,
+    VN_TIMEZONE_LABEL: VN_TIMEZONE_LABEL,
+    VN_UTC_OFFSET_MS: VN_UTC_OFFSET_MS,
+    AOE_TO_UTC_OFFSET_MS: AOE_TO_UTC_OFFSET_MS,
     MILESTONE_DEFINITIONS: MILESTONE_DEFINITIONS,
     FALLBACK_CONFERENCES: FALLBACK_CONFERENCES,
     escapeHtml: escapeHtml,
@@ -2306,6 +2363,7 @@
     extractConferenceRank: extractConferenceRank,
     normalizeConference: normalizeConference,
     renderConferenceAvatar: renderConferenceAvatar,
+    getTodayVnIso: getTodayVnIso,
     convertDeadlineToVn: convertDeadlineToVn,
     formatDeadlineVi: formatDeadlineVi,
     parseDeadlinesList: parseDeadlinesList,

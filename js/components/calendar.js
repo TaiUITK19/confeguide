@@ -12,11 +12,13 @@
 
   /* ================= 1. HẰNG SỐ & TRẠNG THÁI MODULE ================= */
 
+  const SHARED_UTILS = window.ConfGuideUtils || {};
   const MAX_VISIBLE_DAY_EVENTS = 3;
   const MAX_EVENT_SPAN_DAYS = 60;
   const UPCOMING_LIMIT = 5;
-  const AOE_OFFSET_MS = 12 * 3600000;
-  const VN_OFFSET_MS = 7 * 3600000;
+  const AOE_OFFSET_MS = SHARED_UTILS.AOE_TO_UTC_OFFSET_MS || 12 * 3600000;
+  const VN_OFFSET_MS = SHARED_UTILS.VN_UTC_OFFSET_MS || 7 * 3600000;
+  const VN_TIMEZONE_LABEL = SHARED_UTILS.VN_TIMEZONE_LABEL || 'UTC+7 (giờ Việt Nam)';
   const WEEKDAY_LABELS = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
 
   const EVENT_META = {
@@ -124,12 +126,25 @@
   }
 
   /**
-   * Lấy ngày hiện tại cố định theo múi giờ Việt Nam (UTC+7), đồng bộ với ConfGuideUtils.
+   * Lấy ngày hiện tại cố định theo múi giờ Việt Nam (UTC+7), ưu tiên dùng ConfGuideUtils.getTodayVnIso.
    * @returns {{ year: number, month: number, day: number, iso: string, nowMs: number }} Thông tin ngày hôm nay.
    */
   function getVnTodayInfo() {
+    const utils = getCalendarUtils();
     const nowMs = Date.now();
-    const vnNow = new Date(nowMs + 7 * 3600000);
+    const sharedIso = typeof utils.getTodayVnIso === 'function' ? utils.getTodayVnIso() : '';
+    const sharedParts = sharedIso ? parseIsoParts(sharedIso) : null;
+    if (sharedParts) {
+      return {
+        year: sharedParts.year,
+        month: sharedParts.month,
+        day: sharedParts.day,
+        iso: sharedIso,
+        nowMs
+      };
+    }
+
+    const vnNow = new Date(nowMs + VN_OFFSET_MS);
     const year = vnNow.getUTCFullYear();
     const month = vnNow.getUTCMonth() + 1;
     const day = vnNow.getUTCDate();
@@ -204,7 +219,7 @@
     const hh = String(vnDateObj.getUTCHours()).padStart(2, '0');
     const mm = String(vnDateObj.getUTCMinutes()).padStart(2, '0');
     const vnTimeVi = `${hh}:${mm}`;
-    const timezoneLabel = 'UTC+7 (giờ Việt Nam)';
+    const timezoneLabel = VN_TIMEZONE_LABEL;
 
     return {
       rawDate: formatIsoDate(parts.year, parts.month, parts.day),
@@ -221,6 +236,7 @@
 
   /**
    * Quy đổi ngày deadline AoE sang ngày giờ Việt Nam (UTC+7) với dự phòng khi thiếu ConfGuideUtils.
+   * Khi thiếu giờ/múi giờ nguồn (isDeadline = false hoặc hasExplicitTime = false), giữ nguyên giá trị ngày thô.
    * @param {string} dateStr - Chuỗi ngày gốc (YYYY-MM-DD...).
    * @param {Object} [options={}] - Tùy chọn quy đổi (`isDeadline`, `hasExplicitTime`).
    * @returns {Object|null} Thông tin đã quy đổi gồm vnIsoDate, displayText, targetMs hoặc null.
@@ -245,10 +261,10 @@
         vnIsoDate: iso,
         vnDateVi: aoeDateVi,
         vnTimeVi: '',
-        timezoneLabel: 'AoE',
+        timezoneLabel: VN_TIMEZONE_LABEL,
         converted: false,
-        targetMs: Date.UTC(parts.year, parts.month - 1, parts.day, 23, 59, 59) + AOE_OFFSET_MS,
-        displayText: `${aoeDateVi} (AoE)`
+        targetMs: Date.UTC(parts.year, parts.month - 1, parts.day, 23, 59, 59) - VN_OFFSET_MS,
+        displayText: aoeDateVi
       };
     }
 

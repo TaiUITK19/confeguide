@@ -9,12 +9,16 @@
 
   const utils = window.ConfGuideUtils || {};
 
+  /** Mục định hướng thiết kế tương lai bổ sung vào lộ trình trang About */
+  const LIQUID_GLASS_ROADMAP_FEATURE =
+    'Thiết kế lại giao diện theo phong cách Liquid Glass (hiệu ứng kính lỏng kiểu iOS 26)';
+
   // Dữ liệu dự phòng tương thích với data/about.json khi chạy offline hoặc file:///
   const FALLBACK_ABOUT_DATA = {
     hero: {
       eyebrow: 'VỀ CHÚNG TÔI',
-      title: 'Nền tảng Tra cứu & Theo dõi Hội nghị Khoa học',
-      description: 'ConfGuide được nghiên cứu và phát triển nhằm hỗ trợ sinh viên, giảng viên và các nhóm nghiên cứu dễ dàng tra cứu, đối chiếu uy tín và quản lý các mốc thời hạn công bố khoa học. Hệ thống giải quyết các rào cản phổ biến trong tiếp cận thông tin học thuật, hướng tới trở thành công cụ hỗ trợ tin cậy cho cộng đồng nghiên cứu tại Việt Nam.',
+      title: 'Nền tảng Tra cứu & Khuyến nghị Hội nghị Khoa học CNTT tại Việt Nam',
+      description: 'ConfGuide được nghiên cứu và phát triển nhằm hỗ trợ sinh viên, giảng viên và các nhóm nghiên cứu dễ dàng tra cứu, đối chiếu uy tín và quản lý các mốc thời hạn công bố tại các hội nghị khoa học Công nghệ thông tin diễn ra tại Việt Nam (bao gồm cả hội nghị quốc tế tổ chức tại Việt Nam). Hệ thống giải quyết các rào cản phổ biến trong tiếp cận thông tin học thuật, hướng tới trở thành công cụ hỗ trợ tin cậy cho cộng đồng nghiên cứu.',
       contextTitle: 'Bối cảnh thực tế & Sứ mệnh',
       contextChallenges: [
         {
@@ -30,7 +34,7 @@
           desc: 'Thời hạn nộp bài thường công bố theo múi giờ Anywhere on Earth (AoE, UTC-12), nếu không quy đổi sang giờ Việt Nam (UTC+7) rất dễ gây sai sót và lỡ hẹn nộp bài.'
         }
       ],
-      mission: 'Sứ mệnh của ConfGuide là chuẩn hóa, quy tụ và minh bạch hóa thông tin hội nghị khoa học công nghệ thông tin trên một nền tảng thống nhất, hỗ trợ sinh viên và nghiên cứu sinh chủ động xây dựng lộ trình nghiên cứu và tự tin công bố công trình.'
+      mission: 'Sứ mệnh của ConfGuide là chuẩn hóa, quy tụ và minh bạch hóa thông tin các hội nghị khoa học Công nghệ thông tin diễn ra tại Việt Nam (bao gồm cả hội nghị quốc tế được tổ chức tại Việt Nam) trên một nền tảng thống nhất, hỗ trợ sinh viên và nghiên cứu sinh chủ động lộ trình công bố.'
     },
     coreValues: [
       {
@@ -135,7 +139,8 @@
           features: [
             'Khuyến nghị hội nghị bằng AI dựa trên nội dung tóm tắt (Abstract) của bài báo',
             'Đồng bộ tự động các mốc deadline vào Google Calendar và Outlook',
-            'Thông báo đẩy (Push Notifications) khi ban tổ chức công bố đợt nhận bài mới'
+            'Thông báo đẩy (Push Notifications) khi ban tổ chức công bố đợt nhận bài mới',
+            LIQUID_GLASS_ROADMAP_FEATURE
           ]
         }
       ]
@@ -194,9 +199,10 @@
 
   /**
    * Chuẩn hóa chuỗi văn bản từ data/about.json trong bộ nhớ RAM (không sửa file JSON gốc)
-   * để loại bỏ định hướng "quốc tế" và đồng bộ nhãn múi giờ UTC+7 (giờ Việt Nam).
+   * để đồng bộ định hướng hội nghị CNTT tại Việt Nam (gồm cả hội nghị quốc tế tổ chức tại Việt Nam)
+   * và nhãn múi giờ UTC+7 (giờ Việt Nam).
    * @param {string} text - Chuỗi văn bản đầu vào.
-   * @returns {string} Chuỗi văn bản đã chuẩn hóa trung tính.
+   * @returns {string} Chuỗi văn bản đã chuẩn hóa theo định hướng dự án.
    */
   function normalizeAboutText(text) {
     if (typeof text !== 'string') return text;
@@ -206,11 +212,21 @@
       .replace(/múi giờ chuẩn quốc tế Anywhere on Earth \(AoE, UTC-12\) sang giờ Việt Nam \(ICT, UTC\+7\)/g, 'mốc 23:59 Anywhere on Earth (AoE, UTC-12) sang 18:59 ngày kế tiếp theo giờ Việt Nam (UTC+7)')
       .replace(/múi giờ quốc tế Anywhere on Earth \(AoE, UTC-12\) hoặc giờ địa phương của nước chủ nhà/g, 'múi giờ Anywhere on Earth (AoE, UTC-12) khi chưa quy đổi sang giờ Việt Nam (UTC+7)')
       .replace(/đếm ngược deadline thời gian thực chuẩn AoE/g, 'đếm ngược deadline thời gian thực theo múi giờ UTC+7 (giờ Việt Nam)')
-      .replace(/\s*quốc tế/gi, '');
+      .replace(/\s*quốc tế/gi, '')
+      .replace(/^Nền tảng Tra cứu & Theo dõi Hội nghị Khoa học$/g, 'Nền tảng Tra cứu & Khuyến nghị Hội nghị Khoa học CNTT tại Việt Nam')
+      .replace(
+        /quản lý các mốc thời hạn công bố khoa học\. Hệ thống giải quyết các rào cản phổ biến trong tiếp cận thông tin học thuật, hướng tới trở thành công cụ hỗ trợ tin cậy cho cộng đồng nghiên cứu tại Việt Nam\./g,
+        'quản lý các mốc thời hạn công bố tại các hội nghị khoa học Công nghệ thông tin diễn ra tại Việt Nam (bao gồm cả hội nghị quốc tế tổ chức tại Việt Nam). Hệ thống giải quyết các rào cản phổ biến trong tiếp cận thông tin học thuật, hướng tới trở thành công cụ hỗ trợ tin cậy cho cộng đồng nghiên cứu.'
+      )
+      .replace(
+        /minh bạch hóa thông tin hội nghị khoa học công nghệ thông tin trên một nền tảng thống nhất/g,
+        'minh bạch hóa thông tin các hội nghị khoa học Công nghệ thông tin diễn ra tại Việt Nam (bao gồm cả hội nghị quốc tế được tổ chức tại Việt Nam) trên một nền tảng thống nhất'
+      );
   }
 
   /**
-   * Áp dụng chuẩn hóa đệ quy lên đối tượng dữ liệu About nạp từ data/about.json.
+   * Áp dụng chuẩn hóa đệ quy lên đối tượng dữ liệu About nạp từ data/about.json
+   * và bổ sung định hướng Liquid Glass (iOS 26) vào giai đoạn Tương lai của lộ trình.
    * @param {*} node - Nút dữ liệu JSON cần chuẩn hóa.
    * @returns {*} Dữ liệu đã chuẩn hóa trong bộ nhớ.
    */
@@ -222,6 +238,12 @@
       Object.keys(node).forEach(k => {
         out[k] = normalizeAboutDataForDisplay(node[k]);
       });
+      if (out.id === 'future' && Array.isArray(out.features)) {
+        const hasLiquidGlass = out.features.some(item => /liquid\s*glass/i.test(String(item || '')));
+        if (!hasLiquidGlass) {
+          out.features = [...out.features, LIQUID_GLASS_ROADMAP_FEATURE];
+        }
+      }
       return out;
     }
     return node;

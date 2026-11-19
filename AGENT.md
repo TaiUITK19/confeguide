@@ -135,9 +135,9 @@ Tài liệu hướng dẫn kỹ thuật dành cho AI Agents và Lập trình vi�
 ---
 
 ## 1. Tổng quan & Bản chất Kỹ thuật Cốt lõi
-- **Tổng quan**: ConfGuide là nền tảng web tĩnh hỗ trợ tra cứu, đánh giá và theo dõi các hội nghị khoa học công nghệ thông tin tại Việt Nam. Ứng dụng giúp các nhà nghiên cứu, giảng viên và sinh viên dễ dàng tìm kiếm sự kiện phù hợp, nắm bắt hạn nộp bài (AoE) và quản lý tiến độ nộp bài.
+- **Tổng quan**: ConfGuide là nền tảng web tĩnh hỗ trợ tra cứu, khuyến nghị, đánh giá và theo dõi các hội nghị khoa học Công nghệ thông tin diễn ra tại Việt Nam (bao gồm cả hội nghị quốc tế được tổ chức tại Việt Nam). Ứng dụng giúp các nhà nghiên cứu, giảng viên và sinh viên dễ dàng tìm kiếm sự kiện phù hợp, nắm bắt hạn nộp bài theo giờ Việt Nam (`UTC+7`, quy đổi từ AoE) và quản lý tiến độ nộp bài.
 - **Công nghệ (Tech Stack)**: Semantic HTML5, CSS thuần hiện đại (CSS Custom Properties, Flexbox, Grid), Vanilla JavaScript (ES6+). Hoàn toàn không dùng framework (React, Vue), không sử dụng bundler hay công cụ build (zero build tools, zero npm dependencies).
-- **Phạm vi sản phẩm**: Dự án định hướng phục vụ tra cứu các hội nghị khoa học CNTT được tổ chức tại Việt Nam.
+- **Phạm vi sản phẩm**: Dự án định hướng phục vụ tra cứu và khuyến nghị các hội nghị khoa học thuộc lĩnh vực Công nghệ thông tin diễn ra tại Việt Nam (bao gồm cả hội nghị quốc tế được tổ chức tại Việt Nam).
 - **Ràng buộc tương thích file:/// & Web Server tĩnh**:
   - Mã nguồn tương thích khi chạy qua máy chủ HTTP tĩnh (Live Server, `python -m http.server`) cũng như khi mở trực tiếp file HTML từ ổ đĩa qua giao thức `file:///`.
   - Không tải template HTML bằng `fetch()`; toàn bộ Header và Footer được render động bằng JavaScript template string trong [`js/core/layout.js`](file:///d:/IE104/doangithub/confeguide/js/core/layout.js).
@@ -281,7 +281,7 @@ Mỗi bản ghi hội nghị trong `data/conference_data.json` có cấu trúc c
 
 ### 4.3. Các Khác biệt Thiết kế Có chủ đích
 1. **Trang hồ sơ (`profile.html`)**: Ở Light Mode dùng thiết kế phân tầng kép (dual-surface): banner phần đầu có nền tối (`--surface-dark`), phần thân thẻ thông tin người dùng có nền trắng/surface sáng (`--surface`); khi chuyển sang Dark Mode (`body.dark`), toàn bộ phần thân thẻ đồng bộ chuyển sang nền tối `--surface`.
-2. **Hiệu ứng Liquid Glass & Visual Tokens**: Thẻ kính mờ (`backdrop-filter: blur(12px)`), viền mỏng tinh tế (`--border`), bo góc đồng bộ qua biến CSS (`--radius-sm`, `--radius-md`, `--radius-lg`, `--radius-pill`).
+2. **Hiệu ứng Kính mờ & Visual Tokens**: Thanh điều hướng bán trong suốt (`backdrop-filter: blur(14px)`), viền mỏng tinh tế (`--border`), bo góc đồng bộ qua biến CSS (`--radius-sm`, `--radius-md`, `--radius-lg`, `--radius-pill`).
 3. **Favicon**: Thống nhất `<link rel="icon" type="image/svg+xml" href="images/logo.svg">` trên toàn bộ 11 trang HTML.
 
 ---

@@ -246,14 +246,20 @@
   }
 
   /**
-   * Lấy ngày hiện tại dạng ISO YYYY-MM-DD theo giờ địa phương (UTC+7).
+   * Lấy ngày hiện tại dạng ISO YYYY-MM-DD theo múi giờ cố định UTC+7 (Asia/Ho_Chi_Minh).
+   * Tái sử dụng ConfGuideUtils.getTodayVnIso khi sẵn có.
    * @returns {string}
    */
   function getTodayIso() {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const day = String(now.getDate()).padStart(2, '0');
+    const utils = getUtils();
+    if (utils && typeof utils.getTodayVnIso === 'function') {
+      return utils.getTodayVnIso();
+    }
+    const offsetMs = (utils && utils.VN_UTC_OFFSET_MS) || 7 * 3600000;
+    const vnNow = new Date(Date.now() + offsetMs);
+    const year = vnNow.getUTCFullYear();
+    const month = String(vnNow.getUTCMonth() + 1).padStart(2, '0');
+    const day = String(vnNow.getUTCDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
   }
 
@@ -513,8 +519,8 @@
    * @returns {Object|null}
    */
   /**
-   * Đánh giá trạng thái CFP (open, closingSoon, closed, unknown) và mốc hạn nộp tiếp theo/cuối cùng.
-   * @param {Array<Object>} submissionDeadlines - Danh sách các mốc nộp bài đã sắp xếp tăng dần.
+   * Đánh giá trạng thái CFP (open, closingSoon, closed, unknown) và mốc hạn nộp tiếp theo/cuối cùng theo UTC+7.
+   * @param {Array<Object>} submissionDeadlines - Danh sách các mốc nộp bài đã quy đổi UTC+7 và sắp xếp tăng dần.
    * @returns {{ cfpStatus: string, nextDeadline: Object|null, lastDeadline: Object|null }}
    */
   function evaluateSubmissionStatus(submissionDeadlines) {
@@ -522,12 +528,24 @@
       return { cfpStatus: 'unknown', nextDeadline: null, lastDeadline: null };
     }
     const last = submissionDeadlines[submissionDeadlines.length - 1];
-    const lastDeadline = { name: last.name, date: last.date, daysLeft: last.daysLeft };
+    const lastDeadline = {
+      name: last.name,
+      date: last.date,
+      vnTime: last.vnTime || '',
+      targetMs: Number.isFinite(last.targetMs) ? last.targetMs : null,
+      daysLeft: last.daysLeft
+    };
     const upcoming = submissionDeadlines.find(d => d.daysLeft >= 0) || null;
     if (!upcoming) {
       return { cfpStatus: 'closed', nextDeadline: null, lastDeadline };
     }
-    const nextDeadline = { name: upcoming.name, date: upcoming.date, daysLeft: upcoming.daysLeft };
+    const nextDeadline = {
+      name: upcoming.name,
+      date: upcoming.date,
+      vnTime: upcoming.vnTime || '',
+      targetMs: Number.isFinite(upcoming.targetMs) ? upcoming.targetMs : null,
+      daysLeft: upcoming.daysLeft
+    };
     const cfpStatus = upcoming.daysLeft <= CLOSING_SOON_DAYS ? 'closingSoon' : 'open';
     return { cfpStatus, nextDeadline, lastDeadline };
   }
@@ -565,16 +583,34 @@
       ? String(raw.full_name).trim()
       : String(raw.fullName || '').trim();
 
+    const utils = getUtils();
+    const hasConverter = Boolean(utils && typeof utils.convertDeadlineToVn === 'function');
+    const hasDaysLeft = Boolean(utils && typeof utils.daysLeft === 'function');
     const deadlinesWithKind = normalizeDeadlinesArray(raw);
+    // Quy đổi từng mốc hạn nộp từ AoE sang UTC+7 (Asia/Ho_Chi_Minh) bằng helper dùng chung
     const submissionDeadlines = deadlinesWithKind
-      .map(d => ({ name: d.name, date: d.date, kind: d.kind, daysLeft: diffCalendarDays(d.date, todayIso) }))
+      .map(d => {
+        const converted = hasConverter ? utils.convertDeadlineToVn(d.date, { isDeadline: true }) : null;
+        const vnDate = (converted && converted.vnIsoDate) || normalizeIsoDate(d.date);
+        const daysLeftVal = hasDaysLeft ? utils.daysLeft(d.date) : diffCalendarDays(vnDate, todayIso);
+        return {
+          name: d.name,
+          rawDate: d.date,
+          date: vnDate || d.date,
+          vnTime: converted ? (converted.vnTimeVi || '') : '',
+          targetMs: converted && Number.isFinite(converted.targetMs) ? converted.targetMs : null,
+          kind: d.kind,
+          daysLeft: daysLeftVal
+        };
+      })
       .filter(d => d.kind === 'submission' && d.daysLeft !== null)
-      .sort((a, b) => a.date.localeCompare(b.date));
+      .sort((a, b) => (Number.isFinite(a.targetMs) && Number.isFinite(b.targetMs)
+        ? a.targetMs - b.targetMs
+        : String(a.date).localeCompare(String(b.date))));
 
     const { cfpStatus, nextDeadline, lastDeadline } = evaluateSubmissionStatus(submissionDeadlines);
     const startDate = normalizeIsoDate(raw.start_date || raw.startDate);
     const endDate = normalizeIsoDate(raw.end_date || raw.endDate) || startDate;
-    const utils = getUtils();
     const rawRankText = utils && typeof utils.extractConferenceRank === 'function'
       ? utils.extractConferenceRank(raw.rank)
       : (raw.rank && typeof raw.rank === 'object' ? String(raw.rank.core || '') : String(raw.rank || ''));
@@ -1003,12 +1039,20 @@
     if (rankA !== rankB) return rankA - rankB;
 
     if (rankA === 0) {
-      const daysA = a.nextDeadline ? a.nextDeadline.daysLeft : Number.MAX_SAFE_INTEGER;
-      const daysB = b.nextDeadline ? b.nextDeadline.daysLeft : Number.MAX_SAFE_INTEGER;
-      if (daysA !== daysB) return isDesc ? (daysB - daysA) : (daysA - daysB);
+      const targetA = a.nextDeadline && Number.isFinite(a.nextDeadline.targetMs)
+        ? a.nextDeadline.targetMs
+        : (a.nextDeadline ? a.nextDeadline.daysLeft : Number.MAX_SAFE_INTEGER);
+      const targetB = b.nextDeadline && Number.isFinite(b.nextDeadline.targetMs)
+        ? b.nextDeadline.targetMs
+        : (b.nextDeadline ? b.nextDeadline.daysLeft : Number.MAX_SAFE_INTEGER);
+      if (targetA !== targetB) return isDesc ? (targetB - targetA) : (targetA - targetB);
     } else if (rankA === 1) {
-      const closedA = a.lastDeadline ? a.lastDeadline.daysLeft : -Number.MAX_SAFE_INTEGER;
-      const closedB = b.lastDeadline ? b.lastDeadline.daysLeft : -Number.MAX_SAFE_INTEGER;
+      const closedA = a.lastDeadline && Number.isFinite(a.lastDeadline.targetMs)
+        ? a.lastDeadline.targetMs
+        : (a.lastDeadline ? a.lastDeadline.daysLeft : -Number.MAX_SAFE_INTEGER);
+      const closedB = b.lastDeadline && Number.isFinite(b.lastDeadline.targetMs)
+        ? b.lastDeadline.targetMs
+        : (b.lastDeadline ? b.lastDeadline.daysLeft : -Number.MAX_SAFE_INTEGER);
       if (closedA !== closedB) return isDesc ? (closedA - closedB) : (closedB - closedA);
     }
 
@@ -1683,10 +1727,12 @@
   function resolveCardDeadlineSummary(conf) {
     if ((conf.cfpStatus === 'open' || conf.cfpStatus === 'closingSoon') && conf.nextDeadline) {
       const formattedNext = formatIsoToDdMmYyyy(conf.nextDeadline.date);
+      const timePrefix = conf.nextDeadline.vnTime ? `${conf.nextDeadline.vnTime} ` : '';
+      const dateLabel = `${timePrefix}${formattedNext} (UTC+7)`;
       return {
         deadlineHeader: conf.nextDeadline.name || 'Hạn nộp tiếp theo',
         deadlineDateHtml:
-          `Hạn: <time datetime="${escapeHtml(conf.nextDeadline.date)}">${escapeHtml(formattedNext)}</time>`,
+          `Hạn: <time datetime="${escapeHtml(conf.nextDeadline.date)}">${escapeHtml(dateLabel)}</time>`,
         countdownText: `Còn ${conf.nextDeadline.daysLeft} ngày`,
         countdownClass: conf.cfpStatus === 'closingSoon' ? 'deadline-countdown urgent' : 'deadline-countdown'
       };
@@ -1694,11 +1740,13 @@
 
     if (conf.cfpStatus === 'closed' && conf.lastDeadline) {
       const formattedLast = formatIsoToDdMmYyyy(conf.lastDeadline.date);
+      const timePrefix = conf.lastDeadline.vnTime ? `${conf.lastDeadline.vnTime} ` : '';
+      const dateLabel = `${timePrefix}${formattedLast} (UTC+7)`;
       const passedDays = Math.abs(conf.lastDeadline.daysLeft || 0);
       return {
         deadlineHeader: conf.lastDeadline.name || 'Hạn nộp cuối',
         deadlineDateHtml:
-          `Đã đóng ngày <time datetime="${escapeHtml(conf.lastDeadline.date)}">${escapeHtml(formattedLast)}</time>`,
+          `Đã đóng ngày <time datetime="${escapeHtml(conf.lastDeadline.date)}">${escapeHtml(dateLabel)}</time>`,
         countdownText: passedDays > 0 ? `Đã qua ${passedDays} ngày` : 'Đã qua hạn nộp bài',
         countdownClass: 'deadline-countdown closed'
       };

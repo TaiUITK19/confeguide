@@ -125,10 +125,15 @@
   }
 
   /**
-   * Lấy ngày lịch hiện tại (YYYY-MM-DD) theo múi giờ cố định UTC+7 (Việt Nam).
+   * Lấy ngày lịch hiện tại (YYYY-MM-DD) theo múi giờ cố định UTC+7 (Việt Nam),
+   * ưu tiên tái sử dụng ConfGuideUtils.getTodayVnIso dùng chung.
    * @returns {string} Chuỗi ngày ISO YYYY-MM-DD tại UTC+7.
    */
   function getTodayVnIso() {
+    const utils = getUtils();
+    if (utils && typeof utils.getTodayVnIso === 'function') {
+      return utils.getTodayVnIso();
+    }
     const vnNow = new Date(Date.now() + 7 * 3600000);
     const year = vnNow.getUTCFullYear();
     const month = String(vnNow.getUTCMonth() + 1).padStart(2, '0');
@@ -986,7 +991,7 @@
     const dateRange = utils && utils.formatRangeVi
       ? (utils.formatRangeVi(item.startDate, item.endDate) || item.date_happen || '2026')
       : (item.date_happen || '2026');
-    const descText = item.summarization || item.fullName || item.full_name || 'Hội nghị khoa học công nghệ thông tin uy tín.';
+    const descText = item.summarization || item.fullName || item.full_name || 'Hội nghị khoa học công nghệ thông tin uy tín tại Việt Nam.';
     const saveBtnHtml = renderSaveButtonHtml(confId, confName, isSaved);
     const compareBtnHtml = window.ConfGuideCompare ? window.ConfGuideCompare.renderToggleButton(item) : '';
     const avatarHtml = utils && utils.renderConferenceAvatar

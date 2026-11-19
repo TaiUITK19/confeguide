@@ -87,7 +87,7 @@
     academicTitle: 'Nghiên cứu sinh / Giảng viên',
     affiliation: 'Đại học Quốc gia TP.HCM',
     fieldsOfInterest: 'Trí tuệ nhân tạo, Thị giác máy tính, Xử lý ngôn ngữ tự nhiên, Khoa học dữ liệu',
-    bio: 'Quan tâm đến các hội nghị khoa học uy tín thuộc xếp hạng CORE A*/A.',
+    bio: 'Quan tâm đến các hội nghị khoa học Công nghệ thông tin diễn ra tại Việt Nam (gồm cả hội nghị quốc tế tổ chức tại Việt Nam) thuộc xếp hạng CORE A*/A.',
     scholarUrl: 'https://scholar.google.com'
   };
 
@@ -696,7 +696,7 @@
         </svg>
         <h3 class="empty-state-title">Chưa có hội nghị nào được lưu</h3>
         <p class="empty-state-desc">
-          Khám phá danh sách hội nghị khoa học công nghệ, bấm biểu tượng lưu để theo dõi thời gian nộp bài tại đây.
+          Khám phá danh sách hội nghị khoa học Công nghệ thông tin diễn ra tại Việt Nam (bao gồm cả hội nghị quốc tế tổ chức tại Việt Nam), bấm biểu tượng lưu để theo dõi thời gian nộp bài tại đây.
         </p>
         <a href="search.html" class="btn btn-primary btn--compact-md">
           <span>Khám phá danh mục hội nghị &rarr;</span>
@@ -860,11 +860,12 @@
    */
   function buildTrackerPreviewCardHtml(item) {
     const name = item.name || 'Bài báo khoa học';
-    // Mốc propDeadline chỉ có ngày (YYYY-MM-DD), giữ nguyên nhãn AoE để không sai lệch giờ
+    // Mốc Tracker tự nhập chỉ có ngày (YYYY-MM-DD), không kèm giờ/múi giờ nguồn nên giữ nguyên giá trị ngày thô
+    const hasExplicitTime = /[T\s]\d{1,2}:\d{2}/.test(String(item.deadline || ''));
     const deadline = item.deadline
       ? (utils.formatDeadlineVi
-          ? utils.formatDeadlineVi(item.deadline, { hasExplicitTime: false })
-          : `${new Date(`${item.deadline}T00:00:00`).toLocaleDateString('vi-VN')} (AoE)`)
+          ? utils.formatDeadlineVi(item.deadline, { hasExplicitTime })
+          : `${new Date(`${item.deadline}T00:00:00`).toLocaleDateString('vi-VN')}`)
       : 'Chưa có hạn';
     const fieldsStr = Array.isArray(item.fields) ? item.fields.join(', ') : 'Công nghệ thông tin';
 

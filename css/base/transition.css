@@ -1,6 +1,6 @@
 /* ==========================================================================
    CONFGUIDE — HIỆU ỨNG CHUYỂN TRANG & MORPH THANH TÌM KIẾM (PHƯƠNG ÁN B)
-   Kiến trúc hai nhánh tối ưu độ mượt & bảo toàn kính mờ (liquid glass) trên nav:
+   Kiến trúc hai nhánh tối ưu độ mượt & bảo toàn thanh điều hướng kính mờ trên nav:
    1. Cặp index.html <-> search.html (Cross-Document View Transitions):
       - Chỉ 2 trang này khai báo @view-transition (trong index.css & search.css).
       - Giữ tối đa 3 snapshot: site-nav, page-main, search-bar; không tách footer.
