@@ -14,7 +14,7 @@
 
   const STORAGE_KEY = 'confguide_compare_ids';
   const MAX_COMPARE_ITEMS = 3;
-  const CONFERENCES_DATA_URL = 'data/conferences.json';
+  const CONFERENCES_DATA_URL = 'data/conference_data.json';
   const URGENT_COMPARE_DAYS = 14;
 
   let memoryIdsFallback = [];
@@ -431,7 +431,7 @@
   }
 
   /**
-   * Tải và chuẩn hóa danh sách hội nghị từ data/conferences.json (kèm dự phòng FALLBACK_CONFERENCES).
+   * Tải và chuẩn hóa danh sách hội nghị từ data/conference_data.json (kèm dự phòng FALLBACK_CONFERENCES).
    * Tự động loại bỏ các ID trong sessionStorage không còn tồn tại trong dữ liệu.
    * @returns {Promise<Array<Object>>} Danh sách hội nghị đã chuẩn hóa.
    */
@@ -540,9 +540,12 @@
    * @returns {{ html: string, normVal: string }}
    */
   function createRankCell(conf, esc) {
-    const rawRank = String(conf.rank || '').trim();
+    const utils = getCompareUtils();
+    const rawRank = typeof utils.extractConferenceRank === 'function'
+      ? utils.extractConferenceRank(conf && conf.rank)
+      : (conf && conf.rank && typeof conf.rank === 'object' ? String(conf.rank.core || '') : String((conf && conf.rank) || '')).trim();
     if (!rawRank || /^unranked$/i.test(rawRank)) return createMutedCell('Chưa cập nhật');
-    const displayRank = /^core\b/i.test(rawRank) ? rawRank : `CORE ${rawRank}`;
+    const displayRank = /^(a\*|a|b|c)$/i.test(rawRank) ? `CORE ${rawRank.toUpperCase()}` : rawRank;
     return {
       html: `<span class="compare-table__rank-badge">${esc(displayRank)}</span>`,
       normVal: normalizeCompareValue(displayRank)

@@ -700,6 +700,23 @@
   }
 
   /**
+   * Trích xuất chuỗi xếp hạng từ trường rank dạng chuỗi cũ hoặc object { core, ccf } trong dữ liệu JSON mới.
+   * @param {string|Object|null|undefined} rawRank Giá trị rank thô từ dữ liệu hội nghị.
+   * @returns {string} Chuỗi xếp hạng đã chuẩn hóa hoặc chuỗi rỗng nếu chưa có hạng.
+   */
+  function extractConferenceRank(rawRank) {
+    if (!rawRank) return '';
+    if (typeof rawRank === 'string') return rawRank.trim();
+    if (typeof rawRank === 'object') {
+      const coreVal = rawRank.core !== undefined && rawRank.core !== null ? String(rawRank.core).trim() : '';
+      if (coreVal) return coreVal;
+      const ccfVal = rawRank.ccf !== undefined && rawRank.ccf !== null ? String(rawRank.ccf).trim() : '';
+      return ccfVal;
+    }
+    return String(rawRank).trim();
+  }
+
+  /**
    * Chuẩn hóa đối tượng hội nghị từ dữ liệu JSON/crawler về cấu trúc thống nhất.
    * @param {Object} conf Dữ liệu hội nghị thô.
    * @returns {Object|null} Bản sao đã chuẩn hóa các trường định danh, ngày và liên kết.
@@ -719,9 +736,12 @@
     const siteUrl = conf.website || conf.website_url || '';
     const locationText = conf.location || conf.country || '';
     const isVietnam = /việt nam|vietnam/i.test(`${locationText} ${conf.region || ''}`);
+    const rankText = extractConferenceRank(conf.rank);
 
     return Object.assign({}, conf, {
       id: getConferenceId(conf),
+      rank: rankText,
+      rankInfo: conf.rank && typeof conf.rank === 'object' ? conf.rank : null,
       fullName: fullTitle,
       full_name: fullTitle,
       website: siteUrl,
@@ -2283,6 +2303,7 @@
     getSavedStorageKey: getSavedStorageKey,
     slugify: slugify,
     getConferenceId: getConferenceId,
+    extractConferenceRank: extractConferenceRank,
     normalizeConference: normalizeConference,
     renderConferenceAvatar: renderConferenceAvatar,
     convertDeadlineToVn: convertDeadlineToVn,

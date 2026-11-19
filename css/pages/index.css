@@ -11,30 +11,19 @@
 }
 
 /* Nút CTA trang chủ kế thừa .btn từ base.css */
-.hero-actions .btn,
 .featured-cta-wrap .btn {
   padding: 12px 24px;
   font-size: 15px;
 }
 
-.hero-actions .btn-primary,
 .featured-cta-wrap .btn-primary {
   box-shadow: 0 4px 14px var(--primary-shadow);
 }
 
-.hero-actions .btn-primary:hover,
-.hero-actions .btn-primary:focus-visible,
 .featured-cta-wrap .btn-primary:hover,
 .featured-cta-wrap .btn-primary:focus-visible {
   transform: translateY(-1px);
   box-shadow: var(--shadow-lg);
-}
-
-.hero-actions .btn-secondary:hover,
-.hero-actions .btn-secondary:focus-visible {
-  background: var(--primary-soft);
-  color: var(--primary);
-  border-color: var(--primary);
 }
 
 .featured-cta-wrap {
@@ -47,7 +36,7 @@
   font-size: 15px;
 }
 
-/* ================= 2. HERO 2 CỘT (CỘT TRÁI CTA & CỘT PHẢI SLIDER) ================= */
+/* ================= 2. HERO 2 CỘT (CỘT TRÁI GIỚI THIỆU & CỘT PHẢI SLIDER) ================= */
 .hero-section {
   position: relative;
   background: var(--bg-hero);
@@ -57,44 +46,18 @@
   scroll-margin-top: 80px;
 }
 
+/* Tăng chiều rộng cột slider thêm 1/4 so với ban đầu (0.92fr * 1.25 = 1.15fr) */
 .hero-inner {
   display: grid;
-  grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr);
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
   gap: 36px;
   align-items: center;
 }
 
-/* Cột trái cố định: Giới thiệu + CTA + Tìm kiếm nhanh */
+/* Cột trái cố định: Giới thiệu & Tìm kiếm nhanh (tiêu đề h1 sát đầu khối, giữ cân đối theo chiều dọc) */
 .hero-content {
   min-width: 0;
   text-align: left;
-}
-
-.hero-eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  background: var(--primary-soft);
-  color: var(--primary);
-  font-size: 13px;
-  font-weight: 700;
-  padding: 5px 14px;
-  border-radius: var(--radius-pill);
-  border: 1px solid var(--conf-badge-border);
-  margin-bottom: 12px;
-}
-
-.hero-eyebrow span {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--primary);
-  display: inline-block;
-  flex-shrink: 0;
-}
-
-body.dark .hero-eyebrow span {
-  background: var(--navy);
 }
 
 .hero-content h1 {
@@ -103,7 +66,8 @@ body.dark .hero-eyebrow span {
   letter-spacing: -1px;
   color: var(--text);
   font-weight: 800;
-  margin-bottom: 12px;
+  margin-top: 0;
+  margin-bottom: 14px;
 }
 
 .hero-content h1 span {
@@ -118,19 +82,11 @@ body.dark .hero-content h1 span {
   font-size: 15.5px;
   line-height: 1.58;
   color: var(--text-muted);
-  margin-bottom: 20px;
+  margin-bottom: 24px;
   max-width: 600px;
 }
 
-.hero-actions {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  flex-wrap: wrap;
-  margin-bottom: 18px;
-}
-
-/* Thanh tìm kiếm tích hợp ngay dưới CTA trong cột trái */
+/* Thanh tìm kiếm tích hợp ngay dưới đoạn mô tả trong cột trái */
 .hero-search-wrap {
   max-width: 580px;
   width: 100%;
@@ -1124,14 +1080,6 @@ body.dark .hero-slide-card__meta-item svg {
   }
   .hero-slider {
     padding: 12px 2px 12px;
-  }
-  .hero-actions {
-    width: 100%;
-    flex-direction: column;
-    align-items: stretch;
-  }
-  .hero-actions .btn {
-    width: 100%;
   }
   .conf-card {
     padding: 18px 16px;

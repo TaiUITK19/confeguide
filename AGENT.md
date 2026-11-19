@@ -44,7 +44,7 @@ Bạn là Senior Frontend Developer & Web Standards Specialist đang đồng hà
    ├── about/                      # Trang giới thiệu & liên hệ (index.html)
    ├── account/                    # Trang quản lý tài khoản / hội nghị đã lưu
    ├── assets/
-   │   ├── data/                   # Dữ liệu JSON cục bộ (conferences.json, ...)
+   │   ├── data/                   # Dữ liệu JSON cục bộ (conference_data.json, ...)
    │   ├── images/                 # Hình ảnh phân chia theo từng trang/module
    │   ├── styles/
    │   │   ├── reset.css           # CSS Reset đồng bộ trình duyệt (không sửa đổi)
@@ -122,6 +122,7 @@ Bạn là Senior Frontend Developer & Web Standards Specialist đang đồng hà
 ### Quy tắc bổ sung
 (Các quy tắc mới được thêm vào đây, mỗi quy tắc một dòng, đánh số tiếp theo.)
 1. Đối với mã nguồn hiện tại của repository (43 file sau tái cấu trúc và gộp tài liệu vào `README.md`), giữ nguyên 11 trang HTML phẳng ở gốc (`index.html`, `search.html`, `detail.html`, `tracker.html`, `profile.html`, `about.html`, `contact.html`, `login.html`, `register.html`, `terms.html`, `privacy.html`), cấu trúc phân tầng `css/` (`base/`, `components/`, `pages/`), `js/` (`core/`, `components/`, `pages/`), `data/`, `images/`, `.editorconfig`, quy ước đặt tên chữ thường `kebab-case` (bộ ba `<trang>.html ↔ css/pages/<trang>.css ↔ js/pages/<trang>.js`, file data số nhiều), và các quy tắc vận hành tại Mục 7 của tài liệu kiến trúc bên dưới (không tự ý sửa `#site-header`/`#site-footer` trong HTML, giữ script inline chống FOUC đầu `<body>`, giữ nguyên schema `data/` và các class runtime). Khi viết code mới hoặc refactor theo yêu cầu, áp dụng chuẩn code Phần 1 (BEM, tiền tố `js-` cho hook JS, không dùng inline CSS/JS mới, chuẩn W3C HTML5/CSS3, A11y, SEO và comment tiếng Việt).
+2. Ngoại lệ đặt tên tệp dữ liệu chính: tệp danh sách hội nghị sử dụng đường dẫn `data/conference_data.json` (dùng dấu gạch dưới `snake_case` thay vì `kebab-case`) theo xác nhận chủ động của chủ dự án.
 
 ---
 
@@ -199,7 +200,7 @@ Tài liệu hướng dẫn kỹ thuật dành cho AI Agents và Lập trình vi�
 ### 2.4. Dữ liệu & Script Phụ trợ (Data — 4 files)
 | File | Vai trò | Mô tả |
 |---|---|---|
-| [`data/conferences.json`](file:///d:/IE104/doangithub/confeguide/data/conferences.json) | Dữ liệu chính | Mảng hội nghị khoa học CNTT tại Việt Nam (địa điểm, thời gian, deadlines, website). |
+| [`data/conference_data.json`](file:///d:/IE104/doangithub/confeguide/data/conference_data.json) | Dữ liệu chính | Mảng hội nghị khoa học CNTT tại Việt Nam (địa điểm, thời gian, deadlines, website). |
 | [`data/users.json`](file:///d:/IE104/doangithub/confeguide/data/users.json) | Dữ liệu seed | Mảng 20 tài khoản người dùng mẫu phục vụ kiểm thử đăng nhập. |
 | [`data/about.json`](file:///d:/IE104/doangithub/confeguide/data/about.json) | Dữ liệu giới thiệu | Dữ liệu cấu trúc về môn học IE104, đội ngũ UIT và lộ trình phát triển. |
 | [`data/scrape-conferences.py`](file:///d:/IE104/doangithub/confeguide/data/scrape-conferences.py) | Script độc lập | Script Python hỗ trợ thu thập/cập nhật dữ liệu hội nghị độc lập; không phải backend server của website. |
@@ -217,8 +218,8 @@ Tài liệu hướng dẫn kỹ thuật dành cho AI Agents và Lập trình vi�
 
 ## 3. Kiến trúc Dữ liệu & Cơ chế Đọc (Data Architecture)
 
-### 3.1. Cấu trúc Bản ghi Hội nghị (`conferences.json`)
-Mỗi bản ghi hội nghị trong `data/conferences.json` có cấu trúc chuẩn như sau:
+### 3.1. Cấu trúc Bản ghi Hội nghị (`conference_data.json`)
+Mỗi bản ghi hội nghị trong `data/conference_data.json` có cấu trúc chuẩn như sau:
 ```json
 {
   "name": "SOICT 2026",
@@ -248,7 +249,7 @@ Mỗi bản ghi hội nghị trong `data/conferences.json` có cấu trúc chu�
 ```
 
 ### 3.2. Cơ chế Đọc Dữ liệu (Load Strategy)
-- Các file JavaScript (`js/pages/index.js`, `js/pages/search.js`, `js/pages/detail.js`, `js/pages/tracker.js`, `js/pages/profile.js`, `js/components/compare.js`) gọi `fetch('data/conferences.json')`.
+- Các file JavaScript (`js/pages/index.js`, `js/pages/search.js`, `js/pages/detail.js`, `js/pages/tracker.js`, `js/pages/profile.js`, `js/components/compare.js`) gọi `fetch('data/conference_data.json')`.
 - Khi fetch thành công: Dữ liệu JSON được parse và hiển thị.
 - Khi fetch thất bại (ví dụ duyệt qua `file:///` bị trình duyệt chặn): Cơ chế `catch` kích hoạt, tự động gán sang hằng số `FALLBACK_CONFERENCES` nhúng sẵn trong file JS để giao diện không bị trắng hoặc crash.
 
@@ -332,6 +333,6 @@ Mỗi bản ghi hội nghị trong `data/conferences.json` có cấu trúc chu�
    - Rất nhiều class được tạo hoặc gắn động bằng JavaScript trong thời gian chạy (runtime).
    - Ví dụ các class quan trọng: `.dark`, `.show`, `.open`, `.active`, `.has-avatar-photo`, `.user-dropdown-menu`, `.layout-modal`, `.modal-alert`, `.footer-feedback-status`, `.chip-keyword`, `.conference-card`, `.timeline-step`, `.accordion-head`, `.accordion-body`, `.keyword`, v.v.
 3. **KHÔNG chỉnh sửa cấu trúc thư mục `data/` mà không đối chiếu logic JS**:
-   - `data/conferences.json` được đọc bởi nhiều module (`js/pages/index.js`, `js/pages/search.js`, `js/pages/detail.js`, `js/pages/tracker.js`, `js/pages/profile.js`, `js/components/compare.js`). Việc đổi tên trường dữ liệu (ví dụ `date_happen`, `deadlines`, `summarization`) sẽ dẫn đến lỗi hiển thị thẻ hội nghị hoặc timeline.
+   - `data/conference_data.json` được đọc bởi nhiều module (`js/pages/index.js`, `js/pages/search.js`, `js/pages/detail.js`, `js/pages/tracker.js`, `js/pages/profile.js`, `js/components/compare.js`). Việc đổi tên trường dữ liệu (ví dụ `date_happen`, `deadlines`, `summarization`) sẽ dẫn đến lỗi hiển thị thẻ hội nghị hoặc timeline.
 4. **Giữ nguyên thẻ script chống FOUC đầu thẻ `<body>`**:
    - Đoạn script inline đọc `confguide_theme` ở đầu thẻ `<body>` giúp kích hoạt class `dark` trước khi CSS render, ngăn chặn hiện tượng nhấp nháy màn hình trắng khi người dùng đang ở chế độ nền tối.

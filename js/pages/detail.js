@@ -12,7 +12,7 @@
 
   /* ================= 1. HẰNG SỐ & TRẠNG THÁI MODULE ================= */
 
-  const CONFERENCES_DATA_URL = 'data/conferences.json';
+  const CONFERENCES_DATA_URL = 'data/conference_data.json';
   const DETAIL_URGENT_DAYS = 14;
   const COUNTDOWN_TICK_MS = 1000;
   const MIN_REVIEW_CHARS = 8;
@@ -296,9 +296,13 @@
    */
   function renderHeaderBadgesAndTags(root, conf, utils) {
     const rankBadge = root.querySelector('.js-rank-badge');
-    const realRank = conf.rank ? String(conf.rank).trim() : '';
+    const realRank = typeof utils.extractConferenceRank === 'function'
+      ? utils.extractConferenceRank(conf.rank)
+      : (conf.rank ? String(conf.rank).trim() : '');
     if (rankBadge) {
-      rankBadge.textContent = realRank ? `Rank ${realRank}` : '';
+      rankBadge.textContent = realRank
+        ? (/^(a\*|a|b|c)$/i.test(realRank) ? `Rank ${realRank}` : realRank)
+        : '';
       rankBadge.hidden = !realRank;
     }
 
@@ -633,8 +637,14 @@
     const esc = utils.escapeHtml;
 
     const rankEl = root.querySelector('.js-spec-rank');
-    const realRank = conf.rank ? String(conf.rank).trim() : '';
-    if (rankEl) rankEl.textContent = realRank ? `CORE ${realRank}` : 'Chưa cập nhật';
+    const realRank = typeof utils.extractConferenceRank === 'function'
+      ? utils.extractConferenceRank(conf.rank)
+      : (conf.rank ? String(conf.rank).trim() : '');
+    if (rankEl) {
+      rankEl.textContent = realRank
+        ? (/^(a\*|a|b|c)$/i.test(realRank) ? `CORE ${realRank}` : realRank)
+        : 'Chưa cập nhật';
+    }
 
     const pubEl = root.querySelector('.js-spec-publisher');
     const realPub = conf.publisher ? String(conf.publisher).trim() : '';
@@ -894,7 +904,9 @@
     }
 
     const monogram = String(item.name || 'CG').replace(/[^a-zA-Z0-9]/g, '').slice(0, 4).toUpperCase() || 'CONF';
-    const realRank = item.rank ? String(item.rank).trim() : '';
+    const realRank = typeof utils.extractConferenceRank === 'function'
+      ? utils.extractConferenceRank(item.rank)
+      : (item.rank ? String(item.rank).trim() : '');
     const dateRange = utils.formatConferenceEventDate(item);
     const locationText = item.location || 'Chưa cập nhật';
     const compareBtnHtml = window.ConfGuideCompare ? window.ConfGuideCompare.renderToggleButton(item) : '';
@@ -914,7 +926,7 @@
                 </a>
               </h3>
             </div>
-            ${realRank ? `<span class="conf-badge conf-badge--rank">Rank ${esc(realRank)}</span>` : ''}
+            ${realRank ? `<span class="conf-badge conf-badge--rank">${esc(/^(a\*|a|b|c)$/i.test(realRank) ? `Rank ${realRank}` : realRank)}</span>` : ''}
           </div>
 
           <p class="related-card__fullname">${esc(item.fullName || item.full_name || item.summarization || '')}</p>
@@ -1254,7 +1266,7 @@
       const fallbackConfs = mapFallback();
       if (fallbackConfs.length > 0) {
         setFetchNotice(
-          'Không thể kết nối tệp dữ liệu máy chủ (data/conferences.json). '
+          'Không thể kết nối tệp dữ liệu máy chủ (data/conference_data.json). '
           + 'Hệ thống đang hiển thị từ dữ liệu dự phòng cục bộ.'
         );
       }

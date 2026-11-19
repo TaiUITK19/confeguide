@@ -12,7 +12,7 @@
   /* ================= 1. HẰNG SỐ & CẤU HÌNH ================= */
 
   /** Đường dẫn tệp dữ liệu hội nghị tĩnh */
-  const CONFERENCES_DATA_URL = 'data/conferences.json';
+  const CONFERENCES_DATA_URL = 'data/conference_data.json';
 
   /** Ngưỡng số ngày đánh dấu trạng thái hạn nộp khẩn cấp */
   const URGENT_DEADLINE_DAYS = 14;

@@ -584,8 +584,8 @@
 
     try {
       const json = typeof utils.fetchJsonCached === 'function'
-        ? await utils.fetchJsonCached('data/conferences.json')
-        : await fetch('data/conferences.json').then(r => { if (!r.ok) throw new Error(r.status); return r.json(); });
+        ? await utils.fetchJsonCached('data/conference_data.json')
+        : await fetch('data/conference_data.json').then(r => { if (!r.ok) throw new Error(r.status); return r.json(); });
       if (Array.isArray(json) && json.length > 0) {
         cachedConferencesData = typeof utils.normalizeConference === 'function'
           ? json.map(item => utils.normalizeConference(item)).filter(Boolean)
@@ -643,11 +643,14 @@
 
     if (found) {
       const acronym = found.name ? found.name.split(/[\s-]+/)[0].toUpperCase().slice(0, 6) : 'CONF';
+      const rankText = typeof utils.extractConferenceRank === 'function'
+        ? utils.extractConferenceRank(found.rank)
+        : (found.rank ? String(found.rank).trim() : '');
       return {
         id: found.id || itemStr,
         name: found.name || itemStr,
         fullName: found.fullName || '',
-        rank: found.rank || 'A',
+        rank: rankText,
         format: found.format || 'hybrid',
         location: found.location || '',
         acronym,
@@ -722,7 +725,7 @@
           <div class="saved-info">
             <div class="saved-title">
               <strong>${escapeHtml(c.name)}</strong>
-              <span class="saved-badge-rank">Hạng ${escapeHtml(c.rank)}</span>
+              ${c.rank ? `<span class="saved-badge-rank">${escapeHtml(/^(a\*|a|b|c)$/i.test(c.rank) ? `Hạng ${c.rank}` : c.rank)}</span>` : ''}
             </div>
             <div class="saved-meta-line">
               ${c.fullName ? `${escapeHtml(c.fullName)}` : 'Hội nghị khoa học công nghệ thông tin'}
@@ -769,7 +772,7 @@
       items = items.filter(c =>
         c.name.toLowerCase().includes(trimmedKeyword)
         || c.fullName.toLowerCase().includes(trimmedKeyword)
-        || c.rank.toLowerCase().includes(trimmedKeyword)
+        || String(c.rank || '').toLowerCase().includes(trimmedKeyword)
       );
     }
 

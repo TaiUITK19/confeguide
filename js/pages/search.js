@@ -574,11 +574,16 @@
     const { cfpStatus, nextDeadline, lastDeadline } = evaluateSubmissionStatus(submissionDeadlines);
     const startDate = normalizeIsoDate(raw.start_date || raw.startDate);
     const endDate = normalizeIsoDate(raw.end_date || raw.endDate) || startDate;
-    const rawRank = String(raw.rank || '').trim().toUpperCase();
+    const utils = getUtils();
+    const rawRankText = utils && typeof utils.extractConferenceRank === 'function'
+      ? utils.extractConferenceRank(raw.rank)
+      : (raw.rank && typeof raw.rank === 'object' ? String(raw.rank.core || '') : String(raw.rank || ''));
+    const rawRank = rawRankText.trim().toUpperCase();
 
     return Object.assign({}, raw, {
       id,
       rank: VALID_RANK_VALUES.has(rawRank) ? rawRank : '',
+      rankInfo: raw.rank && typeof raw.rank === 'object' ? raw.rank : null,
       fullName: fullNameText || rawName,
       website: raw.website_url || raw.website || '',
       startDate,
@@ -2689,7 +2694,7 @@
   }
 
   /**
-   * Tải dữ liệu hội nghị từ data/conferences.json kèm try/catch fallback về FALLBACK_CONFERENCES.
+   * Tải dữ liệu hội nghị từ data/conference_data.json kèm try/catch fallback về FALLBACK_CONFERENCES.
    */
   async function loadData() {
     const utils = getUtils();
@@ -2712,8 +2717,8 @@
     try {
       const utils = getUtils();
       const data = utils && typeof utils.fetchJsonCached === 'function'
-        ? await utils.fetchJsonCached('data/conferences.json')
-        : await fetch('data/conferences.json').then(r => { if (!r.ok) throw new Error(r.status); return r.json(); });
+        ? await utils.fetchJsonCached('data/conference_data.json')
+        : await fetch('data/conference_data.json').then(r => { if (!r.ok) throw new Error(r.status); return r.json(); });
       if (!Array.isArray(data) || data.length === 0) throw new Error('Dữ liệu trống');
       rawList = data;
       isDataLoaded = true;

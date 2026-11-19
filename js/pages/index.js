@@ -156,7 +156,11 @@
    * @returns {'A*'|'A'|'B'|'C'|''} Nhãn rank hợp lệ hoặc chuỗi rỗng nếu chưa có hạng.
    */
   function getNormalizedRank(conf) {
-    const rawRank = String((conf && conf.rank) || '').trim().toUpperCase();
+    const utils = getUtils();
+    const rawText = utils && typeof utils.extractConferenceRank === 'function'
+      ? utils.extractConferenceRank(conf && conf.rank)
+      : (conf && conf.rank && typeof conf.rank === 'object' ? String(conf.rank.core || '') : String((conf && conf.rank) || ''));
+    const rawRank = rawText.trim().toUpperCase();
     return VALID_RANK_VALUES.has(rawRank) ? rawRank : '';
   }
 
@@ -930,8 +934,8 @@
 
     try {
       const data = utils && typeof utils.fetchJsonCached === 'function'
-        ? await utils.fetchJsonCached('data/conferences.json')
-        : await fetch('data/conferences.json').then(r => { if (!r.ok) throw new Error(r.status); return r.json(); });
+        ? await utils.fetchJsonCached('data/conference_data.json')
+        : await fetch('data/conference_data.json').then(r => { if (!r.ok) throw new Error(r.status); return r.json(); });
       allConferences = Array.isArray(data) && data.length > 0
         ? data.map(normalize).filter(Boolean)
         : fallback;
@@ -972,7 +976,13 @@
     const confId = resolveConferenceId(item);
     const confName = String(item.name || confId).trim();
     const isSaved = Boolean(confId && savedIds.includes(confId));
-    const rankBadge = item.rank ? `Rank ${item.rank}` : 'Rank A';
+    const rawRankText = utils && typeof utils.extractConferenceRank === 'function'
+      ? utils.extractConferenceRank(item.rank)
+      : String(item.rank || '').trim();
+    const upperRankText = rawRankText.toUpperCase();
+    let rankBadge = 'Đề xuất';
+    if (VALID_RANK_VALUES.has(upperRankText)) rankBadge = `Rank ${upperRankText}`;
+    else if (rawRankText) rankBadge = rawRankText;
     const dateRange = utils && utils.formatRangeVi
       ? (utils.formatRangeVi(item.startDate, item.endDate) || item.date_happen || '2026')
       : (item.date_happen || '2026');

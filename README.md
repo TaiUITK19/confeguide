@@ -36,7 +36,7 @@
 
 ## 1. Giới thiệu
 
-**ConfGuide** (tên thương hiệu hiển thị trên giao diện `ConfGuide`, tên repository `confeguide`) được xây dựng dưới dạng ứng dụng web phía client, không phụ thuộc backend hay framework ngoài. Hệ thống tập trung quy tụ dữ liệu của **41** kỳ hội nghị khoa học CNTT (`data/conferences.json`) kèm **20** tài khoản mẫu (`data/users.json`) phục vụ thử nghiệm toàn bộ quy trình tra cứu, so sánh, theo dõi hạn nộp và quản lý lịch cá nhân ngay trên trình duyệt.
+**ConfGuide** (tên thương hiệu hiển thị trên giao diện `ConfGuide`, tên repository `confeguide`) được xây dựng dưới dạng ứng dụng web phía client, không phụ thuộc backend hay framework ngoài. Hệ thống tập trung quy tụ dữ liệu của **46** kỳ hội nghị khoa học CNTT (`data/conference_data.json`) kèm **20** tài khoản mẫu (`data/users.json`) phục vụ thử nghiệm toàn bộ quy trình tra cứu, so sánh, theo dõi hạn nộp và quản lý lịch cá nhân ngay trên trình duyệt.
 
 ---
 
@@ -212,7 +212,7 @@ confguide/
 │       └── tracker.js          # Logic trang tracker.html (hiển thị & xóa hội nghị theo user)
 ├── data/
 │   ├── about.json              # Dữ liệu trang Giới thiệu
-│   ├── conferences.json        # Dữ liệu 41 hội nghị khoa học CNTT tại Việt Nam
+│   ├── conference_data.json    # Dữ liệu 46 hội nghị khoa học CNTT tại Việt Nam
 │   ├── scrape-conferences.py   # Script Python độc lập hỗ trợ cào/trích xuất dữ liệu hội nghị
 │   └── users.json              # Dữ liệu 20 tài khoản mẫu
 ├── images/
@@ -224,7 +224,7 @@ confguide/
 ```
 
 ### Quy ước đặt tên & Nguyên tắc tổ chức (rút từ [Phụ lục A](#phụ-lục-a-bảng-ánh-xạ-tái-cấu-trúc))
-- **Tên tệp & thư mục:** Chữ thường 100%, `kebab-case`, ASCII không dấu, không khoảng trắng, dùng danh từ tiếng Anh rõ nghĩa (tệp dữ liệu dùng danh từ số nhiều: `conferences.json`, `users.json`).
+- **Tên tệp & thư mục:** Chữ thường 100%, `kebab-case`, ASCII không dấu, không khoảng trắng, dùng danh từ tiếng Anh rõ nghĩa (tệp dữ liệu dùng danh từ số nhiều: `users.json`; riêng tệp hội nghị dùng ngoại lệ `conference_data.json` theo xác nhận của chủ dự án).
 - **Bộ ba theo trang:** `<trang>.html` ↔ `css/pages/<trang>.css` ↔ `js/pages/<trang>.js` (cặp `login.html` và `register.html` dùng chung `auth.css`/`auth.js`; 3 trang tĩnh `contact.html`, `terms.html`, `privacy.html` dùng `base.css`/`layout.js`, không tạo file rỗng).
 - **Phân tầng 3 lớp:** `css/base/` → `css/components/` → `css/pages/` (bảo toàn thứ tự `<link>` cascade) và `js/core/` → `js/components/` → `js/pages/`. Thư mục con chỉ tạo khi có từ 2 tệp trở lên (`images/` chỉ có 1 tệp `logo.svg` nên đặt phẳng).
 - **HTML ở gốc & Bất biến `data/`:** 11 trang HTML đặt phẳng tại thư mục gốc để triển khai trực tiếp lên GitHub Pages không cần chỉnh đường dẫn gốc; các tệp dữ liệu `data/` được đối chiếu checksum `SHA-256` nguyên vẹn. Xem bảng ánh xạ cũ → mới đầy đủ tại [Phụ lục A](#phụ-lục-a-bảng-ánh-xạ-tái-cấu-trúc).
@@ -303,7 +303,7 @@ Mọi trang HTML đều dùng chung bộ nền tảng ở `<head>`: `css/base/ba
    - Người dùng nhập từ khóa tại `#searchForm` trên `index.html` → gọi `ConfGuidePageTransition.navigate('search.html?q=...')` kèm cờ `STORAGE_SEARCH_FOCUS_KEY`.
    - Sang `search.html`, `readUrlIntoFilterState()` đọc URL params (`q`, `rank`, `cfp`, `month`, `ongoing`, `from`, `to`, `city`, `topic`, `sort`, `page`) nạp vào `Proxy filterState`; mọi thay đổi tự động gom vào 1 `queueMicrotask` để lọc/sắp xếp, tính facet counts, cập nhật DOM theo batch qua `<template>` + `DocumentFragment` và đồng bộ ngược lại URL bằng `history.replaceState` (debounce `300ms`).
 2. **Chi tiết hội nghị, Lưu theo dõi & Xuất lịch (`detail.js` ↔ `tracker.js`):**
-   - `detail.html?id=<slug>` tra cứu bản ghi từ `fetchJsonCached('data/conferences.json')`, tính 4 mốc AoE → `UTC+7`, chạy đồng hồ đếm ngược (dọn timer qua `pagehide` và khôi phục khi `pageshow`), hỗ trợ tải `.ics` hoặc mở Google Calendar.
+   - `detail.html?id=<slug>` tra cứu bản ghi từ `fetchJsonCached('data/conference_data.json')`, tính 4 mốc AoE → `UTC+7`, chạy đồng hồ đếm ngược (dọn timer qua `pagehide` và khôi phục khi `pageshow`), hỗ trợ tải `.ics` hoặc mở Google Calendar.
    - Nút Lưu ghi danh sách ID vào `confguide_saved_<userId>` (hoặc `confguide_saved_guest`) trong `LocalStorage`; `tracker.html` đọc khóa này qua `ConfGuideUtils.getSavedStorageKey(true)` để hiển thị bảng theo dõi và xóa bằng event delegation trên `#conferenceBody`.
 3. **So sánh tối đa 3 hội nghị (`compare.js`):**
    - Người dùng bật nút So sánh trên thẻ ở `index.html`, `search.html`, `detail.html`, `tracker.html` (và module hỗ trợ trên `profile.html`). Danh sách tối đa 3 ID được lưu trong `SessionStorage` (`confguide_compare_ids`), đồng bộ liên tục với thanh nổi dưới đáy và render bảng đối chiếu chi tiết trong modal khi bấm mở (hỗ trợ đóng bằng `Escape` và nút xóa từng cột).
@@ -374,7 +374,7 @@ cd confeguide
 ```
 
 ### 2. Chạy bằng máy chủ HTTP tĩnh cục bộ
-> **Lưu ý về giao thức `file:///`:** Không nên mở trực tiếp file `.html` bằng `file:///` khi kiểm thử đầy đủ, vì trình duyệt chặn `fetch('data/conferences.json')` và `fetch('data/about.json')` do chính sách CORS cho `origin null` (dù code có sẵn dữ liệu dự phòng `FALLBACK_CONFERENCES`/`SEED_USERS`, `history.replaceState` đồng bộ URL trên `search.html` và `@view-transition` + Speculation Rules cũng chỉ kích hoạt trên `http://`/`https://`).
+> **Lưu ý về giao thức `file:///`:** Không nên mở trực tiếp file `.html` bằng `file:///` khi kiểm thử đầy đủ, vì trình duyệt chặn `fetch('data/conference_data.json')` và `fetch('data/about.json')` do chính sách CORS cho `origin null` (dù code có sẵn dữ liệu dự phòng `FALLBACK_CONFERENCES`/`SEED_USERS`, `history.replaceState` đồng bộ URL trên `search.html` và `@view-transition` + Speculation Rules cũng chỉ kích hoạt trên `http://`/`https://`).
 
 - **Cách 1 — Visual Studio Code Live Server (Khuyến nghị):**
   1. Cài extension **Live Server** (`ritwickdey.LiveServer`).
@@ -400,7 +400,7 @@ Repository có sẵn script Python độc lập [`data/scrape-conferences.py`](d
   2. Từ `deadline_url` (fallback sang `website_url` nếu thiếu): trích mảng `deadlines` (`name`, `date` định dạng `YYYY-MM-DD`).
   - Áp dụng giới hạn tốc độ `RATE_LIMIT_SECONDS = 15` giữa các yêu cầu.
 - **Định dạng vào / ra theo mã nguồn hiện tại:**
-  - `INPUT_FILE = "conferences.json"`, `OUTPUT_FILE = os.path.join("data", "conference_data.json")` *(lưu ý trong script hiện vẫn trỏ theo tên tệp trước khi tái cấu trúc repository; xem ghi chú ngoại lệ ở [Phụ lục A](#phụ-lục-a-bảng-ánh-xạ-tái-cấu-trúc))*.
+  - `INPUT_FILE = "data/conference_data.json"`, `OUTPUT_FILE = os.path.join("data", "conference_data.json")` *(đều trỏ thống nhất tới tệp dữ liệu chính `data/conference_data.json`)*.
 - **Cài đặt phụ thuộc & Cách chạy:**
   ```bash
   pip install pydantic python-dotenv openai requests
@@ -503,7 +503,7 @@ Repository có sẵn script Python độc lập [`data/scrape-conferences.py`](d
 
 | Đường dẫn cũ | Đường dẫn mới | Lý do |
 |---|---|---|
-| `data/conference_data.json` | `data/conferences.json` | Chuẩn hóa từ `snake_case`/số ít thừa `_data` sang danh từ số nhiều `conferences.json` |
+| `data/conference_data.json` | `data/conference_data.json` | Giữ/cập nhật thống nhất dùng tên `data/conference_data.json` theo ngoại lệ do chủ dự án xác nhận |
 | `data/main.py` | `data/scrape-conferences.py` | Đổi từ tên chung `main.py` sang `kebab-case` mô tả đúng chức năng script thu thập dữ liệu hội nghị độc lập |
 | `data/users.json` | `data/users.json` | Đã đúng chuẩn chữ thường, danh từ số nhiều |
 | `data/about.json` | `data/about.json` | Đã đúng chuẩn chữ thường, khớp nội dung trang `about.html` |
@@ -528,12 +528,12 @@ Repository có sẵn script Python độc lập [`data/scrape-conferences.py`](d
 2. **Tham chiếu JS (`<script src>` và chú thích tệp JS):**
    - *(đã cập nhật theo mã nguồn hiện tại)* Tại thời điểm tái cấu trúc chỉ có `js/core/page-transition.js` đặt trong `<head>`; ở bản tối ưu chuyển trang mới nhất (`e04662e`), `<script src="js/core/layout.js" defer blocking="render"></script>` cũng đã được chuyển lên `<head>` ngay sau `page-transition.js`, các script component/page còn lại dùng `defer` ở cuối `<body>`.
    - Chú thích đầu tệp trong toàn bộ 12 tệp JS và 2 chú thích HTML (`detail.html`, `profile.html`) trỏ theo tên đường dẫn mới.
-3. **Tham chiếu Dữ liệu (`fetch('data/conferences.json')`):**
-   - *(đã cập nhật theo mã nguồn hiện tại)* Trong file `restructure-plan.md` gốc có dòng viết nhầm `fetch('data/conference_data.json')`, nhưng mã nguồn JS thực tế của cả 6 tệp (`js/pages/index.js`, `js/pages/search.js`, `js/pages/detail.js`, `js/pages/tracker.js`, `js/pages/profile.js`, `js/components/compare.js`) đều đã gọi **`fetch('data/conferences.json')`** (riêng qua `ConfGuideUtils.fetchJsonCached('data/conferences.json')` kể từ `f4d13a7`).
+3. **Tham chiếu Dữ liệu (`fetch('data/conference_data.json')`):**
+   - *(đã cập nhật theo mã nguồn hiện tại)* Mã nguồn JS thực tế của cả 6 tệp (`js/pages/index.js`, `js/pages/search.js`, `js/pages/detail.js`, `js/pages/tracker.js`, `js/pages/profile.js`, `js/components/compare.js`) đều gọi **`fetch('data/conference_data.json')`** (qua `ConfGuideUtils.fetchJsonCached('data/conference_data.json')`).
 
 ### A.4. Ghi chú & Ràng buộc Ngoại lệ
 
-- **Đường dẫn bên trong `data/scrape-conferences.py` (tên cũ `data/main.py`):** Dòng 120–124 trong tệp Python này khai báo `INPUT_FILE = "conferences.json"` và `OUTPUT_FILE = os.path.join("data", "conference_data.json")`. Do ràng buộc bất biến từng byte với các tệp trong `data/`, chuỗi này được giữ nguyên hoàn toàn.
+- **Đường dẫn bên trong `data/scrape-conferences.py` (tên cũ `data/main.py`):** Dòng 120–124 trong tệp Python này khai báo `INPUT_FILE = "data/conference_data.json"` và `OUTPUT_FILE = os.path.join("data", "conference_data.json")`, trỏ thống nhất tới tệp dữ liệu chính.
 - **Tham chiếu `logs.html` trong `js/core/layout.js`:** Dòng `currentPage === 'tracker.html' || currentPage === 'logs.html'` (dòng 1382) vẫn tồn tại trong JS nhằm giữ nguyên logic cũ; không có tệp `logs.html` nào tồn tại trong repository.
 - **Nhóm CSS phụ trong `css/pages/auth.css`:** Class `.auth-header` trong `css/pages/auth.css` là selector dự phòng/cũ vì header thực tế trên trang Auth do `js/core/layout.js` render thành `.site-header`; giữ nguyên theo nguyên tắc không xóa class CSS hiện có.
 
@@ -613,7 +613,7 @@ Repository có sẵn script Python độc lập [`data/scrape-conferences.py`](d
 | Tệp | Dung lượng | SHA-256 |
 |---|---|---|
 | `data/about.json` | 7,973 B | `580b99aa8e7b2142f0d51e15d91996153571af7a4496b7f752a9137c6aec39d4` |
-| `data/conferences.json` | 65,129 B | `7525871562c0d49c4f0e78b5a5c15932ceae46a29b659e9910ab1fccf524f935` |
+| `data/conference_data.json` *(bản cũ 41 hội nghị trước cập nhật)* | 65,129 B | `7525871562c0d49c4f0e78b5a5c15932ceae46a29b659e9910ab1fccf524f935` |
 | `data/scrape-conferences.py` | 14,234 B | `db728e42be96c74f4eafebfa18f1b0bc58b6ca97ed1d830ca5167d9d3fd30c96` |
 | `data/users.json` | 5,418 B | `1ad847d87b57a8f2cbc0237627392ff80728ad2cb86cf25fc77ab48a57359125` |
 
@@ -638,7 +638,7 @@ Repository có sẵn script Python độc lập [`data/scrape-conferences.py`](d
 | **CSS trên đĩa working tree** | `264,609 B` | `262,875 B` | **`-1,734 B`** |
 | **JS (12 tệp, chuẩn LF)** | `537,375 B` | `538,940 B` | `+1,565 B` *(thêm Promise cache `fetchJsonCached` + `bfcache` cleanup; `about.js -583 B`, `index.js -359 B`, `profile.js -322 B`, `calendar.js -231 B`)* |
 | **Tổng CSS + JS (chuẩn LF)** | `794,347 B` | `794,249 B` | **`-98 B`** *(đồng thời giảm số request trùng)* |
-| **Fetch `data/conferences.json` khi bật So sánh** | `2` request/trang *(page script + `compare.js`)* | **`1` request/trang** *(dùng chung `fetchJsonCached`)* | **`-50%` request JSON** trên `index`, `search`, `detail`, `tracker`, `profile` |
+| **Fetch `data/conference_data.json` khi bật So sánh** | `2` request/trang *(page script + `compare.js`)* | **`1` request/trang** *(dùng chung `fetchJsonCached`)* | **`-50%` request JSON** trên `index`, `search`, `detail`, `tracker`, `profile` |
 | **Khai báo `!important` không cần thiết trong CSS** | `7` chỗ (`base.css`, `about.css`, `tracker.css`) | **`0` chỗ** *(giữ nguyên `!important` cho `[hidden]`, `.is-hidden`, `prefers-reduced-motion`)* | **Loại bỏ 7/7** |
 | **Lệnh `var` trong JS** | `0` | `0` | Sạch `ES6+` |
 | **Lệnh `console.*` trong JS** | `2` (`console.info` ở `about.js`, `console.warn` ở `auth.js`) | **`0`** | **Loại bỏ 2/2** |
@@ -672,7 +672,7 @@ Repository có sẵn script Python độc lập [`data/scrape-conferences.py`](d
 | Tệp | Trước (`1fca950`) | Sau (`56fe38f`) | Chênh lệch | Ghi chú thay đổi |
 |---|---:|---:|---:|---|
 | [`js/components/calendar.js`](js/components/calendar.js) | 46,390 B | 46,159 B | **-231 B** | Thu gọn wrapper `escapeHtml` tái sử dụng `ConfGuideUtils` |
-| [`js/components/compare.js`](js/components/compare.js) | 41,647 B | 41,718 B | +71 B | Tái sử dụng `ConfGuideUtils.fetchJsonCached('data/conferences.json')` |
+| [`js/components/compare.js`](js/components/compare.js) | 41,647 B | 41,718 B | +71 B | Tái sử dụng `ConfGuideUtils.fetchJsonCached('data/conference_data.json')` |
 | [`js/components/search-core.js`](js/components/search-core.js) | 27,982 B | 28,225 B | +243 B | `escapeHtml` ưu tiên dùng `ConfGuideUtils.escapeHtml` |
 | [`js/core/layout.js`](js/core/layout.js) | 93,989 B | 95,743 B | +1,754 B | Thêm `fetchJsonCached(url)` (Map Promise cache có tự xóa khi lỗi) và `getSavedStorageKey()` |
 | [`js/core/page-transition.js`](js/core/page-transition.js) | 16,073 B | 16,073 B | 0 B | Sau `56fe38f`, chuyển sang Phương án B + WAAPI + Speculation Rules ở `d2cd337`/`9d31af1`: hiện tại **`22,483 B`** *(đã cập nhật theo mã nguồn hiện tại)* |
@@ -706,7 +706,7 @@ Repository có sẵn script Python độc lập [`data/scrape-conferences.py`](d
   1. Xóa rule trùng/chết chắc chắn 100% (`0` xuất hiện trong toàn bộ HTML, JS và `data/`): `.visually-hidden`, `.footer-chat-link`, `.footer-chat-status`, `.footer-chat-status--error` (`css/base/base.css`); `.logo-badge`, `.logo-badge.red`, `.logo-badge.yellow`, `.tracker-modal-form*`, `.form-actions` (`css/pages/tracker.css`); `.search-combobox__item-main`, `.accordion-head__selected`, `.active-chips-bar*`, `.accordion-panel`, `.accordion-panel__inner` (`css/pages/search.css`).
   2. Gỡ 7 `!important` không cần thiết bằng specificity chuẩn: `.btn-header-login`, `.btn-header-login:hover`, `.btn-header-login.active`, `.btn-header-register` (`css/base/base.css`); `.btn-github`, `.btn-propose` (`css/pages/about.css`); `.tracker-table td.tracker-empty { padding: 35px; }` (`css/pages/tracker.css`).
 - **Nhóm B — JavaScript (`f4d13a7` & `56fe38f`):**
-  1. **Cache Promise `fetchJsonCached(url)`** trong `js/core/layout.js` (`window.ConfGuideUtils`) chia sẻ 1 request mạng duy nhất khi nhiều module cùng đọc `data/conferences.json` / `data/about.json` (tự xóa cache khi lỗi để retry vẫn hoạt động).
+  1. **Cache Promise `fetchJsonCached(url)`** trong `js/core/layout.js` (`window.ConfGuideUtils`) chia sẻ 1 request mạng duy nhất khi nhiều module cùng đọc `data/conference_data.json` / `data/about.json` (tự xóa cache khi lỗi để retry vẫn hoạt động).
   2. **Event Delegation & Vòng đời timer:** `js/pages/tracker.js` chuyển `[data-remove]` sang 1 listener trên `#conferenceBody`; `js/pages/profile.js` chuyển `.js-remove-saved-btn` sang `#savedConferencesList`; `js/pages/detail.js` dọn `countdownTimer` trên `pagehide` và khôi phục trên `pageshow`.
   3. **Batch DOM Parse & Passive Listener:** `js/pages/search.js` dùng 1 `<template>` + `DocumentFragment` thay cho vòng lặp `createElement` + `innerHTML` trong `renderConferenceList()`; gắn `{ passive: true }` cho `window.resize`.
   4. **Hợp nhất helper & Dọn console:** Xóa `console.info` (`about.js`) và `console.warn` (`auth.js`); hợp nhất `getSavedStorageKey()`, `getCurrentUser()`, `escapeHtml`, `readStorage`, `writeStorage`, `fallbackSlugify` từ `ConfGuideUtils`.
@@ -734,7 +734,7 @@ Repository có sẵn script Python độc lập [`data/scrape-conferences.py`](d
 - **Kiểm tra dữ liệu `data/`:** `SHA-256` khớp 100% với bảng checksum ở [Phụ lục B](#phụ-lục-b-số-liệu-đo-ban-đầu-trước-tối-ưu) (`0` byte đổi).
 - **Kiểm tra cú pháp & W3C / CSSOM:** `node --check` pass `12/12` JS; `StrictHTMLChecker` (`HTMLParser`) pass `11/11` HTML (`0` trùng ID, `0` inline CSS/event, `0` lỗi heading); Chrome CSSOM nạp đủ rule ở cả 11/11 CSS, `0` console error/warning/404.
 - **Đối chiếu `66` ảnh chụp màn hình (`11` trang × `3` kích thước × `Sáng/Tối`) & Computed Styles:** `Computed style diffs: 0`; `Viewport overflow/size diffs: 0` (`1280×860`, `768×1024`, `390×844` phiên `user1`); `59/66` PNG trùng khít từng pixel ngoài thanh cuộn (`7` ảnh còn lại khác ở đồng hồ đếm ngược `detail.html` vùng `1595–1602px, y=550..729` và khung `49×49px` tablet dark trên `search.html`).
-- **Luồng tương tác (`verify_flows.mjs`, `verify_transitions.mjs`):** `data/conferences.json` chỉ gọi **1 lần/trang**; Compare mở/đóng `Escape`; Search lọc `?q=AI` (`25` kết quả), reset `41`, Empty State; Detail đếm ngược; Tracker delegation xóa (`2 -> 1`); Profile calendar & modal; About modal; `0` lỗi console / 404.
+- **Luồng tương tác (`verify_flows.mjs`, `verify_transitions.mjs`):** `data/conference_data.json` chỉ gọi **1 lần/trang**; Compare mở/đóng `Escape`; Search lọc `?q=AI` (`25` kết quả), reset `41`, Empty State; Detail đếm ngược; Tracker delegation xóa (`2 -> 1`); Profile calendar & modal; About modal; `0` lỗi console / 404.
 
 ### C.5. Khuyến nghị Nhỏ cho Bước Tiếp theo
 
@@ -864,7 +864,7 @@ Kiểm thử bằng Chrome DevTools Protocol `Animation.setPlaybackRate(0.02)` k
 | `terms.html` | `97/100/100/100` → `96/100/100/100` | `2194ms / 0 / 0ms` | `100/100/100/100` → **`100/100/100/100`** | `470ms / 0 / 0ms` |
 | `privacy.html` | `97/100/100/100` → `96/100/100/100` | `2202ms / 0 / 0ms` | `100/100/100/100` → **`100/100/100/100`** | `474ms / 0 / 0ms` |
 
-> Lưu ý kiểm định: (1) Các endpoint W3C trực tuyến (`validator.w3.org/nu/`, `jigsaw.w3.org`) gặp lỗi chứng chỉ TLS/Cloudflare trong môi trường CLI (`URLError: CERTIFICATE_VERIFY_FAILED`), được kiểm chứng thay thế bằng `StrictHTMLChecker` (`0` lỗi trên `11/11` HTML) và Chrome CSSOM (`11/11` CSS nạp hợp lệ); (2) Toàn bộ 4 tệp trong `data/` giữ nguyên **100% SHA-256** (`about.json`, `conferences.json`, `scrape-conferences.py`, `users.json`).
+> Lưu ý kiểm định: (1) Các endpoint W3C trực tuyến (`validator.w3.org/nu/`, `jigsaw.w3.org`) gặp lỗi chứng chỉ TLS/Cloudflare trong môi trường CLI (`URLError: CERTIFICATE_VERIFY_FAILED`), được kiểm chứng thay thế bằng `StrictHTMLChecker` (`0` lỗi trên `11/11` HTML) và Chrome CSSOM (`11/11` CSS nạp hợp lệ); (2) Toàn bộ 4 tệp trong `data/` tại thời điểm chốt baseline giữ nguyên **100% SHA-256** (`about.json`, `conference_data.json`, `scrape-conferences.py`, `users.json`).
 
 ### E.4. Danh sách Điểm nghi ngờ giữ nguyên an toàn (Suspect List)
 
@@ -873,6 +873,6 @@ Các thành phần sau không được xóa để bảo đảm nguyên tắc kh�
 2. `css/pages/profile.css` (`.saved-*`, `.tracker-preview-*`, `#savedConferencesList`, `#trackerPreviewContainer`) & hàm tương ứng trong `js/pages/profile.js`: được giữ lại kèm kiểm tra `if (!container) return;` an toàn cho bố cục danh sách đã lưu cũ.
 3. `js/pages/search.js` (`DUPLICATE_RAW_NAMES`, `ENABLED_FILTER_GROUPS.mode/publisher`): cờ tắt sẵn để mở rộng bộ lọc hình thức / nhà xuất bản về sau mà không đổi cấu trúc `filterState`.
 4. `js/pages/index.js` (`initTabs`, `currentTab`) & `css/pages/index.css` (`.filter-tabs`, `.tab-btn`): hook tab lọc hội nghị cũ trên trang chủ, giữ nguyên tương thích.
-5. `js/core/layout.js` (`logs.html` trong kiểm tra active link; `#contactFullName` đối ứng với `#fullName` trong `contact.html`) và `data/scrape-conferences.py` (`INPUT_FILE = "conferences.json"`, `OUTPUT_FILE = os.path.join("data", "conference_data.json")` thuộc `data/` bất biến).
+5. `js/core/layout.js` (`logs.html` trong kiểm tra active link; `#contactFullName` đối ứng với `#fullName` trong `contact.html`) và `data/scrape-conferences.py` (`INPUT_FILE = "data/conference_data.json"`, `OUTPUT_FILE = os.path.join("data", "conference_data.json")`).
 
 </details>
