@@ -5,7 +5,7 @@
     "website_url": "https://soict.org/",
     "deadline_url": "https://soict.org/submission/",
     "full_name": "The 15th International Symposium on Information and Communication Technology",
-    "summarization": "SOICT 2026 is an international symposium covering significant research areas such as AI Foundations and Big Data, Networking and Communication Technologies, Multimedia Processing, AI Applications, Generative AI, Applied Operations Research and Optimization, and Recent Advances in Cyber Security. It aims to provide an academic forum for researchers and graduate students to share their latest research findings and identify future computer science challenges. The symposium will feature tutorials, keynotes, and proceedings published in the Springer CCIS series.",
+    "summarization": "SOICT 2026 is an international symposium covering significant research areas including AI Foundations and Big Data, Networking and Communication Technologies, Multimedia Processing, AI Applications, Generative AI, Applied Operations Research and Optimization, and Cyber Security. The symposium provides an academic forum for researchers and graduate students to share their latest research findings and identify future computer science challenges. Accepted and presented papers will be published in the Springer CCIS series and indexed in major academic databases.",
     "location": "Ho Chi Minh city",
     "country": "Vietnam",
     "is_it_related": true,
@@ -32,15 +32,15 @@
         "date": "2026-10-30"
       }
     ],
-    "crawled_at": "2026-11-18T11:55:40+00:00",
+    "crawled_at": "2026-11-19T09:41:26+00:00",
     "status": "complete",
     "errors": [],
     "rank": {
-      "core": "National/Regional",
-      "core_source": "ICORE2026",
+      "core": null,
+      "core_source": null,
       "ccf": null,
-      "matched_title": "International Conference on the Quality of Information and Communications Technology",
-      "matched_by": "title"
+      "matched_title": null,
+      "matched_by": null
     }
   },
   {
@@ -48,8 +48,8 @@
     "year": "2026",
     "website_url": "https://rivf2026.org/",
     "deadline_url": "https://rivf2026.org/call-for-papers.html",
-    "full_name": "The 20th International Conference on Computing and Communication Technologies",
-    "summarization": "RIVF is a major scientific event for researchers, professionals, and students in the field of Computing and Communication Technologies. The conference serves as a forum to present research, innovation, and vision for the future in areas such as computing, communication, and related IT domains. It brings together national and international participants for paper presentations, keynotes, and tutorials.",
+    "full_name": "RIVF 2026 – The 20th International Conference on Computing and Communication Technologies",
+    "summarization": "The Research, Innovation and Vision for the Future (RIVF) conference is a major scientific event for researchers, professionals, and students in the field of Computing and Communication Technologies. The 20th edition covers topics including AI foundations, big data, communications, networking, IoT, cybersecurity, software engineering, robotics, and applied operations research. It provides a forum for discussing problems, sharing research results, and establishing academic collaborations.",
     "location": "VinUniversity, Hanoi",
     "country": "Vietnam",
     "is_it_related": true,
@@ -64,11 +64,15 @@
         "date": "2026-09-15"
       },
       {
+        "name": "Acceptance Notification",
+        "date": "2026-10-18"
+      },
+      {
         "name": "Camera-Ready Submission",
         "date": "2026-11-25"
       }
     ],
-    "crawled_at": "2026-11-18T11:56:13+00:00",
+    "crawled_at": "2026-11-19T09:42:05+00:00",
     "status": "complete",
     "errors": [],
     "rank": {
@@ -85,8 +89,8 @@
     "website_url": "https://aicon-conf.eai-conferences.org/2026/",
     "deadline_url": "https://aicon-conf.eai-conferences.org/2026/call-for-paper/",
     "full_name": "6th EAI International Conference on Artificial Intelligence for Communications and Networks",
-    "summarization": "The 6th EAI International Conference on Artificial Intelligence for Communications and Networks (EAI AICON 2026) focuses on artificial intelligence methods and systems that directly advance communication technologies, network infrastructures, and connected autonomous systems. It brings together researchers, engineers, and practitioners working at the intersection of AI, communications, and networking to discuss AI-enabled design, optimization, operation, and protection of various network types.",
-    "location": "Phu Quoc Island, An Giang, Vietnam",
+    "summarization": "The 6th EAI International Conference on Artificial Intelligence for Communications and Networks (EAI AICON 2026) focuses on artificial intelligence methods and systems that directly advance communication technologies, network infrastructures, and connected autonomous systems. It brings together researchers, engineers, and practitioners working at the intersection of AI, communications, and networking to discuss AI-enabled design, optimization, operation, and protection.",
+    "location": "Phu Quoc Island, Vietnam",
     "country": "Vietnam",
     "is_it_related": true,
     "date_happen": "2026-12-04 to 2026-12-06",
@@ -112,27 +116,11 @@
         "date": "2026-09-30"
       },
       {
-        "name": "Notification deadline (Secondary Track)",
-        "date": "2026-10-26"
-      },
-      {
-        "name": "Camera-ready deadline (Secondary Track)",
-        "date": "2026-11-22"
-      },
-      {
         "name": "Full Paper Submission deadline (Last Track)",
         "date": "2026-10-15"
-      },
-      {
-        "name": "Notification deadline (Last Track)",
-        "date": "2026-10-26"
-      },
-      {
-        "name": "Camera-ready deadline (Last Track)",
-        "date": "2026-11-22"
       }
     ],
-    "crawled_at": "2026-11-18T11:57:03+00:00",
+    "crawled_at": "2026-11-19T09:42:40+00:00",
     "status": "complete",
     "errors": [],
     "rank": {
@@ -149,7 +137,7 @@
     "website_url": "https://ami.ctu.edu.vn/2026/",
     "deadline_url": "https://ami.ctu.edu.vn/2026/",
     "full_name": "The 1st International Conference on Autonomous Machine Intelligence",
-    "summarization": "The International Conference on Autonomous Machine Intelligence (AMI 2026) is an international forum dedicated to the study of autonomous, self-supervised, and predictive learning systems. The conference brings together researchers and practitioners to advance the foundations and applications of next-generation intelligent systems capable of learning and acting with minimal human supervision, focusing on paradigms such as world models, energy-based models, and joint embedding predictive architectures.",
+    "summarization": "The International Conference on Autonomous Machine Intelligence (AMI 2026) is an international forum dedicated to the study of autonomous, self-supervised, and predictive learning systems. The conference brings together researchers and practitioners to advance the foundations and applications of next-generation intelligent systems capable of learning and acting with minimal human supervision. AMI 2026 focuses on emerging paradigms such as world models, energy-based models, and joint embedding predictive architectures, bridging theoretical advances with practical deployments in real-world environments.",
     "location": "Can Tho City",
     "country": "Vietnam",
     "is_it_related": true,
@@ -172,7 +160,7 @@
         "date": "2026-10-08"
       }
     ],
-    "crawled_at": "2026-11-18T11:57:36+00:00",
+    "crawled_at": "2026-11-19T09:43:14+00:00",
     "status": "complete",
     "errors": [],
     "rank": {
@@ -188,8 +176,8 @@
     "year": "2026",
     "website_url": "https://www.iceba.org/",
     "deadline_url": "https://www.iceba.org/",
-    "full_name": "12th International Conference on E-Business and Applications",
-    "summarization": "ICEBA 2026 focuses on cross-border integration and intelligent upgrade, addressing essential complexities in e-business through systems, software, services, and enterprise-oriented digital transformation. It invites researchers, practitioners, and enterprise leaders to share insights on topics such as intelligent tech for enterprise digital transformation, innovative cross-border e-business service models, and sustainable development. The three-day event features keynote speeches, paper presentations, workshops, and panel discussions.",
+    "full_name": "The 12th International Conference on E-Business and Applications",
+    "summarization": "The International Conference on E-Business and Applications (ICEBA 2026) provides an international forum for presenting original research, exchange, and dissemination of innovative and practical development experiences in e-business and related applications. It draws researchers, application developers, and practitioners from areas such as business intelligence, AIoT-enabled business innovation, business models and processes, ecommerce trading technologies, e-business strategy, digital marketing, information systems, and operations management.",
     "location": "Da Nang",
     "country": "Vietnam",
     "is_it_related": true,
@@ -212,7 +200,7 @@
         "date": "2026-11-25"
       }
     ],
-    "crawled_at": "2026-11-18T11:58:27+00:00",
+    "crawled_at": "2026-11-19T09:44:06+00:00",
     "status": "complete",
     "errors": [],
     "rank": {
@@ -228,9 +216,9 @@
     "year": "2026",
     "website_url": "https://rev-ecit.vn/vi",
     "deadline_url": "https://rev-ecit.vn/vi",
-    "full_name": "Hội nghị Quốc gia lần thứ XXIX về Điện tử, Truyền thông và Công nghệ Thông tin",
-    "summarization": "REV-ECIT 2026 is the 29th National Conference on Electronics, Communications and Information Technology organized by the Radio-Electronics Association of Vietnam (REV). The conference covers topics across electronics, communications, and information technology, with a special focus on national strategic technologies.",
-    "location": "Hanoi",
+    "full_name": "Hội nghị Quốc gia lần thứ XXIX về Điện tử, Truyền thông và Công nghệ Thông tin (REV-ECIT 2026)",
+    "summarization": "The 29th National Conference on Electronics, Communications and Information Technology (REV-ECIT 2026) is an annual scientific conference organized by the Radio and Electronics Association of Vietnam (REV). The conference covers topics across electronics, communications, and information technology, with a particular focus on national strategic technologies.",
+    "location": "Cục Tần số Vô tuyến điện, Bộ Khoa học và Công nghệ, số 115 Trần Duy Hưng, phường Yên Hòa, TP. Hà Nội",
     "country": "Vietnam",
     "is_it_related": true,
     "date_happen": "2026-12-19",
@@ -252,7 +240,7 @@
         "date": "2026-11-26"
       }
     ],
-    "crawled_at": "2026-11-18T11:58:44+00:00",
+    "crawled_at": "2026-11-19T09:44:25+00:00",
     "status": "complete",
     "errors": [],
     "rank": {
@@ -268,8 +256,8 @@
     "year": "2027",
     "website_url": "https://aici2027.thanglong.edu.vn/",
     "deadline_url": "https://aici2027.thanglong.edu.vn/important-dates/",
-    "full_name": "The International Conference on Artificial Intelligence and Computational Intelligence",
-    "summarization": "The International Conference on Artificial Intelligence and Computational Intelligence (AICI 2027) brings together researchers in artificial intelligence, computational intelligence, and related topics to present theoretical and applied research, and to foster research collaborations. The conference features hybrid participation and focuses on main themes including artificial intelligence and other soft computing techniques with biomedical and related applications.",
+    "full_name": "The Eighth International Conference on Artificial Intelligence and Computational Intelligence",
+    "summarization": "The International Conference on Artificial Intelligence and Computational Intelligence aims to bring together researchers working on artificial intelligence, computational intelligence, and related topics. The event provides an opportunity to present and discuss theoretical and applied research problems while fostering research collaborations across fields such as fuzzy systems, machine learning, deep learning, and soft computing.",
     "location": "Thang Long University, Nghiem Xuan Yem Road, Dinh Cong District, Hanoi",
     "country": "Vietnam",
     "is_it_related": true,
@@ -292,7 +280,7 @@
         "date": "2026-10-31"
       }
     ],
-    "crawled_at": "2026-11-18T11:59:16+00:00",
+    "crawled_at": "2026-11-19T09:45:00+00:00",
     "status": "complete",
     "errors": [],
     "rank": {
@@ -309,7 +297,7 @@
     "website_url": "https://www.iciit.org/",
     "deadline_url": "https://www.iciit.org/date.html",
     "full_name": "2027 12th International Conference on Intelligent Information Technology",
-    "summarization": "The 12th International Conference on Intelligent Information Technology (ICIIT 2027) provides an interactive forum for presentation and discussion on intelligent information technology and related fields. It welcomes international researchers, professionals, and students to establish professional ties and explore career opportunities. The event features paper presentations, keynote speeches, and publication opportunities in ACM conference proceedings and affiliated journals.",
+    "summarization": "The 12th International Conference on Intelligent Information Technology (ICIIT 2027) aims to gather professors, researchers, scholars, and industrial pioneers from all over the world. It serves as a premier forum for the presentation and exchange of past experiences, new advances, and research results in the field of theoretical and industrial intelligent information technology and related areas.",
     "location": "Ho Chi Minh City",
     "country": "Vietnam",
     "is_it_related": true,
@@ -320,7 +308,7 @@
     "logo_url": "https://www.iciit.org/images/header.jpg",
     "deadlines": [
       {
-        "name": "Full paper Submission",
+        "name": "Full Paper Submission",
         "date": "2026-11-30"
       },
       {
@@ -328,15 +316,15 @@
         "date": "2026-12-05"
       },
       {
-        "name": "Notification",
+        "name": "Notification Date",
         "date": "2026-12-20"
       },
       {
-        "name": "Registration",
+        "name": "Registration Deadline",
         "date": "2027-01-10"
       }
     ],
-    "crawled_at": "2026-11-18T11:59:49+00:00",
+    "crawled_at": "2026-11-19T09:45:39+00:00",
     "status": "complete",
     "errors": [],
     "rank": {
@@ -352,9 +340,9 @@
     "year": "2027",
     "website_url": "https://iccies.tdtu.edu.vn/2027/",
     "deadline_url": "https://iccies.tdtu.edu.vn/2027/",
-    "full_name": "International Conference on Computational Intelligence in Engineering Science",
-    "summarization": "ICCIES 2027 is an annual international academic forum providing a platform for researchers, academics, and professionals to exchange knowledge, share experiences, and explore innovations, recent advances, and emerging trends in intelligent computing across engineering disciplines such as Information Technology, Electrical and Electronics Engineering, Mechatronics, and the IoT ecosystem. It fosters international collaboration and brings together researchers from universities, research institutions, and industry, as well as Ph.D. and early-career researchers.",
-    "location": "Ton Duc Thang University, Ho Chi Minh City",
+    "full_name": "The 3rd International Conference on Computational Intelligence in Engineering Science",
+    "summarization": "ICCIES 2027 is an annual international academic forum that provides a platform for researchers, academics, and professionals to exchange knowledge, share experiences, and explore innovations, recent advances, and emerging trends in intelligent computing across a broad range of engineering disciplines, including Information Technology, Electrical and Electronics Engineering, Mechatronics, and the Internet of Things ecosystem.",
+    "location": "Ton Duc Thang University, Ho Chi Minh City, Vietnam",
     "country": "Vietnam",
     "is_it_related": true,
     "date_happen": "2027-04-15 to 2027-04-17",
@@ -362,12 +350,15 @@
     "end_date": "2027-04-17",
     "image_url": "https://iccies.tdtu.edu.vn/2027/wp-content/uploads/2024/08/cropped-backdrop-scaled-1.jpg",
     "logo_url": "https://iccies.tdtu.edu.vn/2027/wp-content/uploads/2024/08/cropped-cropped-LOGO-ICCIES-Recovered-05.png",
-    "deadlines": [],
-    "crawled_at": "2026-11-18T12:00:06+00:00",
-    "status": "partial",
-    "errors": [
-      "no deadlines found"
+    "deadlines": [
+      {
+        "name": "Paper Submission",
+        "date": "2026-11-15"
+      }
     ],
+    "crawled_at": "2026-11-19T09:45:56+00:00",
+    "status": "complete",
+    "errors": [],
     "rank": {
       "core": null,
       "core_source": null,
@@ -381,8 +372,8 @@
     "year": "2027",
     "website_url": "https://warwick.ac.uk/fac/sci/dcs/aamas2027/",
     "deadline_url": "https://warwick.ac.uk/fac/sci/dcs/aamas2027/",
-    "full_name": "The 26th International Conference on Autonomous Agents and Multiagent Systems (AAMAS 2027)",
-    "summarization": "AAMAS 2027 is the 26th International Conference on Autonomous Agents and Multiagent Systems, serving as the largest and most influential conference in the area of agents and multiagent systems. It brings together researchers and practitioners in all areas of agent and agentic technology to present and publish the latest developments in the field. The conference is the flagship event of the International Foundation for Autonomous Agents and Multiagent Systems (IFAAMAS).",
+    "full_name": "The 26th International Conference on Autonomous Agents and Multiagent Systems",
+    "summarization": "AAMAS 2027 is the flagship conference of the International Foundation for Autonomous Agents and Multiagent Systems (IFAAMAS), bringing together researchers and practitioners in all areas of agent and agentic technology. It provides an internationally renowned high-profile forum for publishing and discovering the latest developments in autonomous agents and multiagent systems.",
     "location": "JW Marriott Hotel, Hanoi",
     "country": "Vietnam",
     "is_it_related": true,
@@ -393,39 +384,39 @@
     "logo_url": "https://warwick.ac.uk/fac/sci/dcs/aamas2027/aamas27-logo-small.jpg",
     "deadlines": [
       {
-        "name": "Abstract submission (Main Track)",
+        "name": "Main Track Abstract submission",
         "date": "2026-10-01"
       },
       {
-        "name": "Paper submission (Main Track)",
+        "name": "Main Track Paper submission",
         "date": "2026-10-08"
       },
       {
-        "name": "Author notification (Main Track)",
+        "name": "Main Track Author notification",
         "date": "2026-12-21"
       },
       {
-        "name": "Camera-ready paper (Main Track)",
+        "name": "Main Track Camera-ready paper",
         "date": "2027-01-25"
       },
       {
-        "name": "Abstract submission (Blue Sky Ideas)",
+        "name": "Blue Sky Ideas Abstract submission",
         "date": "2026-11-05"
       },
       {
-        "name": "Paper submission (Blue Sky Ideas)",
+        "name": "Blue Sky Ideas Paper submission",
         "date": "2026-11-12"
       },
       {
-        "name": "Phase 1 early notification (Blue Sky Ideas)",
+        "name": "Blue Sky Ideas Phase 1 early notification",
         "date": "2026-11-30"
       },
       {
-        "name": "Phase 2 author notification (Blue Sky Ideas)",
+        "name": "Blue Sky Ideas Phase 2 author notification",
         "date": "2027-01-21"
       },
       {
-        "name": "Camera-ready submission (Blue Sky Ideas)",
+        "name": "Blue Sky Ideas Camera-ready submission",
         "date": "2027-02-11"
       },
       {
@@ -461,11 +452,11 @@
         "date": "2027-03-17"
       },
       {
-        "name": "Proposal Submission (Tutorials)",
+        "name": "Tutorial Proposal Submission",
         "date": "2026-12-10"
       },
       {
-        "name": "Organizer Notifications (Tutorials)",
+        "name": "Tutorial Organizer Notifications",
         "date": "2026-12-30"
       },
       {
@@ -473,59 +464,59 @@
         "date": "2027-02-10"
       },
       {
-        "name": "Submission Deadline (AAAI Fast Tracks)",
+        "name": "AAAI Fast Tracks Submission Deadline",
         "date": "2026-12-11"
       },
       {
-        "name": "Decision Notification (AAAI Fast Tracks)",
+        "name": "AAAI Fast Tracks Decision Notification",
         "date": "2027-02-01"
       },
       {
-        "name": "Camera-Ready Deadline (AAAI Fast Tracks)",
+        "name": "AAAI Fast Tracks Camera-Ready Deadline",
         "date": "2027-02-11"
       },
       {
-        "name": "Author Registration Deadline (AAAI Fast Tracks)",
+        "name": "AAAI Fast Tracks Author Registration Deadline",
         "date": "2027-03-31"
       },
       {
-        "name": "Submission deadline (Demonstrations)",
+        "name": "Demonstrations Submission deadline",
         "date": "2026-12-27"
       },
       {
-        "name": "Author notification (Demonstrations)",
+        "name": "Demonstrations Author notification",
         "date": "2027-01-27"
       },
       {
-        "name": "Camera-ready paper submission deadline (Demonstrations)",
+        "name": "Demonstrations Camera-ready paper submission deadline",
         "date": "2027-02-15"
       },
       {
-        "name": "Competition Proposal Deadline",
+        "name": "Competition Proposals Competition Proposal Deadline",
         "date": "2026-12-05"
       },
       {
-        "name": "Notification (Competition Proposals)",
+        "name": "Competition Proposals Notification",
         "date": "2026-12-24"
       },
       {
-        "name": "Abstract Deadline (Contributions to the Doctoral Consortium)",
+        "name": "Contributions to the Doctoral Consortium Abstract Deadline",
         "date": "2026-12-31"
       },
       {
-        "name": "Submission Deadline (Contributions to the Doctoral Consortium)",
+        "name": "Contributions to the Doctoral Consortium Submission Deadline",
         "date": "2027-01-08"
       },
       {
-        "name": "Author Notification (Contributions to the Doctoral Consortium)",
+        "name": "Contributions to the Doctoral Consortium Author Notification",
         "date": "2027-02-04"
       },
       {
-        "name": "Camera-Ready Deadline (Contributions to the Doctoral Consortium)",
+        "name": "Contributions to the Doctoral Consortium Camera-Ready Deadline",
         "date": "2027-02-11"
       }
     ],
-    "crawled_at": "2026-11-18T12:00:24+00:00",
+    "crawled_at": "2026-11-19T09:46:15+00:00",
     "status": "complete",
     "errors": [],
     "rank": {
@@ -542,8 +533,8 @@
     "website_url": "https://www.sigmobile.org/mobisys/2027/",
     "deadline_url": "https://www.sigmobile.org/mobisys/2027/",
     "full_name": "The 25th ACM International Conference on Mobile Systems, Applications, and Services",
-    "summarization": "ACM MobiSys 2027 aims to showcase innovative and impactful research on the design, implementation, usage, and evaluation of mobile computing and wireless systems, applications, and services. Sponsored by ACM SIGMOBILE, it builds upon the success of the previous twenty-four ACM MobiSys conferences.",
-    "location": "Ho Chi Minh City",
+    "summarization": "ACM MobiSys 2027 aims to showcase innovative and impactful research on the design, implementation, usage, and evaluation of mobile computing and wireless systems, applications, and services. The conference brings together researchers and practitioners to present high-impact technical contributions, investigate emerging mobile use cases, and discuss real-world system deployments. It is sponsored by ACM SIGMOBILE.",
+    "location": "The Reverie Saigon, Times Square Building, Ho Chi Minh City",
     "country": "Vietnam",
     "is_it_related": true,
     "date_happen": "2027-06-21 to 2027-06-25",
@@ -569,6 +560,10 @@
         "date": "2027-01-26"
       },
       {
+        "name": "Rebuttal Period",
+        "date": "2027-02-08"
+      },
+      {
         "name": "Final Decision Notification",
         "date": "2027-03-06"
       },
@@ -577,7 +572,7 @@
         "date": "2027-04-14"
       }
     ],
-    "crawled_at": "2026-11-18T12:00:43+00:00",
+    "crawled_at": "2026-11-19T09:46:33+00:00",
     "status": "complete",
     "errors": [],
     "rank": {
@@ -594,8 +589,8 @@
     "website_url": "https://conf.researchr.org/home/ease-2027",
     "deadline_url": "https://conf.researchr.org/home/ease-2027",
     "full_name": "International Conference on Evaluation and Assessment in Software Engineering",
-    "summarization": "EASE is an internationally leading venue for academics and practitioners to present and discuss their research on evidence-based software engineering and its implications for software practice. The conference welcomes high-quality submissions including full research papers, short papers, industry papers, posters and vision, journal-first, and doctoral symposium tracks. It is ranked as an A conference in CORE and the 2027 edition takes place in Hanoi, Vietnam.",
-    "location": "Hanoi",
+    "summarization": "EASE is an internationally leading venue for academics and practitioners to present and discuss their research on evidence-based software engineering and its implications for software practice. The 31st edition of EASE will take place in Hanoi, Vietnam, welcoming high-quality submissions across various tracks including research papers, short papers, industry papers, and workshops.",
+    "location": "Hanoi University of Science and Technology and the PAN Pacific Hotel, Hanoi",
     "country": "Vietnam",
     "is_it_related": true,
     "date_happen": "2027-06-15 to 2027-06-18",
@@ -605,51 +600,127 @@
     "logo_url": "https://conf.researchr.org/getImage/ease-2027/orig/EASE2027Banner.png",
     "deadlines": [
       {
-        "name": "Workshop Proposal Deadline",
+        "name": "Workshops - Workshop Proposal Deadline",
         "date": "2026-12-02"
       },
       {
-        "name": "Workshop Proposal Notification",
+        "name": "Workshops - Workshop Proposal Notification",
         "date": "2026-12-11"
       },
       {
-        "name": "Research Papers Abstract Submission deadline",
+        "name": "Research Papers - Abstract Submission deadline",
         "date": "2027-01-15"
       },
       {
-        "name": "Research Papers Submission deadline",
+        "name": "Research Papers - Submission deadline",
         "date": "2027-01-22"
       },
       {
-        "name": "Reproducibility and Negative Results Abstract Submission deadline",
+        "name": "Reproducibility and Negative Results - Abstract Submission deadline",
         "date": "2027-02-22"
       },
       {
-        "name": "Industry Papers Abstract Submission Deadline",
+        "name": "Industry Papers - Abstract Submission Deadline",
         "date": "2027-02-22"
       },
       {
-        "name": "Short Papers and Emerging Results Abstract Submission Deadline",
+        "name": "Short Papers and Emerging Results - Abstract Submission Deadline",
         "date": "2027-02-22"
       },
       {
-        "name": "Tutorials Submission Deadline",
+        "name": "Tutorials - Submission Deadline",
         "date": "2027-03-01"
       },
       {
-        "name": "Reproducibility and Negative Results Full paper Submission Deadline",
+        "name": "Reproducibility and Negative Results - Full paper Submission Deadline",
         "date": "2027-03-01"
       },
       {
-        "name": "Industry Papers Full Paper Submission",
+        "name": "Industry Papers - Full Paper Submission",
         "date": "2027-03-01"
       },
       {
-        "name": "Short Papers and Emerging Results Full paper Submission Deadline",
+        "name": "Short Papers and Emerging Results - Full paper Submission Deadline",
         "date": "2027-03-01"
+      },
+      {
+        "name": "Workshops - Workshop Paper Submission Deadline",
+        "date": "2027-03-02"
+      },
+      {
+        "name": "Doctoral Symposium - Submission Deadline",
+        "date": "2027-03-08"
+      },
+      {
+        "name": "Research Papers - Notification",
+        "date": "2027-03-12"
+      },
+      {
+        "name": "AI Models / Data - Submission deadline",
+        "date": "2027-03-15"
+      },
+      {
+        "name": "Posters and Vision - Submission Deadline",
+        "date": "2027-03-16"
+      },
+      {
+        "name": "Tutorials - Notification",
+        "date": "2027-04-05"
+      },
+      {
+        "name": "Short Papers and Emerging Results - Notification",
+        "date": "2027-04-05"
+      },
+      {
+        "name": "Workshops - Workshop Paper Notification",
+        "date": "2027-04-06"
+      },
+      {
+        "name": "Reproducibility and Negative Results - Notification",
+        "date": "2027-04-12"
+      },
+      {
+        "name": "Doctoral Symposium - Notification",
+        "date": "2027-04-12"
+      },
+      {
+        "name": "Industry Papers - Submission Notification",
+        "date": "2027-04-12"
+      },
+      {
+        "name": "AI Models / Data - Notification",
+        "date": "2027-04-16"
+      },
+      {
+        "name": "Short Papers and Emerging Results - Camera-ready Deadline",
+        "date": "2027-04-19"
+      },
+      {
+        "name": "Workshops - Workshop Camera-Ready Deadline",
+        "date": "2027-04-20"
+      },
+      {
+        "name": "Tutorials - Camera-ready Deadline",
+        "date": "2027-04-26"
+      },
+      {
+        "name": "Posters and Vision - Notification",
+        "date": "2027-04-28"
+      },
+      {
+        "name": "AI Models / Data - Camera-ready",
+        "date": "2027-04-30"
+      },
+      {
+        "name": "Doctoral Symposium - Camera-ready Deadline",
+        "date": "2027-05-03"
+      },
+      {
+        "name": "Posters and Vision - Camera-ready Deadline",
+        "date": "2027-05-05"
       }
     ],
-    "crawled_at": "2026-11-18T12:01:00+00:00",
+    "crawled_at": "2026-11-19T09:46:53+00:00",
     "status": "complete",
     "errors": [],
     "rank": {
@@ -666,13 +737,13 @@
     "website_url": "https://wcst.world/2026/",
     "deadline_url": "https://wcst.world/2026/02/",
     "full_name": "4th World Conference on Smart Tourism",
-    "summarization": "The 4th World Conference on Smart Tourism focuses on synergizing industry and academia by harnessing artificial intelligence for transformative tourism and hospitality, with a specific emphasis on the Global South. It brings together researchers, professionals, and students to discuss smart tourism, present papers, and engage in regional sessions and presentations.",
-    "location": "Da Nang",
+    "summarization": "The 4th World Conference on Smart Tourism (WCST) invites researchers, practitioners, policymakers, and industry experts to submit their work for this premier event dedicated to advancing smart tourism. This year’s theme highlights the vital role of academia–industry collaboration in harnessing Artificial Intelligence to drive transformative innovation in tourism and hospitality across the Global South.",
+    "location": "Duy Tân University, Da Nang",
     "country": "Vietnam",
     "is_it_related": true,
-    "date_happen": null,
-    "start_date": null,
-    "end_date": null,
+    "date_happen": "2026-12-16 to 2026-12-19",
+    "start_date": "2026-12-16",
+    "end_date": "2026-12-19",
     "image_url": "https://wcst.world/2026/images/og_wcst2026.jpg",
     "logo_url": "https://wcst.world/2026/images/logo_wcst_world_white.png",
     "deadlines": [
@@ -685,7 +756,7 @@
         "date": "2026-09-30"
       },
       {
-        "name": "Poster Submission Deadline",
+        "name": "Poster Submission",
         "date": "2026-11-10"
       },
       {
@@ -693,7 +764,7 @@
         "date": "2026-11-20"
       },
       {
-        "name": "Oral Presentation Submission Deadline",
+        "name": "Oral Presentation Submission",
         "date": "2026-11-10"
       },
       {
@@ -701,7 +772,7 @@
         "date": "2026-11-20"
       },
       {
-        "name": "Undergraduate Pitching Abstract Submission Deadline",
+        "name": "Undergraduate Pitching Abstract Submission",
         "date": "2026-10-30"
       },
       {
@@ -709,15 +780,13 @@
         "date": "2026-11-15"
       },
       {
-        "name": "Undergraduate Pitching Presentation Submission Deadline",
+        "name": "Undergraduate Pitching Presentation Submission",
         "date": "2026-11-30"
       }
     ],
-    "crawled_at": "2026-11-18T11:58:10+00:00",
-    "status": "partial",
-    "errors": [
-      "missing date_happen"
-    ],
+    "crawled_at": "2026-11-19T09:43:49+00:00",
+    "status": "complete",
+    "errors": [],
     "rank": {
       "core": null,
       "core_source": null,
@@ -732,7 +801,7 @@
     "website_url": "https://tse.lqdtu.edu.vn/",
     "deadline_url": "https://tse.lqdtu.edu.vn/",
     "full_name": "2026 International Conference on Advanced Technologies for Search & Rescue and Emergency Response Systems",
-    "summarization": "The 2026 International Conference on Advanced Technologies for Search & Rescue and Emergency Response Systems (TSE 2026) provides a forum for exchanging ideas, discussing research results, and presenting cutting-edge innovations at the intersection of science, technology, and emergency management. The conference brings together researchers, engineers, practitioners, policymakers, and industry leaders to address challenges in search and rescue operations and emergency response.",
+    "summarization": "The 2026 International Conference on Advanced Technologies for Search & Rescue and Emergency Response Systems (TSE 2026) provides a forum for exchanging ideas, discussing research results, and presenting cutting-edge innovations at the intersection of science, technology, and emergency management. The conference brings together researchers, engineers, practitioners, policymakers, and industry leaders to address the increasingly complex challenges of search and rescue operations and emergency response in the modern era.",
     "location": "Hanoi",
     "country": "Vietnam",
     "is_it_related": true,
@@ -759,59 +828,7 @@
         "date": "2026-10-30"
       }
     ],
-    "crawled_at": "2026-11-18T11:57:19+00:00",
-    "status": "complete",
-    "errors": [],
-    "rank": {
-      "core": null,
-      "core_source": null,
-      "ccf": null,
-      "matched_title": null,
-      "matched_by": null
-    }
-  },
-  {
-    "name": "CSoNet 2026",
-    "year": "2026",
-    "website_url": "https://csonet-conf.github.io/csonet26/",
-    "deadline_url": "https://csonet-conf.github.io/csonet26/index.php/call-for-papers/index.html",
-    "full_name": "The 15th International Conference on Computational Science and Network Intelligence",
-    "summarization": "CSoNet 2026 is an interdisciplinary conference focusing on theoretical foundations, methodological advances, and real-world applications of computational intelligence, network science, graph-based methods, and artificial intelligence in modern systems and networks. It serves as a premier forum for researchers, engineers, and practitioners to exchange original and unpublished research. The event brings together academics and industry experts in Ho Chi Minh City, Vietnam.",
-    "location": "Ho Chi Minh City University of Technology (HCMUT), Ho Chi Minh City",
-    "country": "Vietnam",
-    "is_it_related": true,
-    "date_happen": "2026-11-16 to 2026-11-18",
-    "start_date": "2026-11-16",
-    "end_date": "2026-11-18",
-    "image_url": "https://csonet-conf.github.io/csonet26/wp-content/uploads/2026/hcm1.jpg",
-    "logo_url": "https://csonet-conf.github.io/csonet26/wp-content/uploads/2026/logo.png",
-    "deadlines": [
-      {
-        "name": "Journal Track Paper Submission",
-        "date": "2026-07-15"
-      },
-      {
-        "name": "Conference Track Paper Submission",
-        "date": "2026-07-31"
-      },
-      {
-        "name": "Workshops Paper Submission",
-        "date": "2026-08-08"
-      },
-      {
-        "name": "Acceptance Notification",
-        "date": "2026-09-05"
-      },
-      {
-        "name": "Camera Ready",
-        "date": "2026-09-30"
-      },
-      {
-        "name": "Registration",
-        "date": "2026-09-30"
-      }
-    ],
-    "crawled_at": "2026-11-18T12:02:06+00:00",
+    "crawled_at": "2026-11-19T09:42:57+00:00",
     "status": "complete",
     "errors": [],
     "rank": {
@@ -828,8 +845,8 @@
     "website_url": "https://icta-conf.com/",
     "deadline_url": "https://dhhp.edu.vn/post/hoi-thao-khoa-hoc-quoc-te-ve-cac-van-de-tien-tien-trong-cong-nghe-thong-tin-va-truyen-thong-international-conference-on-advances-in-information-and-communication-technology-icta-2026-62742.html",
     "full_name": "International Conference on Advances in Information and Communication Technology",
-    "summarization": "The International Conference on Advances in Information and Communication Technology (ICTA 2026) aims to provide an international forum for researchers, academics, industry experts, and practitioners to exchange innovative ideas, research findings, and practical experiences in the field of Information and Communication Technology. The conference focuses on emerging trends and frontiers in AI, cybersecurity, smart cities, industries, and interdisciplinary applications, fostering collaboration between theoretical research and real-world implementations.",
-    "location": "Hai Phong University, Hai Phong",
+    "summarization": "The International Conference on Advances in Information and Communication Technology (ICTA 2026) aims to provide an international forum for researchers, academics, industry experts, and practitioners to exchange innovative ideas, research findings, and practical experiences in the field of Information and Communication Technology. The conference focuses on the rapid convergence of Artificial Intelligence, advanced ICT infrastructure, and cybersecurity technologies transforming modern societies, smart cities, and digital industries.",
+    "location": "Hai Phong University, No 171, Phan Dang Luu St, Phu Lien, Hai Phong",
     "country": "Vietnam",
     "is_it_related": true,
     "date_happen": "2026-11-27 to 2026-11-28",
@@ -839,7 +856,7 @@
     "logo_url": "https://ictu.icta-conf.com/wp-content/uploads/2024/12/logo-dai-hoc-thai-nguyen-inkythuatso-01_png-150x150.png",
     "deadlines": [
       {
-        "name": "Paper Submission",
+        "name": "Paper Submission Deadline",
         "date": "2026-06-30"
       },
       {
@@ -851,7 +868,7 @@
         "date": "2026-08-30"
       }
     ],
-    "crawled_at": "2026-11-18T12:02:40+00:00",
+    "crawled_at": "2026-11-19T09:48:38+00:00",
     "status": "complete",
     "errors": [],
     "rank": {
@@ -868,8 +885,8 @@
     "website_url": "https://icdsaia2026.org/",
     "deadline_url": "https://icdsaia2026.org/authors/important-dates",
     "full_name": "International Conference on Data Science, Artificial Intelligence and Applications",
-    "summarization": "The 2nd International Conference on Data Science, AI and Applications (ICDSAIA 2026) brings together experts, researchers, and innovators from around the world to explore the latest advancements in data science, artificial intelligence, and their real-world applications. Attendees engage with thought leaders, collaborate with peers, and discover groundbreaking solutions shaping the future of these fields.",
-    "location": "Phan Tay Nhac Street, Xuan Phuong Ward, Hanoi",
+    "summarization": "The International Conference on Data Science, Artificial Intelligence and Applications (ICDSAIA 2026) is the second edition jointly organized by the University of Salford and East Asia University of Technology, taking place in Hanoi, Vietnam. The conference provides a premier forum for researchers, practitioners, and industry leaders to exchange ideas, address challenges, and share advances in Data Science, Artificial Intelligence, and their real-world applications.",
+    "location": "Hanoi",
     "country": "Vietnam",
     "is_it_related": true,
     "date_happen": "2026-12-09 to 2026-12-10",
@@ -891,7 +908,7 @@
         "date": "2026-10-12"
       }
     ],
-    "crawled_at": "2026-11-18T12:03:14+00:00",
+    "crawled_at": "2026-11-19T09:49:16+00:00",
     "status": "complete",
     "errors": [],
     "rank": {
@@ -908,8 +925,8 @@
     "website_url": "https://aiei2027.org/",
     "deadline_url": "https://aiei2027.org/cfp.html",
     "full_name": "International Conference on Artificial Intelligence in Energy and Infrastructure",
-    "summarization": "AIEI 2027 is the second international conference dedicated to artificial intelligence for energy systems, resilient infrastructure, and sustainable cities. It brings together researchers, academics, engineers, and industry professionals to share recent results, initiate collaborations, and discuss responsible, reliable, and impactful AI solutions across themes such as smart energy, infrastructure, AI and data, and reliability.",
-    "location": "Ho Chi Minh City",
+    "summarization": "AIEI 2027 is the second edition of the international conference series dedicated to artificial intelligence for energy systems, resilient infrastructure, and sustainable cities. Hosted by COSARI at Van Lang University, the event brings together researchers, academics, engineers, and students to share recent findings and discuss responsible AI solutions across various tracks including smart energy, infrastructure, trustworthy AI, and reliability.",
+    "location": "Van Lang University Main Campus, Ho Chi Minh City",
     "country": "Vietnam",
     "is_it_related": true,
     "date_happen": "2027-05-20 to 2027-05-22",
@@ -935,7 +952,7 @@
         "date": "2027-04-15"
       }
     ],
-    "crawled_at": "2026-11-18T12:03:48+00:00",
+    "crawled_at": "2026-11-19T09:49:56+00:00",
     "status": "complete",
     "errors": [],
     "rank": {
@@ -952,7 +969,7 @@
     "website_url": "https://ieee-smc2027.org/",
     "deadline_url": "https://ieee-smc2027.org/",
     "full_name": "2027 IEEE International Conference on Systems, Man, and Cybernetics",
-    "summarization": "The IEEE International Conference on Systems, Man, and Cybernetics is the flagship annual conference of the IEEE SMC Society, focusing on systems science and engineering, cybernetics, and human-machine systems. Under the theme of Human-Centric Intelligence and Human-AI Symbiosis, SMC 2027 provides an open international forum for researchers, engineers, and academics to discuss challenges and design intelligent, autonomous, and sustainable systems. The event features plenary keynotes, panels, workshops, and technical paper presentations.",
+    "summarization": "The IEEE SMC 2027 is the flagship annual conference of the IEEE SMC Society, focusing on systems science, cybernetics, and human-machine systems. Under the theme “Human-Centric Intelligence: Shaping the Digital Future”, it brings together global researchers and industry experts to present novel theory, experimental validations, and applications. Accepted papers will be submitted for inclusion in the IEEE Xplore Digital Library and indexed in major databases.",
     "location": "Sheraton Saigon Grand Opera Hotel, Ho Chi Minh City",
     "country": "Vietnam",
     "is_it_related": true,
@@ -987,15 +1004,15 @@
         "date": "2027-07-15"
       },
       {
-        "name": "Deadline for Late Author Registration",
+        "name": "Deadline for Late Registration (Author)",
         "date": "2027-08-05"
       },
       {
-        "name": "Deadline for Late Non-Author Registration",
+        "name": "Deadline for Late Registration (Non-Author)",
         "date": "2027-10-04"
       }
     ],
-    "crawled_at": "2026-11-18T12:04:06+00:00",
+    "crawled_at": "2026-11-19T09:50:29+00:00",
     "status": "complete",
     "errors": [],
     "rank": {
@@ -1011,9 +1028,9 @@
     "year": "2027",
     "website_url": "https://fjcai.org.vn/",
     "deadline_url": "https://fjcai.org.vn/",
-    "full_name": "Hội thảo khoa học về Trí tuệ nhân tạo",
-    "summarization": "Hội thảo khoa học về Trí tuệ nhân tạo là diễn đàn học thuật toàn quốc thường niên, quy tụ các nhà nghiên cứu, giảng viên, nghiên cứu sinh, sinh viên và chuyên gia trong lĩnh vực Trí tuệ nhân tạo (AI) nhằm trao đổi, chia sẻ các kết quả nghiên cứu mới nhất, xu hướng phát triển, thách thức và ứng dụng của AI trong các lĩnh vực khác nhau.",
-    "location": "Trường Đại học Công nghệ Thông tin và Truyền thông Việt - Hàn (VKU), Đà Nẵng",
+    "full_name": "Hội thảo khoa học về Trí tuệ nhân tạo FJCAI 2027",
+    "summarization": "FJCAI 2027 is an annual national academic forum on Artificial Intelligence, bringing together researchers, lecturers, graduate students, undergraduates, and experts in AI. The conference focuses on exchanging and sharing the latest research results, development trends, challenges, and applications of AI across various fields such as Machine Learning & Deep Learning, Natural Language Processing & Vietnamese language, Computer Vision & Multimodal data, Generative AI & LLMs, and AI Applications.",
+    "location": "Trường Đại học Công nghệ Thông tin và Truyền thông Việt - Hàn (VKU), Quận Ngũ Hành Sơn, TP. Đà Nẵng",
     "country": "Vietnam",
     "is_it_related": true,
     "date_happen": "2027-04-08 to 2027-04-09",
@@ -1023,7 +1040,7 @@
     "logo_url": "https://fjcai.org.vn/fjcai/logo.png",
     "deadlines": [
       {
-        "name": "Full paper submission",
+        "name": "Full Paper Submission",
         "date": "2026-12-15"
       },
       {
@@ -1035,7 +1052,7 @@
         "date": "2027-02-01"
       }
     ],
-    "crawled_at": "2026-11-18T12:04:22+00:00",
+    "crawled_at": "2026-11-19T09:50:46+00:00",
     "status": "complete",
     "errors": [],
     "rank": {
@@ -1052,7 +1069,7 @@
     "website_url": "https://asia.nice-teas.com/",
     "deadline_url": "https://asia.nice-teas.com/",
     "full_name": "4th IEEE Networking International Conference on Emerging Trends in Expert Systems, Applications & Security, ASIA",
-    "summarization": "The 4th IEEE Networking International Conference on Emerging Trends in Expert Systems, Applications & Security, ASIA provides a platform for researchers and professionals to connect, collaborate, and innovate in the fields of networking, expert systems, applications, and security. Conference proceedings will be submitted for possible inclusion in IEEE Xplore.",
+    "summarization": "The 4th IEEE Networking International Conference on Emerging Trends in Expert Systems, Applications & Security, ASIA (IEEE NICE-TEAS ASIA 2026) focuses on networking, expert systems, applications, and security. Accepted papers will be submitted for possible inclusion in IEEE Xplore. The event gathers participants from over 20 countries in Hanoi, Vietnam.",
     "location": "Hanoi",
     "country": "Vietnam",
     "is_it_related": true,
@@ -1062,7 +1079,7 @@
     "image_url": "https://asia.nice-teas.com/images/pages/DSC05202.png",
     "logo_url": "https://asia.nice-teas.com/images/logo3.png",
     "deadlines": [],
-    "crawled_at": "2026-11-18T12:04:39+00:00",
+    "crawled_at": "2026-11-19T09:51:03+00:00",
     "status": "partial",
     "errors": [
       "missing date_happen",
@@ -1077,51 +1094,12 @@
     }
   },
   {
-    "name": "ENASE 2027",
-    "year": "2027",
-    "website_url": "https://enase.scitevents.org/",
-    "deadline_url": "https://enase.scitevents.org/",
-    "full_name": "Evaluation of Novel Approaches to Software Engineering",
-    "summarization": "The mission of ENASE is to serve as a prime international forum to discuss and publish research findings and IT industry experiences related to novel approaches to software engineering. The conference covers theory and practice of systems and applications development, challenges and novel approaches to software engineering, systems and software quality, and engineering for emerging domains.",
-    "location": null,
-    "country": null,
-    "is_it_related": true,
-    "date_happen": null,
-    "start_date": null,
-    "end_date": null,
-    "image_url": "https://insticc.org/images/wise/events/5339//Banners/web.png",
-    "logo_url": "https://insticc.org/images/wise/events/5339//FavIcons/original.png",
-    "deadlines": [
-      {
-        "name": "Regular Paper Submission Extension",
-        "date": "2026-12-01"
-      },
-      {
-        "name": "Position/Regular Paper Submission",
-        "date": "2026-12-21"
-      }
-    ],
-    "crawled_at": "2026-11-18T12:04:56+00:00",
-    "status": "partial",
-    "errors": [
-      "missing date_happen",
-      "missing location/country"
-    ],
-    "rank": {
-      "core": "B",
-      "core_source": "ICORE2026",
-      "ccf": null,
-      "matched_title": "International Conference on Evaluation of Novel Approaches to Software Engineering",
-      "matched_by": "acronym+title"
-    }
-  },
-  {
     "name": "GCHRCLI 2027",
     "year": "2027",
     "website_url": "https://www.researchworld.org/Conference/30077/GCHRCLI/",
     "deadline_url": "https://www.researchworld.org/Conference/30077/GCHRCLI/",
     "full_name": "Global Conference on Human Rights, Cybersecurity & Legal Innovation",
-    "summarization": "The Global Conference on Human Rights, Cybersecurity & Legal Innovation (GCHRCLI) provides an international platform for academicians, researchers, engineers, and students to share research findings and collaborate. The conference covers topics related to human rights, cybersecurity, and legal innovation, offering publication opportunities in Scopus-indexed and reputed journals.",
+    "summarization": "The Global Conference on Human Rights, Cybersecurity & Legal Innovation (GCHRCLI-2027) provides an international platform for academicians, researchers, engineers, and students to share research findings and experiences with global experts. It aims to foster international linkage and collaboration in human rights, cybersecurity, and legal innovation.",
     "location": "Hanoi",
     "country": "Vietnam",
     "is_it_related": true,
@@ -1136,7 +1114,7 @@
         "date": "2027-01-12"
       },
       {
-        "name": "Paper Submission",
+        "name": "Paper Submission Deadline",
         "date": "2027-01-30"
       },
       {
@@ -1144,7 +1122,7 @@
         "date": "2027-02-06"
       }
     ],
-    "crawled_at": "2026-11-18T12:05:12+00:00",
+    "crawled_at": "2026-11-19T09:52:03+00:00",
     "status": "complete",
     "errors": [],
     "rank": {
@@ -1161,7 +1139,7 @@
     "website_url": "https://iccss.org/",
     "deadline_url": "https://iccss.org/",
     "full_name": "2027 10th International Conference on Circuits, Systems and Simulation",
-    "summarization": "The International Conference on Circuits, Systems and Simulation (ICCSS) provides a platform for scientists, engineers, technicians, and graduate students to share research experiences and ideas in circuits, systems, and simulation through oral and poster presentations. Accepted and registered papers will be published in the conference proceedings. The event offers an opportunity to exchange updated research knowledge and contribute to an integrative approach in the field.",
+    "summarization": "The 10th International Conference on Circuits, Systems and Simulation (ICCSS 2027) brings together scientists, engineers, technicians, and graduate students to share research experiences and ideas in circuits, systems, and simulation through oral and poster presentations. Sponsored by Duy Tan University, the event offers a platform to exchange updated research knowledge and publish findings in the conference proceedings.",
     "location": "Da Nang",
     "country": "Vietnam",
     "is_it_related": true,
@@ -1184,125 +1162,9 @@
         "date": "2027-03-05"
       }
     ],
-    "crawled_at": "2026-11-18T12:05:30+00:00",
+    "crawled_at": "2026-11-19T09:52:31+00:00",
     "status": "complete",
     "errors": [],
-    "rank": {
-      "core": null,
-      "core_source": null,
-      "ccf": null,
-      "matched_title": null,
-      "matched_by": null
-    }
-  },
-  {
-    "name": "8th IEEE AICAS 2026",
-    "year": "2026",
-    "website_url": "https://iti.vnu.edu.vn/en/su-kien/8th-ieee-aicas-2026-ha-long-vietnam-call-for-papers-2/",
-    "deadline_url": "https://iti.vnu.edu.vn/en/su-kien/8th-ieee-aicas-2026-ha-long-vietnam-call-for-papers-2/",
-    "full_name": "2026 IEEE 8th International Conference on Artificial Intelligence Circuits and Systems (AICAS 2026)",
-    "summarization": "The 8th IEEE International Conference on Artificial Intelligence Circuits and Systems (AICAS 2026) is a flagship event focusing on cutting-edge research in AI circuits and systems. It covers topics such as in-memory computing, hardware/software co-design, neuromorphic processors, and emerging applications like IoT and autonomous vehicles. The conference brings together researchers and professionals from around the world to share original research and foster innovation.",
-    "location": "Ha Long",
-    "country": "Vietnam",
-    "is_it_related": true,
-    "date_happen": null,
-    "start_date": null,
-    "end_date": null,
-    "image_url": "https://iti.vnu.edu.vn/wp-content/uploads/2022/02/Untitled-1.jpg",
-    "logo_url": "https://iti.vnu.edu.vn/wp-content/uploads/2022/03/LOGO-ITI-2-2.png",
-    "deadlines": [
-      {
-        "name": "Full Paper Submission Deadline",
-        "date": "2026-04-05"
-      }
-    ],
-    "crawled_at": "2026-11-18T12:05:47+00:00",
-    "status": "partial",
-    "errors": [
-      "missing date_happen"
-    ],
-    "rank": {
-      "core": null,
-      "core_source": null,
-      "ccf": null,
-      "matched_title": null,
-      "matched_by": null
-    }
-  },
-  {
-    "name": "REV 2026",
-    "year": "2026",
-    "website_url": "https://rev-ecit.vn/",
-    "deadline_url": "https://rev-ecit.vn/",
-    "full_name": "Hội nghị Quốc gia lần thứ XXIX về Điện tử, Truyền thông và Công nghệ Thông tin",
-    "summarization": "The 29th National Conference on Electronics, Communications and Information Technology (REV-ECIT 2026) is an annual national scientific conference organized by the Radio and Electronics Association of Vietnam (REV). The conference covers the entire field of electronics, communications, and information technology, with a special focus on national strategic technologies.",
-    "location": null,
-    "country": "Vietnam",
-    "is_it_related": true,
-    "date_happen": "2026-12-19",
-    "start_date": "2026-12-19",
-    "end_date": "2026-12-19",
-    "image_url": "https://rev-ecit.vn/sites/all/themes/cassiopeia_theme/BannerQC.png",
-    "logo_url": "https://rev-ecit.vn/sites/default/files/favicon.png",
-    "deadlines": [
-      {
-        "name": "Paper Submission",
-        "date": "2026-10-15"
-      },
-      {
-        "name": "Notification",
-        "date": "2026-11-20"
-      },
-      {
-        "name": "Camera Ready",
-        "date": "2026-11-26"
-      }
-    ],
-    "crawled_at": "2026-11-18T12:06:03+00:00",
-    "status": "complete",
-    "errors": [],
-    "rank": {
-      "core": null,
-      "core_source": null,
-      "ccf": null,
-      "matched_title": null,
-      "matched_by": null
-    }
-  },
-  {
-    "name": "ICE 2027",
-    "year": "2027",
-    "website_url": "https://ice-conference.org/call-for-contributions/",
-    "deadline_url": "https://ice-conference.org/call-for-contributions/",
-    "full_name": "ICE IEEE/ITMC",
-    "summarization": "The ICE 2027 conference invites high quality papers and contributions covering various research topics in engineering, technology, innovation, and entrepreneurship, such as industry 5.0, advanced service systems, AI-driven manufacturing, digital technologies, smart cities, and sustainable systems.",
-    "location": null,
-    "country": null,
-    "is_it_related": true,
-    "date_happen": "2027-06-21 to 2027-06-23",
-    "start_date": "2027-06-21",
-    "end_date": "2027-06-23",
-    "image_url": "https://ice-conference.org/wp-content/uploads/2024/09/red-line-300x38.webp",
-    "logo_url": "https://ice-conference.org/wp-content/uploads/2025/08/cropped-dot-32x32.png",
-    "deadlines": [
-      {
-        "name": "Full Paper Submission",
-        "date": "2027-02-15"
-      },
-      {
-        "name": "Author Notification",
-        "date": "2027-03-15"
-      },
-      {
-        "name": "Camera-ready version",
-        "date": "2027-05-28"
-      }
-    ],
-    "crawled_at": "2026-11-18T12:06:20+00:00",
-    "status": "partial",
-    "errors": [
-      "missing location/country"
-    ],
     "rank": {
       "core": null,
       "core_source": null,
@@ -1316,9 +1178,9 @@
     "year": "2026",
     "website_url": "https://icera2026.tnut.edu.vn/",
     "deadline_url": "https://icera2026.tnut.edu.vn/",
-    "full_name": "9th International Conference on Engineering Research and Applications",
-    "summarization": "ICERA 2026 is an international forum serving researchers, engineers, and practitioners to disseminate recent findings in engineering research, applications, and economics. The conference covers tracks in mechanical engineering, materials and mechanics, mechatronics, automotive engineering, electrical and electronics engineering, information and communication technology, and economics.",
-    "location": "Thai Nguyen",
+    "full_name": "International Conference on Engineering Research and Applications",
+    "summarization": "The 9th International Conference on Engineering Research and Applications (ICERA 2026) is an international forum to disseminate information on the most recent and relevant researches, theories, and practices in engineering research, applications, and economics. It covers tracks in mechanical engineering, materials and mechanics of materials, mechatronics and micro mechatronics, automotive engineering, electrical and electronics engineering, information and communication technology, and economics.",
+    "location": "Thai Nguyen University of Technology, Thai Nguyen Province",
     "country": "Vietnam",
     "is_it_related": true,
     "date_happen": "2026-12-01 to 2026-12-02",
@@ -1328,11 +1190,11 @@
     "logo_url": null,
     "deadlines": [
       {
-        "name": "Submission deadline",
+        "name": "Submission Deadline",
         "date": "2026-07-31"
       }
     ],
-    "crawled_at": "2026-11-18T12:06:37+00:00",
+    "crawled_at": "2026-11-19T09:53:45+00:00",
     "status": "complete",
     "errors": [],
     "rank": {
@@ -1349,7 +1211,7 @@
     "website_url": "https://iad.donga.edu.vn/detail/call-for-papers---3rd-eai-raids-2027-44723",
     "deadline_url": "https://iad.donga.edu.vn/detail/call-for-papers---3rd-eai-raids-2027-44723",
     "full_name": "The 3rd EAI International Conference on Responsible Artificial Intelligence and Data Science",
-    "summarization": "RAIDS 2027 serves as an international forum for the exchange of research and ideas regarding Responsible & Trustworthy AI, Data Science, Machine Learning, AI applications, transparency, fairness, privacy, and related emerging technologies.",
+    "summarization": "The 3rd EAI International Conference on Responsible Artificial Intelligence and Data Science (EAI RAIDS 2027) serves as an international forum for the exchange of research and ideas regarding Responsible & Trustworthy AI, Data Science, Machine Learning, AI applications, transparency, fairness, privacy, and related emerging technologies.",
     "location": "Dong A University, Da Nang",
     "country": "Vietnam",
     "is_it_related": true,
@@ -1372,7 +1234,7 @@
         "date": "2027-02-10"
       }
     ],
-    "crawled_at": "2026-11-18T12:06:54+00:00",
+    "crawled_at": "2026-11-19T09:54:19+00:00",
     "status": "complete",
     "errors": [],
     "rank": {
@@ -1389,7 +1251,7 @@
     "website_url": "https://icetai.neu.edu.vn/2027/call-for-papers",
     "deadline_url": "https://icetai.neu.edu.vn/2027/call-for-papers",
     "full_name": "International Conference on Educational Technology and Artificial Intelligence",
-    "summarization": "ICETAI 2027 is the 2nd edition of the International Conference on Educational Technology and Artificial Intelligence, focusing on the theme 'Trustworthy Agentic AI in Education: From Tools to Learning Partners'. The conference explores multi-agent systems, trustworthy and explainable AI for learning and assessment, retrieval-augmented generation, and human-AI collaboration in education.",
+    "summarization": "ICETAI 2027 focuses on trustworthy agentic AI in education, exploring the shift from single-prompt tools to agentic learning partners. Key areas include multi-agent systems, explainable AI for learning, retrieval-augmented generation, intelligent tutoring systems, and ethical considerations in educational AI.",
     "location": "Da Nang",
     "country": "Vietnam",
     "is_it_related": true,
@@ -1398,12 +1260,27 @@
     "end_date": "2027-08-27",
     "image_url": "https://icetai.neu.edu.vn/images/logo-20neu.png",
     "logo_url": "https://icetai.neu.edu.vn/images/logo-20neu.png",
-    "deadlines": [],
-    "crawled_at": "2026-11-18T12:07:28+00:00",
-    "status": "partial",
-    "errors": [
-      "no deadlines found"
+    "deadlines": [
+      {
+        "name": "Paper Submission Deadline",
+        "date": "2027-04-30"
+      },
+      {
+        "name": "Notification of Acceptance",
+        "date": "2027-06-30"
+      },
+      {
+        "name": "Early Registration Deadline",
+        "date": "2027-07-30"
+      },
+      {
+        "name": "Registration Deadline",
+        "date": "2027-08-15"
+      }
     ],
+    "crawled_at": "2026-11-19T09:54:45+00:00",
+    "status": "complete",
+    "errors": [],
     "rank": {
       "core": null,
       "core_source": null,
@@ -1418,8 +1295,8 @@
     "website_url": "https://iniscom.eai-conferences.org/2027/",
     "deadline_url": "https://iniscom.eai-conferences.org/2027/",
     "full_name": "13th EAI International Conference on Industrial Networks and Intelligent Systems",
-    "summarization": "The 13th EAI International Conference on Industrial Networks and Intelligent Systems (EAI INISCOM 2027) brings together researchers, practitioners, and industry experts to explore the frontier of the 6G era. The conference focuses on Big Data, Artificial Intelligence, Digital Twins, and Quantum Computing, and their transition from cutting-edge technologies to real-world applications in industrial networks and intelligent systems.",
-    "location": "Da Nang City, Vietnam",
+    "summarization": "The 13th EAI International Conference on Industrial Networks and Intelligent Systems (EAI INISCOM 2027) explores the frontier of the 6G era, focusing on Big Data, Artificial Intelligence, Digital Twins, and Quantum Computing, and their transition from cutting-edge technologies to real-world applications. It invites original, unpublished research papers, including visionary, experimental, systems-oriented, and work-in-progress contributions. The event brings together researchers, practitioners, and industry experts to advance the state of the art in intelligent systems and industrial networks.",
+    "location": "Duy Tan University, 3 Quang Trung St., Hai Chau Dist., Da Nang City",
     "country": "Vietnam",
     "is_it_related": true,
     "date_happen": "2027-01-18 to 2027-01-19",
@@ -1429,16 +1306,16 @@
     "logo_url": "https://iniscom.eai-conferences.org/2027/wp-content/uploads/sites/1053/2026/04/cropped-INISCOM-taglineAsset-1@1200-px-222x57.png",
     "deadlines": [
       {
-        "name": "Full Paper Submission (Main Track)",
-        "date": "2026-09-30"
+        "name": "Full Paper Submission (Late Track 2)",
+        "date": "2026-11-06"
       },
       {
-        "name": "Notification (Main Track)",
-        "date": "2026-11-01"
+        "name": "Notification (Late Track 2)",
+        "date": "2026-11-15"
       },
       {
-        "name": "Camera-ready (Main Track)",
-        "date": "2026-12-01"
+        "name": "Camera-ready (Late Track 2)",
+        "date": "2026-12-15"
       },
       {
         "name": "Full Paper Submission (Late Track)",
@@ -1453,19 +1330,19 @@
         "date": "2026-12-15"
       },
       {
-        "name": "Full Paper Submission (Late Track 2)",
-        "date": "2026-11-06"
+        "name": "Full Paper Submission (Main Track)",
+        "date": "2026-09-30"
       },
       {
-        "name": "Notification (Late Track 2)",
-        "date": "2026-11-15"
+        "name": "Notification (Main Track)",
+        "date": "2026-11-01"
       },
       {
-        "name": "Camera-ready (Late Track 2)",
-        "date": "2026-12-15"
+        "name": "Camera-ready (Main Track)",
+        "date": "2026-12-01"
       }
     ],
-    "crawled_at": "2026-11-18T12:07:47+00:00",
+    "crawled_at": "2026-11-19T09:55:03+00:00",
     "status": "complete",
     "errors": [],
     "rank": {
@@ -1482,7 +1359,7 @@
     "website_url": "https://www.hutech.edu.vn/gsets2027",
     "deadline_url": "https://www.hutech.edu.vn/gsets2027",
     "full_name": "The 3rd International Conference on \"Green Solutions and Emerging Technologies for Sustainability\"",
-    "summarization": "GSETS 2027 is a prestigious international scientific event showcasing advanced achievements in Material Science, Green Technology, Data Science, Artificial Intelligence, and emerging technologies aimed at achieving the United Nations' Sustainable Development Goals. It focuses on specialized topics including Advanced Materials and Green Manufacturing, Solutions and Technologies for Sustainable Development, Data Science and Artificial Intelligence for Sustainable Development, and Health Sciences for Sustainable Development. The conference aims to strengthen collaboration and research exchanges among Vietnamese and international universities.",
+    "summarization": "GSETS 2027 is an international scientific event showcasing advanced achievements in Material Science, Green Technology, Data Science, Artificial Intelligence, and emerging technologies aimed at achieving the United Nations' Sustainable Development Goals (SDGs). The conference focuses on specialized topics including Advanced Materials and Green Manufacturing, Solutions and Technologies for Sustainable Development, Data Science and Artificial Intelligence for Sustainable Development, and Health Sciences for Sustainable Development.",
     "location": "HUTECH University (Thu Duc Campus), Ho Chi Minh City",
     "country": "Vietnam",
     "is_it_related": true,
@@ -1517,306 +1394,9 @@
         "date": "2027-03-20"
       }
     ],
-    "crawled_at": "2026-11-18T12:08:04+00:00",
+    "crawled_at": "2026-11-19T09:55:50+00:00",
     "status": "complete",
     "errors": [],
-    "rank": {
-      "core": null,
-      "core_source": null,
-      "ccf": null,
-      "matched_title": null,
-      "matched_by": null
-    }
-  },
-  {
-    "name": "ACM Multimedia Asia 2026",
-    "year": "2026",
-    "website_url": "https://www.mmasia2026.org/",
-    "deadline_url": "https://www.mmasia2026.org/important-dates",
-    "full_name": null,
-    "summarization": null,
-    "location": null,
-    "country": null,
-    "is_it_related": null,
-    "date_happen": null,
-    "start_date": null,
-    "end_date": null,
-    "image_url": null,
-    "logo_url": "https://www.mmasia2026.org/favicon-32x32.png",
-    "deadlines": [],
-    "crawled_at": "2026-11-18T11:56:14+00:00",
-    "status": "partial",
-    "errors": [
-      "website page: Trang gần như không có nội dung (24 ký tự); có thể trang render bằng JavaScript hoặc là file scan.",
-      "deadline llm: Trang gần như không có nội dung (24 ký tự); có thể trang render bằng JavaScript hoặc là file scan.",
-      "missing date_happen",
-      "missing location/country",
-      "is_it_related undetermined",
-      "no deadlines found"
-    ],
-    "rank": {
-      "core": null,
-      "core_source": null,
-      "ccf": null,
-      "matched_title": null,
-      "matched_by": null
-    }
-  },
-  {
-    "name": "SIMC 2026",
-    "year": "2026",
-    "website_url": "https://www.simc-conf.org/",
-    "deadline_url": "https://www.simc-conf.org/call-for-papers",
-    "full_name": null,
-    "summarization": null,
-    "location": null,
-    "country": null,
-    "is_it_related": null,
-    "date_happen": null,
-    "start_date": null,
-    "end_date": null,
-    "image_url": "https://lh7-us.googleusercontent.com/sitesv-images-rt/APXyLQd0lDN-NtCOMMOuEGQRjKSShXBfTzAjNKuyvS53WSuGcrGaX5nfkp_mh3Iv49w5k7dFiD4_HE70JErNzXiZcxOKsRnpTdNYwD2-DtJOHE8_yAJMoxVQd46_JRsGfc-r4oJZ12zQ18oZ1K69WnHURPXKqkb_W1FwfdcphwTb8ZJA6tBXGBaCmw6GUEiH4VbVHsg0684Ap3rR0ail3GXrDBjDUYlzAdLKtxnU3I5T=w1280",
-    "logo_url": "https://lh7-us.googleusercontent.com/sitesv-images-rt/APXyLQcSCZFEy_GEDXLZwRCAgjADPU_joB8k96OCWDMiAxhgSQB22LHdzOog5J6uFG4pRfZR2WGktuTjaMD-wcUw_IERd_st68eSqmrzsgkIf3jNl1Fa_4_sfAid_nVloXdm0kmypveuBMcphmlh7FCwvses78iWvpBxPhSHHOHOiVazrYvkNSqbIE3M5ZjIE3JqbQx7zqJO9kjHePTbfzWZ",
-    "deadlines": [],
-    "crawled_at": "2026-11-18T12:01:33+00:00",
-    "status": "partial",
-    "errors": [
-      "missing date_happen",
-      "missing location/country",
-      "is_it_related undetermined",
-      "no deadlines found"
-    ],
-    "rank": {
-      "core": null,
-      "core_source": null,
-      "ccf": null,
-      "matched_title": null,
-      "matched_by": null
-    }
-  },
-  {
-    "name": "AICAS 2026",
-    "year": "2026",
-    "website_url": "https://edas.info/N34921",
-    "deadline_url": "https://edas.info/N34921",
-    "full_name": null,
-    "summarization": null,
-    "location": null,
-    "country": null,
-    "is_it_related": null,
-    "date_happen": null,
-    "start_date": null,
-    "end_date": null,
-    "image_url": null,
-    "logo_url": null,
-    "deadlines": [],
-    "crawled_at": "2026-11-18T12:04:41+00:00",
-    "status": "partial",
-    "errors": [
-      "website page: Trang gần như không có nội dung (0 ký tự); có thể trang render bằng JavaScript hoặc là file scan.",
-      "missing date_happen",
-      "missing location/country",
-      "is_it_related undetermined",
-      "no deadlines found"
-    ],
-    "rank": {
-      "core": null,
-      "core_source": null,
-      "ccf": null,
-      "matched_title": null,
-      "matched_by": null
-    }
-  },
-  {
-    "name": "ICCTRDA 2026",
-    "year": "2026",
-    "website_url": "https://www.icctrda.com/",
-    "deadline_url": "https://www.icctrda.com/",
-    "full_name": null,
-    "summarization": null,
-    "location": null,
-    "country": null,
-    "is_it_related": null,
-    "date_happen": null,
-    "start_date": null,
-    "end_date": null,
-    "image_url": null,
-    "logo_url": "https://www.icctrda.com/favicon.ico",
-    "deadlines": [],
-    "crawled_at": "2026-11-18T12:04:41+00:00",
-    "status": "partial",
-    "errors": [
-      "website page: Trang gần như không có nội dung (89 ký tự); có thể trang render bằng JavaScript hoặc là file scan.",
-      "missing date_happen",
-      "missing location/country",
-      "is_it_related undetermined",
-      "no deadlines found"
-    ],
-    "rank": {
-      "core": null,
-      "core_source": null,
-      "ccf": null,
-      "matched_title": null,
-      "matched_by": null
-    }
-  },
-  {
-    "name": "IETBHEC 2027",
-    "year": "2027",
-    "website_url": "https://khoahoc.neu.edu.vn/vi/tin-nckh-khac/thu-moi-viet-bai-va-tham-du-hoi-thao-quoc-te-ietbhec-27-lan-thu-5",
-    "deadline_url": "https://khoahoc.neu.edu.vn/vi/tin-nckh-khac/thu-moi-viet-bai-va-tham-du-hoi-thao-quoc-te-ietbhec-27-lan-thu-5",
-    "full_name": null,
-    "summarization": null,
-    "location": null,
-    "country": null,
-    "is_it_related": null,
-    "date_happen": null,
-    "start_date": null,
-    "end_date": null,
-    "image_url": null,
-    "logo_url": null,
-    "deadlines": [],
-    "crawled_at": "2026-11-18T12:06:21+00:00",
-    "status": "partial",
-    "errors": [
-      "website page: Trang gần như không có nội dung (0 ký tự); có thể trang render bằng JavaScript hoặc là file scan.",
-      "missing date_happen",
-      "missing location/country",
-      "is_it_related undetermined",
-      "no deadlines found"
-    ],
-    "rank": {
-      "core": null,
-      "core_source": null,
-      "ccf": null,
-      "matched_title": null,
-      "matched_by": null
-    }
-  },
-  {
-    "name": "International Conference on Signal Processing and Communication 2026",
-    "year": "2026",
-    "website_url": "https://dee.hcmut.edu.vn/tintuc/cfp-ieee-11",
-    "deadline_url": "https://dee.hcmut.edu.vn/tintuc/cfp-ieee-11",
-    "full_name": null,
-    "summarization": null,
-    "location": null,
-    "country": null,
-    "is_it_related": null,
-    "date_happen": null,
-    "start_date": null,
-    "end_date": null,
-    "image_url": null,
-    "logo_url": null,
-    "deadlines": [],
-    "crawled_at": "2026-11-18T12:06:37+00:00",
-    "status": "partial",
-    "errors": [
-      "website page: Trang gần như không có nội dung (19 ký tự); có thể trang render bằng JavaScript hoặc là file scan.",
-      "missing date_happen",
-      "missing location/country",
-      "is_it_related undetermined",
-      "no deadlines found"
-    ],
-    "rank": {
-      "core": null,
-      "core_source": null,
-      "ccf": null,
-      "matched_title": null,
-      "matched_by": null
-    }
-  },
-  {
-    "name": "ICEF 2026",
-    "year": "2026",
-    "website_url": "https://khoahoc.neu.edu.vn/vi/tin-nckh-khac/call-for-papers-icef-2026",
-    "deadline_url": "https://khoahoc.neu.edu.vn/vi/tin-nckh-khac/call-for-papers-icef-2026",
-    "full_name": null,
-    "summarization": null,
-    "location": null,
-    "country": null,
-    "is_it_related": null,
-    "date_happen": null,
-    "start_date": null,
-    "end_date": null,
-    "image_url": null,
-    "logo_url": null,
-    "deadlines": [],
-    "crawled_at": "2026-11-18T12:06:37+00:00",
-    "status": "partial",
-    "errors": [
-      "website page: Trang gần như không có nội dung (0 ký tự); có thể trang render bằng JavaScript hoặc là file scan.",
-      "missing date_happen",
-      "missing location/country",
-      "is_it_related undetermined",
-      "no deadlines found"
-    ],
-    "rank": {
-      "core": null,
-      "core_source": null,
-      "ccf": null,
-      "matched_title": null,
-      "matched_by": null
-    }
-  },
-  {
-    "name": "VCRIS 2026",
-    "year": "2026",
-    "website_url": "https://khoahoc.neu.edu.vn/Resources/Docs/SubDomain/khoahoc/Thong%20tin%20NCKH%20khac/2026/Th%C6%B0%20m%E1%BB%9Di%20-%20H%E1%BB%8Dc%20vi%E1%BB%87n%20K%E1%BB%B9%20thu%E1%BA%ADt%20m%E1%BA%ADt%20m%C3%A3.23-3-2026.pdf",
-    "deadline_url": "https://khoahoc.neu.edu.vn/Resources/Docs/SubDomain/khoahoc/Thong%20tin%20NCKH%20khac/2026/Th%C6%B0%20m%E1%BB%9Di%20-%20H%E1%BB%8Dc%20vi%E1%BB%87n%20K%E1%BB%B9%20thu%E1%BA%ADt%20m%E1%BA%ADt%20m%C3%A3.23-3-2026.pdf",
-    "full_name": null,
-    "summarization": null,
-    "location": null,
-    "country": null,
-    "is_it_related": null,
-    "date_happen": null,
-    "start_date": null,
-    "end_date": null,
-    "image_url": null,
-    "logo_url": null,
-    "deadlines": [],
-    "crawled_at": "2026-11-18T12:06:37+00:00",
-    "status": "partial",
-    "errors": [
-      "website page: Đây là file PDF; cần cài pypdf: pip install pypdf",
-      "missing date_happen",
-      "missing location/country",
-      "is_it_related undetermined",
-      "no deadlines found"
-    ],
-    "rank": {
-      "core": null,
-      "core_source": null,
-      "ccf": null,
-      "matched_title": null,
-      "matched_by": null
-    }
-  },
-  {
-    "name": "NCSP'27 2027",
-    "year": "2027",
-    "website_url": "https://ncsp.jp/",
-    "deadline_url": "https://ncsp.jp/",
-    "full_name": null,
-    "summarization": null,
-    "location": null,
-    "country": null,
-    "is_it_related": null,
-    "date_happen": null,
-    "start_date": null,
-    "end_date": null,
-    "image_url": null,
-    "logo_url": null,
-    "deadlines": [],
-    "crawled_at": "2026-11-18T12:07:47+00:00",
-    "status": "partial",
-    "errors": [
-      "website page: Trang gần như không có nội dung (12 ký tự); có thể trang render bằng JavaScript hoặc là file scan.",
-      "missing date_happen",
-      "missing location/country",
-      "is_it_related undetermined",
-      "no deadlines found"
-    ],
     "rank": {
       "core": null,
       "core_source": null,
@@ -1846,73 +1426,9 @@
         "date": "2026-10-29"
       }
     ],
-    "crawled_at": "2026-11-18T12:08:21+00:00",
+    "crawled_at": "2026-11-19T09:56:12+00:00",
     "status": "complete",
     "errors": [],
-    "rank": {
-      "core": null,
-      "core_source": null,
-      "ccf": null,
-      "matched_title": null,
-      "matched_by": null
-    }
-  },
-  {
-    "name": "ISPCT 2026",
-    "year": "2026",
-    "website_url": "https://www.ispct.org/submission",
-    "deadline_url": "https://www.ispct.org/submission",
-    "full_name": "2026 3rd International Conference on Image, Signal Processing and Communication Technology",
-    "summarization": "The 3rd International Conference on Image, Signal Processing and Communication Technology (ISPCT 2026) invites researchers to submit original research papers and abstracts focusing on image, signal processing, and communication technology.",
-    "location": null,
-    "country": null,
-    "is_it_related": true,
-    "date_happen": null,
-    "start_date": null,
-    "end_date": null,
-    "image_url": "https://fhk.ais.cn/cms/website/functional/pic/202504/384250424145859026.jpg",
-    "logo_url": "https://fhk.ais.cn/cms/website/common/202504/384250423174923310.png",
-    "deadlines": [],
-    "crawled_at": "2026-11-18T12:08:38+00:00",
-    "status": "partial",
-    "errors": [
-      "missing date_happen",
-      "missing location/country",
-      "no deadlines found"
-    ],
-    "rank": {
-      "core": null,
-      "core_source": null,
-      "ccf": null,
-      "matched_title": null,
-      "matched_by": null
-    }
-  },
-  {
-    "name": "GLoCALL 2027",
-    "year": "2027",
-    "website_url": "https://paccall.org/",
-    "deadline_url": "https://paccall.org/",
-    "full_name": null,
-    "summarization": null,
-    "location": null,
-    "country": null,
-    "is_it_related": null,
-    "date_happen": null,
-    "start_date": null,
-    "end_date": null,
-    "image_url": null,
-    "logo_url": null,
-    "deadlines": [],
-    "crawled_at": "2026-11-18T12:08:38+00:00",
-    "status": "partial",
-    "errors": [
-      "website blocked (HTTP 403)",
-      "missing date_happen",
-      "missing location/country",
-      "is_it_related undetermined",
-      "no deadlines found"
-    ],
     "rank": {
       "core": null,
       "core_source": null,
@@ -1926,8 +1442,8 @@
     "year": "2027",
     "website_url": "https://icisn.com/",
     "deadline_url": "https://icisn.com/",
-    "full_name": "Seventh International Conference on Intelligent Systems and Networks",
-    "summarization": "The International Conference on Intelligent Systems and Networks (ICISN 2027) focuses on intelligent systems, network applications, and related technological advancements in computer science and information technology. The event provides an international technical forum for experts from industry, government, and academia to present research and discuss challenges in connected networks and multi-generational mobility. The conference proceedings will be published in Springer's Lecture Notes in Networks and Systems (LNNS) series.",
+    "full_name": "International Conference on Intelligent Systems and Networks",
+    "summarization": "The International Conference on Intelligent Systems and Networks (ICISN 2027) focuses on intelligent systems, network applications, and latest technological advancements within computer science and information technology. It provides an international technical forum for experts from industry, government, and academia to present research results and address new challenges in intelligent networks, multi-generational mobility, and connected systems.",
     "location": "University of Hai Duong (UHD), Hai Duong",
     "country": "Vietnam",
     "is_it_related": true,
@@ -1937,7 +1453,7 @@
     "image_url": "https://images.unsplash.com/photo-1509030450996-dd1a26dda07a?q=80&w=2123&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     "logo_url": "https://icisn.com/uni.png",
     "deadlines": [],
-    "crawled_at": "2026-11-18T12:08:54+00:00",
+    "crawled_at": "2026-11-19T10:04:34+00:00",
     "status": "partial",
     "errors": [
       "no deadlines found"
@@ -1951,37 +1467,83 @@
     }
   },
   {
-    "name": "RAIDS 2027",
-    "year": "2027",
-    "website_url": "https://raids.eai-conferences.org/2027/",
-    "deadline_url": "https://raids.eai-conferences.org/2027/",
-    "full_name": "3rd EAI International Conference on Responsible Artificial Intelligence and Data Science",
-    "summarization": "The conference focuses on responsible artificial intelligence and data science in the context of Industry 5.0, aiming to stimulate interaction and convergence among researchers active in areas such as transparency, bias mitigation, and data privacy. It covers trustworthy and responsible AI and data science practices across multiple sectors.",
-    "location": "Dong A University, Danang",
+    "name": "SIMC 2026",
+    "year": "2026",
+    "website_url": "https://www.simc-conf.org/",
+    "deadline_url": "https://www.simc-conf.org/call-for-papers",
+    "full_name": "The 2nd International Conference on Semantic Intelligence in Massive Computing",
+    "summarization": "The International Conference on Semantic Intelligence in Massive Computing (SIMC 2027) brings together researchers, practitioners, and industry experts to explore the latest advances in semantic intelligence and its applications in massive computing environments like cloud, edge-fog architectures, and IoT. The conference aims to foster interdisciplinary collaboration and discuss emerging trends in semantic modeling, knowledge representation, reasoning, and artificial intelligence. Accepted papers will be published in the Lecture Notes in Electrical Engineering (LNEE) series by Springer and indexed in Scopus.",
+    "location": "Ho Chi Minh City University of Banking (HUB), No. 36 Ton That Dam Street, Ho Chi Minh City",
     "country": "Vietnam",
     "is_it_related": true,
-    "date_happen": "2027-03-10 to 2027-03-12",
-    "start_date": "2027-03-10",
-    "end_date": "2027-03-12",
-    "image_url": "https://raids.eai-conferences.org/2027/wp-content/uploads/sites/1060/2024/08/eai-posters6.jpg",
-    "logo_url": "https://raids.eai-conferences.org/2027/wp-content/uploads/sites/1060/2026/07/cropped-EAI-RAIDS-logo@1200px-259x86.png",
+    "date_happen": "2027-12-21 to 2027-12-23",
+    "start_date": "2027-12-21",
+    "end_date": "2027-12-23",
+    "image_url": "https://lh7-us.googleusercontent.com/sitesv-images-rt/APXyLQehg83YtiDEjw4TBaBGWwRAJdOPxGOeTtoEiMKS68L0fTS4X1beiRpu0pjw7Z3rtFhTQ9vq9twzRNQT2SFQMOn9uwwE9a-Eb3eAxHqiMLeeDI1GlEMRCo-231bT3MIA2iU9znOz0oady0vPzD9xCRenQPrQDwtWsXjFnMmSsmiYXIgrI3JZqlwaX30b8jkuYohsz_ksGz85hmCkxXf-atD-YA3ewcXYJGdgMY6C=w1280",
+    "logo_url": "https://lh7-us.googleusercontent.com/sitesv-images-rt/APXyLQehje_cR5jfBZIbat5HjrrwGBJAGjwO4PZCQie1tniKJqn3i6p7Du-41Um7MYVc1Y_6f589EptDI43wF61UQPyzixkSIZc7Ity08wZGxfXqsmXZayjKLfxevHkRcvX9LXwum-ibCx6aCIsQ_K3g_DoXI_DmuUboKQAf1hH84134ULpQHMg0XWy7yaskmDR_rF64k4un3tsObC1OdUO4",
     "deadlines": [
       {
-        "name": "Full Paper Submission deadline",
-        "date": "2026-12-11"
+        "name": "Paper submission deadline",
+        "date": "2027-07-01"
       },
       {
-        "name": "Notification deadline",
-        "date": "2027-01-11"
+        "name": "Acceptance notification",
+        "date": "2027-09-30"
       },
       {
-        "name": "Camera-ready deadline",
-        "date": "2027-02-10"
+        "name": "Camera-ready paper submission",
+        "date": "2027-10-10"
+      },
+      {
+        "name": "Registration and payment deadline",
+        "date": "2027-10-10"
       }
     ],
-    "crawled_at": "2026-11-18T12:09:30+00:00",
+    "crawled_at": "2026-11-19T09:47:27+00:00",
     "status": "complete",
     "errors": [],
+    "rank": {
+      "core": null,
+      "core_source": null,
+      "ccf": null,
+      "matched_title": null,
+      "matched_by": null
+    }
+  },
+  {
+    "name": "VNNIC Internet Conference 2026",
+    "year": "2026",
+    "website_url": "http://internet-conference.vn/en/callforpapers",
+    "deadline_url": "http://internet-conference.vn/en/callforpapers",
+    "full_name": "VNNIC Internet Conference 2026",
+    "summarization": "VNNIC Internet Conference 2026 focuses on accelerating IPv6 transition and moving towards IPv6-only environments, bringing together policymakers, network operators, researchers, and technology experts. The conference aims to guide the technical community in deploying, operating, and optimizing IPv6-enabled and IPv6-only networks while promoting next-generation Internet infrastructure and digital transformation.",
+    "location": "Sheraton Saigon Grand Opera, 88 Dong Khoi Street, Ho Chi Minh City",
+    "country": "Vietnam",
+    "is_it_related": true,
+    "date_happen": null,
+    "start_date": null,
+    "end_date": null,
+    "image_url": "http://internet-conference.vn/themes/bootstrap_barrio/subtheme/images/vic-2025-background-dark.png",
+    "logo_url": "http://internet-conference.vn/sites/default/files/inline-images/VNNIC-IC-logo-favicon-default.jpg",
+    "deadlines": [
+      {
+        "name": "Open for registration",
+        "date": "2026-05-01"
+      },
+      {
+        "name": "Close for registration",
+        "date": "2026-06-01"
+      },
+      {
+        "name": "Selected speakers announcement",
+        "date": "2026-06-10"
+      }
+    ],
+    "crawled_at": "2026-11-19T10:04:54+00:00",
+    "status": "partial",
+    "errors": [
+      "missing date_happen"
+    ],
     "rank": {
       "core": null,
       "core_source": null,
