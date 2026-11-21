@@ -1,37 +1,40 @@
 <!DOCTYPE html>
+<!--
+  ConfGuide — Trang Hồ sơ Nghiên cứu Cá nhân (profile.html)
+  Hiển thị thông tin học thuật, lịch các mốc hội nghị/Tracker cá nhân và modal chỉnh sửa hồ sơ/avatar.
+-->
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Hồ sơ nghiên cứu cá nhân, danh sách hội nghị đã lưu và tiến độ nộp bài | ConfGuide.">
   <title>Hồ sơ nghiên cứu | ConfGuide</title>
-  
+  <meta name="description" content="Hồ sơ nghiên cứu cá nhân, danh sách hội nghị khoa học Công nghệ thông tin diễn ra tại Việt Nam (gồm cả hội nghị quốc tế tổ chức tại Việt Nam) đã lưu và lịch hạn nộp bài UTC+7 | ConfGuide.">
+
   <link rel="icon" type="image/svg+xml" href="images/logo.svg">
-  
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  
-  <link rel="stylesheet" href="css/base.css">
-  <link rel="stylesheet" href="css/profile.css">
+  <link rel="stylesheet" href="css/base/base.css">
+  <link rel="stylesheet" href="css/pages/profile.css">
+  <link rel="stylesheet" href="css/components/compare.css">
+  <link rel="stylesheet" href="css/components/calendar.css">
+  <link rel="stylesheet" href="css/base/transition.css">
+  <script src="js/core/page-transition.js"></script>
+  <script src="js/core/layout.js" defer blocking="render"></script>
 </head>
 <body>
+  <!-- Áp dụng nhanh Dark Mode trước khi sơn giao diện để tránh nhấp nháy sáng/tối (anti-FOUC) -->
   <script>try { if (localStorage.getItem('confguide_theme') === 'dark') document.body.classList.add('dark'); } catch (e) {}</script>
 
-  <!-- Shared Header -->
+  <!-- Thanh điều hướng dùng chung -->
   <div id="site-header"></div>
 
-  <!-- Main Content -->
+  <!-- Nội dung chính -->
   <main class="profile-page-main">
     <div class="container">
-      
-      <!-- Banner & Thông báo trạng thái -->
+      <!-- Banner thông báo phản hồi thao tác hồ sơ -->
       <div class="profile-page-alert" id="pageAlert" role="alert" aria-live="polite"></div>
 
       <!-- ================= 1. HERO PROFILE CARD ================= -->
       <section class="profile-hero-card" aria-label="Thông tin hồ sơ nghiên cứu cá nhân">
         <div class="profile-hero-banner"></div>
-        
         <div class="profile-hero-content">
           <div class="profile-hero-top-row">
             
@@ -39,13 +42,13 @@
             <div class="profile-avatar-outer">
               <div class="profile-avatar-display" id="profileAvatarBig">U</div>
               <button type="button" class="profile-avatar-upload-btn" id="triggerAvatarUploadBtn" title="Tải ảnh đại diện mới" aria-label="Tải ảnh đại diện">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                   <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
                   <circle cx="12" cy="13" r="4"></circle>
                 </svg>
               </button>
-              <span class="profile-avatar-badge" title="Tài khoản nghiên cứu đã xác thực">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+              <span class="profile-avatar-badge" title="Tài khoản nghiên cứu đã xác thực" aria-hidden="true">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                   <polyline points="20 6 9 17 4 12"></polyline>
                 </svg>
               </span>
@@ -72,15 +75,15 @@
             <!-- Chips thông tin phụ -->
             <div class="profile-meta-chips">
               <div class="profile-meta-chip">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                   <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
                   <polyline points="22,6 12,13 2,6"></polyline>
                 </svg>
                 <span id="profileEmailDisplay">user@confguide.vn</span>
               </div>
 
-              <a href="#" target="_blank" rel="noopener noreferrer" class="profile-meta-chip profile-scholar-chip" id="profileScholarLink" style="display: none;">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <a href="#" target="_blank" rel="noopener noreferrer" class="profile-meta-chip profile-scholar-chip is-hidden" id="profileScholarLink">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                   <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
                   <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
                 </svg>
@@ -99,7 +102,7 @@
             <!-- Giới thiệu / Bio -->
             <div class="profile-bio-box" id="profileBioBox">
               <p class="profile-bio-text" id="profileBioText">
-                Quan tâm đến các hội nghị khoa học quốc tế uy tín thuộc xếp hạng CORE A*/A.
+                Quan tâm đến các hội nghị khoa học Công nghệ thông tin diễn ra tại Việt Nam (gồm cả hội nghị quốc tế tổ chức tại Việt Nam) thuộc xếp hạng CORE A*/A.
               </p>
             </div>
 
@@ -113,32 +116,47 @@
       <section class="profile-stats-grid" aria-label="Thống kê hoạt động nghiên cứu">
         
         <div class="profile-stat-box">
-          <div class="stat-icon-circle stat-icon-green">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <div class="stat-icon-circle stat-icon-green" aria-hidden="true">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <circle cx="12" cy="12" r="10"></circle>
               <polyline points="12 6 12 12 16 14"></polyline>
             </svg>
           </div>
           <div class="stat-content">
-            <div class="stat-num" style="font-size: 20px; font-weight: 700; color: var(--green);">AoE (UTC-12)</div>
+            <div class="stat-num stat-num--timezone">UTC+7 (giờ Việt Nam)</div>
             <div class="stat-title">Múi giờ deadline</div>
-            <div class="stat-hint">Tối đa hóa thời gian nộp bài</div>
+            <div class="stat-hint">Quy đổi tự động từ 23:59 AoE</div>
           </div>
         </div>
 
         <div class="profile-stat-box">
-          <div class="stat-icon-circle stat-icon-amber">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <div class="stat-icon-circle stat-icon-amber" aria-hidden="true">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
             </svg>
           </div>
           <div class="stat-content">
-            <div class="stat-num" style="font-size: 20px; font-weight: 700; color: #b45309;" id="statUserStatus">Đã xác thực</div>
+            <div class="stat-num stat-num--status" id="statUserStatus">Đã xác thực</div>
             <div class="stat-title">Tài khoản học thuật</div>
             <div class="stat-hint">Lưu trữ bảo mật trên trình duyệt</div>
           </div>
         </div>
 
+      </section>
+
+
+      <!-- ================= 3. LỊCH MỐC HỘI NGHỊ & TRACKER ================= -->
+      <section class="profile-section-card" aria-labelledby="calendarTitle">
+        <div class="section-card-header">
+          <div>
+            <h2 id="calendarTitle" class="section-card-title">Lịch các mốc quan trọng</h2>
+            <p class="section-card-subtitle">Tổng hợp hạn nộp bài (UTC+7), ngày diễn ra hội nghị đã lưu và mốc Tracker cá nhân</p>
+          </div>
+        </div>
+
+        <div class="profile-calendar js-profile-calendar" id="profileCalendarRoot">
+          <!-- Nạp động bởi js/components/calendar.js -->
+        </div>
       </section>
 
 
@@ -168,30 +186,32 @@
             </div>
             <div class="modal-avatar-actions">
               <div class="modal-avatar-btn-row">
-                <button type="button" class="btn btn-secondary" id="modalUploadAvatarBtn" style="font-size: 13px; padding: 7px 14px;">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <button type="button" class="btn btn-secondary btn--compact-sm" id="modalUploadAvatarBtn">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                     <polyline points="17 8 12 3 7 8"></polyline>
                     <line x1="12" y1="3" x2="12" y2="15"></line>
                   </svg>
                   <span>Tải ảnh mới</span>
                 </button>
-                <button type="button" class="btn btn-secondary" id="modalRemoveAvatarBtn" style="font-size: 13px; padding: 7px 12px; color: var(--red);" title="Xóa ảnh và dùng chữ cái đầu">
+                <button type="button" class="btn btn-secondary btn--compact-sm btn--danger-text" id="modalRemoveAvatarBtn" title="Xóa ảnh và dùng chữ cái đầu">
                   <span>Xóa ảnh</span>
                 </button>
               </div>
-              <p class="modal-hint" style="margin-top: 6px;">Hỗ trợ JPG, PNG, WEBP. Ảnh tự động được căn giữa và nén tối ưu (200x200px).</p>
+              <p class="modal-hint modal-hint--spaced">Hỗ trợ JPG, PNG, WEBP. Ảnh tự động được căn giữa và nén tối ưu (200x200px).</p>
             </div>
           </div>
 
           <div class="modal-form-grid-2">
             <div class="modal-form-group">
-              <label for="editFullName">Họ và tên <span style="color: var(--red);">*</span></label>
-              <input type="text" id="editFullName" class="modal-input" required>
+              <label for="editFullName">Họ và tên <span class="req-mark" aria-hidden="true">*</span></label>
+              <input type="text" id="editFullName" class="modal-input" required minlength="2" aria-describedby="editFullNameError">
+              <span class="field-error js-field-error" id="editFullNameError" role="alert"></span>
             </div>
             <div class="modal-form-group">
-              <label for="editEmail">Email liên hệ <span style="color: var(--red);">*</span></label>
-              <input type="email" id="editEmail" class="modal-input" required>
+              <label for="editEmail">Email liên hệ <span class="req-mark" aria-hidden="true">*</span></label>
+              <input type="email" id="editEmail" class="modal-input" required aria-describedby="editEmailError">
+              <span class="field-error js-field-error" id="editEmailError" role="alert"></span>
             </div>
           </div>
 
@@ -208,7 +228,8 @@
 
           <div class="modal-form-group">
             <label for="editScholar">Liên kết Google Scholar / ORCID</label>
-            <input type="url" id="editScholar" class="modal-input">
+            <input type="url" id="editScholar" class="modal-input" pattern="https?://.+" aria-describedby="editScholarError">
+            <span class="field-error js-field-error" id="editScholarError" role="alert"></span>
           </div>
 
           <div class="modal-form-group">
@@ -222,7 +243,7 @@
             <textarea id="editBio" class="modal-input" rows="3"></textarea>
           </div>
 
-          <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border);">
+          <div class="profile-modal-actions">
             <button type="button" class="btn btn-secondary" id="cancelEditProfileBtn">Hủy</button>
             <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
           </div>
@@ -235,14 +256,15 @@
 
 
   <!-- File input ẩn dùng chung cho tải ảnh đại diện -->
-  <input type="file" id="globalAvatarInput" accept="image/png, image/jpeg, image/webp, image/gif" style="display: none;">
+  <input type="file" id="globalAvatarInput" class="is-hidden" accept="image/png, image/jpeg, image/webp, image/gif">
 
-  <!-- Shared Footer -->
+  <!-- Chân trang dùng chung -->
   <div id="site-footer"></div>
 
-  <!-- Scripts -->
-  <script src="js/layout.js"></script>
-  <script src="js/profile.js"></script>
-
+  <!-- Script thành phần và nghiệp vụ trang Hồ sơ -->
+  <script src="js/components/compare.js" defer></script>
+  <script src="js/components/calendar.js" defer></script>
+  <script src="js/pages/profile.js" defer></script>
 </body>
 </html>
+

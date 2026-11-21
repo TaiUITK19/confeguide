@@ -1,0 +1,885 @@
+/* =========================================================
+   ConfGuide — Stylesheet So sánh Hội nghị Cạnh nhau (css/components/compare.css)
+   Chuẩn BEM, dùng lại Design Tokens từ css/base/base.css, hỗ trợ Dark Mode (body.dark),
+   cột đầu tiên cố định (sticky left: 0) khi cuộn ngang trên mobile (375px–430px),
+   đảm bảo chuẩn A11y (:focus-visible, vùng chạm >= 44px, prefers-reduced-motion).
+   ========================================================= */
+
+/* Biến màu nền đặc (opaque) cho cột sticky và hàng khác biệt ở chế độ Sáng & Tối */
+body {
+  --compare-sticky-head-bg: var(--surface-alt);
+  --compare-sticky-bg: var(--surface);
+  --compare-sticky-diff-bg: color-mix(in oklch, var(--primary) 8%, var(--surface));
+  --compare-diff-cell-bg: color-mix(in oklch, var(--primary) 4%, var(--surface));
+  --compare-group-bg: var(--surface-muted);
+  --compare-nearest-bg: var(--status-open-bg);
+  --compare-nearest-text: var(--status-open-text);
+  --compare-nearest-border: var(--status-open-border);
+  --compare-diff-badge-bg: var(--gold-bg);
+  --compare-diff-badge-text: var(--gold-text);
+  --compare-diff-badge-border: var(--gold-border);
+}
+
+@supports not (color: oklch(0.5 0.1 200)) {
+  body {
+    --compare-sticky-head-bg: #f1f5fb;
+    --compare-sticky-bg: #ffffff;
+    --compare-sticky-diff-bg: #eff6ff;
+    --compare-diff-cell-bg: #f8fbff;
+    --compare-group-bg: #eef3fb;
+  }
+
+  body.dark {
+    --compare-sticky-head-bg: #0f172a;
+    --compare-sticky-bg: #162032;
+    --compare-sticky-diff-bg: #172946;
+    --compare-diff-cell-bg: #14233c;
+    --compare-group-bg: #0f1a2c;
+  }
+}
+
+@supports (color: oklch(0.5 0.1 200)) and (not (background: color-mix(in oklch, red 50%, blue))) {
+  body {
+    --compare-sticky-diff-bg: #eef3fa;
+    --compare-diff-cell-bg: #f6f9fd;
+  }
+
+  body.dark {
+    --compare-sticky-diff-bg: #222d3a;
+    --compare-diff-cell-bg: #1e2731;
+  }
+}
+
+/* Chừa khoảng trống đáy trang khi thanh so sánh nổi đang hiển thị */
+body.has-compare-bar {
+  padding-bottom: 92px;
+}
+
+body.has-compare-bar .cg-toast-container,
+body.has-compare-bar .toast {
+  bottom: 96px;
+}
+
+/* ================= 1. Nút Chọn So sánh trên Thẻ / Hàng (.compare-toggle) ================= */
+.compare-toggle {
+  position: relative;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--navy);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.25;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 150ms ease, color 150ms ease, border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.compare-toggle:hover {
+  background: var(--primary-soft);
+  color: var(--primary);
+  border-color: var(--primary);
+}
+
+.compare-toggle:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--focus-ring);
+}
+
+.compare-toggle.is-selected,
+.compare-toggle[aria-pressed="true"] {
+  background: var(--primary-soft);
+  color: var(--primary);
+  border-color: var(--primary);
+  font-weight: 700;
+  box-shadow: 0 0 0 1px var(--primary-ring);
+}
+
+.compare-toggle.is-selected:hover,
+.compare-toggle[aria-pressed="true"]:hover {
+  background: var(--primary);
+  color: var(--on-primary);
+  border-color: var(--primary);
+}
+
+.compare-toggle__icon {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.compare-toggle__label {
+  pointer-events: none;
+}
+
+/* ================= 2. Thanh Nổi Dưới Đáy Màn Hình (.compare-bar) ================= */
+.compare-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1200;
+  background: var(--surface);
+  border-top: 1.5px solid var(--border-strong);
+  box-shadow: var(--shadow-lg);
+  padding: 12px 0 calc(12px + env(safe-area-inset-bottom, 0px));
+}
+
+/* Đảm bảo thuộc tính hidden luôn ẩn thanh nổi, không bị display ghi đè */
+.compare-bar[hidden] {
+  display: none;
+}
+
+.compare-bar__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.compare-bar__summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.compare-bar__count {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--navy);
+  white-space: nowrap;
+}
+
+.compare-bar__hint {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: var(--surface-muted);
+  border: 1px solid var(--border);
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+}
+
+.compare-bar__hint[hidden] {
+  display: none;
+}
+
+.compare-bar__chips {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  flex: 1;
+  min-width: 0;
+}
+
+.compare-bar__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 8px 5px 12px;
+  border-radius: var(--radius-pill);
+  background: var(--primary-soft);
+  border: 1px solid var(--border-strong);
+  color: var(--navy);
+  font-size: 13px;
+  font-weight: 700;
+  max-width: 220px;
+}
+
+.compare-bar__chip-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.compare-bar__chip-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: none;
+  background: var(--surface);
+  color: var(--text-muted);
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background-color 140ms ease, color 140ms ease;
+}
+
+.compare-bar__chip-remove:hover {
+  background: var(--danger-solid-bg);
+  color: var(--on-primary);
+}
+
+.compare-bar__chip-remove:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--focus-ring);
+}
+
+.compare-bar__actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.compare-bar__clear {
+  padding: 8px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-strong);
+  background: var(--surface-alt);
+  color: var(--text-muted);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 150ms ease, color 150ms ease, border-color 150ms ease;
+}
+
+.compare-bar__clear:hover {
+  background: var(--danger-bg);
+  color: var(--danger-text);
+  border-color: var(--danger-dot);
+}
+
+.compare-bar__clear:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--focus-ring);
+}
+
+.compare-bar__submit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 9px 18px;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--primary);
+  background: var(--primary);
+  color: var(--on-primary);
+  font-family: inherit;
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: var(--shadow-sm);
+  transition: background-color 150ms ease, border-color 150ms ease, opacity 150ms ease;
+}
+
+.compare-bar__submit:hover:not(:disabled) {
+  background: var(--primary-hover);
+  border-color: var(--primary-hover);
+}
+
+.compare-bar__submit:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--focus-ring);
+}
+
+.compare-bar__submit:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* ================= 3. Hộp Thoại Bảng So Sánh (<dialog class="compare-dialog">) ================= */
+body.is-compare-open {
+  overflow: hidden;
+}
+
+.compare-dialog {
+  padding: 0;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow-lg);
+  width: min(1060px, calc(100vw - 32px));
+  max-width: 1060px;
+  max-height: min(88vh, 860px);
+  margin: auto;
+  overflow: hidden;
+}
+
+.compare-dialog[open] {
+  display: flex;
+  flex-direction: column;
+}
+
+.compare-dialog::backdrop {
+  background: var(--backdrop-scrim);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.compare-dialog__box {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  max-height: min(88vh, 860px);
+  min-height: 0;
+  background: var(--surface);
+}
+
+.compare-dialog__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 24px 14px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  flex-shrink: 0;
+}
+
+.compare-dialog__heading {
+  min-width: 0;
+}
+
+.compare-dialog__title {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--navy);
+  line-height: 1.25;
+  margin: 0 0 4px;
+}
+
+.compare-dialog__subtitle {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.compare-dialog__close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-strong);
+  background: var(--surface-alt);
+  color: var(--text);
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background-color 150ms ease, color 150ms ease, border-color 150ms ease;
+}
+
+.compare-dialog__close:hover {
+  background: var(--primary-soft);
+  color: var(--primary);
+  border-color: var(--primary);
+}
+
+.compare-dialog__close:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--focus-ring);
+}
+
+/* Gợi ý vuốt ngang trên màn hình hẹp (chỉ hiện trên mobile <= 767px) */
+.compare-dialog__swipe-hint {
+  display: none;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: var(--primary-soft);
+  border-bottom: 1px solid var(--border);
+  color: var(--primary);
+  font-size: 12.5px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+/* Trạng thái Đang tải / Lỗi bên trong hộp thoại */
+.compare-dialog__state {
+  padding: 36px 24px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 14.5px;
+  font-weight: 500;
+}
+
+.compare-dialog__state[hidden] {
+  display: none;
+}
+
+.compare-dialog__state--error {
+  color: var(--red);
+}
+
+/* Khung cuộn ngang bao quanh bảng so sánh */
+.compare-dialog__scroll {
+  flex: 1;
+  min-height: 0;
+  max-width: 100%;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.compare-dialog__scroll[hidden] {
+  display: none;
+}
+
+.compare-dialog__scroll:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: -2px;
+}
+
+/* ================= 4. Bảng Đối Chiếu 2 Chiều (.compare-table) ================= */
+.compare-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  text-align: left;
+  font-size: 13.5px;
+  color: var(--text);
+}
+
+.compare-table th,
+.compare-table td {
+  padding: 13px 16px;
+  border-bottom: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+  vertical-align: top;
+  box-sizing: border-box;
+}
+
+.compare-table tr > :last-child {
+  border-right: none;
+}
+
+/* Cột đầu tiên (Tiêu chí) cố định bên trái khi cuộn ngang */
+.compare-table__corner,
+.compare-table__criterion {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  width: 175px;
+  min-width: 155px;
+  max-width: 190px;
+  background: var(--compare-sticky-bg);
+  border-right: 1.5px solid var(--border-strong);
+}
+
+.compare-table__corner {
+  z-index: 3;
+  background: var(--compare-sticky-head-bg);
+  color: var(--navy);
+  font-size: 13px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  vertical-align: middle;
+}
+
+/* Đầu cột mỗi hội nghị */
+.compare-table__conf-head {
+  min-width: 230px;
+  background: var(--compare-sticky-head-bg);
+  vertical-align: top;
+}
+
+.compare-table__conf-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+.compare-table__conf-link {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--primary);
+  text-decoration: none;
+  line-height: 1.25;
+}
+
+.compare-table__conf-link:hover {
+  text-decoration: underline;
+}
+
+.compare-table__conf-link:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+.compare-table__conf-fullname {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--text-muted);
+  line-height: 1.4;
+  margin: 0;
+}
+
+.compare-table__remove-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 4px 9px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--text-muted);
+  font-family: inherit;
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: background-color 140ms ease, color 140ms ease, border-color 140ms ease;
+}
+
+.compare-table__remove-btn:hover {
+  background: var(--danger-bg);
+  color: var(--danger-text);
+  border-color: var(--danger-dot);
+}
+
+.compare-table__remove-btn:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--focus-ring);
+}
+
+/* Hàng tiêu đề nhóm tiêu chí (Học thuật | Thời hạn (UTC+7) | Tổ chức) */
+.compare-table__group-row th {
+  background: var(--compare-group-bg);
+  color: var(--navy);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  padding: 9px 16px;
+  border-bottom: 1px solid var(--border-strong);
+}
+
+/* Ô tên tiêu chí (cột 1) */
+.compare-table__criterion {
+  font-weight: 700;
+  color: var(--navy);
+  line-height: 1.35;
+}
+
+.compare-table__criterion-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 5px;
+}
+
+/* Ô dữ liệu của từng hội nghị */
+.compare-table__cell {
+  min-width: 230px;
+  background: var(--surface);
+  color: var(--text);
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+/* Hàng có sự khác biệt giữa các hội nghị */
+.compare-table__row--diff > .compare-table__criterion {
+  background: var(--compare-sticky-diff-bg);
+  border-left: 3px solid var(--primary);
+}
+
+.compare-table__row--diff > .compare-table__cell {
+  background: var(--compare-diff-cell-bg);
+}
+
+.compare-table__diff-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 7px;
+  border-radius: var(--radius-pill);
+  background: var(--compare-diff-badge-bg);
+  color: var(--compare-diff-badge-text);
+  border: 1px solid var(--compare-diff-badge-border);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+/* Thành phần hiển thị bên trong ô dữ liệu */
+.compare-table__rank-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  background: var(--compare-diff-badge-bg);
+  color: var(--compare-diff-badge-text);
+  border: 1px solid var(--compare-diff-badge-border);
+  font-size: 12.5px;
+  font-weight: 800;
+}
+
+.compare-table__tags {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.compare-table__tag {
+  display: inline-block;
+  padding: 3px 9px;
+  border-radius: var(--radius-pill);
+  background: var(--primary-soft);
+  color: var(--primary);
+  border: 1px solid var(--border);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.compare-table__days-wrap {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.compare-table__days {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 800;
+  color: var(--status-open-text);
+}
+
+.compare-table__days::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--status-open-dot);
+}
+
+.compare-table__days--urgent {
+  color: var(--status-warning-text);
+}
+
+.compare-table__days--urgent::before {
+  background: var(--status-warning-dot);
+}
+
+.compare-table__days--passed {
+  color: var(--status-closed-text);
+  font-weight: 600;
+}
+
+.compare-table__days--passed::before {
+  background: var(--status-closed-dot);
+}
+
+.compare-table__nearest-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  background: var(--compare-nearest-bg);
+  color: var(--compare-nearest-text);
+  border: 1px solid var(--compare-nearest-border);
+  font-size: 11.5px;
+  font-weight: 700;
+}
+
+.compare-table__mode {
+  display: block;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 2px;
+}
+
+.compare-table__loc {
+  display: block;
+  font-size: 12.5px;
+  color: var(--text-muted);
+}
+
+.compare-table__muted {
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+/* Chân hộp thoại chứa ghi chú lệ phí ước tính */
+.compare-dialog__footer {
+  padding: 12px 24px;
+  border-top: 1px solid var(--border);
+  background: var(--surface-alt);
+  flex-shrink: 0;
+}
+
+.compare-dialog__footnote {
+  margin: 0;
+  font-size: 12.5px;
+  color: var(--text-muted);
+  line-height: 1.45;
+}
+
+/* ================= 5. Tôn trọng Tùy chọn Giảm Chuyển động ================= */
+@media (prefers-reduced-motion: reduce) {
+  .compare-toggle,
+  .compare-bar__chip-remove,
+  .compare-bar__clear,
+  .compare-bar__submit,
+  .compare-dialog__close,
+  .compare-table__remove-btn {
+    transition: none;
+  }
+}
+
+/* ================= 6. RESPONSIVE: Tablet & Mobile ================= */
+@media (max-width: 1023px) {
+  body.has-compare-bar {
+    padding-bottom: 124px;
+  }
+
+  body.has-compare-bar .cg-toast-container,
+  body.has-compare-bar .toast {
+    bottom: 128px;
+  }
+}
+
+@media (max-width: 767px) {
+  body.has-compare-bar {
+    padding-bottom: 152px;
+  }
+
+  body.has-compare-bar .cg-toast-container,
+  body.has-compare-bar .toast {
+    bottom: 156px;
+  }
+
+  /* Vùng chạm tối thiểu 44x44px trên thiết bị cảm ứng */
+  .compare-toggle {
+    min-height: 44px;
+    min-width: 44px;
+    padding: 8px 12px;
+  }
+
+  .compare-bar__inner {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .compare-bar__summary {
+    justify-content: space-between;
+  }
+
+  .compare-bar__actions {
+    width: 100%;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 8px;
+  }
+
+  .compare-bar__clear,
+  .compare-bar__submit {
+    min-height: 44px;
+  }
+
+  /* Hộp thoại toàn màn hình trên mobile (<= 767px) */
+  .compare-dialog {
+    width: 100%;
+    height: 100%;
+    max-width: 100%;
+    max-height: 100%;
+    margin: 0;
+    border-radius: 0;
+    border: none;
+  }
+
+  .compare-dialog__box {
+    max-height: 100%;
+  }
+
+  .compare-dialog__header {
+    padding: 14px 16px 12px;
+  }
+
+  .compare-dialog__title {
+    font-size: 17.5px;
+  }
+
+  .compare-dialog__close {
+    width: 44px;
+    height: 44px;
+  }
+
+  .compare-dialog__swipe-hint {
+    display: flex;
+  }
+
+  /* Cột tiêu chí min-width 104px, mỗi cột hội nghị min-width 180px để cuộn ngang mượt */
+  .compare-table th,
+  .compare-table td {
+    padding: 10px 12px;
+  }
+
+  .compare-table__corner,
+  .compare-table__criterion {
+    width: 112px;
+    min-width: 104px;
+    max-width: 120px;
+  }
+
+  .compare-table__conf-head,
+  .compare-table__cell {
+    min-width: 184px;
+    width: 184px;
+  }
+
+  .compare-table__remove-btn {
+    min-height: 36px;
+    padding: 6px 10px;
+  }
+
+  .compare-dialog__footer {
+    padding: 10px 16px calc(10px + env(safe-area-inset-bottom, 0px));
+  }
+}

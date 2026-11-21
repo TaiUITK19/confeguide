@@ -1,359 +1,451 @@
 <!DOCTYPE html>
+<!--
+  ConfGuide - Trang Chi tiết Hội nghị Khoa học (detail.html)
+  Cấu trúc ngữ nghĩa HTML5 chuẩn W3C, sử dụng SVG Sprite dùng chung,
+  bố cục ưu tiên hành động chính (Lưu, Website, Hạn nộp tiếp theo UTC+7) và hỗ trợ route #danh-gia.
+-->
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Chi tiết hội nghị - ConfGuide</title>
-  
+  <meta name="description" content="Thông tin chi tiết hội nghị khoa học Công nghệ thông tin diễn ra tại Việt Nam (bao gồm cả hội nghị quốc tế tổ chức tại Việt Nam), tiến trình hạn nộp bài theo múi giờ UTC+7 (giờ Việt Nam) và nhận xét cộng đồng trên ConfGuide.">
+
   <link rel="icon" type="image/svg+xml" href="images/logo.svg">
-  
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  
-  <link rel="stylesheet" href="css/base.css">
-  <link rel="stylesheet" href="css/detail.css">
+  <link rel="stylesheet" href="css/base/base.css">
+  <link rel="stylesheet" href="css/pages/detail.css">
+  <link rel="stylesheet" href="css/components/compare.css">
+  <link rel="stylesheet" href="css/base/transition.css">
+  <script src="js/core/page-transition.js"></script>
+  <script src="js/core/layout.js" defer blocking="render"></script>
 </head>
 <body>
+  <!-- Áp dụng nhanh Dark Mode trước khi sơn giao diện để tránh nhấp nháy sáng/tối (anti-FOUC) -->
   <script>try { if (localStorage.getItem('confguide_theme') === 'dark') document.body.classList.add('dark'); } catch (e) {}</script>
-  <!-- Shared Header -->
+
+  <!-- Kho biểu tượng SVG Sprite dùng chung cho cả HTML và JavaScript trên trang Chi tiết -->
+  <svg class="svg-sprite" aria-hidden="true" focusable="false">
+    <symbol id="icon-arrow-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="19" y1="12" x2="5" y2="12"></line>
+      <polyline points="12 19 5 12 12 5"></polyline>
+    </symbol>
+    <symbol id="icon-arrow-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="5" y1="12" x2="19" y2="12"></line>
+      <polyline points="12 5 19 12 12 19"></polyline>
+    </symbol>
+    <symbol id="icon-calendar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3" y="4" width="18" height="18" rx="2"></rect>
+      <path d="M16 2v4M8 2v4M3 10h18"></path>
+    </symbol>
+    <symbol id="icon-calendar-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3" y="4" width="18" height="18" rx="2"></rect>
+      <path d="M16 2v4M8 2v4M3 10h18M12 14v4M10 16h4"></path>
+    </symbol>
+    <symbol id="icon-location" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 2a8 8 0 0 0-8 8c0 5.25 8 12 8 12s8-6.75 8-12a8 8 0 0 0-8-8z"></path>
+      <circle cx="12" cy="10" r="3"></circle>
+    </symbol>
+    <symbol id="icon-mode" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="2" y="3" width="20" height="14" rx="2"></rect>
+      <line x1="8" y1="21" x2="16" y2="21"></line>
+      <line x1="12" y1="17" x2="12" y2="21"></line>
+    </symbol>
+    <symbol id="icon-fee" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+    </symbol>
+    <symbol id="icon-star" viewBox="0 0 24 24">
+      <path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4 6.1 20.5l1.2-6.5L2.5 9.4l6.6-.9z"></path>
+    </symbol>
+    <symbol id="icon-external" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+      <polyline points="15 3 21 3 21 9"></polyline>
+      <line x1="10" y1="14" x2="21" y2="3"></line>
+    </symbol>
+    <symbol id="icon-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="10"></circle>
+      <polyline points="12 6 12 12 16 14"></polyline>
+    </symbol>
+    <symbol id="icon-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+      <polyline points="7 10 12 15 17 10"></polyline>
+      <line x1="12" y1="15" x2="12" y2="3"></line>
+    </symbol>
+    <symbol id="icon-globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="10"></circle>
+      <path d="M2 12h20"></path>
+      <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+    </symbol>
+    <symbol id="icon-doc" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+      <polyline points="14 2 14 8 20 8"></polyline>
+      <line x1="16" y1="13" x2="8" y2="13"></line>
+      <line x1="16" y1="17" x2="8" y2="17"></line>
+    </symbol>
+    <symbol id="icon-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="10"></circle>
+      <line x1="12" y1="16" x2="12" y2="12"></line>
+      <line x1="12" y1="8" x2="12.01" y2="8"></line>
+    </symbol>
+    <symbol id="icon-message" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+    </symbol>
+    <symbol id="icon-share" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="18" cy="5" r="3"></circle>
+      <circle cx="6" cy="12" r="3"></circle>
+      <circle cx="18" cy="19" r="3"></circle>
+      <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+      <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+    </symbol>
+    <symbol id="icon-alert" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="10"></circle>
+      <line x1="12" y1="8" x2="12" y2="12"></line>
+      <line x1="12" y1="16" x2="12.01" y2="16"></line>
+    </symbol>
+    <symbol id="icon-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="20 6 9 17 4 12"></polyline>
+    </symbol>
+  </svg>
+
+  <!-- Header dùng chung được render bởi js/core/layout.js -->
   <div id="site-header"></div>
 
-  <div class="container detail-container">
-    <!-- Back & Navigation Bar -->
-    <nav class="detail-nav-bar" aria-label="Điều hướng trang chi tiết">
-      <button class="btn-back" id="backBtn" type="button" aria-label="Quay lại danh sách hội nghị">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <line x1="19" y1="12" x2="5" y2="12"></line>
-          <polyline points="12 19 5 12 12 5"></polyline>
-        </svg>
-        <span>Quay lại</span>
-      </button>
-
-      <div class="nav-bar-right">
-        <div class="status-badge" id="detailStatusBadge">Đang mở nộp bài</div>
-        <div class="rank-pill" id="detailRankBadge">Rank A*</div>
-      </div>
-    </nav>
-
-    <!-- View 1: Conference Detail -->
-    <div id="viewDetail">
-      <!-- Hero Section -->
-      <section class="hero" id="conferenceHero">
-        <div class="hero-content">
-          <div class="hero-eyebrow-row">
-            <span class="eyebrow" id="detailEyebrow">HỘI NGHỊ KHOA HỌC UY TÍN</span>
-            <span class="region-pill" id="detailRegionPill">Quốc tế</span>
-          </div>
-
-          <h1 id="detailTitle">CVPR 2026</h1>
-          <h2 id="detailFullName">IEEE/CVF Conference on Computer Vision and Pattern Recognition</h2>
-          <p id="detailDesc">Đang tải mô tả hội nghị...</p>
-          
-          <div class="tags" id="detailTags"></div>
-          
-          <div class="hero-meta-grid">
-            <div class="meta-item">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                <path d="M12 2a8 8 0 0 0-8 8c0 5.25 8 12 8 12s8-6.75 8-12a8 8 0 0 0-8-8z"/>
-                <circle cx="12" cy="10" r="3"/>
-              </svg>
-              <span id="detailLocation">Vancouver, Canada</span>
-            </div>
-            
-            <div class="meta-item">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                <rect x="3" y="4" width="18" height="18" rx="2"/>
-                <path d="M16 2v4M8 2v4M3 10h18"/>
-              </svg>
-              <span id="detailDate">14 – 19 Jun 2026</span>
-            </div>
-
-            <div class="meta-item">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                <rect x="2" y="3" width="20" height="14" rx="2"/>
-                <line x1="8" y1="21" x2="16" y2="21"/>
-                <line x1="12" y1="17" x2="12" y2="21"/>
-              </svg>
-              <span id="detailFormat">Trực tiếp</span>
-            </div>
-
-            <div class="meta-item">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-              </svg>
-              <span id="detailFee">850 USD</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Right: Deadline & Countdown Card -->
-        <aside class="hero-deadline-card" id="detailCountdownBox" aria-label="Thông tin mốc hạn nộp bài">
-          <div class="deadline-card-top">
-            <div class="deadline-icon-circle" aria-hidden="true">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-                <circle cx="12" cy="12" r="10"/>
-                <polyline points="12 6 12 12 16 14"/>
-              </svg>
-            </div>
-            <div class="deadline-card-title-wrap">
-              <span class="deadline-card-sub">MỐC NỘP TIẾP THEO</span>
-              <strong class="deadline-card-title" id="detailNextMilestoneName">Full Paper Submission</strong>
-            </div>
-          </div>
-
-          <div class="deadline-countdown-display">
-            <span class="countdown-days" id="detailCountdownDays">Đang tính...</span>
-            <span class="countdown-exact" id="detailDeadlineExact">(Giờ AoE UTC-12)</span>
-          </div>
-
-          <div class="live-ticker-box" id="heroLiveTickerBox">
-            <span class="ticker-pulse" aria-hidden="true"></span>
-            <span class="ticker-text" id="heroLiveTickerText">Đang đồng bộ đồng hồ AoE...</span>
-          </div>
-
-          <div class="calendar-btn-group">
-            <button type="button" class="btn-cal-action" id="btnCalGoogle" title="Thêm mốc tiếp theo vào Google Calendar">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                <rect x="3" y="4" width="18" height="18" rx="2"></rect>
-                <line x1="16" y1="2" x2="16" y2="6"></line>
-                <line x1="8" y1="2" x2="8" y2="6"></line>
-                <line x1="3" y1="10" x2="21" y2="10"></line>
-              </svg>
-              <span>Google Calendar</span>
-            </button>
-            <button type="button" class="btn-cal-action" id="btnCalIcs" title="Tải file .ics cho Outlook hoặc Apple Calendar">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                <polyline points="7 10 12 15 17 10"></polyline>
-                <line x1="12" y1="15" x2="12" y2="3"></line>
-              </svg>
-              <span>Tải file .ics</span>
-            </button>
-          </div>
-        </aside>
-      </section>
-
-      <!-- 4-Milestone Timeline Section -->
-      <section class="timeline-card" id="timelineSection" aria-labelledby="timelineHeading">
-        <div class="timeline-header">
-          <div class="timeline-title-wrap">
-            <h3 id="timelineHeading">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
-                <circle cx="12" cy="12" r="10"></circle>
-                <polyline points="12 6 12 12 16 14"></polyline>
-              </svg>
-              Tiến trình hạn nộp bài (Call for Papers Timeline)
-            </h3>
-            <span class="aoe-badge">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-              Quy ước hạn chót theo chuẩn AoE (Anywhere on Earth, 23:59 UTC-12)
-            </span>
-          </div>
-        </div>
-
-        <div class="timeline-track" id="timelineTrack">
-          <!-- Populated dynamically by js/detail.js -->
-        </div>
-      </section>
-
-      <!-- Main Columns -->
-      <div class="main">
-        <!-- Left: Description and Specifications -->
-        <section class="card desc" aria-labelledby="descHeading">
-          <h3 id="descHeading">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-              <polyline points="14 2 14 8 20 8"/>
-              <line x1="16" y1="13" x2="8" y2="13"/>
-              <line x1="16" y1="17" x2="8" y2="17"/>
-              <polyline points="10 9 9 9 8 9"/>
-            </svg>
-            Mô tả chi tiết hội nghị
-          </h3>
-          <div id="detailOverviewText" class="detail-overview-content">
-            <p>Đang tải thông tin chi tiết...</p>
-          </div>
-
-          <hr class="card-divider">
-
-          <div class="info-title">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-              <circle cx="12" cy="12" r="10"/>
-              <line x1="12" y1="16" x2="12" y2="12"/>
-              <line x1="12" y1="8" x2="12.01" y2="8"/>
-            </svg>
-            Thông số kỹ thuật &amp; Lịch trình
-          </div>
-
-          <div class="info">
-            <div class="row">
-              <span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a8 8 0 0 0-8 8c0 5.25 8 12 8 12s8-6.75 8-12a8 8 0 0 0-8-8z"/><circle cx="12" cy="10" r="3"/></svg></span>
-              <span class="k">Địa điểm tổ chức</span><span class="sep">:</span><span class="v" id="infoLocation">Vancouver, Canada</span>
-            </div>
-
-            <div class="row">
-              <span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></span>
-              <span class="k">Hình thức tham gia</span><span class="sep">:</span><span class="v" id="infoFormat">Trực tiếp</span>
-            </div>
-
-            <div class="row">
-              <span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></span>
-              <span class="k">Khu vực tổ chức</span><span class="sep">:</span><span class="v" id="infoRegion">Quốc tế</span>
-            </div>
-
-            <div class="row">
-              <span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></span>
-              <span class="k">Thời gian diễn ra</span><span class="sep">:</span><span class="v" id="infoDate">14 – 19 Jun 2026</span>
-            </div>
-
-            <div class="row">
-              <span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></span>
-              <span class="k">Nhà xuất bản</span><span class="sep">:</span><span class="v" id="infoPublisher">IEEE / CVF</span>
-            </div>
-
-            <div class="row">
-              <span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></span>
-              <span class="k">Chỉ mục học thuật</span><span class="sep">:</span><span class="v" id="infoIndexing">Scopus, DBLP, IEEE Xplore</span>
-            </div>
-
-            <div class="row">
-              <span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span>
-              <span class="k">Lệ phí tham dự</span><span class="sep">:</span><span class="v" id="infoFee">850 USD</span>
-            </div>
-
-            <div class="row">
-              <span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></span>
-              <span class="k">Lĩnh vực nghiên cứu</span><span class="sep">:</span><span class="v" id="infoFields">Computer Vision, Machine Learning</span>
-            </div>
-
-            <div class="row">
-              <span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.45 1-1 1H7c-.55 0-1-.45-1-1v-2.34"/><path d="M14 14.66V17c0 .55.45 1 1 1h2c.55 0 1-.45 1-1v-2.34"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2z"/></svg></span>
-              <span class="k">Xếp hạng uy tín</span><span class="sep">:</span><span class="v"><strong id="infoRank">A*</strong></span>
-            </div>
-
-            <div class="row">
-              <span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></span>
-              <span class="k">Xác minh lần cuối</span><span class="sep">:</span><span class="v" id="infoVerified">15/03/2026</span>
-            </div>
-
-            <div class="row row-deadlines-full">
-              <span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>
-              <span class="k">Chi tiết các mốc</span><span class="sep">:</span><span class="v" id="infoDeadlines">Đang tải...</span>
-            </div>
-          </div>
-        </section>
-
-        <!-- Right Side: Actions and Rating -->
-        <aside class="side" aria-label="Thao tác &amp; Đánh giá">
-          <!-- Bookmark Action -->
-          <div class="card card-action">
-            <button class="btn-line" id="saveBtn" aria-pressed="false" type="button">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-              </svg>
-              <span id="saveText">Lưu hội nghị này</span>
-            </button>
-          </div>
-
-          <!-- Export All Milestones to .ics -->
-          <div class="card card-action">
-            <button class="btn-line btn-line-secondary" id="btnExportAllIcs" type="button" title="Xuất toàn bộ 4 mốc của hội nghị vào file .ics">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                <rect x="3" y="4" width="18" height="18" rx="2"></rect>
-                <line x1="16" y1="2" x2="16" y2="6"></line>
-                <line x1="8" y1="2" x2="8" y2="6"></line>
-                <line x1="3" y1="10" x2="21" y2="10"></line>
-              </svg>
-              <span>Xuất toàn bộ lịch (.ics)</span>
-            </button>
-          </div>
-
-          <!-- Official Links -->
-          <div class="card card-action">
-            <a class="btn-line" href="#" id="webBtn" target="_blank" rel="noopener noreferrer">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
-                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
-                <polyline points="15 3 21 3 21 9"/>
-                <line x1="10" y1="14" x2="21" y2="3"/>
-              </svg>
-              <span>Website chính thức</span>
-            </a>
-          </div>
-
-          <!-- Community Reviews Box -->
-          <div class="card rate-box clickable" id="openReviews" role="button" tabindex="0" title="Xem nhận xét được lưu trên trình duyệt này">
-            <div class="avg">
-              <span>Điểm tham khảo:</span>
-              <strong id="avgScore">—</strong> / 5
-            </div>
-            <div class="stars-display" id="headerStars"></div>
-            <small id="reviewsCountText">Chưa có dữ liệu tổng hợp</small>
-            <div class="reviews-cta-hint">Nhấn để xem và gửi nhận xét &rarr;</div>
-          </div>
-
-          <!-- User Interactive 5-Star Rating -->
-          <div class="card rate-box">
-            <h4>Chấm điểm của bạn</h4>
-            <div class="stars" id="stars" aria-label="Chấm điểm sao"></div>
-            <div id="rateMsg" aria-live="polite"></div>
-          </div>
-        </aside>
-      </div>
-
-      <!-- Related Conferences -->
-      <section class="related" aria-labelledby="relatedHeading">
-        <h3 id="relatedHeading">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-            <circle cx="18" cy="5" r="3"/>
-            <circle cx="6" cy="12" r="3"/>
-            <circle cx="18" cy="19" r="3"/>
-            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
-            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+  <main id="mainContent" class="conf-detail js-detail-root">
+    <div class="container conf-detail__container">
+      <!-- Thanh điều hướng quay lại danh sách hội nghị -->
+      <nav class="conf-nav" aria-label="Điều hướng trang chi tiết">
+        <button class="conf-nav__back-btn js-back-btn" id="backBtn" type="button">
+          <svg class="conf-nav__icon" width="18" height="18" aria-hidden="true">
+            <use href="#icon-arrow-left"></use>
           </svg>
-          Hội nghị liên quan
-        </h3>
-        <div class="grid" id="relGrid"></div>
-      </section>
-    </div>
-
-    <!-- View 2: Detailed Reviews Page -->
-    <div id="viewReviews" hidden>
-      <div class="rv-header-bar">
-        <button class="btn-back" id="backToDetailBtn" type="button">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-            <line x1="19" y1="12" x2="5" y2="12"></line>
-            <polyline points="12 19 5 12 12 5"></polyline>
-          </svg>
-          <span>Quay lại thông tin hội nghị</span>
+          <span class="js-back-btn-label">Quay lại danh sách</span>
         </button>
-        <h2 class="rv-page-title" id="rvPageTitle">Nhận xét hội nghị</h2>
-      </div>
+      </nav>
 
-      <section class="card rv-summary">
-        <div class="rv-score">
-          <strong id="rvAvg">—</strong>
-          <div class="rv-stars-lg" id="rvStars"></div>
-          <small id="rvTotal">Chưa có nhận xét</small>
+      <!-- Thông báo trạng thái tải dữ liệu hoặc cảnh báo nguồn dữ liệu dự phòng -->
+      <div class="conf-state conf-state--loading js-loading-state" id="detailLoadingBanner" role="status" aria-live="polite">
+        Đang tải thông tin chi tiết hội nghị...
+      </div>
+      <div class="conf-fetch-notice js-fetch-notice" id="detailFetchNotice" role="status" aria-live="polite" hidden></div>
+
+      <!-- Trạng thái lỗi khi thiếu ?id hoặc không tìm thấy hội nghị -->
+      <section class="conf-state conf-state--error js-error-state" id="detailErrorState" aria-labelledby="errorStateTitle" hidden>
+        <div class="conf-state__icon-box" aria-hidden="true">
+          <svg width="36" height="36">
+            <use href="#icon-alert"></use>
+          </svg>
         </div>
-        <div class="rv-bars" id="rvBars"></div>
+        <h2 class="conf-state__title" id="errorStateTitle">Không tìm thấy hội nghị</h2>
+        <p class="conf-state__desc js-error-desc">
+          Mã hội nghị trên đường dẫn không tồn tại hoặc chưa được cung cấp. Vui lòng quay lại trang tra cứu để chọn hội nghị cần xem.
+        </p>
+        <div class="conf-state__actions">
+          <a class="conf-btn conf-btn--primary" href="search.html">
+            <span>Về danh sách hội nghị</span>
+            <svg width="16" height="16" aria-hidden="true">
+              <use href="#icon-arrow-right"></use>
+            </svg>
+          </a>
+        </div>
       </section>
 
-      <h3 class="rv-list-title" id="rvListTitle">Nhận xét lưu trên trình duyệt này</h3>
-      <form class="card review-form" id="reviewForm">
-        <label for="reviewText">Chia sẻ nhận xét của bạn</label>
-        <textarea id="reviewText" rows="4" maxlength="1200" required></textarea>
-        <div class="review-form-footer"><small>Nội dung được lưu cục bộ trên trình duyệt hiện tại.</small><button class="btn-primary" type="submit">Gửi nhận xét</button></div>
-        <p id="reviewFormMessage" class="review-form-message" aria-live="polite"></p>
-      </form>
-      <div id="rvList"></div>
-    </div>
-  </div>
+      <!-- ================= VIEW 1: CHI TIẾT HỘI NGHỊ ================= -->
+      <div class="conf-detail__view js-view-detail" id="viewDetail" hidden>
+        <!-- Khối Header tóm tắt hội nghị + Hành động chính + 4 thông tin nhanh (chỉ hiển thị 1 lần) -->
+        <header class="conf-header">
+          <div class="conf-header__top">
+            <div class="conf-header__badges">
+              <span class="conf-badge conf-badge--rank js-rank-badge" id="detailRankBadge" hidden></span>
+              <span class="conf-badge conf-badge--status js-status-badge" id="detailStatusBadge">Đang cập nhật</span>
+            </div>
+          </div>
 
-  <!-- Shared Footer -->
+          <div class="conf-header__main">
+            <div class="conf-header__identity">
+              <div class="conf-header__title-line">
+                <h1 class="conf-header__title js-conf-title" id="detailTitle">Hội nghị khoa học</h1>
+                <span class="conf-header__sep" aria-hidden="true">·</span>
+                <p class="conf-header__fullname js-conf-fullname" id="detailFullName"></p>
+              </div>
+              <div class="conf-header__tags js-conf-tags" id="detailTags" aria-label="Lĩnh vực nghiên cứu"></div>
+            </div>
+
+            <div class="conf-header__actions">
+              <button class="conf-btn conf-btn--bookmark js-save-btn" id="saveBtn" type="button" aria-pressed="false">
+                <svg class="conf-btn__star-icon js-save-icon" width="18" height="18" aria-hidden="true">
+                  <use href="#icon-star"></use>
+                </svg>
+                <span class="js-save-text" id="saveText">Lưu hội nghị</span>
+              </button>
+              <a class="conf-btn conf-btn--primary js-web-btn" id="webBtn" href="#" target="_blank" rel="noopener noreferrer">
+                <span>Website chính thức</span>
+                <svg width="16" height="16" aria-hidden="true">
+                  <use href="#icon-external"></use>
+                </svg>
+              </a>
+            </div>
+          </div>
+
+          <!-- 4 thông tin nhanh duy nhất: Thời gian | Địa điểm | Hình thức | Lệ phí -->
+          <ul class="conf-header__quick-facts" aria-label="Thông tin tổ chức nhanh">
+            <li class="conf-header__fact">
+              <svg class="conf-header__fact-icon" width="17" height="17" aria-hidden="true">
+                <use href="#icon-calendar"></use>
+              </svg>
+              <span class="conf-header__fact-label">Thời gian:</span>
+              <span class="conf-header__fact-value js-fact-date" id="detailDate">Chưa cập nhật</span>
+            </li>
+            <li class="conf-header__fact">
+              <svg class="conf-header__fact-icon" width="17" height="17" aria-hidden="true">
+                <use href="#icon-location"></use>
+              </svg>
+              <span class="conf-header__fact-label">Địa điểm:</span>
+              <span class="conf-header__fact-value js-fact-location" id="detailLocation">Chưa cập nhật</span>
+            </li>
+            <li class="conf-header__fact">
+              <svg class="conf-header__fact-icon" width="17" height="17" aria-hidden="true">
+                <use href="#icon-mode"></use>
+              </svg>
+              <span class="conf-header__fact-label">Hình thức:</span>
+              <span class="conf-header__fact-value js-fact-format" id="detailFormat">Chưa cập nhật</span>
+            </li>
+            <li class="conf-header__fact">
+              <svg class="conf-header__fact-icon" width="17" height="17" aria-hidden="true">
+                <use href="#icon-fee"></use>
+              </svg>
+              <span class="conf-header__fact-label">Lệ phí:</span>
+              <span class="conf-header__fact-value js-fact-fee" id="detailFee">Chưa cập nhật</span>
+            </li>
+          </ul>
+        </header>
+
+        <!-- Bố cục 2 cột: Cột trái (Timeline 4 mốc, Giới thiệu, Thông tin học thuật, Đánh giá) | Cột phải Sticky (Mốc tiếp theo) -->
+        <div class="conf-layout">
+          <div class="conf-layout__main">
+            <!-- 1. Mốc quan trọng (Timeline 4 mốc) -->
+            <section class="conf-section deadline-timeline" id="timelineSection" aria-labelledby="timelineHeading">
+              <div class="conf-section__header deadline-timeline__header">
+                <h2 class="conf-section__title" id="timelineHeading">
+                  <svg class="conf-section__icon" width="20" height="20" aria-hidden="true">
+                    <use href="#icon-clock"></use>
+                  </svg>
+                  <span>Mốc quan trọng (Call for Papers)</span>
+                </h2>
+                <span class="deadline-timeline__tz-note">
+                  <svg width="14" height="14" aria-hidden="true">
+                    <use href="#icon-globe"></use>
+                  </svg>
+                  <span>Quy đổi sang UTC+7 (giờ Việt Nam) từ 23:59 AoE</span>
+                </span>
+              </div>
+
+              <div class="deadline-timeline__track js-timeline-track" id="timelineTrack"></div>
+            </section>
+
+            <!-- 2. Giới thiệu hội nghị -->
+            <section class="conf-section conf-overview" aria-labelledby="descHeading">
+              <h2 class="conf-section__title" id="descHeading">
+                <svg class="conf-section__icon" width="20" height="20" aria-hidden="true">
+                  <use href="#icon-doc"></use>
+                </svg>
+                <span>Giới thiệu</span>
+              </h2>
+              <div class="conf-overview__body js-overview-text" id="detailOverviewText"></div>
+            </section>
+
+            <!-- 3. Thông tin học thuật (<dl> chỉ gồm 5 trường không lặp lại với Header) -->
+            <section class="conf-section academic-specs" aria-labelledby="academicSpecsHeading">
+              <h2 class="conf-section__title" id="academicSpecsHeading">
+                <svg class="conf-section__icon" width="20" height="20" aria-hidden="true">
+                  <use href="#icon-info"></use>
+                </svg>
+                <span>Thông tin học thuật</span>
+              </h2>
+
+              <dl class="academic-specs__list">
+                <div class="academic-specs__item">
+                  <dt class="academic-specs__term">Xếp hạng</dt>
+                  <dd class="academic-specs__desc js-spec-rank" id="infoRank">Chưa cập nhật</dd>
+                </div>
+                <div class="academic-specs__item">
+                  <dt class="academic-specs__term">Nhà xuất bản</dt>
+                  <dd class="academic-specs__desc js-spec-publisher" id="infoPublisher">Chưa cập nhật</dd>
+                </div>
+                <div class="academic-specs__item">
+                  <dt class="academic-specs__term">Chỉ mục học thuật</dt>
+                  <dd class="academic-specs__desc js-spec-indexing" id="infoIndexing">Chưa cập nhật</dd>
+                </div>
+                <div class="academic-specs__item">
+                  <dt class="academic-specs__term">Lĩnh vực nghiên cứu</dt>
+                  <dd class="academic-specs__desc js-spec-fields" id="infoFields">Chưa cập nhật</dd>
+                </div>
+                <div class="academic-specs__item">
+                  <dt class="academic-specs__term">Xác minh lần cuối</dt>
+                  <dd class="academic-specs__desc js-spec-verified" id="infoVerified">Chưa cập nhật</dd>
+                </div>
+              </dl>
+            </section>
+
+            <!-- 4. Đánh giá & Nhận xét hợp nhất -->
+            <section class="conf-section conf-reviews" aria-labelledby="reviewsHeading">
+              <div class="conf-section__header">
+                <h2 class="conf-section__title" id="reviewsHeading">
+                  <svg class="conf-section__icon" width="20" height="20" aria-hidden="true">
+                    <use href="#icon-message"></use>
+                  </svg>
+                  <span>Đánh giá &amp; nhận xét</span>
+                </h2>
+              </div>
+
+              <div class="conf-reviews__grid">
+                <!-- Cột trái: Điểm tham khảo từ dữ liệu -->
+                <div class="conf-reviews__summary">
+                  <span class="conf-reviews__label">Điểm tham khảo</span>
+                  <div class="conf-reviews__score-line">
+                    <strong class="conf-reviews__score-num js-avg-score" id="avgScore">—</strong>
+                    <span class="conf-reviews__score-max">/ 5</span>
+                  </div>
+                  <div class="conf-reviews__stars js-header-stars" id="headerStars" aria-hidden="true"></div>
+                  <small class="conf-reviews__meta js-reviews-count-text" id="reviewsCountText">Chưa có dữ liệu tổng hợp</small>
+                </div>
+
+                <!-- Cột giữa: Chấm điểm sao của người dùng (Radio group chuẩn A11y) -->
+                <div class="conf-reviews__user-rate">
+                  <h3 class="conf-reviews__subhead" id="userRateLabel">Chấm điểm của bạn</h3>
+                  <div class="star-rating js-star-rating" id="stars" role="radiogroup" aria-labelledby="userRateLabel"></div>
+                  <p class="conf-reviews__rate-msg js-rate-msg" id="rateMsg" aria-live="polite"></p>
+                </div>
+
+                <!-- Cột phải: Nút mở trang nhận xét đầy đủ (#danh-gia) -->
+                <div class="conf-reviews__cta">
+                  <p class="conf-reviews__cta-desc js-local-review-summary">
+                    Xem hoặc chia sẻ nhận xét cá nhân được lưu trên trình duyệt này.
+                  </p>
+                  <button class="conf-btn conf-btn--secondary conf-reviews__open-btn js-open-reviews" id="openReviews" type="button">
+                    <span>Xem &amp; gửi nhận xét</span>
+                    <svg width="16" height="16" aria-hidden="true">
+                      <use href="#icon-arrow-right"></use>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </section>
+          </div>
+
+          <!-- Cột phải Sticky: Thẻ Mốc tiếp theo (nơi duy nhất có đồng hồ đếm ngược) -->
+          <aside class="conf-layout__sidebar" aria-label="Đếm ngược hạn nộp bài tiếp theo">
+            <div class="next-deadline-card" id="detailCountdownBox">
+              <div class="next-deadline-card__header">
+                <div class="next-deadline-card__icon" aria-hidden="true">
+                  <svg width="22" height="22">
+                    <use href="#icon-clock"></use>
+                  </svg>
+                </div>
+                <div class="next-deadline-card__heading">
+                  <span class="next-deadline-card__eyebrow">MỐC TIẾP THEO</span>
+                  <h2 class="next-deadline-card__title js-next-milestone-name" id="detailNextMilestoneName">Đang cập nhật</h2>
+                </div>
+              </div>
+
+              <div class="next-deadline-card__countdown">
+                <span class="next-deadline-card__days js-countdown-days" id="detailCountdownDays">—</span>
+                <p class="next-deadline-card__exact js-deadline-exact" id="detailDeadlineExact">Chưa công bố</p>
+              </div>
+
+              <div class="next-deadline-card__ticker js-live-ticker-box" id="heroLiveTickerBox">
+                <span class="next-deadline-card__pulse" aria-hidden="true"></span>
+                <span class="next-deadline-card__ticker-text js-live-ticker-text" id="heroLiveTickerText" aria-live="off">Đang đồng bộ...</span>
+              </div>
+
+              <div class="next-deadline-card__actions js-next-cal-group">
+                <button type="button" class="conf-btn conf-btn--outline js-cal-action" id="btnCalGoogle" data-cal-action="google-next">
+                  <svg width="15" height="15" aria-hidden="true">
+                    <use href="#icon-calendar-plus"></use>
+                  </svg>
+                  <span>Google Calendar</span>
+                </button>
+                <button type="button" class="conf-btn conf-btn--outline js-cal-action" id="btnCalIcs" data-cal-action="ics-next">
+                  <svg width="15" height="15" aria-hidden="true">
+                    <use href="#icon-download"></use>
+                  </svg>
+                  <span>Tải file .ics</span>
+                </button>
+              </div>
+
+              <button type="button" class="next-deadline-card__export-all js-cal-action" id="btnExportAllIcs" data-cal-action="ics-all">
+                <svg width="15" height="15" aria-hidden="true">
+                  <use href="#icon-calendar"></use>
+                </svg>
+                <span>Xuất toàn bộ lịch (.ics)</span>
+              </button>
+            </div>
+          </aside>
+        </div>
+
+        <!-- Hội nghị liên quan (Tối đa 3 thẻ, cấu trúc Grid đồng nhất) -->
+        <section class="conf-related js-related-section" aria-labelledby="relatedHeading">
+          <div class="conf-section__header">
+            <h2 class="conf-section__title" id="relatedHeading">
+              <svg class="conf-section__icon" width="20" height="20" aria-hidden="true">
+                <use href="#icon-share"></use>
+              </svg>
+              <span>Hội nghị liên quan</span>
+            </h2>
+          </div>
+          <div class="conf-related__grid js-related-grid" id="relGrid"></div>
+        </section>
+      </div>
+
+      <!-- ================= VIEW 2: TRANG NHẬN XÉT ĐẦY ĐỦ (#danh-gia) ================= -->
+      <section class="reviews-view js-view-reviews" id="viewReviews" aria-labelledby="rvPageTitle" hidden>
+        <div class="reviews-view__header">
+          <button class="conf-nav__back-btn js-back-to-detail-btn" id="backToDetailBtn" type="button">
+            <svg class="conf-nav__icon" width="18" height="18" aria-hidden="true">
+              <use href="#icon-arrow-left"></use>
+            </svg>
+            <span>Quay lại thông tin hội nghị</span>
+          </button>
+          <h2 class="reviews-view__title js-rv-page-title" id="rvPageTitle">Nhận xét hội nghị</h2>
+        </div>
+
+        <div class="conf-section reviews-view__summary">
+          <div class="reviews-view__score-box">
+            <strong class="reviews-view__score-big js-rv-avg" id="rvAvg">—</strong>
+            <div class="reviews-view__stars js-rv-stars" id="rvStars" aria-hidden="true"></div>
+            <small class="reviews-view__count js-rv-total" id="rvTotal">Chưa có nhận xét</small>
+          </div>
+          <div class="reviews-view__bars js-rv-bars" id="rvBars" hidden></div>
+        </div>
+
+        <h3 class="reviews-view__section-title" id="rvListTitle">Nhận xét lưu trên trình duyệt này</h3>
+
+        <form class="conf-section reviews-view__form js-review-form" id="reviewForm" novalidate>
+          <label class="reviews-view__label" for="reviewText">Chia sẻ nhận xét của bạn (tối thiểu 8 ký tự)</label>
+          <textarea
+            class="reviews-view__textarea js-review-textarea"
+            id="reviewText"
+            rows="4"
+            minlength="8"
+            maxlength="1200"
+            required
+            aria-describedby="reviewTextError"
+          ></textarea>
+          <p class="field-error js-field-error" id="reviewTextError" aria-live="polite"></p>
+          <div class="reviews-view__form-footer">
+            <small class="reviews-view__note">Nội dung nhận xét được lưu cục bộ trên trình duyệt hiện tại.</small>
+            <button class="conf-btn conf-btn--primary" type="submit">Gửi nhận xét</button>
+          </div>
+          <p class="reviews-view__form-msg js-review-form-msg" id="reviewFormMessage" aria-live="polite"></p>
+        </form>
+
+        <div class="reviews-view__list js-rv-list" id="rvList"></div>
+      </section>
+    </div>
+  </main>
+
+  <!-- Footer dùng chung được render bởi js/core/layout.js -->
   <div id="site-footer"></div>
 
-  <!-- Scripts -->
-  <script src="js/layout.js"></script>
-  <script src="js/detail.js"></script>
+  <script src="js/components/compare.js" defer></script>
+  <script src="js/pages/detail.js" defer></script>
 </body>
 </html>

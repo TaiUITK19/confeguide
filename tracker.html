@@ -1,31 +1,39 @@
 <!DOCTYPE html>
+<!--
+  ConfGuide — Trang Theo dõi Nộp bài (tracker.html)
+  Quản lý danh sách hội nghị đã lưu, hiển thị hạn nộp gần nhất (UTC+7) và thao tác xóa nhanh.
+-->
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Theo dõi tiến độ nộp bài và các mốc deadline của hội nghị khoa học quan tâm.">
-  <title>Theo dõi hội nghị - ConfGuide</title>
-  
+  <title>Theo dõi hội nghị CNTT tại Việt Nam - ConfGuide</title>
+  <meta name="description" content="Theo dõi tiến độ nộp bài và các mốc hạn chót (UTC+7) của các hội nghị khoa học Công nghệ thông tin diễn ra tại Việt Nam (bao gồm cả hội nghị quốc tế tổ chức tại Việt Nam).">
+
   <link rel="icon" type="image/svg+xml" href="images/logo.svg">
-  
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  
-  <link rel="stylesheet" href="css/base.css">
-  <link rel="stylesheet" href="css/tracker.css">
+  <link rel="stylesheet" href="css/base/base.css">
+  <link rel="stylesheet" href="css/pages/tracker.css">
+  <link rel="stylesheet" href="css/components/compare.css">
+  <link rel="stylesheet" href="css/base/transition.css">
+  <script src="js/core/page-transition.js"></script>
+  <script src="js/core/layout.js" defer blocking="render"></script>
 </head>
 <body>
+  <!-- Áp dụng nhanh Dark Mode trước khi sơn giao diện để tránh nhấp nháy sáng/tối (anti-FOUC) -->
   <script>try { if (localStorage.getItem('confguide_theme') === 'dark') document.body.classList.add('dark'); } catch (e) {}</script>
+
+  <!-- Thanh điều hướng dùng chung (render bởi js/core/layout.js) -->
   <div id="site-header"></div>
 
+  <!-- Nội dung chính -->
   <main>
+    <!-- Banner tiêu đề trang theo dõi -->
     <section class="hero">
       <div class="hero-overlay"></div>
       <div class="hero-content">
         <div class="eyebrow">THEO DÕI HỘI NGHỊ</div>
         <h1>Theo dõi hội nghị</h1>
-        <p>Các hội nghị bạn đã lưu từ trang Tra cứu hoặc trang chi tiết sẽ xuất hiện tại đây.</p>
+        <p>Các hội nghị khoa học Công nghệ thông tin tại Việt Nam (bao gồm cả hội nghị quốc tế tổ chức tại Việt Nam) bạn đã lưu sẽ xuất hiện tại đây.</p>
       </div>
       <div class="quote">
         <div>“Good conferences<br>create great research journeys.”</div>
@@ -33,7 +41,9 @@
       </div>
     </section>
 
+    <!-- Thẻ thống kê và bảng danh sách hội nghị đang theo dõi -->
     <section class="content-card">
+      <h2 class="sr-only">Danh sách hội nghị đang theo dõi</h2>
       <div class="toolbar">
         <div class="stat-box">
           <div>Tổng số hội nghị đang theo dõi</div>
@@ -43,7 +53,7 @@
       </div>
 
       <div class="table-wrap">
-        <table>
+        <table class="tracker-table">
           <thead>
             <tr>
               <th>Tên hội nghị</th>
@@ -57,8 +67,9 @@
       </div>
     </section>
 
+    <!-- Ghi chú phạm vi đồng bộ dữ liệu trên trình duyệt -->
     <div class="notice">
-      <div class="notice-icon">i</div>
+      <div class="notice-icon" aria-hidden="true">i</div>
       <div>
         <div>Danh sách này đồng bộ với nút “Lưu hội nghị” trong trang Tra cứu và trang chi tiết.</div>
         <div>Dữ liệu được lưu trên trình duyệt hiện tại; mỗi trình duyệt có danh sách riêng.</div>
@@ -66,9 +77,11 @@
     </div>
   </main>
 
+  <!-- Chân trang dùng chung (render bởi js/core/layout.js) -->
   <div id="site-footer"></div>
 
-  <script src="js/layout.js"></script>
-  <script src="js/tracker.js"></script>
+  <!-- Script thành phần và nghiệp vụ trang Theo dõi -->
+  <script src="js/components/compare.js" defer></script>
+  <script src="js/pages/tracker.js" defer></script>
 </body>
 </html>

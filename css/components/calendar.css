@@ -1,0 +1,892 @@
+/* =========================================================
+   ConfGuide — Stylesheet Lịch Mốc Hội nghị Cá nhân (css/components/calendar.css)
+   Chuẩn BEM (.profile-calendar__*), dùng Design Tokens từ css/base/base.css,
+   hỗ trợ Dark Mode (body.dark), responsive >=1024px / 768px / 375-430px
+   và tôn trọng tùy chọn prefers-reduced-motion.
+   ========================================================= */
+
+/* Biến cục bộ cho trạng thái 3 loại sự kiện trên lịch ánh xạ từ base.css */
+body {
+  --cal-deadline-bg: var(--primary-soft);
+  --cal-deadline-text: var(--primary-dark);
+  --cal-deadline-border: var(--conf-badge-border);
+  --cal-deadline-dot: var(--primary);
+
+  --cal-event-bg: var(--status-open-bg);
+  --cal-event-text: var(--status-open-text);
+  --cal-event-border: var(--status-open-border);
+  --cal-event-dot: var(--status-open-dot);
+
+  --cal-tracker-bg: var(--status-warning-bg);
+  --cal-tracker-text: var(--status-warning-text);
+  --cal-tracker-border: var(--status-warning-border);
+  --cal-tracker-dot: var(--status-warning-dot);
+
+  --cal-today-bg: color-mix(in oklch, var(--primary) 8%, var(--surface));
+  --cal-selected-ring: var(--primary-ring);
+}
+
+@supports not (color: oklch(0.5 0.1 200)) {
+  body {
+    --cal-today-bg: rgba(18, 104, 201, 0.08);
+  }
+
+  body.dark {
+    --cal-today-bg: rgba(18, 104, 201, 0.18);
+  }
+}
+
+@supports (color: oklch(0.5 0.1 200)) and (not (background: color-mix(in oklch, red 50%, blue))) {
+  body {
+    --cal-today-bg: #eef4fc;
+  }
+
+  body.dark {
+    --cal-today-bg: #1e2a38;
+  }
+}
+
+/* ================= 1. KHỐI CHỨA LỊCH & TRẠNG THÁI ================= */
+.profile-calendar {
+  width: 100%;
+  min-width: 0;
+}
+
+.profile-calendar__state {
+  text-align: center;
+  padding: 40px 20px;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface-muted);
+  color: var(--text-muted);
+}
+
+.profile-calendar__state--loading {
+  border-style: solid;
+  border-color: var(--border);
+  font-size: 14.5px;
+  font-weight: 500;
+}
+
+.profile-calendar__empty-icon {
+  margin: 0 auto 12px;
+  color: var(--primary);
+}
+
+.profile-calendar__empty-title {
+  margin: 0 0 6px;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.profile-calendar__empty-desc {
+  margin: 0 auto 18px;
+  max-width: 480px;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--text-muted);
+}
+
+.profile-calendar__empty-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.profile-calendar__notice {
+  margin-bottom: 16px;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--surface-muted);
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 1.5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.profile-calendar__notice-link {
+  color: var(--primary);
+  font-weight: 600;
+  text-decoration: underline;
+  white-space: nowrap;
+}
+
+/* ================= 2. BỐ CỤC 2 CỘT DESKTOP (LỊCH ~2/3, PANEL ~1/3) ================= */
+.profile-calendar__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(300px, 1fr);
+  gap: 24px;
+  align-items: start;
+  min-width: 0;
+}
+
+.profile-calendar__main {
+  min-width: 0;
+}
+
+/* ================= 3. THANH ĐIỀU HƯỚNG THÁNG & CHÚ THÍCH ================= */
+.profile-calendar__toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.profile-calendar__heading {
+  min-width: 0;
+}
+
+.profile-calendar__month-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--text);
+  line-height: 1.3;
+}
+
+.profile-calendar__nav {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.profile-calendar__nav-btn,
+.profile-calendar__today-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease;
+}
+
+.profile-calendar__nav-btn {
+  width: 36px;
+  font-size: 18px;
+  line-height: 1;
+}
+
+.profile-calendar__today-btn {
+  padding: 0 14px;
+  white-space: nowrap;
+}
+
+.profile-calendar__nav-btn:hover,
+.profile-calendar__today-btn:hover {
+  background: var(--primary-soft);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.profile-calendar__nav-btn:focus-visible,
+.profile-calendar__today-btn:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* Chú thích 3 loại sự kiện (màu + ký hiệu + nhãn chữ) */
+.profile-calendar__legend {
+  display: flex;
+  align-items: center;
+  gap: 10px 16px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-muted);
+  border: 1px solid var(--border);
+}
+
+.profile-calendar__legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.profile-calendar__legend-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.25;
+  border: 1px solid transparent;
+}
+
+.profile-calendar__legend-badge--deadline {
+  background: var(--cal-deadline-bg);
+  color: var(--cal-deadline-text);
+  border-color: var(--cal-deadline-border);
+}
+
+.profile-calendar__legend-badge--event {
+  background: var(--cal-event-bg);
+  color: var(--cal-event-text);
+  border-color: var(--cal-event-border);
+}
+
+.profile-calendar__legend-badge--tracker {
+  background: var(--cal-tracker-bg);
+  color: var(--cal-tracker-text);
+  border-color: var(--cal-tracker-border);
+}
+
+.profile-calendar__legend-item--past {
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.profile-calendar__legend-past-sample {
+  /* Dùng token chữ dịu đạt WCAG AA + gạch ngang thay cho opacity thấp gây rớt tương phản */
+  color: var(--text-dim);
+  text-decoration: line-through;
+}
+
+/* ================= 4. LƯỚI THÁNG 7 CỘT (T2..CN) ================= */
+.profile-calendar__weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.profile-calendar__weekday {
+  text-align: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-muted);
+  padding: 4px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.profile-calendar__grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 6px;
+  min-width: 0;
+}
+
+.profile-calendar__day {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: 4px;
+  width: 100%;
+  min-width: 0;
+  min-height: 92px;
+  padding: 7px 6px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 150ms ease, background-color 150ms ease, box-shadow 150ms ease;
+}
+
+.profile-calendar__day:hover {
+  border-color: var(--primary);
+  background: var(--surface-alt);
+}
+
+.profile-calendar__day:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 1px;
+  z-index: 2;
+}
+
+.profile-calendar__day--outside {
+  background: var(--surface-muted);
+}
+
+/* Ở Dark Mode dùng nền tối hơn --surface để ô ngoài tháng không sáng hơn ô trong tháng */
+body.dark .profile-calendar__day--outside {
+  background: var(--bg-secondary);
+}
+
+.profile-calendar__day--outside:hover {
+  background: var(--surface-alt);
+}
+
+.profile-calendar__day--today {
+  background: var(--cal-today-bg);
+  border-color: var(--primary);
+}
+
+.profile-calendar__day--selected {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px var(--cal-selected-ring);
+}
+
+.profile-calendar__day-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+}
+
+.profile-calendar__day-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 4px;
+  border-radius: var(--radius-pill);
+  font-size: 12.5px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--text);
+}
+
+.profile-calendar__day--today .profile-calendar__day-num {
+  background: var(--primary);
+  color: var(--on-primary);
+}
+
+.profile-calendar__day--outside .profile-calendar__day-num {
+  color: var(--text-dim);
+  font-weight: 600;
+}
+
+/* Nhãn / chấm sự kiện bên trong ô ngày (tối đa 3 + "+N") */
+.profile-calendar__day-events {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  width: 100%;
+}
+
+.profile-calendar__chip {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  max-width: 100%;
+  padding: 2px 5px;
+  border-radius: 4px;
+  border: 1px solid transparent;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.profile-calendar__chip--deadline {
+  background: var(--cal-deadline-bg);
+  color: var(--cal-deadline-text);
+  border-color: var(--cal-deadline-border);
+}
+
+.profile-calendar__chip--event {
+  background: var(--cal-event-bg);
+  color: var(--cal-event-text);
+  border-color: var(--cal-event-border);
+}
+
+.profile-calendar__chip--tracker {
+  background: var(--cal-tracker-bg);
+  color: var(--cal-tracker-text);
+  border-color: var(--cal-tracker-border);
+}
+
+.profile-calendar__chip--past {
+  /* Giữ đủ tương phản WCAG AA trên cả ô thường lẫn ô ngoài tháng bằng bảng màu trạng thái đã qua */
+  background: var(--status-closed-bg);
+  color: var(--status-closed-text);
+  border-color: var(--status-closed-border);
+  text-decoration: line-through;
+}
+
+.profile-calendar__chip-mark {
+  flex-shrink: 0;
+  font-size: 10px;
+  line-height: 1;
+}
+
+.profile-calendar__chip-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.profile-calendar__more {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+  padding-left: 3px;
+  line-height: 1.2;
+}
+
+/* ================= 5. PANEL CHI TIẾT NGÀY & DANH SÁCH SẮP TỚI ================= */
+.profile-calendar__panel {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-width: 0;
+}
+
+.profile-calendar__panel-card {
+  background: var(--surface-muted);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  min-width: 0;
+}
+
+.profile-calendar__panel-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+.profile-calendar__panel-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--text);
+  line-height: 1.35;
+}
+
+.profile-calendar__panel-subtitle {
+  margin: 2px 0 0;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.profile-calendar__panel-count {
+  flex-shrink: 0;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 11.5px;
+  font-weight: 700;
+}
+
+.profile-calendar__panel-empty {
+  margin: 0;
+  padding: 10px 0 4px;
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.profile-calendar__panel-empty-link {
+  display: inline-block;
+  margin-top: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--primary);
+  text-decoration: underline;
+}
+
+.profile-calendar__event-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.profile-calendar__event-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--primary);
+  border-radius: var(--radius-sm);
+  padding: 11px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.profile-calendar__event-item--deadline {
+  border-left-color: var(--cal-deadline-dot);
+}
+
+.profile-calendar__event-item--event {
+  border-left-color: var(--cal-event-dot);
+}
+
+.profile-calendar__event-item--tracker {
+  border-left-color: var(--cal-tracker-dot);
+}
+
+.profile-calendar__event-item--past {
+  background: var(--surface-muted);
+  border-color: var(--border);
+}
+
+.profile-calendar__event-badges {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.profile-calendar__type-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  border: 1px solid transparent;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.profile-calendar__type-pill--deadline {
+  background: var(--cal-deadline-bg);
+  color: var(--cal-deadline-text);
+  border-color: var(--cal-deadline-border);
+}
+
+.profile-calendar__type-pill--event {
+  background: var(--cal-event-bg);
+  color: var(--cal-event-text);
+  border-color: var(--cal-event-border);
+}
+
+.profile-calendar__type-pill--tracker {
+  background: var(--cal-tracker-bg);
+  color: var(--cal-tracker-text);
+  border-color: var(--cal-tracker-border);
+}
+
+.profile-calendar__past-pill {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: var(--surface-muted);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  padding: 1px 7px;
+}
+
+.profile-calendar__event-title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.35;
+  word-break: break-word;
+}
+
+.profile-calendar__event-subtitle {
+  margin: 0;
+  font-size: 12.5px;
+  color: var(--text-muted);
+  line-height: 1.45;
+  word-break: break-word;
+}
+
+.profile-calendar__event-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin-top: 2px;
+}
+
+.profile-calendar__detail-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--primary);
+  text-decoration: none;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: background-color 140ms ease;
+}
+
+.profile-calendar__detail-link:hover {
+  background: var(--primary-soft);
+  text-decoration: underline;
+}
+
+.profile-calendar__detail-link:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* Danh sách "Sắp tới" (5 sự kiện gần nhất từ hôm nay) */
+.profile-calendar__upcoming-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.profile-calendar__upcoming-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.profile-calendar__upcoming-jump {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  color: inherit;
+  min-width: 0;
+}
+
+.profile-calendar__upcoming-jump:hover .profile-calendar__upcoming-title {
+  color: var(--primary);
+  text-decoration: underline;
+}
+
+.profile-calendar__upcoming-jump:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.profile-calendar__upcoming-date {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 46px;
+  padding: 5px 6px;
+  border-radius: 6px;
+  background: var(--surface-muted);
+  border: 1px solid var(--border);
+  line-height: 1.15;
+}
+
+.profile-calendar__upcoming-day {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.profile-calendar__upcoming-month {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.profile-calendar__upcoming-body {
+  min-width: 0;
+  flex: 1;
+}
+
+.profile-calendar__upcoming-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 2px;
+  flex-wrap: wrap;
+}
+
+.profile-calendar__upcoming-title {
+  display: block;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.35;
+  word-break: break-word;
+}
+
+.profile-calendar__upcoming-sub {
+  display: block;
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.profile-calendar__upcoming-footer {
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* ================= 6. TÔN TRỌNG GIẢM CHUYỂN ĐỘNG ================= */
+@media (prefers-reduced-motion: reduce) {
+  .profile-calendar__nav-btn,
+  .profile-calendar__today-btn,
+  .profile-calendar__day,
+  .profile-calendar__detail-link {
+    transition: none;
+  }
+}
+
+/* ================= 7. RESPONSIVE (TABLET 768px & MOBILE 375–430px) ================= */
+/* Dưới 1024px: lịch và panel xếp dọc 1 cột */
+@media (max-width: 1023px) {
+  .profile-calendar__layout {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+}
+
+/* Tablet 768px & Mobile 375-430px: ô ngày thu nhỏ chỉ còn chấm/ký hiệu, không cuộn ngang */
+@media (max-width: 768px) {
+  .profile-calendar__weekdays,
+  .profile-calendar__grid {
+    gap: 4px;
+  }
+
+  .profile-calendar__day {
+    min-height: 54px;
+    padding: 5px 3px;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .profile-calendar__day-top {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .profile-calendar__day-num {
+    min-width: 22px;
+    height: 22px;
+    font-size: 12px;
+  }
+
+  .profile-calendar__day-events {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 3px;
+  }
+
+  /* Ẩn nhãn chữ, thu nhỏ thành chấm có hình dạng phân biệt theo từng loại */
+  .profile-calendar__chip-text,
+  .profile-calendar__chip-mark {
+    display: none;
+  }
+
+  .profile-calendar__chip {
+    width: 8px;
+    height: 8px;
+    padding: 0;
+    border: none;
+    flex-shrink: 0;
+  }
+
+  .profile-calendar__chip--deadline {
+    background: var(--cal-deadline-dot);
+    border-radius: 1px;
+    transform: rotate(45deg);
+    width: 7px;
+    height: 7px;
+  }
+
+  .profile-calendar__chip--event {
+    background: var(--cal-event-dot);
+    border-radius: 50%;
+  }
+
+  .profile-calendar__chip--tracker {
+    background: transparent;
+    width: 0;
+    height: 0;
+    border-left: 4.5px solid transparent;
+    border-right: 4.5px solid transparent;
+    border-bottom: 8px solid var(--cal-tracker-dot);
+    border-radius: 0;
+  }
+
+  .profile-calendar__chip--past:not(.profile-calendar__chip--tracker) {
+    background: var(--status-closed-dot);
+  }
+
+  .profile-calendar__chip--past.profile-calendar__chip--tracker {
+    border-bottom-color: var(--status-closed-dot);
+  }
+
+  .profile-calendar__more {
+    padding-left: 1px;
+    font-size: 10px;
+    line-height: 1;
+  }
+}
+
+@media (max-width: 480px) {
+  .profile-calendar__toolbar {
+    gap: 10px;
+  }
+
+  .profile-calendar__month-title {
+    font-size: 16.5px;
+  }
+
+  .profile-calendar__legend {
+    padding: 8px 10px;
+    gap: 8px 12px;
+  }
+
+  .profile-calendar__legend-item {
+    font-size: 12px;
+  }
+
+  .profile-calendar__weekdays,
+  .profile-calendar__grid {
+    gap: 2px;
+  }
+
+  .profile-calendar__day {
+    min-height: 46px;
+    padding: 4px 2px;
+  }
+
+  .profile-calendar__panel-card {
+    padding: 14px 12px;
+  }
+}

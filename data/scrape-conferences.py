@@ -117,7 +117,7 @@ class ExtractedConferenceInfo(BaseModel):
 
 DATA_DIR = "data"
 
-INPUT_FILE = "conferences.json"
+INPUT_FILE = "data/conference_data.json"
 OUTPUT_FILE = os.path.join(
     DATA_DIR,
     "conference_data.json"
