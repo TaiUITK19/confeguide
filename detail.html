@@ -2,14 +2,14 @@
 <!--
   ConfGuide - Trang Chi tiết Hội nghị Khoa học (detail.html)
   Cấu trúc ngữ nghĩa HTML5 chuẩn W3C, sử dụng SVG Sprite dùng chung,
-  bố cục ưu tiên hành động chính (Lưu, Website, Hạn nộp tiếp theo UTC+7) và hỗ trợ route #danh-gia.
+  bố cục ưu tiên hành động chính (Lưu, Website, Hạn nộp tiếp theo UTC+7).
 -->
 <html lang="vi">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Chi tiết hội nghị - ConfGuide</title>
-  <meta name="description" content="Thông tin chi tiết hội nghị khoa học Công nghệ thông tin diễn ra tại Việt Nam (bao gồm cả hội nghị quốc tế tổ chức tại Việt Nam), tiến trình hạn nộp bài theo múi giờ UTC+7 (giờ Việt Nam) và nhận xét cộng đồng trên ConfGuide.">
+  <meta name="description" content="Thông tin chi tiết hội nghị khoa học Công nghệ thông tin diễn ra tại Việt Nam (bao gồm cả hội nghị quốc tế tổ chức tại Việt Nam), tiến trình hạn nộp bài theo múi giờ UTC+7 (giờ Việt Nam) và thông tin tổ chức trên ConfGuide.">
 
   <link rel="icon" type="image/svg+xml" href="images/logo.svg">
   <link rel="stylesheet" href="css/base/base.css">
@@ -65,11 +65,6 @@
       <circle cx="12" cy="12" r="10"></circle>
       <polyline points="12 6 12 12 16 14"></polyline>
     </symbol>
-    <symbol id="icon-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-      <polyline points="7 10 12 15 17 10"></polyline>
-      <line x1="12" y1="15" x2="12" y2="3"></line>
-    </symbol>
     <symbol id="icon-globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <circle cx="12" cy="12" r="10"></circle>
       <path d="M2 12h20"></path>
@@ -85,9 +80,6 @@
       <circle cx="12" cy="12" r="10"></circle>
       <line x1="12" y1="16" x2="12" y2="12"></line>
       <line x1="12" y1="8" x2="12.01" y2="8"></line>
-    </symbol>
-    <symbol id="icon-message" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
     </symbol>
     <symbol id="icon-share" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <circle cx="18" cy="5" r="3"></circle>
@@ -154,7 +146,7 @@
         <header class="conf-header">
           <div class="conf-header__top">
             <div class="conf-header__badges">
-              <span class="conf-badge conf-badge--rank js-rank-badge" id="detailRankBadge" hidden></span>
+              <span class="conf-badge conf-badge--rank js-rank-badge" id="detailRankBadge"></span>
               <span class="conf-badge conf-badge--status js-status-badge" id="detailStatusBadge">Đang cập nhật</span>
             </div>
           </div>
@@ -218,10 +210,10 @@
           </ul>
         </header>
 
-        <!-- Bố cục 2 cột: Cột trái (Timeline 4 mốc, Giới thiệu, Thông tin học thuật, Đánh giá) | Cột phải Sticky (Mốc tiếp theo) -->
+        <!-- Bố cục 2 cột: Cột trái (Toàn bộ mốc deadline, Giới thiệu) | Cột phải Sticky (Mốc tiếp theo) -->
         <div class="conf-layout">
           <div class="conf-layout__main">
-            <!-- 1. Mốc quan trọng (Timeline 4 mốc) -->
+            <!-- 1. Toàn bộ mốc thời gian từ dữ liệu gốc -->
             <section class="conf-section deadline-timeline" id="timelineSection" aria-labelledby="timelineHeading">
               <div class="conf-section__header deadline-timeline__header">
                 <h2 class="conf-section__title" id="timelineHeading">
@@ -229,6 +221,7 @@
                     <use href="#icon-clock"></use>
                   </svg>
                   <span>Mốc quan trọng (Call for Papers)</span>
+                  <span class="deadline-timeline__count js-timeline-count" id="timelineCountBadge" hidden></span>
                 </h2>
                 <span class="deadline-timeline__tz-note">
                   <svg width="14" height="14" aria-hidden="true">
@@ -250,84 +243,6 @@
                 <span>Giới thiệu</span>
               </h2>
               <div class="conf-overview__body js-overview-text" id="detailOverviewText"></div>
-            </section>
-
-            <!-- 3. Thông tin học thuật (<dl> chỉ gồm 5 trường không lặp lại với Header) -->
-            <section class="conf-section academic-specs" aria-labelledby="academicSpecsHeading">
-              <h2 class="conf-section__title" id="academicSpecsHeading">
-                <svg class="conf-section__icon" width="20" height="20" aria-hidden="true">
-                  <use href="#icon-info"></use>
-                </svg>
-                <span>Thông tin học thuật</span>
-              </h2>
-
-              <dl class="academic-specs__list">
-                <div class="academic-specs__item">
-                  <dt class="academic-specs__term">Xếp hạng</dt>
-                  <dd class="academic-specs__desc js-spec-rank" id="infoRank">Chưa cập nhật</dd>
-                </div>
-                <div class="academic-specs__item">
-                  <dt class="academic-specs__term">Nhà xuất bản</dt>
-                  <dd class="academic-specs__desc js-spec-publisher" id="infoPublisher">Chưa cập nhật</dd>
-                </div>
-                <div class="academic-specs__item">
-                  <dt class="academic-specs__term">Chỉ mục học thuật</dt>
-                  <dd class="academic-specs__desc js-spec-indexing" id="infoIndexing">Chưa cập nhật</dd>
-                </div>
-                <div class="academic-specs__item">
-                  <dt class="academic-specs__term">Lĩnh vực nghiên cứu</dt>
-                  <dd class="academic-specs__desc js-spec-fields" id="infoFields">Chưa cập nhật</dd>
-                </div>
-                <div class="academic-specs__item">
-                  <dt class="academic-specs__term">Xác minh lần cuối</dt>
-                  <dd class="academic-specs__desc js-spec-verified" id="infoVerified">Chưa cập nhật</dd>
-                </div>
-              </dl>
-            </section>
-
-            <!-- 4. Đánh giá & Nhận xét hợp nhất -->
-            <section class="conf-section conf-reviews" aria-labelledby="reviewsHeading">
-              <div class="conf-section__header">
-                <h2 class="conf-section__title" id="reviewsHeading">
-                  <svg class="conf-section__icon" width="20" height="20" aria-hidden="true">
-                    <use href="#icon-message"></use>
-                  </svg>
-                  <span>Đánh giá &amp; nhận xét</span>
-                </h2>
-              </div>
-
-              <div class="conf-reviews__grid">
-                <!-- Cột trái: Điểm tham khảo từ dữ liệu -->
-                <div class="conf-reviews__summary">
-                  <span class="conf-reviews__label">Điểm tham khảo</span>
-                  <div class="conf-reviews__score-line">
-                    <strong class="conf-reviews__score-num js-avg-score" id="avgScore">—</strong>
-                    <span class="conf-reviews__score-max">/ 5</span>
-                  </div>
-                  <div class="conf-reviews__stars js-header-stars" id="headerStars" aria-hidden="true"></div>
-                  <small class="conf-reviews__meta js-reviews-count-text" id="reviewsCountText">Chưa có dữ liệu tổng hợp</small>
-                </div>
-
-                <!-- Cột giữa: Chấm điểm sao của người dùng (Radio group chuẩn A11y) -->
-                <div class="conf-reviews__user-rate">
-                  <h3 class="conf-reviews__subhead" id="userRateLabel">Chấm điểm của bạn</h3>
-                  <div class="star-rating js-star-rating" id="stars" role="radiogroup" aria-labelledby="userRateLabel"></div>
-                  <p class="conf-reviews__rate-msg js-rate-msg" id="rateMsg" aria-live="polite"></p>
-                </div>
-
-                <!-- Cột phải: Nút mở trang nhận xét đầy đủ (#danh-gia) -->
-                <div class="conf-reviews__cta">
-                  <p class="conf-reviews__cta-desc js-local-review-summary">
-                    Xem hoặc chia sẻ nhận xét cá nhân được lưu trên trình duyệt này.
-                  </p>
-                  <button class="conf-btn conf-btn--secondary conf-reviews__open-btn js-open-reviews" id="openReviews" type="button">
-                    <span>Xem &amp; gửi nhận xét</span>
-                    <svg width="16" height="16" aria-hidden="true">
-                      <use href="#icon-arrow-right"></use>
-                    </svg>
-                  </button>
-                </div>
-              </div>
             </section>
           </div>
 
@@ -358,25 +273,12 @@
 
               <div class="next-deadline-card__actions js-next-cal-group">
                 <button type="button" class="conf-btn conf-btn--outline js-cal-action" id="btnCalGoogle" data-cal-action="google-next">
-                  <svg width="15" height="15" aria-hidden="true">
+                  <svg width="16" height="16" aria-hidden="true">
                     <use href="#icon-calendar-plus"></use>
                   </svg>
-                  <span>Google Calendar</span>
-                </button>
-                <button type="button" class="conf-btn conf-btn--outline js-cal-action" id="btnCalIcs" data-cal-action="ics-next">
-                  <svg width="15" height="15" aria-hidden="true">
-                    <use href="#icon-download"></use>
-                  </svg>
-                  <span>Tải file .ics</span>
+                  <span>Thêm vào Google Calendar</span>
                 </button>
               </div>
-
-              <button type="button" class="next-deadline-card__export-all js-cal-action" id="btnExportAllIcs" data-cal-action="ics-all">
-                <svg width="15" height="15" aria-hidden="true">
-                  <use href="#icon-calendar"></use>
-                </svg>
-                <span>Xuất toàn bộ lịch (.ics)</span>
-              </button>
             </div>
           </aside>
         </div>
@@ -394,51 +296,6 @@
           <div class="conf-related__grid js-related-grid" id="relGrid"></div>
         </section>
       </div>
-
-      <!-- ================= VIEW 2: TRANG NHẬN XÉT ĐẦY ĐỦ (#danh-gia) ================= -->
-      <section class="reviews-view js-view-reviews" id="viewReviews" aria-labelledby="rvPageTitle" hidden>
-        <div class="reviews-view__header">
-          <button class="conf-nav__back-btn js-back-to-detail-btn" id="backToDetailBtn" type="button">
-            <svg class="conf-nav__icon" width="18" height="18" aria-hidden="true">
-              <use href="#icon-arrow-left"></use>
-            </svg>
-            <span>Quay lại thông tin hội nghị</span>
-          </button>
-          <h2 class="reviews-view__title js-rv-page-title" id="rvPageTitle">Nhận xét hội nghị</h2>
-        </div>
-
-        <div class="conf-section reviews-view__summary">
-          <div class="reviews-view__score-box">
-            <strong class="reviews-view__score-big js-rv-avg" id="rvAvg">—</strong>
-            <div class="reviews-view__stars js-rv-stars" id="rvStars" aria-hidden="true"></div>
-            <small class="reviews-view__count js-rv-total" id="rvTotal">Chưa có nhận xét</small>
-          </div>
-          <div class="reviews-view__bars js-rv-bars" id="rvBars" hidden></div>
-        </div>
-
-        <h3 class="reviews-view__section-title" id="rvListTitle">Nhận xét lưu trên trình duyệt này</h3>
-
-        <form class="conf-section reviews-view__form js-review-form" id="reviewForm" novalidate>
-          <label class="reviews-view__label" for="reviewText">Chia sẻ nhận xét của bạn (tối thiểu 8 ký tự)</label>
-          <textarea
-            class="reviews-view__textarea js-review-textarea"
-            id="reviewText"
-            rows="4"
-            minlength="8"
-            maxlength="1200"
-            required
-            aria-describedby="reviewTextError"
-          ></textarea>
-          <p class="field-error js-field-error" id="reviewTextError" aria-live="polite"></p>
-          <div class="reviews-view__form-footer">
-            <small class="reviews-view__note">Nội dung nhận xét được lưu cục bộ trên trình duyệt hiện tại.</small>
-            <button class="conf-btn conf-btn--primary" type="submit">Gửi nhận xét</button>
-          </div>
-          <p class="reviews-view__form-msg js-review-form-msg" id="reviewFormMessage" aria-live="polite"></p>
-        </form>
-
-        <div class="reviews-view__list js-rv-list" id="rvList"></div>
-      </section>
     </div>
   </main>
 

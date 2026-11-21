@@ -9,7 +9,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ConfGuide — Tra cứu Hội nghị Khoa học CNTT tại Việt Nam</title>
-  <meta name="description" content="Tra cứu và lọc hội nghị khoa học Công nghệ thông tin diễn ra tại Việt Nam (bao gồm cả hội nghị quốc tế tổ chức tại Việt Nam) theo trạng thái hạn nộp bài UTC+7, thời gian, địa điểm và chủ đề | ConfGuide.">
+  <meta name="description" content="Tra cứu và lọc hội nghị khoa học Công nghệ thông tin diễn ra tại Việt Nam (bao gồm cả hội nghị quốc tế tổ chức tại Việt Nam) theo phân hạng CORE, tháng diễn ra, hạn nộp bài UTC+7, hình thức tổ chức, địa điểm và lĩnh vực nghiên cứu | ConfGuide.">
 
   <link rel="icon" type="image/svg+xml" href="images/logo.svg">
   <link rel="stylesheet" href="css/base/base.css">
@@ -40,7 +40,7 @@
       <div class="hero-overlay"></div>
       <div class="container hero-content">
         <h1>Tra cứu Hội nghị Khoa học CNTT tại Việt Nam</h1>
-        <p id="searchInputHint">Tìm kiếm hội nghị trong nước và hội nghị quốc tế tổ chức tại Việt Nam theo tên viết tắt, tên đầy đủ, địa điểm hoặc chủ đề.</p>
+        <p id="searchInputHint">Tìm kiếm và lọc hội nghị theo phân hạng CORE, tháng diễn ra, hạn nộp bài UTC+7, hình thức tổ chức, địa điểm và lĩnh vực nghiên cứu.</p>
 
         <div class="search-box__container">
           <form class="search-box js-search-form" id="searchForm" role="search">
@@ -50,9 +50,7 @@
               <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
             </svg>
             <div class="search-box__input-wrapper">
-              <input id="searchInput" class="search-box__input js-search-input" type="search" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="searchComboboxList" aria-label="Nhập từ khóa tìm kiếm hội nghị" autocomplete="off" aria-describedby="searchInputHint">
-              <ul id="searchComboboxList" class="search-combobox js-search-combobox" role="listbox" hidden></ul>
-              <span class="sr-only js-combobox-status" role="status"></span>
+              <input id="searchInput" class="search-box__input js-search-input" type="search" aria-label="Nhập từ khóa tìm kiếm hội nghị" autocomplete="off" aria-describedby="searchInputHint">
             </div>
             <button type="submit">Tìm kiếm</button>
           </form>
@@ -79,11 +77,10 @@
         <aside class="filters" id="filtersSidebar" aria-label="Bộ lọc danh sách hội nghị">
           <div class="filter-header-bar">
             <div class="filter-title">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
               </svg>
-              <h2 id="filtersDrawerTitle">Bộ lọc hội nghị</h2>
-              <span class="filter-title__badge js-panel-filter-count" hidden>0</span>
+              <h2 id="filtersDrawerTitle">Bộ lọc nâng cao</h2>
             </div>
             <div class="filter-header-bar__actions">
               <button type="button" class="btn-clear-all js-filter-reset" id="btnResetAllFilters" title="Đặt lại toàn bộ bộ lọc" disabled>
@@ -96,134 +93,131 @@
           </div>
 
           <div class="filters__body">
-            <!-- 1. Phân hạng hội nghị (CORE / Rank - 4 nút bấm chọn nhiều OR) -->
+            <!-- 1. Phân hạng (CORE Rank) -->
             <div class="filter-group filter-accordion js-filter-accordion open" data-group="rank">
-              <div class="accordion-header-row">
-                <h3 class="filter-group__heading">
-                  <button type="button" class="filter-group__toggle accordion-head js-filter-toggle js-accordion-head" id="accHeadRank" aria-expanded="true" aria-controls="accBodyRank">
-                    <span class="accordion-head__main">
-                      <span class="accordion-head__icon" aria-hidden="true">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                      </span>
-                      <span class="accordion-head__title filter-group__title">Phân hạng (Rank)</span>
-                    </span>
-                    <span class="accordion-head__meta">
-                      <span class="filter-group__selected js-group-selected-count" data-group-count="rank" hidden></span>
-                      <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                    </span>
-                  </button>
-                </h3>
-                <button type="button" class="accordion-clear-btn js-clear-group" data-clear-group="rank" aria-label="Xóa bộ lọc nhóm Phân hạng" hidden>
-                  Xóa nhóm
+              <h3 class="filter-group__heading">
+                <button type="button" class="filter-group__toggle accordion-head js-filter-toggle js-accordion-head" id="accHeadRank" aria-expanded="true" aria-controls="accBodyRank">
+                  <span class="accordion-head__title filter-group__title">Phân hạng (CORE Rank)</span>
+                  <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
                 </button>
-              </div>
+              </h3>
               <div class="filter-group__panel accordion-body" id="accBodyRank" role="region" aria-labelledby="accHeadRank">
-                <fieldset class="filter-group__fieldset rank-btn-grid">
-                  <legend class="sr-only">Chọn một hoặc nhiều phân hạng hội nghị (A*, A, B, C)</legend>
-                  <button type="button" class="rank-btn js-filter-rank js-option-row" data-option-key="rank:A*" data-rank="A*" aria-pressed="false">
-                    <span class="rank-btn__code">A*</span>
-                    <span class="rank-btn__count js-filter-count" data-count-for="rank:A*">(0)</span>
-                  </button>
-                  <button type="button" class="rank-btn js-filter-rank js-option-row" data-option-key="rank:A" data-rank="A" aria-pressed="false">
-                    <span class="rank-btn__code">A</span>
-                    <span class="rank-btn__count js-filter-count" data-count-for="rank:A">(0)</span>
-                  </button>
-                  <button type="button" class="rank-btn js-filter-rank js-option-row" data-option-key="rank:B" data-rank="B" aria-pressed="false">
-                    <span class="rank-btn__code">B</span>
-                    <span class="rank-btn__count js-filter-count" data-count-for="rank:B">(0)</span>
-                  </button>
-                  <button type="button" class="rank-btn js-filter-rank js-option-row" data-option-key="rank:C" data-rank="C" aria-pressed="false">
-                    <span class="rank-btn__code">C</span>
-                    <span class="rank-btn__count js-filter-count" data-count-for="rank:C">(0)</span>
-                  </button>
+                <fieldset class="filter-group__fieldset filter-fieldset" id="rankFieldset">
+                  <legend class="sr-only">Chọn phân hạng CORE của hội nghị</legend>
                 </fieldset>
               </div>
             </div>
 
-            <!-- 2. Trạng thái hạn nộp bài (CFP) -->
-            <div class="filter-group filter-accordion js-filter-accordion open" data-group="cfp">
-              <div class="accordion-header-row">
-                <h3 class="filter-group__heading">
-                  <button type="button" class="filter-group__toggle accordion-head js-filter-toggle js-accordion-head" id="accHeadCfp" aria-expanded="true" aria-controls="accBodyCfp">
-                    <span class="accordion-head__main">
-                      <span class="accordion-head__icon" aria-hidden="true">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                      </span>
-                      <span class="accordion-head__title filter-group__title">Hạn nộp bài</span>
-                    </span>
-                    <span class="accordion-head__meta">
-                      <span class="filter-group__selected js-group-selected-count" data-group-count="cfp" hidden></span>
-                      <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                    </span>
-                  </button>
-                </h3>
-                <button type="button" class="accordion-clear-btn js-clear-group" data-clear-group="cfp" aria-label="Xóa bộ lọc nhóm Hạn nộp bài" hidden>
-                  Xóa nhóm
+            <!-- 2. Tháng diễn ra -->
+            <div class="filter-group filter-accordion js-filter-accordion open" data-group="month">
+              <h3 class="filter-group__heading">
+                <button type="button" class="filter-group__toggle accordion-head js-filter-toggle js-accordion-head" id="accHeadMonth" aria-expanded="true" aria-controls="accBodyMonth">
+                  <span class="accordion-head__title filter-group__title">Tháng diễn ra</span>
+                  <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
                 </button>
+              </h3>
+              <div class="filter-group__panel accordion-body" id="accBodyMonth" role="region" aria-labelledby="accHeadMonth">
+                <fieldset class="filter-group__fieldset filter-fieldset">
+                  <legend class="sr-only">Lọc theo tháng tổ chức hội nghị</legend>
+                  <div class="filter-field-group">
+                    <label class="filter-sub-label" for="monthSelect">Chọn tháng tổ chức:</label>
+                    <select id="monthSelect" class="filter-select js-filter-month" name="month">
+                      <option value="">Tất cả các tháng</option>
+                    </select>
+                  </div>
+                  <label class="filter-option js-filter-option check-row check-row--compact js-option-row" data-option-key="ongoing:1" id="ongoingOptionRow" hidden>
+                    <input type="checkbox" id="ongoingCheck" class="filter-option__input js-filter-input js-filter-ongoing" data-group="month" name="ongoing" value="1">
+                    <span class="filter-option__text check-row__label">Đang diễn ra</span>
+                    <span class="filter-option__count check-row__count js-filter-count" data-count-for="ongoing:1">(0)</span>
+                  </label>
+                </fieldset>
               </div>
+            </div>
+
+            <!-- 3. Hạn nộp bài (Trạng thái & Khoảng thời gian UTC+7) -->
+            <div class="filter-group filter-accordion js-filter-accordion open" data-group="cfp">
+              <h3 class="filter-group__heading">
+                <button type="button" class="filter-group__toggle accordion-head js-filter-toggle js-accordion-head" id="accHeadCfp" aria-expanded="true" aria-controls="accBodyCfp">
+                  <span class="accordion-head__title filter-group__title">Hạn nộp bài</span>
+                  <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </button>
+              </h3>
               <div class="filter-group__panel accordion-body" id="accBodyCfp" role="region" aria-labelledby="accHeadCfp">
-                <fieldset class="filter-group__fieldset filter-fieldset filter-fieldset--grid-2">
-                  <legend class="sr-only">Chọn trạng thái hạn nộp bài</legend>
-                  <label class="filter-option js-filter-option check-row js-option-row check-row--full" data-option-key="cfp:all">
+                <fieldset class="filter-group__fieldset filter-fieldset" id="cfpFieldset">
+                  <legend class="sr-only">Chọn trạng thái và khoảng thời gian hạn nộp bài</legend>
+                  <label class="filter-option js-filter-option check-row js-option-row" data-option-key="cfp:all">
                     <input type="checkbox" class="filter-option__input js-filter-input js-filter-cfp" data-group="cfp" value="all" checked>
                     <span class="filter-option__text check-row__label">Tất cả trạng thái</span>
                     <span class="filter-option__count check-row__count js-filter-count" data-count-for="cfp:all">(0)</span>
                   </label>
                   <label class="filter-option js-filter-option check-row js-option-row" data-option-key="cfp:open">
                     <input type="checkbox" class="filter-option__input js-filter-input js-filter-cfp" data-group="cfp" value="open">
-                    <span class="check-row__dot check-row__dot--open" aria-hidden="true"></span>
-                    <span class="filter-option__text check-row__label">Đang mở</span>
+                    <span class="filter-option__text check-row__label">Đang mở nộp bài</span>
                     <span class="filter-option__count check-row__count js-filter-count" data-count-for="cfp:open">(0)</span>
                   </label>
                   <label class="filter-option js-filter-option check-row js-option-row" data-option-key="cfp:closingSoon" title="Sắp hết hạn (&le; 14 ngày)">
                     <input type="checkbox" class="filter-option__input js-filter-input js-filter-cfp" data-group="cfp" value="closingSoon" aria-label="Sắp hết hạn (&le; 14 ngày)">
-                    <span class="check-row__dot check-row__dot--closing" aria-hidden="true"></span>
-                    <span class="filter-option__text check-row__label">Sắp &le;14 ngày</span>
+                    <span class="filter-option__text check-row__label">Sắp hết hạn (&le; 14 ngày)</span>
                     <span class="filter-option__count check-row__count js-filter-count" data-count-for="cfp:closingSoon">(0)</span>
                   </label>
                   <label class="filter-option js-filter-option check-row js-option-row" data-option-key="cfp:closed">
                     <input type="checkbox" class="filter-option__input js-filter-input js-filter-cfp" data-group="cfp" value="closed">
-                    <span class="check-row__dot check-row__dot--closed" aria-hidden="true"></span>
-                    <span class="filter-option__text check-row__label">Đã đóng</span>
+                    <span class="filter-option__text check-row__label">Đã đóng đợt nộp</span>
                     <span class="filter-option__count check-row__count js-filter-count" data-count-for="cfp:closed">(0)</span>
                   </label>
                   <label class="filter-option js-filter-option check-row js-option-row" data-option-key="cfp:unknown">
                     <input type="checkbox" class="filter-option__input js-filter-input js-filter-cfp" data-group="cfp" value="unknown">
-                    <span class="check-row__dot check-row__dot--unknown" aria-hidden="true"></span>
-                    <span class="filter-option__text check-row__label">Chưa rõ</span>
+                    <span class="filter-option__text check-row__label">Chưa rõ hạn nộp</span>
                     <span class="filter-option__count check-row__count js-filter-count" data-count-for="cfp:unknown">(0)</span>
                   </label>
+
+                  <div class="date-range">
+                    <span class="filter-sub-label" id="dateRangeLabel">Khoảng thời gian hạn nộp:</span>
+                    <div class="date-range__grid">
+                      <label class="date-range__field" for="fromDate">
+                        <span class="date-range__field-label">Từ:</span>
+                        <input type="date" id="fromDate" class="js-date-from" name="from" aria-describedby="dateRangeError">
+                      </label>
+                      <label class="date-range__field" for="toDate">
+                        <span class="date-range__field-label">Đến:</span>
+                        <input type="date" id="toDate" class="js-date-to" name="to" aria-describedby="dateRangeError">
+                      </label>
+                    </div>
+                    <p id="dateRangeError" class="date-range__error field-error js-date-range-error" role="alert" hidden></p>
+                  </div>
                 </fieldset>
               </div>
             </div>
 
-            <!-- 3. Địa điểm tổ chức -->
-            <div class="filter-group filter-accordion js-filter-accordion open" data-group="where">
-              <div class="accordion-header-row">
-                <h3 class="filter-group__heading">
-                  <button type="button" class="filter-group__toggle accordion-head js-filter-toggle js-accordion-head" id="accHeadWhere" aria-expanded="true" aria-controls="accBodyWhere">
-                    <span class="accordion-head__main">
-                      <span class="accordion-head__icon" aria-hidden="true">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-                      </span>
-                      <span class="accordion-head__title filter-group__title">Địa điểm</span>
-                    </span>
-                    <span class="accordion-head__meta">
-                      <span class="filter-group__selected js-group-selected-count" data-group-count="where" hidden></span>
-                      <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                    </span>
-                  </button>
-                </h3>
-                <button type="button" class="accordion-clear-btn js-clear-group" data-clear-group="where" aria-label="Xóa bộ lọc nhóm Địa điểm" hidden>
-                  Xóa nhóm
+            <!-- 4. Hình thức tổ chức -->
+            <div class="filter-group filter-accordion js-filter-accordion open" data-group="mode">
+              <h3 class="filter-group__heading">
+                <button type="button" class="filter-group__toggle accordion-head js-filter-toggle js-accordion-head" id="accHeadMode" aria-expanded="true" aria-controls="accBodyMode">
+                  <span class="accordion-head__title filter-group__title">Hình thức tổ chức</span>
+                  <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
                 </button>
+              </h3>
+              <div class="filter-group__panel accordion-body" id="accBodyMode" role="region" aria-labelledby="accHeadMode">
+                <fieldset class="filter-group__fieldset filter-fieldset" id="modeFieldset">
+                  <legend class="sr-only">Chọn hình thức tổ chức hội nghị</legend>
+                </fieldset>
               </div>
+            </div>
+
+            <!-- 5. Địa điểm diễn ra -->
+            <div class="filter-group filter-accordion js-filter-accordion open" data-group="where">
+              <h3 class="filter-group__heading">
+                <button type="button" class="filter-group__toggle accordion-head js-filter-toggle js-accordion-head" id="accHeadWhere" aria-expanded="true" aria-controls="accBodyWhere">
+                  <span class="accordion-head__title filter-group__title">Địa điểm diễn ra</span>
+                  <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </button>
+              </h3>
               <div class="filter-group__panel accordion-body" id="accBodyWhere" role="region" aria-labelledby="accHeadWhere">
-                <fieldset class="filter-group__fieldset filter-fieldset filter-fieldset--grid-2">
-                  <legend class="sr-only">Chọn địa điểm tổ chức hội nghị</legend>
+                <fieldset class="filter-group__fieldset filter-fieldset" id="cityFieldset">
+                  <legend class="sr-only">Chọn địa điểm diễn ra hội nghị</legend>
                   <label class="filter-option js-filter-option check-row js-option-row" data-option-key="city:all">
                     <input type="checkbox" class="filter-option__input js-filter-input js-filter-city" data-group="where" name="city" value="all" checked>
-                    <span class="filter-option__text check-row__label">Tất cả</span>
+                    <span class="filter-option__text check-row__label">Tất cả địa điểm</span>
                     <span class="filter-option__count check-row__count js-filter-count" data-count-for="city:all">(0)</span>
                   </label>
                   <label class="filter-option js-filter-option check-row js-option-row" data-option-key="city:ha-noi">
@@ -233,139 +227,33 @@
                   </label>
                   <label class="filter-option js-filter-option check-row js-option-row" data-option-key="city:ho-chi-minh">
                     <input type="checkbox" class="filter-option__input js-filter-input js-filter-city" data-group="where" name="city" value="ho-chi-minh">
-                    <span class="filter-option__text check-row__label">Hồ Chí Minh</span>
+                    <span class="filter-option__text check-row__label">TP. Hồ Chí Minh</span>
                     <span class="filter-option__count check-row__count js-filter-count" data-count-for="city:ho-chi-minh">(0)</span>
                   </label>
                   <label class="filter-option js-filter-option check-row js-option-row" data-option-key="city:other">
                     <input type="checkbox" class="filter-option__input js-filter-input js-filter-city" data-group="where" name="city" value="other">
-                    <span class="filter-option__text check-row__label">Khu vực khác</span>
+                    <span class="filter-option__text check-row__label">Tỉnh / thành khác</span>
                     <span class="filter-option__count check-row__count js-filter-count" data-count-for="city:other">(0)</span>
                   </label>
                 </fieldset>
               </div>
             </div>
 
-            <!-- 4. Chủ đề & Lĩnh vực nghiên cứu (OR trong nhóm) -->
+            <!-- 6. Lĩnh vực nghiên cứu (OR trong nhóm) -->
             <div class="filter-group filter-accordion js-filter-accordion open" data-group="what">
-              <div class="accordion-header-row">
-                <h3 class="filter-group__heading">
-                  <button type="button" class="filter-group__toggle accordion-head js-filter-toggle js-accordion-head" id="accHeadWhat" aria-expanded="true" aria-controls="dynamicFieldsContainer">
-                    <span class="accordion-head__main">
-                      <span class="accordion-head__icon" aria-hidden="true">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>
-                      </span>
-                      <span class="accordion-head__title filter-group__title">Lĩnh vực &amp; Chủ đề</span>
-                    </span>
-                    <span class="accordion-head__meta">
-                      <span class="filter-group__selected js-group-selected-count" data-group-count="what" hidden></span>
-                      <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                    </span>
-                  </button>
-                </h3>
-                <button type="button" class="accordion-clear-btn js-clear-group" data-clear-group="what" aria-label="Xóa bộ lọc nhóm Chủ đề" hidden>
-                  Xóa nhóm
+              <h3 class="filter-group__heading">
+                <button type="button" class="filter-group__toggle accordion-head js-filter-toggle js-accordion-head" id="accHeadWhat" aria-expanded="true" aria-controls="dynamicFieldsContainer">
+                  <span class="accordion-head__title filter-group__title">Lĩnh vực nghiên cứu</span>
+                  <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
                 </button>
-              </div>
+              </h3>
               <div class="filter-group__panel accordion-body" id="dynamicFieldsContainer" role="region" aria-labelledby="accHeadWhat">
                 <fieldset class="filter-group__fieldset filter-fieldset" id="topicFieldset">
-                  <legend class="sr-only">Chọn một hoặc nhiều chủ đề nghiên cứu</legend>
-                  <label class="filter-option js-filter-option check-row js-option-row" data-option-key="topic:ai-data">
-                    <input type="checkbox" class="filter-option__input js-filter-input js-filter-topic" data-group="what" name="topic" value="ai-data">
-                    <span class="filter-option__text check-row__label">Trí tuệ nhân tạo &amp; Dữ liệu</span>
-                    <span class="filter-option__count check-row__count js-filter-count" data-count-for="topic:ai-data">(0)</span>
-                  </label>
-                  <label class="filter-option js-filter-option check-row js-option-row" data-option-key="topic:network-iot">
-                    <input type="checkbox" class="filter-option__input js-filter-input js-filter-topic" data-group="what" name="topic" value="network-iot">
-                    <span class="filter-option__text check-row__label">Mạng, Viễn thông &amp; IoT</span>
-                    <span class="filter-option__count check-row__count js-filter-count" data-count-for="topic:network-iot">(0)</span>
-                  </label>
-                  <label class="filter-option js-filter-option check-row js-option-row" data-option-key="topic:electronics">
-                    <input type="checkbox" class="filter-option__input js-filter-input js-filter-topic" data-group="what" name="topic" value="electronics">
-                    <span class="filter-option__text check-row__label">Điện tử, Vi mạch &amp; Nhúng</span>
-                    <span class="filter-option__count check-row__count js-filter-count" data-count-for="topic:electronics">(0)</span>
-                  </label>
-                  <label class="filter-option js-filter-option check-row js-option-row" data-option-key="topic:software">
-                    <input type="checkbox" class="filter-option__input js-filter-input js-filter-topic" data-group="what" name="topic" value="software">
-                    <span class="filter-option__text check-row__label">Kỹ thuật phần mềm</span>
-                    <span class="filter-option__count check-row__count js-filter-count" data-count-for="topic:software">(0)</span>
-                  </label>
-                  <label class="filter-option js-filter-option check-row js-option-row" data-option-key="topic:security">
-                    <input type="checkbox" class="filter-option__input js-filter-input js-filter-topic" data-group="what" name="topic" value="security">
-                    <span class="filter-option__text check-row__label">An toàn thông tin</span>
-                    <span class="filter-option__count check-row__count js-filter-count" data-count-for="topic:security">(0)</span>
-                  </label>
-                  <label class="filter-option js-filter-option check-row js-option-row" data-option-key="topic:cross-domain">
-                    <input type="checkbox" class="filter-option__input js-filter-input js-filter-topic" data-group="what" name="topic" value="cross-domain">
-                    <span class="filter-option__text check-row__label">Liên ngành &amp; Ứng dụng</span>
-                    <span class="filter-option__count check-row__count js-filter-count" data-count-for="topic:cross-domain">(0)</span>
-                  </label>
+                  <legend class="sr-only">Chọn một hoặc nhiều lĩnh vực nghiên cứu</legend>
                 </fieldset>
                 <button type="button" class="topic-toggle-btn js-toggle-more-topics" id="btnToggleMoreTopics" aria-expanded="false" aria-controls="topicFieldset" hidden>
                   Xem thêm (0)
                 </button>
-              </div>
-            </div>
-
-            <!-- 5. Thời gian diễn ra & Khoảng hạn nộp (Thu gọn mặc định để sidebar gọn nhẹ) -->
-            <div class="filter-group filter-accordion js-filter-accordion" data-group="when">
-              <div class="accordion-header-row">
-                <h3 class="filter-group__heading">
-                  <button type="button" class="filter-group__toggle accordion-head js-filter-toggle js-accordion-head" id="accHeadWhen" aria-expanded="false" aria-controls="accBodyWhen">
-                    <span class="accordion-head__main">
-                      <span class="accordion-head__icon" aria-hidden="true">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-                      </span>
-                      <span class="accordion-head__title filter-group__title">Thời gian &amp; Hạn nộp</span>
-                    </span>
-                    <span class="accordion-head__meta">
-                      <span class="filter-group__selected js-group-selected-count" data-group-count="when" hidden></span>
-                      <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                    </span>
-                  </button>
-                </h3>
-                <button type="button" class="accordion-clear-btn js-clear-group" data-clear-group="when" aria-label="Xóa bộ lọc nhóm Thời gian" hidden>
-                  Xóa nhóm
-                </button>
-              </div>
-              <div class="filter-group__panel accordion-body" id="accBodyWhen" role="region" aria-labelledby="accHeadWhen" hidden>
-                <fieldset class="filter-group__fieldset filter-fieldset">
-                  <legend class="sr-only">Lọc theo tháng diễn ra và khoảng ngày hạn nộp</legend>
-
-                  <div class="when-compact-row">
-                    <div class="filter-field-group">
-                      <label class="filter-sub-label" for="monthSelect">Tháng diễn ra:</label>
-                      <select id="monthSelect" class="filter-select js-filter-month" name="month">
-                        <option value="">Tất cả các tháng</option>
-                      </select>
-                    </div>
-
-                    <label class="filter-option js-filter-option check-row check-row--compact js-option-row" data-option-key="ongoing:1">
-                      <input type="checkbox" id="ongoingCheck" class="filter-option__input js-filter-input js-filter-ongoing" data-group="when" name="ongoing" value="1">
-                      <span class="filter-option__text check-row__label">Đang diễn ra</span>
-                      <span class="filter-option__count check-row__count js-filter-count" data-count-for="ongoing:1">(0)</span>
-                    </label>
-                  </div>
-
-                  <div class="date-range">
-                    <span class="filter-sub-label" id="dateRangeLabel">Khoảng hạn nộp bài:</span>
-                    <div class="date-presets" role="group" aria-label="Chọn nhanh khoảng hạn nộp bài">
-                      <button type="button" class="date-preset-chip js-date-preset" data-preset="7d" aria-pressed="false">7 ngày</button>
-                      <button type="button" class="date-preset-chip js-date-preset" data-preset="30d" aria-pressed="false">30 ngày</button>
-                      <button type="button" class="date-preset-chip js-date-preset" data-preset="3m" aria-pressed="false">3 tháng</button>
-                    </div>
-                    <div class="date-range__grid">
-                      <label class="date-range__field" for="fromDate">
-                        <span class="date-range__field-label">Từ</span>
-                        <input type="date" id="fromDate" class="js-date-from" name="from" aria-describedby="dateRangeError">
-                      </label>
-                      <label class="date-range__field" for="toDate">
-                        <span class="date-range__field-label">Đến</span>
-                        <input type="date" id="toDate" class="js-date-to" name="to" aria-describedby="dateRangeError">
-                      </label>
-                    </div>
-                    <p id="dateRangeError" class="date-range__error field-error js-date-range-error" role="alert" hidden></p>
-                  </div>
-                </fieldset>
               </div>
             </div>
           </div>
@@ -378,7 +266,7 @@
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
                 <polyline points="20 6 9 17 4 12"></polyline>
               </svg>
-              <span class="js-apply-filters-label">Áp dụng (0 kết quả)</span>
+              <span class="js-apply-filters-label">Áp dụng bộ lọc</span>
             </button>
           </div>
         </aside>
@@ -389,6 +277,9 @@
 
           <!-- Vùng thông báo trạng thái kết quả (chờ kết quả ổn định mới thông báo) -->
           <p class="search-results__status js-search-status sr-only" role="status"></p>
+
+          <!-- Thanh gợi ý cá nhân hóa theo lĩnh vực & mục đích sử dụng -->
+          <div class="search-prefs-banner js-search-prefs-banner" id="searchPrefsPrompt" hidden></div>
 
           <!-- Nhóm chip bộ lọc đang áp dụng -->
           <div class="filter-chips-wrapper js-filter-chips-wrapper" id="filterChipsWrapper" hidden>
@@ -420,15 +311,16 @@
               <div class="results-head__sort">
                 <label for="sortSelect" class="results-head__sort-label">Sắp xếp:</label>
                 <select id="sortSelect" class="js-sort-select">
-                  <option value="deadline">Hạn nộp gần nhất</option>
-                  <option value="deadline-desc">Hạn nộp xa nhất</option>
-                  <option value="rank-desc">Phân hạng cao nhất (A* &rarr; C)</option>
-                  <option value="rank-asc">Phân hạng từ C &rarr; A*</option>
+                  <option value="deadline">Hạn nộp bài gần nhất</option>
+                  <option value="deadline-desc">Hạn nộp bài xa nhất</option>
                   <option value="event">Ngày diễn ra sớm nhất</option>
                   <option value="event-desc">Ngày diễn ra muộn nhất</option>
+                  <option value="fee-asc">Lệ phí (Thấp → Cao)</option>
+                  <option value="fee-desc">Lệ phí (Cao → Thấp)</option>
+                  <option value="rank-desc">Phân hạng CORE (Cao → Thấp)</option>
+                  <option value="rank-asc">Phân hạng CORE (Thấp → Cao)</option>
                   <option value="name">Tên hội nghị (A–Z)</option>
                   <option value="name-desc">Tên hội nghị (Z–A)</option>
-                  <option value="relevance">Phù hợp nhất với từ khóa</option>
                 </select>
               </div>
             </div>

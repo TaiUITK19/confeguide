@@ -93,7 +93,8 @@ Tất cả các tính năng dưới đây đã được kiểm chứng trực ti
 
 - **Trang chủ & Cổng tìm kiếm ([`index.html`](index.html), [`js/pages/index.js`](js/pages/index.js)):**
   - Ô tìm kiếm nhanh chuyển hướng sang `search.html?q=...` kèm hiệu ứng biến hình thanh tìm kiếm (shared-element View Transition).
-  - Hero Slider 3 thẻ nổi bật (*Góc học thuật*, *Hội nghị nổi bật* `CORE A* & A`, *Sắp hết hạn UTC+7*) hỗ trợ tự động chạy, tạm dừng khi hover/focus, điều hướng bằng bàn phím, nút chấm và thao tác vuốt trên màn hình cảm ứng.
+  - Hero Slider 3 slide (*Khuyến nghị cá nhân hóa theo trạng thái đăng nhập và lĩnh vực nghiên cứu của tài khoản*, *Hội nghị nổi bật*, *Sắp hết hạn UTC+7*) hỗ trợ tự động chạy, tạm dừng khi hover/focus hoặc vừa cập nhật lĩnh vực, điều hướng bằng bàn phím, nút chấm và thao tác vuốt trên màn hình cảm ứng.
+  - Khối *Cá nhân hóa trải nghiệm* hỗ trợ chọn nhanh mục đích tìm kiếm và chọn nhiều lĩnh vực nghiên cứu trực tiếp (yêu cầu đăng nhập và đồng bộ trực tiếp vào trường `fieldsOfInterest` của tài khoản).
   - Danh sách hội nghị sắp diễn ra kèm nút Lưu và nút chọn So sánh.
 - **Tra cứu nâng cao & Lọc đa chiều ([`search.html`](search.html), [`js/components/search-core.js`](js/components/search-core.js), [`js/pages/search.js`](js/pages/search.js)):**
   - Tìm kiếm tức thì, gợi ý combobox và gợi ý sửa chính tả bằng khoảng cách **Damerau-Levenshtein**.

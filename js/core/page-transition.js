@@ -39,6 +39,10 @@
   };
 
   const NON_HTML_EXT_RE = /\.(pdf|zip|rar|7z|ics|json|csv|xml|png|jpe?g|webp|gif|svg|ico|mp4|mp3|webm)$/i;
+  const KNOWN_HTML_PAGES = new Set([
+    'index.html', 'search.html', 'detail.html', 'tracker.html', 'profile.html',
+    'about.html', 'contact.html', 'login.html', 'register.html', 'terms.html', 'privacy.html', '404.html'
+  ]);
   const isFileProtocol = window.location.protocol === 'file:';
 
   // Phát hiện đúng Cross-Document View Transitions theo PageRevealEvent / @view-transition
@@ -608,6 +612,23 @@
 
     const toPage = extractPageName(targetUrl.href);
     const fromPage = extractPageName(window.location.href);
+
+    // Chuyển hướng các liên kết nội bộ trỏ tới trang HTML hoặc thư mục con không tồn tại sang 404.html
+    const isAssetDir = /\/(css|js|data|images)\//i.test(targetUrl.pathname || '');
+    const baseDirPath = new URL('.', document.baseURI || window.location.href).pathname;
+    const relPath = targetUrl.pathname.startsWith(baseDirPath)
+      ? targetUrl.pathname.slice(baseDirPath.length)
+      : targetUrl.pathname.replace(/^\/+/, '');
+    const isNestedUnknown = relPath.includes('/');
+    const isInvalidTarget = !isAssetDir && (isNestedUnknown || (relPath && !KNOWN_HTML_PAGES.has(toPage)));
+    if (isInvalidTarget) {
+      event.preventDefault();
+      const rawHref = anchor.getAttribute('href') || `${targetUrl.pathname}${targetUrl.search || ''}`;
+      const baseOrigin = document.baseURI || window.location.href;
+      const notFoundUrl = new URL(`404.html?reason=broken-link&from=${encodeURIComponent(rawHref)}`, baseOrigin).href;
+      navigateWithWaapiExit(notFoundUrl);
+      return;
+    }
 
     // Chỉ để trình duyệt tự điều hướng cho @view-transition khi cả 2 đầu là cặp index <-> search
     if (hasCrossDocViewTransition && !prefersReducedMotion() && isSearchMorphPair(fromPage, toPage)) {
