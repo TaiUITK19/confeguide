@@ -33,200 +33,223 @@
     { key: 'cameraReady', name: 'Nộp bản hoàn chỉnh (Camera-Ready)', shortName: 'Camera-Ready' }
   ];
 
-  /** Bộ dữ liệu dự phòng gồm 7 hội nghị khoa học CNTT tại Việt Nam để hỗ trợ chạy ngoại tuyến / file:/// */
+  /** Bộ dữ liệu dự phòng trích từ data/conference_data.json để hỗ trợ chạy ngoại tuyến / file:/// */
   const RAW_FALLBACK_CONFERENCES = [
     {
-      id: 'soict-2026',
       name: 'SOICT 2026',
-      fullName: 'Hội nghị Khoa học về Công nghệ Thông tin và Truyền thông (SOICT)',
-      rank: 'B',
-      region: 'Việt Nam',
-      format: 'in-person',
-      publisher: 'ACM / Springer',
-      indexing: ['Scopus', 'DBLP', 'ACM Digital Library'],
-      fields: ['ai foundations', 'big data', 'cyber security', 'multimedia'],
-      keywords: ['soict', 'hust', 'cntt', 'cyber security', 'việt nam'],
-      fee: '5.000.000 VNĐ',
-      location: 'TP. Hồ Chí Minh, Việt Nam',
-      startDate: '2026-12-04',
-      endDate: '2026-12-05',
-      website: 'https://soict.org/',
-      deadlines: {
-        abstract: '2026-09-20',
-        fullPaper: '2026-09-25',
-        notification: '2026-10-12',
-        cameraReady: '2026-10-23'
-      },
-      lastVerified: '2026-03-15',
-      summarization: 'Hội nghị khoa học uy tín về CNTT quy tụ các hướng nghiên cứu hiện đại: Trí tuệ nhân tạo, An ninh mạng, Khoa học dữ liệu và Xử lý đa phương tiện.',
-      rating: 4.5,
-      rating_count: 82
+      year: '2026',
+      website_url: 'https://soict.org/',
+      deadline_url: 'https://soict.org/submission/',
+      full_name: 'The 15th International Symposium on Information and Communication Technology',
+      summarization: 'SOICT 2026 is an international symposium covering significant research areas such as AI Foundations and Big Data, Networking and Communication Technologies, Multimedia Processing, AI Applications, Generative AI, Applied Operations Research and Optimization, and Cyber Security.',
+      location: 'Ho Chi Minh City, Vietnam',
+      country: 'Vietnam',
+      date_happen: '2026-12-04 to 2026-12-05',
+      start_date: '2026-12-04',
+      end_date: '2026-12-05',
+      topics: ['ai', 'data', 'vision', 'security'],
+      primary_topic: 'ai',
+      topic_labels: [
+        'Trí tuệ nhân tạo & Học máy',
+        'Khoa học dữ liệu & Dữ liệu lớn',
+        'Thị giác máy tính & Đa phương tiện',
+        'An toàn thông tin'
+      ],
+      attendance_mode: 'offline',
+      attendance_label: 'Trực tiếp',
+      fee_min: 250,
+      fee_max: 650,
+      fee_currency: 'USD',
+      deadlines: [
+        { name: 'Abstract Submission', date: '2026-09-20' },
+        { name: 'Full Paper Submission', date: '2026-09-20' },
+        { name: 'Author Notification', date: '2026-10-18' },
+        { name: 'Camera-Ready Submission', date: '2026-10-30' }
+      ],
+      crawled_at: '2026-11-20T01:33:35+00:00',
+      rank: { core: null, core_source: null, ccf: null }
     },
     {
-      id: 'rivf-2026',
       name: 'RIVF 2026',
-      fullName: 'Hội nghị Nghiên cứu, Đổi mới và Tầm nhìn Tương lai về Công nghệ Tính toán và Truyền thông (RIVF)',
-      rank: 'B',
-      region: 'Việt Nam',
-      format: 'in-person',
-      publisher: 'IEEE',
-      indexing: ['Scopus', 'DBLP', 'IEEE Xplore'],
-      fields: ['machine learning', 'computer vision', 'nlp', 'communications'],
-      keywords: ['rivf', 'ieee', 'machine learning', 'việt nam'],
-      fee: '4.800.000 VNĐ',
-      location: 'TP. Hồ Chí Minh, Việt Nam',
-      startDate: '2026-11-21',
-      endDate: '2026-11-23',
-      website: 'https://rivf2026.org/',
-      deadlines: {
-        abstract: '2026-07-01',
-        fullPaper: '2026-07-15',
-        notification: '2026-09-10',
-        cameraReady: '2026-10-01'
-      },
-      lastVerified: '2026-03-15',
-      summarization: 'Diễn đàn khoa học lớn về công nghệ tính toán, trí tuệ nhân tạo, xử lý ngôn ngữ tự nhiên và hệ thống truyền thông thông minh tại Việt Nam.',
-      rating: 4.6,
-      rating_count: 95
+      year: '2026',
+      website_url: 'https://rivf2026.org/',
+      deadline_url: 'https://rivf2026.org/call-for-papers.html',
+      full_name: 'The 20th International Conference on Computing and Communication Technologies',
+      summarization: 'RIVF 2026 is the 20th International Conference on Computing and Communication Technologies, serving as a major scientific event for researchers, professionals, and students in computing and communications.',
+      location: 'VinUniversity, Hanoi',
+      country: 'Vietnam',
+      date_happen: '2026-12-18 to 2026-12-20',
+      start_date: '2026-12-18',
+      end_date: '2026-12-20',
+      topics: ['ai', 'data', 'vision', 'security'],
+      primary_topic: 'ai',
+      topic_labels: [
+        'Trí tuệ nhân tạo & Học máy',
+        'Khoa học dữ liệu & Dữ liệu lớn',
+        'Thị giác máy tính & Đa phương tiện',
+        'An toàn thông tin'
+      ],
+      attendance_mode: null,
+      attendance_label: null,
+      deadlines: [
+        { name: 'Paper Submission', date: '2026-09-15' },
+        { name: 'Camera-Ready Submission', date: '2026-11-25' }
+      ],
+      crawled_at: '2026-11-20T01:33:35+00:00',
+      rank: { core: null, core_source: null, ccf: null }
     },
     {
-      id: 'kse-2026',
-      name: 'KSE 2026',
-      fullName: 'Hội nghị Khoa học về Kỹ thuật Tri thức và Hệ thống (KSE)',
-      rank: 'B',
-      region: 'Việt Nam',
-      format: 'hybrid',
-      publisher: 'IEEE',
-      indexing: ['Scopus', 'DBLP', 'IEEE Xplore'],
-      fields: ['knowledge engineering', 'deep learning', 'data science', 'software engineering'],
-      keywords: ['kse', 'knowledge engineering', 'deep learning', 'hà nội'],
-      fee: '4.500.000 VNĐ',
-      location: 'Hà Nội, Việt Nam',
-      startDate: '2026-11-12',
-      endDate: '2026-11-14',
-      website: 'https://kse-conf.org/',
-      deadlines: {
-        abstract: '2026-06-20',
-        fullPaper: '2026-07-05',
-        notification: '2026-08-30',
-        cameraReady: '2026-09-20'
-      },
-      lastVerified: '2026-03-15',
-      summarization: 'Diễn đàn học thuật chuyên sâu về kỹ thuật tri thức, học máy, khai phá dữ liệu và phát triển các hệ thống phần mềm thông minh.',
-      rating: 4.4,
-      rating_count: 68
+      name: 'ICIIT 2027',
+      year: '2027',
+      website_url: 'https://www.iciit.org/',
+      deadline_url: 'https://www.iciit.org/',
+      full_name: '2027 12th International Conference on Intelligent Information Technology',
+      summarization: 'The 12th International Conference on Intelligent Information Technology (ICIIT 2027) aims to promote the exchange of research findings and innovations in intelligent information technology.',
+      location: 'Ho Chi Minh City',
+      country: 'Vietnam',
+      date_happen: '2027-03-04 to 2027-03-07',
+      start_date: '2027-03-04',
+      end_date: '2027-03-07',
+      topics: ['ai', 'data', 'vision', 'security'],
+      primary_topic: 'ai',
+      topic_labels: [
+        'Trí tuệ nhân tạo & Học máy',
+        'Khoa học dữ liệu & Dữ liệu lớn',
+        'Thị giác máy tính & Đa phương tiện',
+        'An toàn thông tin'
+      ],
+      attendance_mode: 'offline',
+      attendance_label: 'Trực tiếp',
+      fee_min: 180,
+      fee_max: 520,
+      fee_currency: 'USD',
+      deadlines: [
+        { name: 'Submission Deadline (Full paper)', date: '2026-11-30' },
+        { name: 'Submission Deadline (Abstract)', date: '2026-12-05' },
+        { name: 'Notification Date (Full paper or Abstract)', date: '2026-12-20' },
+        { name: 'Registration Deadline', date: '2027-01-10' }
+      ],
+      crawled_at: '2026-11-20T01:38:02+00:00',
+      rank: { core: null, core_source: null, ccf: null }
     },
     {
-      id: 'fdse-2026',
-      name: 'FDSE 2026',
-      fullName: 'Hội nghị Khoa học về Dữ liệu Tương lai và Kỹ thuật Bảo mật (FDSE)',
-      rank: 'B',
-      region: 'Việt Nam',
-      format: 'hybrid',
-      publisher: 'Springer LNCS',
-      indexing: ['Scopus', 'DBLP'],
-      fields: ['cyber security', 'big data', 'privacy', 'cloud computing'],
-      keywords: ['fdse', 'springer', 'cyber security', 'big data'],
-      fee: '4.500.000 VNĐ',
-      location: 'Bình Dương, Việt Nam',
-      startDate: '2026-11-26',
-      endDate: '2026-11-28',
-      website: 'https://fdse.vn/',
-      deadlines: {
-        abstract: '2026-06-30',
-        fullPaper: '2026-07-20',
-        notification: '2026-09-15',
-        cameraReady: '2026-10-05'
-      },
-      lastVerified: '2026-03-15',
-      summarization: 'Hội nghị khoa học tập trung vào an toàn thông tin, mật mã học, bảo mật dữ liệu lớn và điện toán đám mây thế hệ mới.',
-      rating: 4.3,
-      rating_count: 54
+      name: 'AAMAS 2027',
+      year: '2027',
+      website_url: 'https://warwick.ac.uk/fac/sci/dcs/aamas2027/',
+      deadline_url: 'https://warwick.ac.uk/fac/sci/dcs/aamas2027/',
+      full_name: 'The 26th International Conference on Autonomous Agents and Multiagent Systems',
+      summarization: 'AAMAS 2027 is the 26th International Conference on Autonomous Agents and Multiagent Systems, serving as the flagship conference for the International Foundation for Autonomous Agents and Multiagent Systems (IFAAMAS).',
+      location: 'JW Marriott Hotel, Hanoi',
+      country: 'Vietnam',
+      date_happen: '2027-05-03 to 2027-05-07',
+      start_date: '2027-05-03',
+      end_date: '2027-05-07',
+      topics: ['ai', 'general'],
+      primary_topic: 'ai',
+      topic_labels: ['Trí tuệ nhân tạo & Học máy', 'CNTT tổng hợp (nhiều lĩnh vực)'],
+      attendance_mode: null,
+      attendance_label: null,
+      deadlines: [
+        { name: 'Main Track: Abstract submission', date: '2026-10-01' },
+        { name: 'Main Track: Paper submission', date: '2026-10-08' },
+        { name: 'Main Track: Author notification', date: '2026-12-21' },
+        { name: 'Main Track: Camera-ready paper', date: '2027-01-25' }
+      ],
+      crawled_at: '2026-11-20T01:38:58+00:00',
+      rank: { core: 'A', core_source: 'ICORE2026', ccf: 'B' }
     },
     {
-      id: 'atc-2026',
-      name: 'ATC 2026',
-      fullName: 'Hội nghị Khoa học về Công nghệ Tiên tiến trong Truyền thông (ATC)',
-      rank: 'B',
-      region: 'Việt Nam',
-      format: 'in-person',
-      publisher: 'IEEE ComSoc / REV',
-      indexing: ['Scopus', 'IEEE Xplore'],
-      fields: ['communications', 'wireless networks', 'iot', 'antenna'],
-      keywords: ['atc', 'viễn thông', 'wireless', 'iot', 'việt nam'],
-      fee: '4.500.000 VNĐ',
-      location: 'Quy Nhơn, Việt Nam',
-      startDate: '2026-10-15',
-      endDate: '2026-10-17',
-      website: 'https://atc-conf.org/',
-      deadlines: {
-        abstract: '2026-05-15',
-        fullPaper: '2026-05-30',
-        notification: '2026-07-30',
-        cameraReady: '2026-08-15'
-      },
-      lastVerified: '2026-03-15',
-      summarization: 'Hội nghị khoa học thường niên về công nghệ truyền thông, mạng không dây và viễn thông tại Việt Nam do Hội Vô tuyến Điện tử (REV) đồng tổ chức.',
-      rating: 4.2,
-      rating_count: 45
+      name: 'EASE 2027',
+      year: '2027',
+      website_url: 'https://conf.researchr.org/home/ease-2027',
+      deadline_url: 'https://conf.researchr.org/home/ease-2027',
+      full_name: 'International Conference on Evaluation and Assessment in Software Engineering',
+      summarization: 'EASE is an internationally leading venue for academics and practitioners to present and discuss their research on evidence-based software engineering, and its implications for software practice.',
+      location: 'Hanoi',
+      country: 'Vietnam',
+      date_happen: '2027-06-15 to 2027-06-18',
+      start_date: '2027-06-15',
+      end_date: '2027-06-18',
+      topics: ['software'],
+      primary_topic: 'software',
+      topic_labels: ['Công nghệ phần mềm'],
+      attendance_mode: null,
+      attendance_label: null,
+      deadlines: [
+        { name: 'Workshop Proposal Deadline', date: '2026-12-02' },
+        { name: 'Workshop Proposal Notification', date: '2026-12-11' },
+        { name: 'Research Papers Abstract Submission deadline', date: '2027-01-15' },
+        { name: 'Research Papers Submission deadline', date: '2027-01-22' }
+      ],
+      crawled_at: '2026-11-20T01:39:25+00:00',
+      rank: { core: 'A', core_source: 'ICORE2026', ccf: 'C' }
     },
     {
-      id: 'acomp-2026',
-      name: 'ACOMP 2026',
-      fullName: 'Hội nghị Khoa học về Tính toán Tiên tiến và Ứng dụng (ACOMP)',
-      rank: 'C',
-      region: 'Việt Nam',
-      format: 'in-person',
-      publisher: 'IEEE CPS',
-      indexing: ['Scopus', 'DBLP', 'IEEE Xplore'],
-      fields: ['high performance computing', 'software engineering', 'iot', 'ai foundations'],
-      keywords: ['acomp', 'hiệu năng cao', 'iot', 'tp hcm'],
-      fee: '4.200.000 VNĐ',
-      location: 'TP. Hồ Chí Minh, Việt Nam',
-      startDate: '2026-11-25',
-      endDate: '2026-11-27',
-      website: 'https://acomp.hcmut.edu.vn/',
-      deadlines: {
-        abstract: '2026-07-10',
-        fullPaper: '2026-07-25',
-        notification: '2026-09-18',
-        cameraReady: '2026-10-10'
-      },
-      lastVerified: '2026-03-15',
-      summarization: 'Hội nghị khoa học về tính toán hiệu năng cao, kỹ thuật phần mềm, hệ thống nhúng và các ứng dụng trí tuệ nhân tạo.',
-      rating: 4.2,
-      rating_count: 41
+      name: 'IEEE SMC 2027',
+      year: '2027',
+      website_url: 'https://ieeesmc2027.org/',
+      deadline_url: 'https://ieeesmc2027.org/key-dates/',
+      full_name: '2027 IEEE International Conference on Systems, Man, and Cybernetics',
+      summarization: '2027 IEEE International Conference on Systems, Man, and Cybernetics covers systems science and engineering, human-machine systems, and cybernetics.',
+      location: 'Da Nang',
+      country: 'Vietnam',
+      date_happen: '2027-10-10 to 2027-10-13',
+      start_date: '2027-10-10',
+      end_date: '2027-10-13',
+      topics: ['ai', 'robotics'],
+      primary_topic: 'ai',
+      topic_labels: ['Trí tuệ nhân tạo & Học máy', 'Robot, Tự động hóa & Điều khiển'],
+      attendance_mode: 'hybrid',
+      attendance_label: 'Kết hợp (trực tiếp + trực tuyến)',
+      deadlines: [
+        { name: 'Submission of Proposals for Special Sessions, Tutorials and Workshops', date: '2027-02-15' },
+        { name: 'Paper Submission for Workshops, Regular and Special Sessions', date: '2027-04-08' },
+        { name: 'Notification of Papers Acceptance for Workshops, Regular and Special Sessions', date: '2027-05-30' },
+        { name: 'Final Paper Camera-Ready Submission of Regular, Special Sessions and Workshops', date: '2027-07-15' }
+      ],
+      crawled_at: '2026-11-20T01:42:35+00:00',
+      rank: { core: 'B', core_source: 'ICORE2026', ccf: 'C' }
     },
     {
-      id: 'mapr-2026',
-      name: 'MAPR 2026',
-      fullName: 'Hội nghị Khoa học về Phân tích Đa phương tiện và Nhận dạng Mẫu (MAPR)',
-      rank: 'B',
-      region: 'Việt Nam',
-      format: 'in-person',
-      publisher: 'IEEE',
-      indexing: ['Scopus', 'IEEE Xplore'],
-      fields: ['multimedia', 'pattern recognition', 'computer vision', 'healthcare ai'],
-      keywords: ['mapr', 'uit', 'pattern recognition', 'multimedia', 'đà nẵng'],
-      fee: '4.500.000 VNĐ',
-      location: 'Đà Nẵng, Việt Nam',
-      startDate: '2026-10-08',
-      endDate: '2026-10-09',
-      website: 'https://mapr.uit.edu.vn/',
-      deadlines: {
-        abstract: '2026-06-01',
-        fullPaper: '2026-06-15',
-        notification: '2026-08-10',
-        cameraReady: '2026-08-25'
-      },
-      lastVerified: '2026-03-15',
-      summarization: 'Hội nghị khoa học chuyên sâu về Phân tích Đa phương tiện và Nhận dạng Mẫu do Trường Đại học Công nghệ Thông tin (ĐHQG-HCM) phối hợp tổ chức.',
-      rating: 4.4,
-      rating_count: 48
+      name: 'GSETS 2027',
+      year: '2027',
+      website_url: 'https://www.hutech.edu.vn/gsets2027',
+      deadline_url: 'https://www.hutech.edu.vn/gsets2027',
+      full_name: 'The 3rd International Conference on "Green Solutions and Emerging Technologies for Sustainability" (GSETS 2027)',
+      summarization: 'GSETS 2027 is a prestigious international scientific event showcasing advanced achievements in the fields of Material Science, Green Technology, Data Science, Artificial Intelligence, and emerging technologies.',
+      location: 'HUTECH University (Thu Duc Campus), Ho Chi Minh City',
+      country: 'Vietnam',
+      date_happen: '2027-04-08 to 2027-04-10',
+      start_date: '2027-04-08',
+      end_date: '2027-04-10',
+      topics: ['ai', 'data', 'electronics', 'general'],
+      primary_topic: 'ai',
+      topic_labels: [
+        'Trí tuệ nhân tạo & Học máy',
+        'Khoa học dữ liệu & Dữ liệu lớn',
+        'Điện tử, Viễn thông & Xử lý tín hiệu',
+        'CNTT tổng hợp (nhiều lĩnh vực)'
+      ],
+      attendance_mode: 'offline',
+      attendance_label: 'Trực tiếp',
+      fee_min: 40,
+      fee_max: 300,
+      fee_currency: 'USD',
+      deadlines: [
+        { name: 'Abstract Submission', date: '2026-11-23' },
+        { name: 'Abstract Acceptance', date: '2026-11-30' },
+        { name: 'Full-text Submission', date: '2026-12-31' },
+        { name: 'Estimated Review', date: '2027-01-29' },
+        { name: 'Estimated Revision', date: '2027-02-21' },
+        { name: 'Registration of Attendance', date: '2027-03-20' }
+      ],
+      crawled_at: '2026-11-20T01:46:36+00:00',
+      rank: { core: null, core_source: null, ccf: null }
     }
   ];
 
   const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+  const modalReturnFocusMap = new Map();
   let activeModalLastFocus = null;
   let lastFeedbackSubmitTime = 0;
   let layoutInitialized = false;
@@ -332,6 +355,24 @@
   }
 
   /**
+   * Kiểm tra bộ ba năm/tháng/ngày có tạo thành ngày lịch hợp lệ (không tràn tháng).
+   * @param {number} year Năm dương lịch.
+   * @param {number} month Tháng (1..12).
+   * @param {number} day Ngày trong tháng.
+   * @returns {boolean} True nếu là ngày hợp lệ.
+   */
+  function isValidCalendarDateParts(year, month, day) {
+    if (!Number.isInteger(year) || !Number.isInteger(month) || !Number.isInteger(day)) return false;
+    if (year < 1970 || month < 1 || month > 12 || day < 1 || day > 31) return false;
+    const probe = new Date(Date.UTC(year, month - 1, day));
+    return (
+      probe.getUTCFullYear() === year &&
+      probe.getUTCMonth() === month - 1 &&
+      probe.getUTCDate() === day
+    );
+  }
+
+  /**
    * Chuẩn hóa ngày về định dạng ISO YYYY-MM-DD nếu hợp lệ.
    * @param {string} dateStr Chuỗi ngày thô.
    * @returns {string} Chuỗi YYYY-MM-DD hoặc chuỗi rỗng nếu không hợp lệ.
@@ -339,11 +380,24 @@
   function normalizeDateIso(dateStr) {
     if (!dateStr || typeof dateStr !== 'string') return '';
     const trimmed = dateStr.trim();
-    if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) return trimmed;
-    const isoPrefix = trimmed.match(/^(\d{4}-\d{2}-\d{2})[T\s]/);
-    if (isoPrefix) return isoPrefix[1];
+    if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
+      const [y, m, d] = trimmed.split('-').map(Number);
+      return isValidCalendarDateParts(y, m, d) ? trimmed : '';
+    }
+    const isoPrefix = trimmed.match(/^(\d{4})-(\d{2})-(\d{2})[T\s]/);
+    if (isoPrefix) {
+      const y = Number(isoPrefix[1]);
+      const m = Number(isoPrefix[2]);
+      const d = Number(isoPrefix[3]);
+      return isValidCalendarDateParts(y, m, d) ? `${isoPrefix[1]}-${isoPrefix[2]}-${isoPrefix[3]}` : '';
+    }
     const match = trimmed.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
-    if (match) return `${match[3]}-${match[2]}-${match[1]}`;
+    if (match) {
+      const d = Number(match[1]);
+      const m = Number(match[2]);
+      const y = Number(match[3]);
+      return isValidCalendarDateParts(y, m, d) ? `${match[3]}-${match[2]}-${match[1]}` : '';
+    }
     return '';
   }
 
@@ -516,112 +570,147 @@
   }
 
   /**
-   * Phân tích thuộc tính deadlines (hỗ trợ cả dạng Array và Object) thành danh sách đồng nhất
-   * kèm thông tin quy đổi sang múi giờ UTC+7 (giờ Việt Nam).
+   * Phân tích thuộc tính deadlines (hỗ trợ cả dạng Array và Object) thành toàn bộ danh sách đồng nhất
+   * kèm thông tin quy đổi sang múi giờ UTC+7 (giờ Việt Nam). Giữ nguyên mọi mốc thời gian trong dữ liệu gốc,
+   * kể cả các mốc không phân tích được ngày (không tự tạo ngày thay thế).
    * @param {Array|Object|null} deadlines Dữ liệu hạn nộp thô của hội nghị.
-   * @returns {Array<Object>} Danh sách các mốc đã chuẩn hóa và sắp xếp tăng dần theo timestamp tuyệt đối.
+   * @returns {Array<Object>} Danh sách toàn bộ các mốc: các mốc có ngày hợp lệ xếp tăng dần trước, mốc chưa rõ ngày giữ ở sau theo thứ tự gốc.
    */
   function parseDeadlinesList(deadlines) {
     if (!deadlines) return [];
     const items = [];
 
     if (Array.isArray(deadlines)) {
-      deadlines.forEach(entry => {
+      deadlines.forEach((entry, rawIndex) => {
         if (!entry || typeof entry !== 'object') return;
-        const converted = convertDeadlineToVn(entry.date, { isDeadline: true });
-        if (!converted) return;
-        const classified = classifyMilestoneName(entry.name);
-        const left = daysLeft(entry.date);
-        items.push({
-          key: classified.key,
-          name: String(entry.name || classified.shortName).trim(),
-          shortName: classified.shortName,
-          date: converted.rawDate,
-          vnDate: converted.vnIsoDate,
-          displayDate: converted.displayText,
-          timezoneLabel: converted.timezoneLabel,
-          targetMs: converted.targetMs,
-          daysLeft: left,
-          isPassed: converted.targetMs <= Date.now()
-        });
+        const rawDate = entry.date !== undefined && entry.date !== null ? String(entry.date).trim() : '';
+        const rawType = entry.type !== undefined && entry.type !== null ? String(entry.type).trim() : '';
+        const rawNote = String(entry.description || entry.note || '').trim();
+        const rawName = String(entry.name || '').trim();
+        const classified = classifyMilestoneName(rawName);
+        const converted = rawDate ? convertDeadlineToVn(rawDate, { isDeadline: true }) : null;
+
+        if (converted && Number.isFinite(converted.targetMs)) {
+          const left = daysLeft(rawDate);
+          items.push({
+            rawIndex,
+            hasValidDate: true,
+            key: classified.key,
+            name: rawName || classified.shortName,
+            shortName: classified.shortName,
+            type: rawType,
+            note: rawNote,
+            rawDate,
+            date: converted.rawDate,
+            vnDate: converted.vnIsoDate,
+            vnDateVi: converted.vnDateVi,
+            vnTimeVi: converted.vnTimeVi,
+            displayDate: converted.displayText,
+            timezoneLabel: converted.timezoneLabel,
+            targetMs: converted.targetMs,
+            daysLeft: left,
+            isPassed: converted.targetMs <= Date.now()
+          });
+        } else {
+          items.push({
+            rawIndex,
+            hasValidDate: false,
+            key: classified.key,
+            name: rawName || classified.shortName,
+            shortName: classified.shortName,
+            type: rawType,
+            note: rawNote,
+            rawDate,
+            date: '',
+            vnDate: '',
+            vnDateVi: '',
+            vnTimeVi: '',
+            displayDate: rawDate || 'Chưa xác định ngày',
+            timezoneLabel: '',
+            targetMs: null,
+            daysLeft: null,
+            isPassed: false
+          });
+        }
       });
     } else if (typeof deadlines === 'object') {
-      MILESTONE_DEFINITIONS.forEach(def => {
-        const converted = convertDeadlineToVn(deadlines[def.key], { isDeadline: true });
-        if (!converted) return;
-        const left = daysLeft(deadlines[def.key]);
-        items.push({
-          key: def.key,
-          name: def.name,
-          shortName: def.shortName,
-          date: converted.rawDate,
-          vnDate: converted.vnIsoDate,
-          displayDate: converted.displayText,
-          timezoneLabel: converted.timezoneLabel,
-          targetMs: converted.targetMs,
-          daysLeft: left,
-          isPassed: converted.targetMs <= Date.now()
-        });
+      MILESTONE_DEFINITIONS.forEach((def, rawIndex) => {
+        const rawVal = deadlines[def.key];
+        const rawDate = rawVal !== undefined && rawVal !== null ? String(rawVal).trim() : '';
+        if (!rawDate) return;
+        const converted = convertDeadlineToVn(rawDate, { isDeadline: true });
+        if (converted && Number.isFinite(converted.targetMs)) {
+          const left = daysLeft(rawDate);
+          items.push({
+            rawIndex,
+            hasValidDate: true,
+            key: def.key,
+            name: def.name,
+            shortName: def.shortName,
+            type: '',
+            note: '',
+            rawDate,
+            date: converted.rawDate,
+            vnDate: converted.vnIsoDate,
+            vnDateVi: converted.vnDateVi,
+            vnTimeVi: converted.vnTimeVi,
+            displayDate: converted.displayText,
+            timezoneLabel: converted.timezoneLabel,
+            targetMs: converted.targetMs,
+            daysLeft: left,
+            isPassed: converted.targetMs <= Date.now()
+          });
+        } else {
+          items.push({
+            rawIndex,
+            hasValidDate: false,
+            key: def.key,
+            name: def.name,
+            shortName: def.shortName,
+            type: '',
+            note: '',
+            rawDate,
+            date: '',
+            vnDate: '',
+            vnDateVi: '',
+            vnTimeVi: '',
+            displayDate: rawDate || 'Chưa xác định ngày',
+            timezoneLabel: '',
+            targetMs: null,
+            daysLeft: null,
+            isPassed: false
+          });
+        }
       });
     }
 
-    items.sort((a, b) => a.targetMs - b.targetMs);
+    items.sort((a, b) => {
+      if (a.hasValidDate !== b.hasValidDate) return a.hasValidDate ? -1 : 1;
+      if (a.hasValidDate && b.hasValidDate && a.targetMs !== b.targetMs) {
+        return a.targetMs - b.targetMs;
+      }
+      return a.rawIndex - b.rawIndex;
+    });
     return items;
   }
 
   /**
-   * Trích xuất tối đa 4 mốc chính đại diện cho thanh tiến trình trên trang chi tiết.
+   * Trích xuất toàn bộ các mốc thời gian đã chuẩn hóa của hội nghị để hiển thị trên trang chi tiết.
    * @param {Object} conf Đối tượng hội nghị.
-   * @returns {Array<Object>} Danh sách 4 mốc tiêu biểu.
+   * @returns {Array<Object>} Toàn bộ danh sách các mốc thời gian thực có trong dữ liệu.
    */
   function getCoreMilestones(conf) {
-    const all = parseDeadlinesList(conf ? conf.deadlines : null);
-    if (!all.length) return [];
-
-    // Nếu là dạng object chuẩn 4 mốc thì trả về đúng thứ tự chuẩn
-    if (conf && !Array.isArray(conf.deadlines)) {
-      return MILESTONE_DEFINITIONS.map(def => {
-        const found = all.find(m => m.key === def.key);
-        return found || {
-          key: def.key,
-          name: def.name,
-          shortName: def.shortName,
-          date: '',
-          daysLeft: null,
-          isPassed: false
-        };
-      });
-    }
-
-    // Dạng mảng từ crawl: ưu tiên ghép vào 4 giai đoạn chuẩn nếu khớp
-    const picked = [];
-    const usedIndices = new Set();
-    MILESTONE_DEFINITIONS.forEach(def => {
-      const idx = all.findIndex((item, i) => !usedIndices.has(i) && item.key === def.key);
-      if (idx !== -1) {
-        usedIndices.add(idx);
-        picked.push(all[idx]);
-      }
-    });
-
-    // Bổ sung các mốc còn lại nếu chưa đủ 4 thẻ hiển thị
-    for (let i = 0; i < all.length && picked.length < 4; i++) {
-      if (!usedIndices.has(i)) {
-        usedIndices.add(i);
-        picked.push(all[i]);
-      }
-    }
-
-    return picked.slice(0, 4).sort((a, b) => a.date.localeCompare(b.date));
+    return parseDeadlinesList(conf ? conf.deadlines : null);
   }
 
   /**
-   * Tìm mốc hạn nộp tiếp theo gần nhất (hoặc mốc cuối cùng nếu toàn bộ đã qua).
+   * Tìm mốc hạn nộp có ngày hợp lệ tiếp theo gần nhất (hoặc mốc hợp lệ cuối cùng nếu toàn bộ đã qua).
    * @param {Object} conf Đối tượng hội nghị.
-   * @returns {Object|null} Đối tượng mốc thời gian hoặc null nếu chưa có dữ liệu.
+   * @returns {Object|null} Đối tượng mốc thời gian hoặc null nếu chưa có dữ liệu hợp lệ.
    */
   function getNextDeadline(conf) {
-    const items = parseDeadlinesList(conf ? conf.deadlines : null);
+    const items = parseDeadlinesList(conf ? conf.deadlines : null)
+      .filter(m => m && m.hasValidDate && Number.isFinite(m.targetMs));
     if (!items.length) return null;
 
     const upcoming = items.find(m => !m.isPassed);
@@ -691,21 +780,165 @@
   }
 
   /**
-   * Chuẩn hóa nhãn hình thức tổ chức hội nghị sang tiếng Việt rõ nghĩa.
+   * Chuẩn hóa nhãn hình thức tổ chức hội nghị chỉ dựa trên trường dữ liệu gốc
+   * (`attendance_label`, `attendance_mode`, `format`, `mode`), tuyệt đối không suy đoán.
    * @param {Object} conf Đối tượng hội nghị.
    * @returns {string} Chuỗi hình thức tổ chức hoặc "Chưa cập nhật".
    */
   function formatConferenceMode(conf) {
-    if (!conf) return 'Chưa cập nhật';
-    const raw = String(conf.format || conf.mode || '').trim();
+    if (!conf || typeof conf !== 'object') return 'Chưa cập nhật';
+    const labelText = conf.attendance_label !== undefined && conf.attendance_label !== null
+      ? String(conf.attendance_label).trim()
+      : '';
+    if (labelText) return labelText;
+
+    const raw = String(conf.attendance_mode || conf.format || conf.mode || '').trim();
     if (!raw) return 'Chưa cập nhật';
     const fmtMap = {
       'in-person': 'Trực tiếp (In-person)',
-      'offline': 'Trực tiếp (In-person)',
-      'online': 'Trực tuyến (Online)',
-      'hybrid': 'Kết hợp (Hybrid)'
+      offline: 'Trực tiếp',
+      online: 'Trực tuyến',
+      hybrid: 'Kết hợp (trực tiếp + trực tuyến)'
     };
     return fmtMap[raw.toLowerCase()] || raw;
+  }
+
+  /**
+   * Định dạng lệ phí tham dự/đăng bài theo dạng `min-max <đơn vị tiền>` chỉ dựa trên dữ liệu gốc
+   * (`fee_min`, `fee_max`, `fee_currency`, `registration_fees`, hoặc `fee`), tuyệt đối không suy đoán.
+   * @param {Object} conf Đối tượng hội nghị.
+   * @returns {string} Chuỗi lệ phí hợp lệ hoặc "Chưa cập nhật".
+   */
+  /**
+   * Trích xuất khoảng lệ phí số (min, max) và đơn vị tiền tệ từ dữ liệu gốc của hội nghị.
+   * @param {Object} conf Đối tượng hội nghị.
+   * @returns {{ min: number, max: number, currency: string }|null} Khoảng lệ phí hợp lệ hoặc null nếu chưa cập nhật.
+   */
+  function extractConferenceFeeRange(conf) {
+    if (!conf || typeof conf !== 'object') return null;
+
+    const rawMin = conf.fee_min;
+    const rawMax = conf.fee_max;
+    const hasMin = rawMin !== null && rawMin !== undefined && String(rawMin).trim() !== '' && Number.isFinite(Number(rawMin));
+    const hasMax = rawMax !== null && rawMax !== undefined && String(rawMax).trim() !== '' && Number.isFinite(Number(rawMax));
+    const currency = conf.fee_currency ? String(conf.fee_currency).trim() : '';
+
+    if (hasMin && hasMax) {
+      const a = Number(rawMin);
+      const b = Number(rawMax);
+      return { min: Math.min(a, b), max: Math.max(a, b), currency };
+    }
+    if (hasMin || hasMax) {
+      const val = Number(hasMin ? rawMin : rawMax);
+      return { min: val, max: val, currency };
+    }
+
+    if (Array.isArray(conf.registration_fees) && conf.registration_fees.length > 0) {
+      const numericFees = conf.registration_fees.filter(item =>
+        item && item.amount !== null && item.amount !== undefined && String(item.amount).trim() !== '' && Number.isFinite(Number(item.amount))
+      );
+      if (numericFees.length > 0) {
+        const targetCurrency = currency
+          || (numericFees[0].currency ? String(numericFees[0].currency).trim() : '');
+        const matchingAmounts = numericFees
+          .filter(item => {
+            const itemCur = item.currency ? String(item.currency).trim() : '';
+            return !targetCurrency || !itemCur || itemCur.toUpperCase() === targetCurrency.toUpperCase();
+          })
+          .map(item => Number(item.amount));
+        if (matchingAmounts.length > 0) {
+          return {
+            min: Math.min(...matchingAmounts),
+            max: Math.max(...matchingAmounts),
+            currency: targetCurrency
+          };
+        }
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Định dạng lệ phí tham dự theo đúng dữ liệu gốc (dạng `min-max <đơn vị tiền>` hoặc `min <đơn vị>` nếu min === max).
+   * Tuyệt đối không lấy chuỗi `fee_note` dài làm giá trị lệ phí hiển thị.
+   * @param {Object} conf Đối tượng hội nghị.
+   * @returns {string} Chuỗi lệ phí gọn gàng hoặc "Chưa cập nhật".
+   */
+  function formatConferenceFee(conf) {
+    if (!conf || typeof conf !== 'object') return 'Chưa cập nhật';
+    if (conf.fee && String(conf.fee).trim()) return String(conf.fee).trim();
+
+    const range = extractConferenceFeeRange(conf);
+    if (!range) return 'Chưa cập nhật';
+
+    const formatNumberByCurrency = (val, cur) => {
+      if (cur && cur.toUpperCase() === 'VND') {
+        return Number(val).toLocaleString('vi-VN');
+      }
+      return String(val);
+    };
+
+    const cur = range.currency;
+    const rangeStr = range.min === range.max
+      ? formatNumberByCurrency(range.min, cur)
+      : `${formatNumberByCurrency(range.min, cur)}-${formatNumberByCurrency(range.max, cur)}`;
+    return cur ? `${rangeStr} ${cur}` : rangeStr;
+  }
+
+  /**
+   * Quy đổi khoảng lệ phí (min, max) về đơn vị USD ước tính để sắp xếp công bằng giữa USD, EUR và VND.
+   * Trả về null nếu hội nghị chưa cập nhật lệ phí.
+   * @param {Object} conf Đối tượng hội nghị.
+   * @returns {{ minUsd: number, maxUsd: number }|null} Cặp giá trị quy đổi hoặc null.
+   */
+  function getFeeSortBoundsUsd(conf) {
+    const range = extractConferenceFeeRange(conf);
+    if (!range) return null;
+
+    const cur = String(range.currency || 'USD').trim().toUpperCase();
+    let rateToUsd = 1;
+    if (cur === 'VND') rateToUsd = 1 / 25400;
+    else if (cur === 'EUR') rateToUsd = 1.08;
+    return {
+      minUsd: range.min * rateToUsd,
+      maxUsd: range.max * rateToUsd
+    };
+  }
+
+  /**
+   * Trích xuất danh sách nhãn lĩnh vực nguyên bản trực tiếp từ dữ liệu gốc của hội nghị
+   * (`topic_labels`, fallback `fields`/`topics`) để hiển thị đúng như trong data
+   * (ví dụ: "Trí tuệ nhân tạo & Học máy"), tuyệt đối không tự tách hay suy đoán thêm.
+   * Việc tách lĩnh vực đơn phục vụ tìm kiếm/lọc do `ConfGuideSearchCore.normalizeTopicFields` đảm nhiệm.
+   * @param {Object} conf Đối tượng hội nghị.
+   * @returns {Array<string>} Mảng nhãn lĩnh vực hiển thị duy nhất hoặc mảng rỗng nếu thiếu dữ liệu.
+   */
+  function extractTopicLabels(conf) {
+    if (!conf || typeof conf !== 'object') return [];
+
+    // Ưu tiên displayTopics / topic_labels đúng nguyên văn từ data gốc
+    if (Array.isArray(conf.displayTopics)) {
+      return conf.displayTopics
+        .map(item => (item === null || item === undefined ? '' : String(item).trim()))
+        .filter((val, idx, arr) => Boolean(val) && arr.indexOf(val) === idx);
+    }
+    if (Array.isArray(conf.topic_labels)) {
+      return conf.topic_labels
+        .map(item => (item === null || item === undefined ? '' : String(item).trim()))
+        .filter((val, idx, arr) => Boolean(val) && arr.indexOf(val) === idx);
+    }
+    if (typeof conf.topic_labels === 'string' && conf.topic_labels.trim()) {
+      return [conf.topic_labels.trim()];
+    }
+
+    let rawList = [];
+    if (Array.isArray(conf.fields) && conf.fields.length > 0) rawList = conf.fields;
+    else if (typeof conf.fields === 'string' && conf.fields.trim()) rawList = [conf.fields];
+    else if (Array.isArray(conf.topics) && conf.topics.length > 0) rawList = conf.topics;
+
+    return rawList
+      .map(item => (item === null || item === undefined ? '' : String(item).trim()))
+      .filter((val, idx, arr) => Boolean(val) && arr.indexOf(val) === idx);
   }
 
   /**
@@ -741,7 +974,7 @@
   }
 
   /**
-   * Chuẩn hóa đối tượng hội nghị từ dữ liệu JSON/crawler về cấu trúc thống nhất.
+   * Chuẩn hóa đối tượng hội nghị từ dữ liệu JSON về cấu trúc thống nhất mà không tự sinh dữ liệu thiếu.
    * @param {Object} conf Dữ liệu hội nghị thô.
    * @returns {Object|null} Bản sao đã chuẩn hóa các trường định danh, ngày và liên kết.
    */
@@ -756,26 +989,29 @@
       if (!endIso) endIso = normalizeDateIso(parts[1]);
     }
 
-    const fullTitle = conf.fullName || conf.full_name || conf.name || '';
+    const rawFullTitle = conf.fullName !== undefined && conf.fullName !== null
+      ? String(conf.fullName).trim()
+      : (conf.full_name !== undefined && conf.full_name !== null ? String(conf.full_name).trim() : '');
     const siteUrl = conf.website || conf.website_url || '';
     const locationText = conf.location || conf.country || '';
-    const isVietnam = /việt nam|vietnam/i.test(`${locationText} ${conf.region || ''}`);
+    const hasVietnamInfo = /việt nam|vietnam/i.test(`${locationText} ${conf.region || ''}`);
+    const countryFallback = conf.country ? String(conf.country).trim() : '';
     const rankText = extractConferenceRank(conf.rank);
 
     return Object.assign({}, conf, {
       id: getConferenceId(conf),
       rank: rankText,
       rankInfo: conf.rank && typeof conf.rank === 'object' ? conf.rank : null,
-      fullName: fullTitle,
-      full_name: fullTitle,
+      fullName: rawFullTitle,
+      full_name: rawFullTitle,
       website: siteUrl,
       website_url: siteUrl,
       startDate: startIso,
       start_date: startIso,
       endDate: endIso,
       end_date: endIso,
-      region: conf.region || (isVietnam ? 'Việt Nam' : 'Việt Nam'),
-      fields: Array.isArray(conf.fields) ? conf.fields : [],
+      region: conf.region ? String(conf.region).trim() : (hasVietnamInfo ? 'Việt Nam' : countryFallback),
+      fields: extractTopicLabels(conf),
       indexing: Array.isArray(conf.indexing) ? conf.indexing : (conf.indexing ? [conf.indexing] : [])
     });
   }
@@ -1046,19 +1282,129 @@
    * @returns {Object|null} Thông tin người dùng hoặc null nếu chưa đăng nhập.
    */
   function getCurrentUser() {
-    return readStorage('confguide_current_user', null);
+    const user = readStorage('confguide_current_user', null);
+    if (!user || typeof user !== 'object') return null;
+    const hasIdentity = Boolean(user.id || user.email || user.username);
+    return hasIdentity ? user : null;
   }
 
   /**
-   * Tạo khóa lưu trữ danh sách hội nghị đã lưu gắn theo người dùng hiện tại.
-   * @param {boolean} [useEmailFallback=false] Cho phép fallback theo email khi user chưa có id.
-   * @returns {string} Tên khóa lưu trữ trong localStorage.
+   * Kiểm tra người dùng hiện tại đã đăng nhập hợp lệ hay chưa.
+   * @returns {boolean} True nếu đã xác thực.
+   */
+  function isUserAuthenticated() {
+    return Boolean(getCurrentUser());
+  }
+
+  /**
+   * Tạo khóa lưu trữ danh sách hội nghị đã lưu gắn theo người dùng đã đăng nhập.
+   * Trả về chuỗi rỗng nếu chưa đăng nhập (tuyệt đối không lưu cho khách).
+   * @param {boolean} [useEmailFallback=false] Cho phép fallback theo email/username khi user chưa có id.
+   * @returns {string} Tên khóa lưu trữ trong localStorage hoặc chuỗi rỗng nếu chưa xác thực.
    */
   function getSavedStorageKey(useEmailFallback = false) {
     const user = getCurrentUser();
-    if (!user) return 'confguide_saved_guest';
-    const userKey = user.id || (useEmailFallback ? user.email : '');
-    return userKey ? `confguide_saved_${userKey}` : 'confguide_saved_guest';
+    if (!user) return '';
+    const userKey = user.id || (useEmailFallback ? (user.email || user.username) : '') || user.username;
+    return userKey ? `confguide_saved_${userKey}` : '';
+  }
+
+  /**
+   * Đọc danh sách ID hội nghị đã lưu của người dùng đã đăng nhập.
+   * Người chưa đăng nhập luôn nhận mảng rỗng.
+   * @param {boolean} [useEmailFallback=false] Cho phép fallback theo email/username khi user chưa có id.
+   * @returns {Array<string>} Mảng ID hội nghị đã lưu.
+   */
+  function getSavedConferenceIds(useEmailFallback = false) {
+    const key = getSavedStorageKey(useEmailFallback);
+    if (!key) return [];
+    const list = readStorage(key, []);
+    return Array.isArray(list) ? list.map(id => String(id)) : [];
+  }
+
+  /**
+   * Ghi đè danh sách ID hội nghị đã lưu vào localStorage kèm kiểm tra quyền truy cập.
+   * Từ chối thao tác và trả về false nếu chưa đăng nhập.
+   * @param {Array<string>} ids Danh sách ID hội nghị cần lưu.
+   * @param {boolean} [useEmailFallback=false] Cho phép fallback khóa user.
+   * @returns {boolean} True nếu hợp lệ và ghi thành công; false nếu chưa đăng nhập hoặc lỗi ghi.
+   */
+  function setSavedConferenceIds(ids, useEmailFallback = false) {
+    const key = getSavedStorageKey(useEmailFallback);
+    if (!key) return false;
+    const clean = Array.isArray(ids) ? ids.map(id => String(id).trim()).filter(Boolean) : [];
+    return writeStorage(key, clean);
+  }
+
+  /**
+   * Kiểm tra một hội nghị có đang được người dùng hiện tại theo dõi hay không.
+   * @param {string} confId Mã hội nghị.
+   * @returns {boolean} True nếu đã đăng nhập và hội nghị nằm trong danh sách theo dõi.
+   */
+  function isConferenceSaved(confId) {
+    if (!confId || !isUserAuthenticated()) return false;
+    return getSavedConferenceIds(false).includes(String(confId));
+  }
+
+  /**
+   * Hiển thị thông báo và hộp thoại yêu cầu đăng nhập khi khách nhấn chức năng theo dõi hội nghị.
+   * Sau khi người dùng chọn "Đăng nhập ngay", điều hướng kèm `?redirect=...` để quay lại đúng trang cũ.
+   * @param {Object} [options={}] Tùy chọn đường dẫn quay lại sau đăng nhập.
+   * @returns {Promise<boolean>} Promise trả về true nếu người dùng chọn chuyển sang trang đăng nhập.
+   */
+  async function promptLoginForTracking(options = {}) {
+    const currentTarget = options.redirectUrl
+      || `${getCurrentPage()}${window.location.search || ''}${window.location.hash || ''}`;
+    const loginUrl = `login.html?redirect=${encodeURIComponent(currentTarget)}`;
+
+    if (!document.body) {
+      window.location.assign(loginUrl);
+      return true;
+    }
+
+    const confirmed = await showConfirmModal(
+      'Chỉ tài khoản đã đăng nhập mới có thể lưu và theo dõi hội nghị. Bạn có muốn đăng nhập ngay để tiếp tục không?',
+      {
+        title: 'Yêu cầu đăng nhập',
+        confirmText: 'Đăng nhập ngay',
+        cancelText: 'Để sau',
+        danger: false
+      }
+    );
+
+    if (confirmed) {
+      window.location.assign(loginUrl);
+    }
+    return confirmed;
+  }
+
+  /**
+   * Thực hiện bật/tắt trạng thái theo dõi một hội nghị có kiểm tra xác thực tài khoản ở lớp dữ liệu.
+   * Không cho phép thêm/xóa nếu người dùng chưa đăng nhập.
+   * @param {string} confId Mã hội nghị.
+   * @param {Object} [options={}] Tùy chọn chuyển hướng khi yêu cầu đăng nhập.
+   * @returns {{ ok: boolean, requiresAuth: boolean, isSaved: boolean }} Kết quả thao tác.
+   */
+  function toggleSavedConference(confId, options = {}) {
+    if (!confId) return { ok: false, requiresAuth: false, isSaved: false };
+    if (!isUserAuthenticated()) {
+      promptLoginForTracking(options);
+      return { ok: false, requiresAuth: true, isSaved: false };
+    }
+
+    const targetId = String(confId);
+    const current = getSavedConferenceIds(false);
+    const exists = current.includes(targetId);
+    const next = exists
+      ? current.filter(id => id !== targetId)
+      : [...current, targetId];
+
+    const written = setSavedConferenceIds(next, false);
+    if (!written) {
+      showToast('Không thể cập nhật danh sách trong bộ nhớ trình duyệt.', 'error');
+      return { ok: false, requiresAuth: false, isSaved: exists };
+    }
+    return { ok: true, requiresAuth: false, isSaved: !exists };
   }
 
   /**
@@ -1207,7 +1553,9 @@
 
     const isLoginPage = currentPage === 'login.html';
     const isRegisterPage = currentPage === 'register.html';
-    const redirectParam = (currentPage && currentPage !== 'index.html' && !isLoginPage && !isRegisterPage)
+    const isNotFoundPage = currentPage === '404.html'
+      || Boolean(document.body && document.body.dataset && document.body.dataset.page === '404');
+    const redirectParam = (currentPage && currentPage !== 'index.html' && !isLoginPage && !isRegisterPage && !isNotFoundPage)
       ? `?redirect=${encodeURIComponent(currentPage)}`
       : '';
 
@@ -1225,6 +1573,422 @@
         </a>
       </div>
     `;
+  }
+
+  /** Danh sách mục đích sử dụng ConfGuide gắn trực tiếp với tiêu chí lọc và sắp xếp thực tế */
+  const USAGE_PURPOSES = [
+    {
+      key: 'submit-paper',
+      label: 'Nộp bài công bố nghiên cứu',
+      shortLabel: 'Nộp bài nghiên cứu',
+      desc: 'Ưu tiên hội nghị đang mở nhận bài (CFP mở) và hạn nộp gần nhất.',
+      searchCfp: 'open',
+      searchSort: 'deadline'
+    },
+    {
+      key: 'track-deadlines',
+      label: 'Theo dõi lịch & tham dự sự kiện',
+      shortLabel: 'Theo dõi lịch sự kiện',
+      desc: 'Sắp xếp theo thời gian diễn ra để chủ động lập kế hoạch tham dự.',
+      searchCfp: '',
+      searchSort: 'event'
+    },
+    {
+      key: 'explore-rank',
+      label: 'Tìm hội nghị uy tín (Rank CORE)',
+      shortLabel: 'Tìm hội nghị uy tín',
+      desc: 'Ưu tiên hội nghị đạt chuẩn phân hạng CORE A*, A, B, C.',
+      searchCfp: '',
+      searchSort: 'rank-desc'
+    },
+    {
+      key: 'budget-friendly',
+      label: 'Cân nhắc lệ phí hợp lý',
+      shortLabel: 'Cân nhắc lệ phí',
+      desc: 'Ưu tiên hội nghị có mức lệ phí tham dự từ thấp đến cao.',
+      searchCfp: '',
+      searchSort: 'fee-asc'
+    }
+  ];
+
+  /** Danh mục 25 lĩnh vực đơn chuẩn hóa khớp 100% với topic slug trong data/conference_data.json */
+  const PREFERENCE_TOPICS = [
+    { key: 'tri-tue-nhan-tao', label: 'Trí tuệ nhân tạo', primary: true },
+    { key: 'hoc-may', label: 'Học máy', primary: true },
+    { key: 'khoa-hoc-du-lieu', label: 'Khoa học dữ liệu', primary: true },
+    { key: 'du-lieu-lon', label: 'Dữ liệu lớn', primary: true },
+    { key: 'mang-may-tinh', label: 'Mạng máy tính', primary: true },
+    { key: 'iot', label: 'IoT', primary: true },
+    { key: 'an-toan-thong-tin', label: 'An toàn thông tin', primary: true },
+    { key: 'thi-giac-may-tinh', label: 'Thị giác máy tính', primary: true },
+    { key: 'cong-nghe-phan-mem', label: 'Công nghệ phần mềm', primary: true },
+    { key: 'xu-ly-ngon-ngu-tu-nhien', label: 'Xử lý ngôn ngữ tự nhiên', primary: true },
+    { key: 'truyen-thong', label: 'Truyền thông', primary: false },
+    { key: 'da-phuong-tien', label: 'Đa phương tiện', primary: false },
+    { key: 'dien-tu', label: 'Điện tử', primary: false },
+    { key: 'vien-thong', label: 'Viễn thông', primary: false },
+    { key: 'xu-ly-tin-hieu', label: 'Xử lý tín hiệu', primary: false },
+    { key: 'cntt-tong-hop', label: 'CNTT tổng hợp', primary: false },
+    { key: 'robot', label: 'Robot', primary: false },
+    { key: 'tu-dong-hoa', label: 'Tự động hóa', primary: false },
+    { key: 'dieu-khien', label: 'Điều khiển', primary: false },
+    { key: 'he-thong-thong-tin', label: 'Hệ thống thông tin', primary: false },
+    { key: 'chuyen-doi-so', label: 'Chuyển đổi số', primary: false },
+    { key: 'tuong-tac-nguoi-may', label: 'Tương tác người-máy', primary: false },
+    { key: 'cong-nghe-giao-duc', label: 'Công nghệ giáo dục', primary: false },
+    { key: 'dien-toan-dam-may', label: 'Điện toán đám mây', primary: false },
+    { key: 'he-thong-phan-tan', label: 'Hệ thống phân tán', primary: false }
+  ];
+
+  const VALID_PURPOSE_KEYS = new Set(USAGE_PURPOSES.map(item => item.key));
+  const VALID_PREF_TOPIC_KEYS = new Set(PREFERENCE_TOPICS.map(item => item.key));
+  const PREF_TOPIC_LABEL_MAP = PREFERENCE_TOPICS.reduce((acc, item) => {
+    acc[item.key] = item.label;
+    return acc;
+  }, {});
+  const TOPIC_SLUG_ALIAS_FALLBACK = {
+    ai: 'tri-tue-nhan-tao',
+    'artificial-intelligence': 'tri-tue-nhan-tao',
+    ml: 'hoc-may',
+    'machine-learning': 'hoc-may',
+    'deep-learning': 'hoc-may',
+    'data-science': 'khoa-hoc-du-lieu',
+    'big-data': 'du-lieu-lon',
+    network: 'mang-may-tinh',
+    networks: 'mang-may-tinh',
+    iot: 'iot',
+    security: 'an-toan-thong-tin',
+    'cyber-security': 'an-toan-thong-tin',
+    vision: 'thi-giac-may-tinh',
+    'computer-vision': 'thi-giac-may-tinh',
+    cv: 'thi-giac-may-tinh',
+    software: 'cong-nghe-phan-mem',
+    'software-engineering': 'cong-nghe-phan-mem',
+    nlp: 'xu-ly-ngon-ngu-tu-nhien',
+    'natural-language-processing': 'xu-ly-ngon-ngu-tu-nhien',
+    robotics: 'robot',
+    cloud: 'dien-toan-dam-may',
+    'cloud-computing': 'dien-toan-dam-may',
+    hci: 'tuong-tac-nguoi-may'
+  };
+
+  /**
+   * Chuyển đổi tên hoặc cụm lĩnh vực sang khóa slug chuẩn khớp bộ lọc Tra cứu (hỗ trợ đ/Đ).
+   * @param {string} text - Chuỗi tên lĩnh vực.
+   * @returns {string} Khóa slug kebab-case.
+   */
+  function toCanonicalTopicSlug(text) {
+    if (window.ConfGuideSearchCore && typeof window.ConfGuideSearchCore.toTopicSlug === 'function') {
+      return window.ConfGuideSearchCore.toTopicSlug(text);
+    }
+    return String(text || '')
+      .trim()
+      .toLowerCase()
+      .replace(/[đĐ]/g, 'd')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+  }
+
+  /**
+   * Phân tích chuỗi `fieldsOfInterest` trong hồ sơ tài khoản thành danh sách khóa lĩnh vực chuẩn hợp lệ.
+   * Tái sử dụng `ConfGuideSearchCore.normalizeTopicFields` khi sẵn có để khớp 1:1 với trang Tra cứu.
+   * @param {string|Array<string>} fieldsInput - Chuỗi hoặc mảng lĩnh vực từ hồ sơ tài khoản.
+   * @returns {Array<string>} Mảng khóa slug lĩnh vực duy nhất hợp lệ.
+   */
+  function parseTopicKeysFromText(fieldsInput) {
+    if (!fieldsInput) return [];
+    const seen = new Set();
+    const keys = [];
+    const pushIfValid = key => {
+      if (VALID_PREF_TOPIC_KEYS.has(key) && !seen.has(key)) {
+        seen.add(key);
+        keys.push(key);
+      }
+    };
+
+    if (window.ConfGuideSearchCore && typeof window.ConfGuideSearchCore.normalizeTopicFields === 'function') {
+      window.ConfGuideSearchCore.normalizeTopicFields(fieldsInput).forEach(item => {
+        if (item && item.key) pushIfValid(item.key);
+      });
+      return keys;
+    }
+
+    const rawPieces = Array.isArray(fieldsInput)
+      ? fieldsInput
+      : String(fieldsInput).split(/(?:\s*[,;/&\n]+\s*|\s+và\s+)/gi);
+    rawPieces.forEach(part => {
+      const slug = toCanonicalTopicSlug(part);
+      if (!slug) return;
+      const mapped = TOPIC_SLUG_ALIAS_FALLBACK[slug] || slug;
+      pushIfValid(mapped);
+    });
+    return keys;
+  }
+
+  /**
+   * Trích xuất danh sách nhãn hiển thị lĩnh vực từ trường `fieldsOfInterest` của hồ sơ.
+   * Các lĩnh vực chuẩn hóa trả về nhãn chuẩn tiếng Việt; giá trị tùy biến vẫn được giữ nguyên để hiển thị trung thực.
+   * @param {string|Array<string>} fieldsInput - Chuỗi hoặc mảng lĩnh vực từ hồ sơ tài khoản.
+   * @returns {Array<string>} Danh sách nhãn lĩnh vực không trùng lặp.
+   */
+  function parseTopicDisplayLabelsFromText(fieldsInput) {
+    if (!fieldsInput) return [];
+    const pieces = Array.isArray(fieldsInput)
+      ? fieldsInput
+      : String(fieldsInput).split(/(?:\s*[,;\n]+\s*)/g);
+    const seen = new Set();
+    const labels = [];
+    pieces.forEach(part => {
+      const clean = String(part || '').trim();
+      if (!clean) return;
+      const matchedKeys = parseTopicKeysFromText(clean);
+      if (matchedKeys.length > 0) {
+        matchedKeys.forEach(key => {
+          const canonLabel = PREF_TOPIC_LABEL_MAP[key] || clean;
+          const norm = canonLabel.toLowerCase();
+          if (!seen.has(norm)) {
+            seen.add(norm);
+            labels.push(canonLabel);
+          }
+        });
+        return;
+      }
+      const normRaw = clean.toLowerCase();
+      if (!seen.has(normRaw)) {
+        seen.add(normRaw);
+        labels.push(clean);
+      }
+    });
+    return labels;
+  }
+
+  /**
+   * Kiểm tra một bản ghi trong `confguide_users` có khớp với phiên đăng nhập hiện tại hay không.
+   * @param {Object|null} candidate - Bản ghi người dùng trong danh sách tài khoản.
+   * @param {Object|null} activeUser - Phiên người dùng hiện tại.
+   * @returns {boolean} True nếu cùng một tài khoản.
+   */
+  function isMatchingStoredAccount(candidate, activeUser) {
+    if (!candidate || typeof candidate !== 'object' || !activeUser || typeof activeUser !== 'object') return false;
+    if (candidate.id && activeUser.id && String(candidate.id) === String(activeUser.id)) return true;
+    if (candidate.username && activeUser.username
+      && String(candidate.username).toLowerCase() === String(activeUser.username).toLowerCase()) {
+      return true;
+    }
+    if (candidate.email && activeUser.email
+      && String(candidate.email).toLowerCase() === String(activeUser.email).toLowerCase()) {
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Lấy chuỗi `fieldsOfInterest` gắn với tài khoản đang đăng nhập (`confguide_current_user` làm nguồn chính,
+   * đồng bộ từ `confguide_users` nếu cần). Trả về chuỗi rỗng nếu chưa đăng nhập.
+   * @returns {string} Chuỗi lĩnh vực nghiên cứu của tài khoản hoặc chuỗi rỗng.
+   */
+  function getUserResearchFieldsText() {
+    const user = getCurrentUser();
+    if (!user) return '';
+    if (typeof user.fieldsOfInterest === 'string') {
+      return user.fieldsOfInterest.trim();
+    }
+    const users = readStorage('confguide_users', []);
+    if (Array.isArray(users)) {
+      const matched = users.find(candidate => isMatchingStoredAccount(candidate, user));
+      if (matched && typeof matched.fieldsOfInterest === 'string') {
+        return matched.fieldsOfInterest.trim();
+      }
+    }
+    return '';
+  }
+
+  /**
+   * Lấy danh sách khóa lĩnh vực nghiên cứu (slug) gắn với tài khoản đang đăng nhập.
+   * Luôn trả về `[]` khi người dùng chưa đăng nhập.
+   * @returns {Array<string>} Danh sách khóa lĩnh vực của tài khoản hiện tại.
+   */
+  function getUserResearchTopicKeys() {
+    if (!isUserAuthenticated()) return [];
+    return parseTopicKeysFromText(getUserResearchFieldsText());
+  }
+
+  /**
+   * Lấy danh sách nhãn lĩnh vực nghiên cứu gắn với tài khoản đang đăng nhập.
+   * Luôn trả về `[]` khi người dùng chưa đăng nhập.
+   * @returns {Array<string>} Danh sách nhãn lĩnh vực để hiển thị.
+   */
+  function getUserResearchTopicLabels() {
+    if (!isUserAuthenticated()) return [];
+    return parseTopicDisplayLabelsFromText(getUserResearchFieldsText());
+  }
+
+  /**
+   * Cập nhật danh sách lĩnh vực nghiên cứu vào đúng trường `fieldsOfInterest` của tài khoản đang đăng nhập
+   * (đồng bộ cả `confguide_current_user` và `confguide_users`). Từ chối lưu nếu chưa đăng nhập.
+   * @param {Array<string>} topicKeys - Danh sách khóa lĩnh vực muốn lưu.
+   * @param {{ silent?: boolean }} [options={}] - Tùy chọn không phát sự kiện nếu đang gộp lưu cùng prefs.
+   * @returns {{ ok: boolean, requiresAuth: boolean, keys: Array<string>, labels: Array<string>, fieldsOfInterest: string }} Kết quả thao tác.
+   */
+  function setUserResearchTopicKeys(topicKeys, options = {}) {
+    const activeUser = getCurrentUser();
+    if (!activeUser) {
+      return { ok: false, requiresAuth: true, keys: [], labels: [], fieldsOfInterest: '' };
+    }
+
+    const inputSet = new Set(
+      Array.isArray(topicKeys) ? topicKeys.map(item => String(item || '').trim()).filter(Boolean) : []
+    );
+    const cleanKeys = PREFERENCE_TOPICS
+      .map(item => item.key)
+      .filter(key => inputSet.has(key));
+    const labels = cleanKeys.map(key => PREF_TOPIC_LABEL_MAP[key] || key);
+    const fieldsText = labels.join(', ');
+
+    const updatedCurrentUser = Object.assign({}, activeUser, { fieldsOfInterest: fieldsText });
+    writeStorage('confguide_current_user', updatedCurrentUser);
+
+    const users = readStorage('confguide_users', []);
+    if (Array.isArray(users)) {
+      let modified = false;
+      const nextUsers = users.map(candidate => {
+        if (!isMatchingStoredAccount(candidate, updatedCurrentUser)) return candidate;
+        modified = true;
+        return Object.assign({}, candidate, { fieldsOfInterest: fieldsText });
+      });
+      if (modified) {
+        writeStorage('confguide_users', nextUsers);
+      }
+    }
+
+    updateSettingsPrefSummary();
+    if (!options.silent) {
+      try {
+        window.dispatchEvent(new CustomEvent('confguide:preferences-changed', {
+          detail: getUserPreferences()
+        }));
+      } catch {
+        /* Bỏ qua nếu môi trường không hỗ trợ CustomEvent */
+      }
+    }
+    return {
+      ok: true,
+      requiresAuth: false,
+      keys: cleanKeys,
+      labels,
+      fieldsOfInterest: fieldsText
+    };
+  }
+
+  /**
+   * Đọc và chuẩn hóa tùy chọn người dùng từ `confguide_user_preferences` kết hợp nguồn lĩnh vực
+   * gắn với tài khoản đang đăng nhập (`confguide_current_user.fieldsOfInterest`).
+   * @returns {{ aoe: boolean, countdown: boolean, purpose: string, topics: string[], bannerDismissed: boolean, onboardingCompleted: boolean, updatedAt: string }}
+   */
+  function getUserPreferences() {
+    const raw = readStorage('confguide_user_preferences', {});
+    const safeObj = (raw && typeof raw === 'object' && !Array.isArray(raw)) ? raw : {};
+    const rawPurpose = typeof safeObj.purpose === 'string' ? safeObj.purpose.trim() : '';
+    const purpose = VALID_PURPOSE_KEYS.has(rawPurpose) ? rawPurpose : '';
+    return {
+      aoe: safeObj.aoe !== false,
+      countdown: safeObj.countdown !== false,
+      purpose,
+      topics: getUserResearchTopicKeys(),
+      bannerDismissed: Boolean(safeObj.bannerDismissed),
+      onboardingCompleted: Boolean(safeObj.onboardingCompleted),
+      updatedAt: typeof safeObj.updatedAt === 'string' ? safeObj.updatedAt : ''
+    };
+  }
+
+  /**
+   * Cập nhật tóm tắt sở thích hiển thị bên trong modal Cài đặt toàn cục.
+   */
+  function updateSettingsPrefSummary() {
+    const summaryEl = document.getElementById('globalPrefPersonalSummary');
+    if (!summaryEl) return;
+    const prefs = getUserPreferences();
+    const purposeObj = USAGE_PURPOSES.find(item => item.key === prefs.purpose);
+    const topicLabels = prefs.topics.map(key => PREF_TOPIC_LABEL_MAP[key] || key);
+    if (!purposeObj && topicLabels.length === 0) {
+      summaryEl.textContent = 'Chưa thiết lập mục đích sử dụng và lĩnh vực quan tâm.';
+      return;
+    }
+    const parts = [];
+    if (purposeObj) parts.push(`Mục đích: ${purposeObj.label}`);
+    if (topicLabels.length > 0) {
+      const preview = topicLabels.slice(0, 3).join(', ');
+      const extra = topicLabels.length > 3 ? ` (+${topicLabels.length - 3})` : '';
+      parts.push(`Lĩnh vực (${topicLabels.length}): ${preview}${extra}`);
+    }
+    summaryEl.textContent = parts.join(' • ');
+  }
+
+  /**
+   * Hợp nhất và lưu thay đổi vào `confguide_user_preferences` (và đồng bộ `fieldsOfInterest` của tài khoản
+   * nếu đã đăng nhập), đồng thời phát sự kiện cập nhật toàn trang.
+   * @param {Object} [patch={}] - Các trường tùy chọn cần cập nhật.
+   * @returns {Object} Đối tượng tùy chọn đã chuẩn hóa sau khi lưu.
+   */
+  function saveUserPreferences(patch = {}) {
+    const current = getUserPreferences();
+    const safePatch = (patch && typeof patch === 'object' && !Array.isArray(patch)) ? patch : {};
+    const merged = {
+      ...current,
+      ...safePatch,
+      updatedAt: new Date().toISOString()
+    };
+    const nextPurpose = typeof merged.purpose === 'string' && VALID_PURPOSE_KEYS.has(merged.purpose.trim())
+      ? merged.purpose.trim()
+      : '';
+
+    if (Object.prototype.hasOwnProperty.call(safePatch, 'topics') && isUserAuthenticated()) {
+      setUserResearchTopicKeys(safePatch.topics, { silent: true });
+    }
+
+    const storedPrefs = {
+      aoe: merged.aoe !== false,
+      countdown: merged.countdown !== false,
+      purpose: nextPurpose,
+      bannerDismissed: Boolean(merged.bannerDismissed),
+      onboardingCompleted: Boolean(merged.onboardingCompleted),
+      updatedAt: merged.updatedAt
+    };
+    writeStorage('confguide_user_preferences', storedPrefs);
+
+    const nextPrefs = {
+      ...storedPrefs,
+      topics: getUserResearchTopicKeys()
+    };
+    updateSettingsPrefSummary();
+    try {
+      window.dispatchEvent(new CustomEvent('confguide:preferences-changed', { detail: nextPrefs }));
+    } catch {
+      /* Bỏ qua nếu môi trường không hỗ trợ CustomEvent */
+    }
+    return nextPrefs;
+  }
+
+  /**
+   * Tạo URL điều hướng tới trang Tra cứu (search.html) gắn sẵn lĩnh vực và tiêu chí theo mục đích.
+   * @param {Object} [prefs] - Tùy chọn người dùng (mặc định đọc từ getUserPreferences()).
+   * @returns {string} Đường dẫn tương đối tới search.html kèm tham số truy vấn.
+   */
+  function buildPersonalizedSearchUrl(prefs) {
+    const state = prefs && typeof prefs === 'object' ? prefs : getUserPreferences();
+    const params = new URLSearchParams();
+    if (Array.isArray(state.topics) && state.topics.length > 0) {
+      params.set('topic', state.topics.join(','));
+    }
+    const purposeMeta = USAGE_PURPOSES.find(item => item.key === state.purpose);
+    if (purposeMeta) {
+      if (purposeMeta.searchCfp) params.set('cfp', purposeMeta.searchCfp);
+      if (purposeMeta.searchSort) params.set('sort', purposeMeta.searchSort);
+    }
+    const qs = params.toString();
+    return qs ? `search.html?${qs}` : 'search.html';
   }
 
   /**
@@ -1292,6 +2056,17 @@
                   <span class="switch-slider"></span>
                 </label>
               </div>
+              <div class="modal-divider"></div>
+              <div class="modal-section-block">
+                <h4 class="modal-block-title">Cá nhân hóa mục đích &amp; lĩnh vực</h4>
+                <p class="modal-block-desc">Chọn mục đích sử dụng và các lĩnh vực nghiên cứu quan tâm để hệ thống gợi ý hội nghị phù hợp hơn.</p>
+                <div class="modal-pref-summary-card">
+                  <p class="modal-pref-summary-text" id="globalPrefPersonalSummary">Chưa thiết lập mục đích sử dụng và lĩnh vực quan tâm.</p>
+                  <button type="button" class="btn btn-secondary modal-pref-open-btn" id="btnOpenPrefSurveyFromSettings">
+                    Thiết lập sở thích
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -1318,15 +2093,17 @@
         open: true
       },
       {
-        q: '2. Làm thế nào để xuất hạn nộp sang Google Calendar hoặc file .ics?',
-        a: 'Tại trang Chi tiết hội nghị (detail.html), cạnh mỗi mốc hạn chót đều có nút "Google Calendar" '
-          + 'và "Tải file .ics". File .ics tự động cài sẵn nhắc nhở trước 7 ngày và trước 1 ngày.',
+        q: '2. Làm thế nào để thêm hạn nộp bài vào Google Calendar?',
+        a: 'Tại trang Chi tiết hội nghị (detail.html), bạn có thể nhấn nút "Thêm vào Google Calendar" trong khung '
+          + 'Mốc tiếp theo hoặc biểu tượng lịch trên từng mốc hạn để lưu nhắc nhở theo giờ Việt Nam (UTC+7).',
         open: false
       },
       {
-        q: '3. Phân hạng CORE (A*, A, B, C) có ý nghĩa gì?',
-        a: 'CORE Ranking là chuẩn xếp hạng hội nghị khoa học CNTT uy tín: A* là hạng xuất sắc hàng đầu '
-          + '(Top 4%-7%), A là hội nghị rất uy tín, B là hội nghị chất lượng tốt và C là hội nghị chuyên ngành.',
+        q: '3. Phân hạng CORE (A*, A, B, C) và nhãn "Chưa xếp hạng" có ý nghĩa gì?',
+        a: 'Thang phân hạng CORE / ICORE đánh giá uy tín học thuật của hội nghị quốc tế (từ cao đến thấp: '
+          + '<strong>A*</strong>, <strong>A</strong>, <strong>B</strong>, <strong>C</strong>). '
+          + 'Các hội nghị trong nước, chuyên đề mới hoặc chưa có dữ liệu xếp hạng trong danh mục gốc '
+          + 'sẽ được hiển thị trung thực là <strong>Chưa xếp hạng</strong>.',
         open: false
       },
       {
@@ -1393,7 +2170,7 @@
                   <label for="globalReportCategory">Phân loại sự cố</label>
                   <select id="globalReportCategory" class="modal-input">
                     <option value="Sai thông tin deadline">Sai thông tin deadline / Mốc thời gian</option>
-                    <option value="Sai phân hạng CORE">Sai phân hạng CORE / Chỉ mục</option>
+                    <option value="Sai thông tin địa điểm / Lệ phí">Sai thông tin địa điểm / Lệ phí</option>
                     <option value="Link website bị hỏng">Link website bị hỏng</option>
                     <option value="Lỗi giao diện / Chức năng">Lỗi giao diện / Chức năng</option>
                     <option value="Đề xuất hội nghị mới">Đề xuất hội nghị mới</option>
@@ -1427,28 +2204,251 @@
   }
 
   /**
-   * Tạo HTML cho 3 modal toàn cục: Cài đặt, Trợ giúp và Báo cáo sự cố.
-   * @returns {string} Chuỗi HTML chứa cấu trúc 3 modal.
+   * Tạo HTML cho modal khảo sát sở thích & mục đích sử dụng ConfGuide toàn cục dạng bảng biểu có ô tích.
+   * Sử dụng đúng danh mục 25 lĩnh vực đơn thực tế từ dữ liệu hội nghị.
+   * @returns {string} Chuỗi HTML `#globalPreferencesSurveyModal`.
+   */
+  function buildPreferencesSurveyModalHtml() {
+    const renderTopicCheckboxRow = item => `
+      <label class="pref-topic-row">
+        <input type="checkbox" class="pref-topic-row__input js-pref-topic-checkbox" value="${escapeHtml(item.key)}">
+        <span class="pref-topic-row__label">${escapeHtml(item.label)}</span>
+      </label>
+    `;
+
+    const purposesHtml = USAGE_PURPOSES.map(item => `
+      <button type="button" class="pref-purpose-card" data-purpose="${escapeHtml(item.key)}" aria-pressed="false">
+        <span class="pref-purpose-card__check" aria-hidden="true">✓</span>
+        <span class="pref-purpose-card__body">
+          <span class="pref-purpose-card__title">${escapeHtml(item.label)}</span>
+          <span class="pref-purpose-card__desc">${escapeHtml(item.desc)}</span>
+        </span>
+      </button>
+    `).join('');
+
+    return `
+      <div class="layout-modal" id="globalPreferencesSurveyModal" role="dialog"
+        aria-modal="true" aria-labelledby="prefSurveyModalTitle" hidden>
+        <div class="layout-modal-backdrop"></div>
+        <div class="layout-modal-box layout-modal-box--wide">
+          <div class="layout-modal-header">
+            <h3 class="layout-modal-title" id="prefSurveyModalTitle">Cá nhân hóa trải nghiệm ConfGuide</h3>
+            <button type="button" class="layout-modal-close-btn" aria-label="Đóng">&times;</button>
+          </div>
+          <div class="layout-modal-body">
+            <p class="modal-block-desc pref-survey-intro" id="prefSurveyIntro">
+              Chọn mục đích sử dụng và tích chọn các lĩnh vực nghiên cứu bạn quan tâm để ConfGuide ưu tiên gợi ý hội nghị phù hợp trên Trang chủ và trang Tra cứu.
+            </p>
+
+            <div class="modal-section-block" id="prefPurposeSection">
+              <div class="pref-survey-section-head">
+                <h4 class="modal-block-title">1. Mục đích tìm kiếm</h4>
+                <span class="pref-survey-optional">Tùy chọn (chọn 1)</span>
+              </div>
+              <div class="pref-purpose-grid" id="prefPurposeGrid" role="group" aria-label="Mục đích sử dụng trang web">
+                ${purposesHtml}
+              </div>
+            </div>
+
+            <div class="modal-divider" id="prefSurveyDivider"></div>
+
+            <div class="modal-section-block" id="prefTopicsSection">
+              <div class="pref-survey-section-head">
+                <h4 class="modal-block-title" id="prefTopicsHeading">2. Lĩnh vực nghiên cứu bạn quan tâm</h4>
+                <span class="pref-count-badge" id="prefTopicCountBadge">Đã chọn: 0 lĩnh vực</span>
+              </div>
+              <div class="pref-topic-table">
+                <div class="pref-topic-table__head">
+                  <span>Tích chọn một hoặc nhiều lĩnh vực nghiên cứu</span>
+                </div>
+                <div class="pref-topic-table__grid" id="prefTopicGrid" role="group" aria-labelledby="prefTopicsHeading">
+                  ${PREFERENCE_TOPICS.map(renderTopicCheckboxRow).join('')}
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="pref-modal-actions">
+            <button type="button" class="btn btn-secondary pref-modal-reset-btn" id="prefSurveyResetBtn">Xóa lựa chọn</button>
+            <div class="pref-modal-actions__right">
+              <button type="button" class="btn btn-secondary layout-modal-cancel-btn">Hủy</button>
+              <button type="button" class="btn btn-primary" id="prefSurveySaveBtn">OK</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  /**
+   * Tạo HTML cho các modal toàn cục: Cài đặt, Trợ giúp, Báo cáo sự cố và Khảo sát sở thích.
+   * @returns {string} Chuỗi HTML chứa cấu trúc các modal dùng chung.
    */
   function renderGlobalModalsHtml() {
-    return [buildSettingsModalHtml(), buildHelpModalHtml(), buildReportModalHtml()].join('');
+    return [
+      buildSettingsModalHtml(),
+      buildHelpModalHtml(),
+      buildReportModalHtml(),
+      buildPreferencesSurveyModalHtml()
+    ].join('');
   }
 
   /**
    * Mở modal toàn cục, lưu vị trí focus và khóa cuộn nền.
    * @param {string} modalId Mã id của phần tử modal.
+   * @param {HTMLElement|null} [customReturnFocusEl=null] Phần tử ưu tiên khôi phục focus khi đóng.
    */
-  function openLayoutModal(modalId) {
+  function openLayoutModal(modalId, customReturnFocusEl = null) {
     const modal = document.getElementById(modalId);
     if (!modal) return;
-    activeModalLastFocus = document.activeElement;
+    const focusAnchor = customReturnFocusEl instanceof HTMLElement ? customReturnFocusEl : document.activeElement;
+    activeModalLastFocus = focusAnchor;
+    modalReturnFocusMap.set(modalId, focusAnchor);
     modal.removeAttribute('hidden');
     document.body.classList.add('modal-open');
     requestAnimationFrame(() => {
       modal.classList.add('show');
-      const focusTarget = modal.querySelector('input, select, textarea, button.layout-modal-close-btn');
+      const bodyEl = modal.querySelector('.layout-modal-body');
+      if (bodyEl) bodyEl.scrollTop = 0;
+      const focusTarget = modalId === 'globalPreferencesSurveyModal'
+        ? (modal.querySelector('#prefPurposeSection:not([hidden]) .pref-purpose-card')
+          || modal.querySelector('button.layout-modal-close-btn'))
+        : modal.querySelector('input, select, textarea, button.layout-modal-close-btn');
       if (focusTarget) focusTarget.focus();
     });
+  }
+
+  /**
+   * Mở hộp thoại Báo cáo sự cố toàn cục kèm dữ liệu điền sẵn (tùy chọn).
+   * @param {{ category?: string, confName?: string, title?: string, description?: string }} [preset={}] Dữ liệu điền sẵn.
+   */
+  function openReportModal(preset = {}) {
+    const categoryEl = document.getElementById('globalReportCategory');
+    const confEl = document.getElementById('globalReportConf');
+    const titleEl = document.getElementById('globalReportTitle');
+    const descEl = document.getElementById('globalReportDesc');
+
+    if (categoryEl && preset.category) categoryEl.value = preset.category;
+    if (confEl && typeof preset.confName === 'string') confEl.value = preset.confName;
+    if (titleEl && typeof preset.title === 'string') titleEl.value = preset.title;
+    if (descEl && typeof preset.description === 'string') descEl.value = preset.description;
+
+    openLayoutModal('globalReportModal');
+  }
+
+  /** Trạng thái nháp trong modal cá nhân hóa & chọn lĩnh vực nghiên cứu */
+  const surveyDraftState = {
+    purpose: '',
+    topics: new Set(),
+    topicsOnly: false,
+    preserveOpenModals: false,
+    onConfirm: null
+  };
+
+  /**
+   * Đồng bộ giao diện modal cá nhân hóa dạng bảng biểu từ trạng thái nháp `surveyDraftState`.
+   */
+  function syncPreferencesSurveyModalUi() {
+    const modal = document.getElementById('globalPreferencesSurveyModal');
+    if (!modal) return;
+
+    const isTopicsOnly = Boolean(surveyDraftState.topicsOnly);
+    const titleEl = document.getElementById('prefSurveyModalTitle');
+    const introEl = document.getElementById('prefSurveyIntro');
+    const purposeSection = document.getElementById('prefPurposeSection');
+    const dividerEl = document.getElementById('prefSurveyDivider');
+    const topicsHeading = document.getElementById('prefTopicsHeading');
+
+    if (titleEl) {
+      titleEl.textContent = isTopicsOnly
+        ? 'Chọn lĩnh vực nghiên cứu'
+        : 'Cá nhân hóa trải nghiệm ConfGuide';
+    }
+    if (introEl) {
+      introEl.textContent = isTopicsOnly
+        ? 'Tích chọn các lĩnh vực nghiên cứu bạn quan tâm rồi nhấn OK để lưu lại.'
+        : 'Chọn mục đích sử dụng và tích chọn các lĩnh vực nghiên cứu bạn quan tâm, sau đó nhấn OK để lưu lại.';
+    }
+    if (purposeSection) {
+      if (isTopicsOnly) purposeSection.setAttribute('hidden', '');
+      else purposeSection.removeAttribute('hidden');
+    }
+    if (dividerEl) {
+      if (isTopicsOnly) dividerEl.setAttribute('hidden', '');
+      else dividerEl.removeAttribute('hidden');
+    }
+    if (topicsHeading) {
+      topicsHeading.textContent = isTopicsOnly
+        ? 'Bảng lĩnh vực nghiên cứu'
+        : '2. Lĩnh vực nghiên cứu bạn quan tâm';
+    }
+
+    modal.querySelectorAll('.pref-purpose-card').forEach(btn => {
+      const pKey = btn.getAttribute('data-purpose') || '';
+      const isSelected = Boolean(pKey && surveyDraftState.purpose === pKey);
+      btn.classList.toggle('is-selected', isSelected);
+      btn.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
+    });
+
+    modal.querySelectorAll('.js-pref-topic-checkbox').forEach(checkbox => {
+      const tKey = checkbox.value || '';
+      const isSelected = Boolean(tKey && surveyDraftState.topics.has(tKey));
+      checkbox.checked = isSelected;
+      const row = checkbox.closest('.pref-topic-row');
+      if (row) row.classList.toggle('is-selected', isSelected);
+    });
+
+    const countBadge = document.getElementById('prefTopicCountBadge');
+    if (countBadge) {
+      countBadge.textContent = `Đã chọn: ${surveyDraftState.topics.size} lĩnh vực`;
+    }
+  }
+
+  /**
+   * Mở modal bảng biểu cá nhân hóa (Trang chủ) hoặc bảng chọn lĩnh vực nghiên cứu (Trang cá nhân).
+   * @param {{
+   *   topicsOnly?: boolean,
+   *   preserveOpenModals?: boolean,
+   *   initialTopicKeys?: Array<string>,
+   *   onConfirm?: Function|null,
+   *   returnFocusEl?: HTMLElement|null
+   * }} [options={}] Tùy chọn hiển thị và callback khi nhấn OK.
+   */
+  function openPreferencesSurveyModal(options = {}) {
+    const safeOpts = (options && typeof options === 'object') ? options : {};
+    const prefs = getUserPreferences();
+    const isOnboarding = Boolean(safeOpts.isOnboarding);
+    const initialTopics = isOnboarding
+      ? []
+      : (Array.isArray(safeOpts.initialTopicKeys)
+        ? safeOpts.initialTopicKeys.filter(key => VALID_PREF_TOPIC_KEYS.has(key))
+        : prefs.topics);
+
+    surveyDraftState.purpose = isOnboarding ? '' : prefs.purpose;
+    surveyDraftState.topics = new Set(initialTopics);
+    surveyDraftState.topicsOnly = isOnboarding ? false : Boolean(safeOpts.topicsOnly);
+    surveyDraftState.preserveOpenModals = Boolean(safeOpts.preserveOpenModals);
+    surveyDraftState.onConfirm = typeof safeOpts.onConfirm === 'function' ? safeOpts.onConfirm : null;
+
+    const modalEl = document.getElementById('globalPreferencesSurveyModal');
+    if (modalEl) {
+      modalEl.classList.toggle('layout-modal--nested', surveyDraftState.preserveOpenModals);
+    }
+
+    // Đóng nhanh các modal toàn cục khác nếu không mở chồng lên modal chỉnh sửa hồ sơ
+    if (!surveyDraftState.preserveOpenModals) {
+      document.querySelectorAll('.layout-modal.show').forEach(otherModal => {
+        if (otherModal.id !== 'globalPreferencesSurveyModal') {
+          otherModal.classList.remove('show');
+          otherModal.setAttribute('hidden', 'true');
+        }
+      });
+    }
+
+    syncPreferencesSurveyModalUi();
+    openLayoutModal(
+      'globalPreferencesSurveyModal',
+      safeOpts.returnFocusEl instanceof HTMLElement ? safeOpts.returnFocusEl : null
+    );
   }
 
   /**
@@ -1458,12 +2458,20 @@
   function closeLayoutModal(modalId) {
     const modal = document.getElementById(modalId);
     if (!modal) return;
-    modal.classList.remove('show');
-    document.body.classList.remove('modal-open');
+    modal.classList.remove('show', 'layout-modal--nested');
+    if (modalId === 'globalPreferencesSurveyModal') {
+      surveyDraftState.onConfirm = null;
+      surveyDraftState.preserveOpenModals = false;
+    }
+    if (document.querySelectorAll('.layout-modal.show').length === 0) {
+      document.body.classList.remove('modal-open');
+    }
     setTimeout(() => modal.setAttribute('hidden', 'true'), 180);
-    if (activeModalLastFocus && typeof activeModalLastFocus.focus === 'function') {
-      activeModalLastFocus.focus();
-      activeModalLastFocus = null;
+    const savedFocus = modalReturnFocusMap.get(modalId) || activeModalLastFocus;
+    modalReturnFocusMap.delete(modalId);
+    activeModalLastFocus = null;
+    if (savedFocus && typeof savedFocus.focus === 'function') {
+      savedFocus.focus();
     }
   }
 
@@ -1740,9 +2748,13 @@
       });
     });
     document.addEventListener('keydown', e => {
-      if (e.key === 'Escape') {
-        document.querySelectorAll('.layout-modal.show').forEach(m => closeLayoutModal(m.id));
+      if (e.key !== 'Escape') return;
+      const prefModal = document.getElementById('globalPreferencesSurveyModal');
+      if (prefModal && prefModal.classList.contains('show') && prefModal.classList.contains('layout-modal--nested')) {
+        closeLayoutModal('globalPreferencesSurveyModal');
+        return;
       }
+      document.querySelectorAll('.layout-modal.show').forEach(m => closeLayoutModal(m.id));
     });
 
     const userAvatarBtn = document.getElementById('userAvatarBtn');
@@ -1758,6 +2770,7 @@
 
     initGlobalPasswordForm(user);
     initGlobalPreferences();
+    initPreferencesSurveyModal();
     initHelpAccordion();
     initGlobalReportForm(user);
   }
@@ -1854,17 +2867,20 @@
   }
 
   /**
-   * Đồng bộ công tắc tùy chọn AoE và đếm ngược trên toàn hệ thống.
+   * Đồng bộ công tắc tùy chọn AoE, đếm ngược và nút mở khảo sát cá nhân hóa trong Cài đặt.
    */
   function initGlobalPreferences() {
     const aoeToggle = document.getElementById('globalPrefAoe');
     const cdToggle = document.getElementById('globalPrefCountdown');
-    const userPrefs = readStorage('confguide_user_preferences', { aoe: true, countdown: true });
+    const openPrefBtn = document.getElementById('btnOpenPrefSurveyFromSettings');
+    const userPrefs = getUserPreferences();
+
     if (aoeToggle) aoeToggle.checked = userPrefs.aoe !== false;
     if (cdToggle) cdToggle.checked = userPrefs.countdown !== false;
+    updateSettingsPrefSummary();
 
     const savePrefs = () => {
-      writeStorage('confguide_user_preferences', {
+      saveUserPreferences({
         aoe: aoeToggle ? aoeToggle.checked : true,
         countdown: cdToggle ? cdToggle.checked : true
       });
@@ -1872,6 +2888,129 @@
 
     if (aoeToggle) aoeToggle.addEventListener('change', savePrefs);
     if (cdToggle) cdToggle.addEventListener('change', savePrefs);
+    if (openPrefBtn) {
+      openPrefBtn.addEventListener('click', () => {
+        openPreferencesSurveyModal();
+      });
+    }
+  }
+
+  /**
+   * Gắn sự kiện tương tác cho modal bảng biểu cá nhân hóa & chọn lĩnh vực nghiên cứu.
+   */
+  function initPreferencesSurveyModal() {
+    const modal = document.getElementById('globalPreferencesSurveyModal');
+    if (!modal) return;
+
+    const purposeGrid = document.getElementById('prefPurposeGrid');
+    const topicGrid = document.getElementById('prefTopicGrid');
+    const resetBtn = document.getElementById('prefSurveyResetBtn');
+    const saveBtn = document.getElementById('prefSurveySaveBtn');
+
+    if (purposeGrid) {
+      purposeGrid.addEventListener('click', event => {
+        const card = event.target.closest('.pref-purpose-card');
+        if (!card) return;
+        const pKey = card.getAttribute('data-purpose') || '';
+        surveyDraftState.purpose = surveyDraftState.purpose === pKey ? '' : pKey;
+        syncPreferencesSurveyModalUi();
+      });
+    }
+
+    if (topicGrid) {
+      topicGrid.addEventListener('change', event => {
+        const checkbox = event.target;
+        if (!(checkbox instanceof HTMLInputElement) || !checkbox.classList.contains('js-pref-topic-checkbox')) {
+          return;
+        }
+        const tKey = checkbox.value || '';
+        if (!VALID_PREF_TOPIC_KEYS.has(tKey)) return;
+        if (checkbox.checked) {
+          surveyDraftState.topics.add(tKey);
+        } else {
+          surveyDraftState.topics.delete(tKey);
+        }
+        syncPreferencesSurveyModalUi();
+      });
+    }
+
+    if (resetBtn) {
+      resetBtn.addEventListener('click', () => {
+        if (!surveyDraftState.topicsOnly) {
+          surveyDraftState.purpose = '';
+        }
+        surveyDraftState.topics.clear();
+        syncPreferencesSurveyModalUi();
+      });
+    }
+
+    if (saveBtn) {
+      saveBtn.addEventListener('click', () => {
+        const selectedTopics = PREFERENCE_TOPICS
+          .map(item => item.key)
+          .filter(key => surveyDraftState.topics.has(key));
+        const selectedLabels = selectedTopics.map(key => PREF_TOPIC_LABEL_MAP[key] || key);
+
+        if (typeof surveyDraftState.onConfirm === 'function') {
+          const confirmHandler = surveyDraftState.onConfirm;
+          confirmHandler({
+            purpose: surveyDraftState.purpose,
+            topics: selectedTopics,
+            labels: selectedLabels
+          });
+          closeLayoutModal('globalPreferencesSurveyModal');
+          return;
+        }
+
+        if (surveyDraftState.topicsOnly) {
+          if (!isUserAuthenticated()) {
+            showToast('Vui lòng đăng nhập để lưu lĩnh vực nghiên cứu.', 'info');
+            closeLayoutModal('globalPreferencesSurveyModal');
+            return;
+          }
+          const currentPrefs = getUserPreferences();
+          saveUserPreferences({
+            purpose: currentPrefs.purpose,
+            topics: selectedTopics,
+            onboardingCompleted: true,
+            bannerDismissed: false
+          });
+          closeLayoutModal('globalPreferencesSurveyModal');
+          showToast(
+            selectedTopics.length > 0
+              ? `Đã lưu ${selectedTopics.length} lĩnh vực nghiên cứu.`
+              : 'Đã xóa danh sách lĩnh vực nghiên cứu.',
+            'success'
+          );
+          return;
+        }
+
+        if (!isUserAuthenticated() && selectedTopics.length > 0) {
+          showToast('Vui lòng đăng nhập để lưu lĩnh vực nghiên cứu và nhận gợi ý.', 'info');
+          saveUserPreferences({
+            purpose: surveyDraftState.purpose,
+            onboardingCompleted: true,
+            bannerDismissed: false
+          });
+          closeLayoutModal('globalPreferencesSurveyModal');
+          return;
+        }
+        const hasAny = Boolean(surveyDraftState.purpose || selectedTopics.length > 0);
+        saveUserPreferences({
+          purpose: surveyDraftState.purpose,
+          topics: selectedTopics,
+          onboardingCompleted: true,
+          bannerDismissed: false
+        });
+        closeLayoutModal('globalPreferencesSurveyModal');
+        showToast(
+          hasAny
+            ? 'Đã lưu mục đích & lĩnh vực quan tâm.'
+            : 'Đã đặt lại thiết lập cá nhân hóa.',
+          'success'
+        );
+      });
+    }
   }
 
   /**
@@ -2291,6 +3430,68 @@
   }
 
   /**
+   * Đánh dấu tài khoản đang đăng nhập đã được hiển thị bảng khảo sát cá nhân hóa lần đầu
+   * bằng cách đặt `needsOnboarding: false` ở cả phiên hiện tại và danh sách tài khoản.
+   */
+  function consumeUserOnboardingFlag() {
+    const activeUser = getCurrentUser();
+    if (!activeUser || !activeUser.needsOnboarding) return;
+
+    const updatedSession = Object.assign({}, activeUser, { needsOnboarding: false });
+    writeStorage('confguide_current_user', updatedSession);
+
+    const users = readStorage('confguide_users', []);
+    if (Array.isArray(users)) {
+      let modified = false;
+      const nextUsers = users.map(candidate => {
+        if (!isMatchingStoredAccount(candidate, updatedSession) || !candidate.needsOnboarding) {
+          return candidate;
+        }
+        modified = true;
+        return Object.assign({}, candidate, { needsOnboarding: false });
+      });
+      if (modified) {
+        writeStorage('confguide_users', nextUsers);
+      }
+    }
+  }
+
+  /**
+   * Tự động mở bảng cá nhân hóa đầy đủ (Mục đích sử dụng + Lĩnh vực nghiên cứu) một lần duy nhất
+   * khi người dùng vừa đăng ký tài khoản mới và bắt đầu phiên sử dụng đầu tiên.
+   * @param {string} currentPage - Tên trang hiện tại.
+   */
+  function maybeTriggerNewUserOnboarding(currentPage) {
+    if (
+      currentPage === 'login.html'
+      || currentPage === 'register.html'
+      || currentPage === '404.html'
+    ) {
+      return;
+    }
+
+    const activeUser = getCurrentUser();
+    if (!activeUser || activeUser.needsOnboarding !== true) return;
+    if (!document.getElementById('globalPreferencesSurveyModal')) return;
+
+    consumeUserOnboardingFlag();
+    saveUserPreferences({ purpose: '', onboardingCompleted: false });
+
+    const launchOnboardingModal = () => {
+      openPreferencesSurveyModal({
+        topicsOnly: false,
+        isOnboarding: true
+      });
+    };
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', () => setTimeout(launchOnboardingModal, 80), { once: true });
+    } else {
+      setTimeout(launchOnboardingModal, 80);
+    }
+  }
+
+  /**
    * Khởi tạo toàn bộ bố cục trang dùng chung khi DOM sẵn sàng.
    */
   function initLayout() {
@@ -2302,6 +3503,7 @@
     renderFooter(page);
     initContactForm();
     layoutInitialized = true;
+    maybeTriggerNewUserOnboarding(page);
   }
 
   if (document.getElementById('site-header')) {
@@ -2357,10 +3559,17 @@
     writeStorage: writeStorage,
     fetchJsonCached: fetchJsonCached,
     getCurrentUser: getCurrentUser,
+    isUserAuthenticated: isUserAuthenticated,
     getSavedStorageKey: getSavedStorageKey,
+    getSavedConferenceIds: getSavedConferenceIds,
+    setSavedConferenceIds: setSavedConferenceIds,
+    isConferenceSaved: isConferenceSaved,
+    promptLoginForTracking: promptLoginForTracking,
+    toggleSavedConference: toggleSavedConference,
     slugify: slugify,
     getConferenceId: getConferenceId,
     extractConferenceRank: extractConferenceRank,
+    extractTopicLabels: extractTopicLabels,
     normalizeConference: normalizeConference,
     renderConferenceAvatar: renderConferenceAvatar,
     getTodayVnIso: getTodayVnIso,
@@ -2375,11 +3584,26 @@
     formatDateVi: formatDateVi,
     formatRangeVi: formatRangeVi,
     formatConferenceMode: formatConferenceMode,
+    extractConferenceFeeRange: extractConferenceFeeRange,
+    formatConferenceFee: formatConferenceFee,
+    getFeeSortBoundsUsd: getFeeSortBoundsUsd,
     formatConferenceEventDate: formatConferenceEventDate,
     getGoogleCalendarUrl: getGoogleCalendarUrl,
     createIcsContent: createIcsContent,
     downloadIcsFile: downloadIcsFile,
     showToast: showToast,
-    showConfirmModal: showConfirmModal
+    showConfirmModal: showConfirmModal,
+    openReportModal: openReportModal,
+    USAGE_PURPOSES: USAGE_PURPOSES,
+    PREFERENCE_TOPICS: PREFERENCE_TOPICS,
+    parseTopicKeysFromText: parseTopicKeysFromText,
+    parseTopicDisplayLabelsFromText: parseTopicDisplayLabelsFromText,
+    getUserResearchTopicKeys: getUserResearchTopicKeys,
+    getUserResearchTopicLabels: getUserResearchTopicLabels,
+    setUserResearchTopicKeys: setUserResearchTopicKeys,
+    getUserPreferences: getUserPreferences,
+    saveUserPreferences: saveUserPreferences,
+    buildPersonalizedSearchUrl: buildPersonalizedSearchUrl,
+    openPreferencesSurveyModal: openPreferencesSurveyModal
   };
 })();

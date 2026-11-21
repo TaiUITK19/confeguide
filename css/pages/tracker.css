@@ -302,6 +302,15 @@
   line-height: 1.6;
 }
 
+.tracker-auth-msg {
+  margin: 0 0 14px;
+  color: var(--text-muted);
+}
+
+.tracker-auth-btn {
+  display: inline-flex;
+}
+
 .action-btn {
   padding: 7px 14px;
   border: 1px solid var(--border-strong);

@@ -87,7 +87,7 @@
     academicTitle: 'Nghiên cứu sinh / Giảng viên',
     affiliation: 'Đại học Quốc gia TP.HCM',
     fieldsOfInterest: 'Trí tuệ nhân tạo, Thị giác máy tính, Xử lý ngôn ngữ tự nhiên, Khoa học dữ liệu',
-    bio: 'Quan tâm đến các hội nghị khoa học Công nghệ thông tin diễn ra tại Việt Nam (gồm cả hội nghị quốc tế tổ chức tại Việt Nam) thuộc xếp hạng CORE A*/A.',
+    bio: 'Quan tâm đến các hội nghị khoa học Công nghệ thông tin diễn ra tại Việt Nam (gồm cả hội nghị quốc tế tổ chức tại Việt Nam) trong các lĩnh vực trí tuệ nhân tạo, khoa học dữ liệu và kỹ thuật phần mềm.',
     scholarUrl: 'https://scholar.google.com'
   };
 
@@ -98,9 +98,13 @@
    * @returns {string} Tên khóa lưu trữ trong localStorage.
    */
   function getSavedStorageKey() {
-    return currentUser && currentUser.id
-      ? `confguide_saved_${currentUser.id}`
-      : 'confguide_saved_guest';
+    if (typeof utils.getSavedStorageKey === 'function') {
+      return utils.getSavedStorageKey(false);
+    }
+    const activeUser = getCurrentUser();
+    return activeUser && (activeUser.id || activeUser.username || activeUser.email)
+      ? `confguide_saved_${activeUser.id || activeUser.username || activeUser.email}`
+      : '';
   }
 
   /**
@@ -198,6 +202,22 @@
   }
 
   /**
+   * Kết xuất danh sách nhãn lĩnh vực nghiên cứu vào phần tử container chỉ định.
+   * @param {HTMLElement|null} containerEl - Phần tử chứa các pill lĩnh vực.
+   * @param {string} fieldsText - Chuỗi lĩnh vực ngăn cách bằng dấu phẩy.
+   */
+  function renderFieldsChips(containerEl, fieldsText) {
+    if (!containerEl) return;
+    const rawText = typeof fieldsText === 'string' ? fieldsText : '';
+    const fieldList = typeof utils.parseTopicDisplayLabelsFromText === 'function'
+      ? utils.parseTopicDisplayLabelsFromText(rawText)
+      : (rawText ? rawText.split(',').map(f => f.trim()).filter(Boolean) : []);
+    containerEl.innerHTML = fieldList.length > 0
+      ? fieldList.map(f => `<span class="profile-field-pill">${escapeHtml(f)}</span>`).join('')
+      : '<span class="profile-field-pill profile-field-pill--empty">Chưa chọn lĩnh vực nghiên cứu</span>';
+  }
+
+  /**
    * Render toàn bộ thông tin hồ sơ người dùng lên giao diện và điền sẵn dữ liệu vào form chỉnh sửa.
    */
   function renderUserProfile() {
@@ -210,7 +230,7 @@
     const email = currentUser.email || DEFAULT_USER_DATA.email;
     const bio = currentUser.bio || DEFAULT_USER_DATA.bio;
     const scholarUrl = currentUser.scholarUrl || '';
-    const fieldsRaw = currentUser.fieldsOfInterest || DEFAULT_USER_DATA.fieldsOfInterest;
+    const fieldsRaw = typeof currentUser.fieldsOfInterest === 'string' ? currentUser.fieldsOfInterest : '';
 
     renderAvatarSlot(
       'profileAvatarBig',
@@ -247,13 +267,8 @@
       scholarLink.classList.toggle('is-hidden', !hasValidScholar);
     }
 
-    const fieldsContainer = document.getElementById('profileFieldsChips');
-    if (fieldsContainer) {
-      const fieldList = fieldsRaw.split(',').map(f => f.trim()).filter(Boolean);
-      fieldsContainer.innerHTML = fieldList.length > 0
-        ? fieldList.map(f => `<span class="profile-field-pill">${escapeHtml(f)}</span>`).join('')
-        : '<span class="profile-field-pill">Khoa học máy tính</span>';
-    }
+    renderFieldsChips(document.getElementById('profileFieldsChips'), fieldsRaw);
+    renderFieldsChips(document.getElementById('editProfileFieldsChips'), fieldsRaw);
 
     const fieldValues = {
       editFullName: fullName,
@@ -430,8 +445,33 @@
     });
 
     document.addEventListener('keydown', e => {
+      const prefModal = document.getElementById('globalPreferencesSurveyModal');
+      if (prefModal && prefModal.classList.contains('show')) return;
       if (e.key === 'Escape' && modal.classList.contains('show')) closeModal();
     });
+
+    const editChooseTopicsBtn = document.getElementById('editModalChooseTopicsBtn');
+    if (editChooseTopicsBtn) {
+      editChooseTopicsBtn.addEventListener('click', () => {
+        if (typeof utils.openPreferencesSurveyModal !== 'function') return;
+        const fieldsInput = document.getElementById('editFields');
+        const currentText = fieldsInput ? fieldsInput.value : '';
+        const initialTopicKeys = typeof utils.parseTopicKeysFromText === 'function'
+          ? utils.parseTopicKeysFromText(currentText)
+          : [];
+        utils.openPreferencesSurveyModal({
+          topicsOnly: true,
+          preserveOpenModals: true,
+          initialTopicKeys,
+          returnFocusEl: editChooseTopicsBtn,
+          onConfirm: ({ labels }) => {
+            const nextText = Array.isArray(labels) ? labels.join(', ') : '';
+            if (fieldsInput) fieldsInput.value = nextText;
+            renderFieldsChips(document.getElementById('editProfileFieldsChips'), nextText);
+          }
+        });
+      });
+    }
 
     [
       [fullNameInput, validators.validateFullName],
@@ -603,31 +643,35 @@
   }
 
   /**
-   * Đọc danh sách hội nghị đã lưu của người dùng hiện tại từ localStorage.
-   * @returns {Array<string>} Mảng ID/tên hội nghị đã lưu.
+   * Đọc danh sách hội nghị đã lưu của người dùng đã đăng nhập từ localStorage.
+   * @returns {Array<string>} Mảng ID/tên hội nghị đã lưu (rỗng nếu chưa đăng nhập).
    */
   function getSavedList() {
-    const key = getSavedStorageKey();
-    let saved = readStorage(key, null);
-    if (!saved) {
-      const alt = readStorage('confguide_saved', null);
-      saved = alt || readStorage('savedConferences', []);
+    if (typeof utils.getSavedConferenceIds === 'function') {
+      return utils.getSavedConferenceIds(false);
     }
+    const key = getSavedStorageKey();
+    if (!key) return [];
+    const saved = readStorage(key, []);
     return Array.isArray(saved) ? saved : [];
   }
 
   /**
-   * Ghi đè danh sách hội nghị đã lưu của người dùng xuống localStorage.
+   * Ghi đè danh sách hội nghị đã lưu của người dùng đã đăng nhập xuống localStorage.
    * @param {Array<string>} list - Mảng ID/tên hội nghị cần lưu.
+   * @returns {boolean} True nếu lưu thành công.
    */
   function setSavedList(list) {
+    if (typeof utils.setSavedConferenceIds === 'function') {
+      return utils.setSavedConferenceIds(list, false);
+    }
     const key = getSavedStorageKey();
-    writeStorage(key, list);
-    writeStorage('confguide_saved', list);
+    if (!key) return false;
+    return writeStorage(key, Array.isArray(list) ? list : []);
   }
 
   /**
-   * Tra cứu thông tin chi tiết của một hội nghị đã lưu theo ID hoặc tên.
+   * Tra cứu thông tin chi tiết của một hội nghị đã lưu theo ID hoặc tên (không tự tạo dữ liệu giả).
    * @param {string} item - ID hoặc tên hội nghị đã lưu.
    * @param {Array<Object>} allConfs - Danh sách đầy đủ các hội nghị.
    * @returns {Object} Đối tượng thông tin tóm tắt để hiển thị thẻ.
@@ -643,15 +687,15 @@
 
     if (found) {
       const acronym = found.name ? found.name.split(/[\s-]+/)[0].toUpperCase().slice(0, 6) : 'CONF';
-      const rankText = typeof utils.extractConferenceRank === 'function'
+      const rawRank = utils && typeof utils.extractConferenceRank === 'function'
         ? utils.extractConferenceRank(found.rank)
-        : (found.rank ? String(found.rank).trim() : '');
+        : (found.rank && typeof found.rank === 'object' ? String(found.rank.core || '') : String(found.rank || ''));
       return {
         id: found.id || itemStr,
         name: found.name || itemStr,
-        fullName: found.fullName || '',
-        rank: rankText,
-        format: found.format || 'hybrid',
+        rank: String(rawRank || '').trim().toUpperCase(),
+        fullName: found.fullName || found.full_name || '',
+        format: found.attendance_label || found.attendance_mode || found.format || '',
         location: found.location || '',
         acronym,
         slug: found.id || itemStr.toLowerCase().replace(/[^a-z0-9]+/g, '-')
@@ -662,9 +706,9 @@
     return {
       id: itemStr,
       name: itemStr,
-      fullName: 'Hội nghị khoa học công nghệ thông tin',
-      rank: 'A',
-      format: 'hybrid',
+      rank: '',
+      fullName: '',
+      format: '',
       location: '',
       acronym: acronym || 'CONF',
       slug: itemStr.toLowerCase().replace(/[^a-z0-9]+/g, '-')
@@ -718,6 +762,11 @@
       ? window.ConfGuideUtils.renderConferenceAvatar(c, 'saved-avatar')
       : fallbackBadge;
 
+    const hasRank = Boolean(c.rank && !/^UNRANKED$/i.test(c.rank));
+    const rankLabel = hasRank
+      ? (/^(A\*|A|B|C)$/i.test(c.rank) ? `Rank ${c.rank}` : c.rank)
+      : 'Chưa xếp hạng';
+
     return `
       <div class="saved-card">
         <div class="saved-card-main">
@@ -725,10 +774,10 @@
           <div class="saved-info">
             <div class="saved-title">
               <strong>${escapeHtml(c.name)}</strong>
-              ${c.rank ? `<span class="saved-badge-rank">${escapeHtml(/^(a\*|a|b|c)$/i.test(c.rank) ? `Hạng ${c.rank}` : c.rank)}</span>` : ''}
+              <span class="saved-badge-rank${hasRank ? '' : ' saved-badge-rank--unranked'}">${escapeHtml(rankLabel)}</span>
             </div>
             <div class="saved-meta-line">
-              ${c.fullName ? `${escapeHtml(c.fullName)}` : 'Hội nghị khoa học công nghệ thông tin'}
+              ${c.fullName ? `${escapeHtml(c.fullName)}` : 'Chưa cập nhật tên đầy đủ'}
               ${c.location ? ` • 📍 ${escapeHtml(c.location)}` : ''}
             </div>
           </div>
@@ -772,7 +821,6 @@
       items = items.filter(c =>
         c.name.toLowerCase().includes(trimmedKeyword)
         || c.fullName.toLowerCase().includes(trimmedKeyword)
-        || String(c.rank || '').toLowerCase().includes(trimmedKeyword)
       );
     }
 
@@ -867,7 +915,9 @@
           ? utils.formatDeadlineVi(item.deadline, { hasExplicitTime })
           : `${new Date(`${item.deadline}T00:00:00`).toLocaleDateString('vi-VN')}`)
       : 'Chưa có hạn';
-    const fieldsStr = Array.isArray(item.fields) ? item.fields.join(', ') : 'Công nghệ thông tin';
+    const fieldsStr = Array.isArray(item.fields) && item.fields.length > 0
+      ? item.fields.join(', ')
+      : 'Chưa cập nhật';
 
     return `
       <div class="tracker-card-item">
@@ -982,6 +1032,22 @@
     renderUserProfile();
     initEditProfileModal();
     initAvatarUpload();
+
+    const profileChooseBtn = document.getElementById('profileChooseTopicsBtn');
+    if (profileChooseBtn) {
+      profileChooseBtn.addEventListener('click', () => {
+        if (typeof utils.openPreferencesSurveyModal === 'function') {
+          utils.openPreferencesSurveyModal({
+            topicsOnly: true,
+            returnFocusEl: profileChooseBtn
+          });
+        }
+      });
+    }
+
+    window.addEventListener('confguide:preferences-changed', () => {
+      renderUserProfile();
+    });
     if (document.getElementById('savedConferencesList')) {
       initSavedSection();
     }

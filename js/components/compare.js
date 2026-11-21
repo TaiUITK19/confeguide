@@ -534,34 +534,16 @@
   });
 
   /**
-   * Tạo ô dữ liệu Bậc CORE cho một hội nghị.
-   * @param {Object} conf - Đối tượng hội nghị.
-   * @param {Function} esc - Hàm thoát ký tự HTML.
-   * @returns {{ html: string, normVal: string }}
-   */
-  function createRankCell(conf, esc) {
-    const utils = getCompareUtils();
-    const rawRank = typeof utils.extractConferenceRank === 'function'
-      ? utils.extractConferenceRank(conf && conf.rank)
-      : (conf && conf.rank && typeof conf.rank === 'object' ? String(conf.rank.core || '') : String((conf && conf.rank) || '')).trim();
-    if (!rawRank || /^unranked$/i.test(rawRank)) return createMutedCell('Chưa cập nhật');
-    const displayRank = /^(a\*|a|b|c)$/i.test(rawRank) ? `CORE ${rawRank.toUpperCase()}` : rawRank;
-    return {
-      html: `<span class="compare-table__rank-badge">${esc(displayRank)}</span>`,
-      normVal: normalizeCompareValue(displayRank)
-    };
-  }
-
-  /**
    * Tạo ô dữ liệu Lĩnh vực nghiên cứu cho một hội nghị.
    * @param {Object} conf - Đối tượng hội nghị.
    * @param {Function} esc - Hàm thoát ký tự HTML.
    * @returns {{ html: string, normVal: string }}
    */
   function createFieldsCell(conf, esc) {
-    const fields = Array.isArray(conf.fields)
-      ? conf.fields.map(f => String(f || '').trim()).filter(Boolean)
-      : [];
+    const utils = getCompareUtils();
+    const fields = typeof utils.extractTopicLabels === 'function'
+      ? utils.extractTopicLabels(conf)
+      : (Array.isArray(conf.fields) ? conf.fields.map(f => String(f || '').trim()).filter(Boolean) : []);
     if (!fields.length) return createMutedCell('Chưa cập nhật');
     const itemsHtml = fields.map(field => `<li class="compare-table__tag">${esc(field)}</li>`).join('');
     return {
@@ -571,15 +553,23 @@
   }
 
   /**
-   * Tạo ô dữ liệu Nhà xuất bản cho một hội nghị.
+   * Tạo ô dữ liệu Phân hạng CORE cho một hội nghị.
    * @param {Object} conf - Đối tượng hội nghị.
-   * @param {Function} esc - Hàm thoát ký tự HTML.
+   * @param {Object} utils - Tập tiện ích ConfGuideUtils.
    * @returns {{ html: string, normVal: string }}
    */
-  function createPublisherCell(conf, esc) {
-    const pub = String(conf.publisher || '').trim();
-    if (!pub) return createMutedCell('Chưa cập nhật');
-    return { html: `<span>${esc(pub)}</span>`, normVal: normalizeCompareValue(pub) };
+  function createRankCell(conf, utils) {
+    const esc = utils.escapeHtml;
+    const rawRank = typeof utils.extractConferenceRank === 'function'
+      ? utils.extractConferenceRank(conf && conf.rank)
+      : (conf && conf.rank && typeof conf.rank === 'object' ? String(conf.rank.core || '') : String((conf && conf.rank) || '')).trim();
+    if (!rawRank || /^unranked$/i.test(rawRank)) return createMutedCell('Chưa xếp hạng');
+    const upper = rawRank.toUpperCase();
+    const displayRank = /^(A\*|A|B|C)$/i.test(upper) ? `Rank ${upper}` : rawRank;
+    return {
+      html: `<span class="compare-table__rank-badge">${esc(displayRank)}</span>`,
+      normVal: normalizeCompareValue(displayRank)
+    };
   }
 
   /**
@@ -676,8 +666,11 @@
    * @returns {{ html: string, normVal: string }}
    */
   function createFeeCell(conf, esc) {
-    const rawFee = String(conf.fee || '').trim();
-    if (!rawFee) return createMutedCell('Chưa cập nhật');
+    const utils = getCompareUtils();
+    const rawFee = typeof utils.formatConferenceFee === 'function'
+      ? utils.formatConferenceFee(conf)
+      : String((conf && conf.fee) || '').trim();
+    if (!rawFee || rawFee === 'Chưa cập nhật') return createMutedCell('Chưa cập nhật');
     return { html: `<span>${esc(rawFee)}</span>`, normVal: normalizeCompareValue(rawFee) };
   }
 
@@ -701,11 +694,10 @@
 
     return [
       {
-        groupTitle: 'Học thuật',
+        groupTitle: 'Thông tin chung',
         rows: [
-          { label: 'Bậc CORE', cells: confs.map(conf => createRankCell(conf, esc)) },
-          { label: 'Lĩnh vực nghiên cứu', cells: confs.map(conf => createFieldsCell(conf, esc)) },
-          { label: 'Nhà xuất bản', cells: confs.map(conf => createPublisherCell(conf, esc)) }
+          { label: 'Phân hạng CORE', cells: confs.map(conf => createRankCell(conf, utils)) },
+          { label: 'Lĩnh vực nghiên cứu', cells: confs.map(conf => createFieldsCell(conf, esc)) }
         ]
       },
       {

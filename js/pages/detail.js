@@ -3,8 +3,8 @@
  * Trang sử dụng: detail.html
  * Phụ thuộc: js/core/layout.js (ConfGuideUtils), js/components/compare.js
  * Chức năng: Quản lý tải dữ liệu hội nghị theo `?id=<slug>`, hiển thị bố cục ưu tiên hành động chính,
- * đếm ngược mốc tiếp theo (1 bộ `setInterval` duy nhất), timeline 4 mốc kèm nhãn múi giờ UTC+7/AoE,
- * thông tin học thuật (`<dl>`), đánh giá & nhận xét hợp nhất (`#danh-gia`) và xuất lịch Google / `.ics`.
+ * đếm ngược mốc tiếp theo (1 bộ `setInterval` duy nhất), timeline đầy đủ mốc hạn múi giờ UTC+7/AoE,
+ * thông tin học thuật (Xếp hạng, Lĩnh vực nghiên cứu, Xác minh lần cuối) và thêm lịch Google Calendar.
  */
 
 (function () {
@@ -15,7 +15,6 @@
   const CONFERENCES_DATA_URL = 'data/conference_data.json';
   const DETAIL_URGENT_DAYS = 14;
   const COUNTDOWN_TICK_MS = 1000;
-  const MIN_REVIEW_CHARS = 8;
 
   let currentConference = null;
   let allConferences = [];
@@ -59,10 +58,10 @@
       formatRangeVi: s => s || '',
       formatConferenceMode: () => 'Chưa cập nhật',
       formatConferenceEventDate: () => 'Chưa cập nhật',
+      extractTopicLabels: c => (c && Array.isArray(c.topic_labels) ? c.topic_labels : (c && Array.isArray(c.fields) ? c.fields : [])),
+      extractConferenceRank: r => (r && typeof r === 'object' ? String(r.core || r.ccf || '').trim() : String(r || '').trim()),
       getAoETimeRemaining: () => ({ days: 0, hours: 0, minutes: 0, seconds: 0, isPassed: true }),
       getGoogleCalendarUrl: () => 'https://calendar.google.com/calendar/render',
-      createIcsContent: () => '',
-      downloadIcsFile: () => {},
       showToast: () => {}
     };
   }
@@ -78,8 +77,8 @@
   }
 
   /**
-   * Xác định khóa localStorage lưu danh sách hội nghị đã lưu của người dùng hiện hành.
-   * @returns {string} Khóa lưu trữ trong localStorage.
+   * Xác định khóa localStorage lưu danh sách hội nghị đã lưu của người dùng đã đăng nhập.
+   * @returns {string} Khóa lưu trữ trong localStorage hoặc chuỗi rỗng nếu chưa đăng nhập.
    */
   function getSavedStorageKey() {
     const utils = getDetailUtils();
@@ -87,25 +86,24 @@
       return utils.getSavedStorageKey(false);
     }
     const user = utils.readStorage('confguide_current_user', null);
-    return user && user.id ? `confguide_saved_${user.id}` : 'confguide_saved_guest';
+    return user && (user.id || user.username || user.email)
+      ? `confguide_saved_${user.id || user.username || user.email}`
+      : '';
   }
 
   /**
-   * Đọc mảng mã hội nghị đã lưu từ localStorage.
+   * Đọc mảng mã hội nghị đã lưu từ localStorage (chỉ khi đã đăng nhập).
    * @returns {Array<string>} Danh sách ID hội nghị đã lưu.
    */
   function getSavedList() {
-    const list = getDetailUtils().readStorage(getSavedStorageKey(), []);
+    const utils = getDetailUtils();
+    if (typeof utils.getSavedConferenceIds === 'function') {
+      return utils.getSavedConferenceIds(false);
+    }
+    const key = getSavedStorageKey();
+    if (!key) return [];
+    const list = utils.readStorage(key, []);
     return Array.isArray(list) ? list : [];
-  }
-
-  /**
-   * Lưu mảng mã hội nghị vào localStorage.
-   * @param {Array<string>} list Danh sách ID hội nghị.
-   * @returns {boolean} Kết quả ghi vào bộ nhớ.
-   */
-  function setSavedList(list) {
-    return getDetailUtils().writeStorage(getSavedStorageKey(), list);
   }
 
   /**
@@ -121,7 +119,6 @@
     const errorEl = root.querySelector('.js-error-state');
     const errorDescEl = root.querySelector('.js-error-desc');
     const viewDetailEl = root.querySelector('.js-view-detail');
-    const viewReviewsEl = root.querySelector('.js-view-reviews');
 
     if (loadingEl) loadingEl.hidden = state !== 'loading';
     if (errorEl) errorEl.hidden = state !== 'error';
@@ -132,16 +129,15 @@
         errorDescEl.textContent = errorMessage;
       }
       if (viewDetailEl) viewDetailEl.hidden = true;
-      if (viewReviewsEl) viewReviewsEl.hidden = true;
       document.title = 'Không tìm thấy hội nghị - ConfGuide';
       return;
     }
 
     if (state === 'content') {
-      syncHashRoute();
+      if (viewDetailEl) viewDetailEl.hidden = false;
+      window.scrollTo(0, 0);
     } else {
       if (viewDetailEl) viewDetailEl.hidden = true;
-      if (viewReviewsEl) viewReviewsEl.hidden = true;
     }
   }
 
@@ -180,7 +176,7 @@
    * @returns {{ title: string, description: string, location: string, date: string, fileSlug: string }|null}
    */
   function buildCalendarEvent(conf, milestone) {
-    if (!conf || !milestone || !milestone.date) return null;
+    if (!conf || !milestone || !milestone.date || milestone.hasValidDate === false) return null;
     const utils = getDetailUtils();
     const confId = utils.getConferenceId(conf) || 'confguide';
     const dlText = utils.formatDeadlineVi
@@ -193,61 +189,32 @@
       title: `[ConfGuide] ${conf.name} - Hạn ${label}`,
       description: `Hạn mốc ${milestone.name || label} của hội nghị ${conf.fullName || conf.name}: ${dlText}.${site ? `\nWebsite: ${site}` : ''}`,
       location: conf.location || '',
-      date: milestone.date,
-      fileSlug: `${confId}-${milestone.key || 'deadline'}.ics`
+      date: milestone.date
     };
   }
 
   /**
-   * Xử lý tập trung mọi thao tác thêm vào Google Calendar hoặc tải file .ics (mốc lẻ & toàn bộ).
-   * @param {'google'|'ics-single'|'ics-all'} actionType Loại thao tác lịch.
+   * Xử lý thao tác thêm mốc thời gian vào Google Calendar.
+   * @param {'google'} actionType Loại thao tác lịch.
    * @param {Object} conf Đối tượng hội nghị.
-   * @param {Object|null} [milestone=null] Mốc thời gian cụ thể (nếu thao tác trên 1 mốc).
+   * @param {Object|null} [milestone=null] Mốc thời gian cụ thể.
    */
   function handleCalendarAction(actionType, conf, milestone = null) {
-    if (!conf) return;
+    if (!conf || actionType !== 'google') return;
     const utils = getDetailUtils();
-
-    if (actionType === 'ics-all') {
-      const allMilestones = utils.parseDeadlinesList(conf.deadlines);
-      const events = allMilestones
-        .map(m => buildCalendarEvent(conf, m))
-        .filter(Boolean);
-
-      if (!events.length) {
-        utils.showToast('Hội nghị này chưa có mốc thời gian cụ thể để xuất lịch.', 'info');
-        return;
-      }
-
-      const confId = utils.getConferenceId(conf) || 'confguide';
-      const icsContent = utils.createIcsContent(events);
-      utils.downloadIcsFile(`${confId}-all-deadlines.ics`, icsContent);
-      utils.showToast(`Đã xuất ${events.length} mốc thời gian sang file .ics.`, 'success');
-      return;
-    }
-
     const eventObj = buildCalendarEvent(conf, milestone);
     if (!eventObj) {
       utils.showToast('Mốc thời gian này chưa được công bố ngày cụ thể.', 'info');
       return;
     }
 
-    if (actionType === 'google') {
-      const calUrl = utils.getGoogleCalendarUrl(
-        eventObj.title,
-        eventObj.description,
-        eventObj.location,
-        eventObj.date
-      );
-      window.open(calUrl, '_blank', 'noopener,noreferrer');
-      return;
-    }
-
-    if (actionType === 'ics-single') {
-      const icsContent = utils.createIcsContent([eventObj]);
-      utils.downloadIcsFile(eventObj.fileSlug, icsContent);
-      utils.showToast('Đã tải file lịch .ics cho mốc hạn nộp.', 'success');
-    }
+    const calUrl = utils.getGoogleCalendarUrl(
+      eventObj.title,
+      eventObj.description,
+      eventObj.location,
+      eventObj.date
+    );
+    window.open(calUrl, '_blank', 'noopener,noreferrer');
   }
 
   /**
@@ -265,7 +232,7 @@
   }
 
   /**
-   * Đảo trạng thái lưu/bỏ lưu hội nghị hiện tại trong localStorage.
+   * Đảo trạng thái lưu/bỏ lưu hội nghị hiện tại trong localStorage (chỉ cho phép khi đã đăng nhập).
    */
   function toggleSaveCurrentConference() {
     if (!currentConference) return;
@@ -273,19 +240,23 @@
     const confId = utils.getConferenceId(currentConference);
     if (!confId) return;
 
-    const currentList = getSavedList();
-    const exists = currentList.includes(confId);
-    const nextList = exists
-      ? currentList.filter(id => id !== confId)
-      : [...currentList, confId];
-
-    if (setSavedList(nextList)) {
-      updateSaveButtonUi(!exists);
-      utils.showToast(
-        exists ? 'Đã bỏ lưu hội nghị khỏi danh sách theo dõi.' : 'Đã lưu hội nghị vào danh sách theo dõi.',
-        exists ? 'info' : 'success'
-      );
+    if (typeof utils.toggleSavedConference !== 'function') {
+      utils.showToast('Vui lòng đăng nhập để sử dụng chức năng theo dõi hội nghị.', 'info');
+      return;
     }
+
+    const result = utils.toggleSavedConference(confId, {
+      redirectUrl: `detail.html${window.location.search || ''}`
+    });
+    if (!result || result.requiresAuth || !result.ok) {
+      return;
+    }
+
+    updateSaveButtonUi(result.isSaved);
+    utils.showToast(
+      result.isSaved ? 'Đã lưu hội nghị vào danh sách theo dõi.' : 'Đã bỏ lưu hội nghị khỏi danh sách theo dõi.',
+      result.isSaved ? 'success' : 'info'
+    );
   }
 
   /**
@@ -296,14 +267,23 @@
    */
   function renderHeaderBadgesAndTags(root, conf, utils) {
     const rankBadge = root.querySelector('.js-rank-badge');
-    const realRank = typeof utils.extractConferenceRank === 'function'
+    const rawRank = typeof utils.extractConferenceRank === 'function'
       ? utils.extractConferenceRank(conf.rank)
-      : (conf.rank ? String(conf.rank).trim() : '');
+      : (conf && conf.rank && typeof conf.rank === 'object' ? String(conf.rank.core || '') : String((conf && conf.rank) || ''));
+    const realRank = String(rawRank || '').trim().toUpperCase();
     if (rankBadge) {
-      rankBadge.textContent = realRank
-        ? (/^(a\*|a|b|c)$/i.test(realRank) ? `Rank ${realRank}` : realRank)
-        : '';
-      rankBadge.hidden = !realRank;
+      if (realRank && !/^UNRANKED$/i.test(realRank)) {
+        rankBadge.textContent = /^(A\*|A|B|C)$/i.test(realRank) ? `Rank ${realRank}` : realRank;
+        rankBadge.classList.remove('conf-badge--rank-unranked');
+        const sourceName = conf && conf.rank && typeof conf.rank === 'object' ? String(conf.rank.core_source || '').trim() : '';
+        if (sourceName) rankBadge.title = `Nguồn xếp hạng: ${sourceName}`;
+        else rankBadge.removeAttribute('title');
+      } else {
+        rankBadge.textContent = 'Chưa xếp hạng';
+        rankBadge.classList.add('conf-badge--rank-unranked');
+        rankBadge.removeAttribute('title');
+      }
+      rankBadge.hidden = false;
     }
 
     const statusObj = utils.getStatus(conf);
@@ -314,9 +294,9 @@
     }
 
     const tagsEl = root.querySelector('.js-conf-tags');
-    const realFields = Array.isArray(conf.fields)
-      ? conf.fields.map(f => String(f).trim()).filter(Boolean)
-      : [];
+    const realFields = typeof utils.extractTopicLabels === 'function'
+      ? utils.extractTopicLabels(conf)
+      : (Array.isArray(conf.fields) ? conf.fields.map(f => String(f).trim()).filter(Boolean) : []);
     if (tagsEl) {
       tagsEl.innerHTML = realFields.length > 0
         ? realFields.map(tag => `<span class="conf-header__tag">${utils.escapeHtml(tag)}</span>`).join('')
@@ -343,16 +323,25 @@
 
     const locParts = [conf.location, conf.country].map(v => String(v || '').trim()).filter(Boolean);
     const uniqueLoc = [...new Set(locParts)].join(', ');
+    const feeText = typeof utils.formatConferenceFee === 'function'
+      ? utils.formatConferenceFee(conf)
+      : (conf.fee ? String(conf.fee).trim() : 'Chưa cập nhật');
     const factMap = {
       '.js-fact-date': utils.formatConferenceEventDate(conf),
       '.js-fact-location': uniqueLoc || 'Chưa cập nhật',
       '.js-fact-format': utils.formatConferenceMode(conf),
-      '.js-fact-fee': conf.fee ? String(conf.fee).trim() : 'Chưa cập nhật'
+      '.js-fact-fee': feeText
     };
     Object.entries(factMap).forEach(([sel, val]) => {
       const el = root.querySelector(sel);
       if (el) el.textContent = val || 'Chưa cập nhật';
     });
+    const feeEl = root.querySelector('.js-fact-fee');
+    if (feeEl) {
+      const feeNoteText = conf.fee_note ? String(conf.fee_note).trim() : '';
+      if (feeNoteText) feeEl.setAttribute('title', feeNoteText);
+      else feeEl.removeAttribute('title');
+    }
   }
 
   /**
@@ -477,10 +466,6 @@
       tickerText: root.querySelector('.js-live-ticker-text'),
       calGroup: root.querySelector('.js-next-cal-group')
     };
-    const exportAllBtn = root.querySelector('[data-cal-action="ics-all"]');
-    if (exportAllBtn) {
-      exportAllBtn.hidden = utils.parseDeadlinesList(conf.deadlines).length === 0;
-    }
 
     const nextMilestone = utils.getNextDeadline(conf);
     if (nextMilestone && !nextMilestone.isPassed) {
@@ -507,29 +492,42 @@
   }
 
   /**
-   * Tạo mã HTML một bước trong thanh tiến trình 4 mốc quan trọng của hội nghị.
-   * @param {Object} milestone - Dữ liệu mốc nộp bài.
-   * @param {number} idx - Chỉ số thứ tự mốc (0..3).
-   * @param {Object|null} next - Mốc sắp tới gần nhất để đánh dấu active.
+   * Tạo mã HTML một bước trong danh sách toàn bộ các mốc deadline của hội nghị.
+   * Giữ nguyên tên, loại, nội dung và ngày tháng theo dữ liệu gốc; không tự tạo ngày thay thế khi thiếu/lỗi.
+   * @param {Object} milestone - Dữ liệu mốc deadline đã phân tích.
+   * @param {number} idx - Chỉ số thứ tự mốc (0..N-1).
+   * @param {Object|null} next - Mốc hợp lệ sắp tới gần nhất để đánh dấu active.
    * @param {Object} utils - Tập tiện ích ConfGuideUtils.
    * @returns {string} Chuỗi HTML `.deadline-timeline__step`.
    */
   function buildTimelineStepHtml(milestone, idx, next, utils) {
     const esc = utils.escapeHtml;
-    const dateVal = milestone.date;
+    const rawDate = milestone.rawDate !== undefined && milestone.rawDate !== null
+      ? String(milestone.rawDate).trim()
+      : String(milestone.date || '').trim();
+    const dateVal = milestone.hasValidDate === false ? '' : (milestone.date || '');
     const converted = dateVal && utils.convertDeadlineToVn
       ? utils.convertDeadlineToVn(dateVal, { isDeadline: true })
       : null;
-    const left = dateVal ? utils.daysLeft(dateVal) : null;
-    const isPassed = left !== null && left < 0;
-    const isActive = Boolean(next && !next.isPassed && next.date === dateVal && next.key === milestone.key);
+    const hasValidDate = Boolean(milestone.hasValidDate !== false && dateVal && converted);
+    const left = hasValidDate ? utils.daysLeft(dateVal) : null;
+    const isPassed = hasValidDate && left !== null && left < 0;
+    const isActive = Boolean(
+      hasValidDate
+      && next
+      && !next.isPassed
+      && Number.isFinite(next.targetMs)
+      && next.targetMs === milestone.targetMs
+      && next.name === milestone.name
+    );
 
     let modifierClass = 'deadline-timeline__step--upcoming';
-    let statusLabel = `Sắp tới · Còn ${Math.max(0, left ?? 0)} ngày`;
+    let statusLabel = hasValidDate ? `Sắp tới · Còn ${Math.max(0, left ?? 0)} ngày` : 'Chưa xác định ngày';
     let badgeContent = String(idx + 1);
 
-    if (!dateVal || !converted) {
-      statusLabel = 'Chưa công bố';
+    if (!hasValidDate) {
+      modifierClass = 'deadline-timeline__step--undated';
+      statusLabel = rawDate ? 'Không thể phân tích ngày' : 'Chưa công bố ngày';
     } else if (isPassed) {
       modifierClass = 'deadline-timeline__step--passed';
       statusLabel = 'Đã qua';
@@ -540,13 +538,24 @@
       statusLabel = `Mốc tiếp theo · Còn ${Math.max(0, left)} ngày`;
     }
 
-    const timeDisplay = converted
+    const timeDisplay = hasValidDate
       ? (converted.vnTimeVi ? `${converted.vnTimeVi} ${converted.vnDateVi}` : converted.vnDateVi)
-      : 'Chưa cập nhật';
-    const tzLabel = converted ? converted.timezoneLabel : 'UTC+7 (giờ Việt Nam)';
-    const datetimeAttr = converted ? converted.vnIsoDate : '';
+      : (rawDate || 'Chưa có ngày hợp lệ');
+    const rawDateHtml = hasValidDate && rawDate
+      ? `<span class="deadline-timeline__raw-date">Ngày gốc: ${esc(rawDate)}</span>`
+      : '';
+    const tzHtml = hasValidDate
+      ? `<span class="deadline-timeline__tz">${esc(converted.timezoneLabel)}</span>`
+      : '';
+    const typeHtml = milestone.type
+      ? `<span class="deadline-timeline__type">${esc(milestone.type)}</span>`
+      : '';
+    const noteHtml = milestone.note
+      ? `<p class="deadline-timeline__note">${esc(milestone.note)}</p>`
+      : '';
+    const datetimeAttr = hasValidDate ? converted.vnIsoDate : '';
 
-    const calButtonHtml = dateVal && converted && !isPassed
+    const calButtonHtml = hasValidDate && !isPassed
       ? `
         <button
           type="button"
@@ -566,37 +575,50 @@
           <span class="deadline-timeline__badge" aria-hidden="true">${badgeContent}</span>
           ${calButtonHtml}
         </div>
+        ${typeHtml}
         <h3 class="deadline-timeline__name">${esc(milestone.name)}</h3>
+        ${noteHtml}
         ${datetimeAttr
           ? `<time class="deadline-timeline__time" datetime="${esc(datetimeAttr)}">${esc(timeDisplay)}</time>`
           : `<span class="deadline-timeline__time">${esc(timeDisplay)}</span>`}
-        <span class="deadline-timeline__tz">${esc(tzLabel)}</span>
+        ${rawDateHtml}
+        ${tzHtml}
         <span class="deadline-timeline__status">${esc(statusLabel)}</span>
       </div>
     `;
   }
 
   /**
-   * Render thanh tiến trình 4 mốc quan trọng kèm thẻ `<time datetime>`, nhãn múi giờ rõ ràng và nút icon thêm lịch.
+   * Render toàn bộ danh sách các mốc deadline từ dữ liệu gốc (không giới hạn 4 mốc),
+   * sắp xếp tăng dần các mốc có ngày hợp lệ và giữ nguyên các mốc chưa xác định ngày.
    * @param {Object} conf - Đối tượng hội nghị.
    */
   function renderTimeline(conf) {
     const track = document.querySelector('.js-timeline-track');
+    const countBadge = document.querySelector('.js-timeline-count');
     if (!track || !conf) return;
 
     const utils = getDetailUtils();
-    const milestones = utils.getCoreMilestones(conf);
+    const milestones = utils.parseDeadlinesList(conf.deadlines);
     const next = utils.getNextDeadline(conf);
     coreMilestonesCache = milestones;
 
+    track.classList.toggle('deadline-timeline__track--many', milestones.length > 4);
+    track.classList.toggle('deadline-timeline__track--scrollable', milestones.length > 8);
+
+    if (countBadge) {
+      countBadge.textContent = milestones.length > 0 ? `${milestones.length} mốc` : '';
+      countBadge.hidden = milestones.length === 0;
+    }
+
     if (!milestones.length) {
       track.innerHTML = `
-        <div class="deadline-timeline__step deadline-timeline__step--upcoming timeline-step">
+        <div class="deadline-timeline__step deadline-timeline__step--undated timeline-step">
           <div class="deadline-timeline__step-top">
             <span class="deadline-timeline__badge">1</span>
           </div>
           <h3 class="deadline-timeline__name">Đang cập nhật mốc nộp bài</h3>
-          <span class="deadline-timeline__tz">Ban tổ chức chưa công bố lịch trình chi tiết.</span>
+          <span class="deadline-timeline__tz">Ban tổ chức chưa công bố lịch trình chi tiết trong dữ liệu gốc.</span>
           <span class="deadline-timeline__status">Chưa cập nhật</span>
         </div>
       `;
@@ -626,8 +648,47 @@
   }
 
   /**
-   * Render danh sách Thông tin học thuật (<dl>): chỉ hiển thị 5 thông số học thuật thật, không lặp lại với Header.
-   * @param {Object} conf Đối tượng hội nghị.
+   * Chuẩn hóa chuỗi hiển thị xếp hạng học thuật từ đối tượng `rankInfo` (CORE/ICORE, CCF) hoặc chuỗi `rank`.
+   * @param {Object} conf Đối tượng hội nghị chuẩn hóa.
+   * @param {Object} utils Tập tiện ích ConfGuideUtils.
+   * @returns {string} Chuỗi xếp hạng dễ đọc hoặc "Chưa xếp hạng" / "Chưa cập nhật".
+   */
+  function formatAcademicRankValue(conf, utils) {
+    if (!conf || typeof conf !== 'object') return 'Chưa cập nhật';
+
+    const rankObj = conf.rankInfo && typeof conf.rankInfo === 'object'
+      ? conf.rankInfo
+      : (conf.rank && typeof conf.rank === 'object' ? conf.rank : null);
+
+    if (rankObj) {
+      const parts = [];
+      const coreVal = rankObj.core !== undefined && rankObj.core !== null ? String(rankObj.core).trim() : '';
+      const coreSource = rankObj.core_source !== undefined && rankObj.core_source !== null ? String(rankObj.core_source).trim() : '';
+      const ccfVal = rankObj.ccf !== undefined && rankObj.ccf !== null ? String(rankObj.ccf).trim() : '';
+
+      if (coreVal && !/^unranked$/i.test(coreVal)) {
+        const coreLabel = /^(a\*|a|b|c)$/i.test(coreVal) ? `CORE ${coreVal.toUpperCase()}` : coreVal;
+        parts.push(coreSource ? `${coreLabel} (${coreSource})` : coreLabel);
+      }
+      if (ccfVal && !/^unranked$/i.test(ccfVal)) {
+        parts.push(/^ccf\b/i.test(ccfVal) ? ccfVal : `CCF ${ccfVal.toUpperCase()}`);
+      }
+
+      if (parts.length > 0) return parts.join(' · ');
+      return 'Chưa xếp hạng';
+    }
+
+    const rawRank = typeof utils.extractConferenceRank === 'function'
+      ? utils.extractConferenceRank(conf.rank)
+      : String(conf.rank || '').trim();
+    if (!rawRank) return 'Chưa cập nhật';
+    if (/^unranked$/i.test(rawRank)) return 'Chưa xếp hạng';
+    return /^(a\*|a|b|c)$/i.test(rawRank) ? `CORE ${rawRank.toUpperCase()}` : rawRank;
+  }
+
+  /**
+   * Render phần Thông tin học thuật với 3 mục: Xếp hạng, Lĩnh vực nghiên cứu và Xác minh lần cuối.
+   * @param {Object} conf Đối tượng hội nghị chuẩn hóa.
    */
   function renderAcademicInfo(conf) {
     const root = document.querySelector('.js-detail-root');
@@ -637,33 +698,24 @@
     const esc = utils.escapeHtml;
 
     const rankEl = root.querySelector('.js-spec-rank');
-    const realRank = typeof utils.extractConferenceRank === 'function'
-      ? utils.extractConferenceRank(conf.rank)
-      : (conf.rank ? String(conf.rank).trim() : '');
     if (rankEl) {
-      rankEl.textContent = realRank
-        ? (/^(a\*|a|b|c)$/i.test(realRank) ? `CORE ${realRank}` : realRank)
-        : 'Chưa cập nhật';
+      rankEl.textContent = formatAcademicRankValue(conf, utils);
     }
 
-    const pubEl = root.querySelector('.js-spec-publisher');
-    const realPub = conf.publisher ? String(conf.publisher).trim() : '';
-    if (pubEl) pubEl.textContent = realPub || 'Chưa cập nhật';
-
-    const idxEl = root.querySelector('.js-spec-indexing');
-    const realIdx = Array.isArray(conf.indexing)
-      ? conf.indexing.map(i => String(i).trim()).filter(Boolean)
-      : [];
-    if (idxEl) idxEl.textContent = realIdx.length > 0 ? realIdx.join(', ') : 'Chưa cập nhật';
-
     const fieldsEl = root.querySelector('.js-spec-fields');
-    const realFields = Array.isArray(conf.fields)
-      ? conf.fields.map(f => String(f).trim()).filter(Boolean)
-      : [];
-    if (fieldsEl) fieldsEl.textContent = realFields.length > 0 ? realFields.join(', ') : 'Chưa cập nhật';
+    const realFields = typeof utils.extractTopicLabels === 'function'
+      ? utils.extractTopicLabels(conf)
+      : (Array.isArray(conf.fields) ? conf.fields.map(f => String(f).trim()).filter(Boolean) : []);
+    if (fieldsEl) {
+      fieldsEl.textContent = realFields.length > 0 ? realFields.join(', ') : 'Chưa cập nhật';
+    }
 
     const verifiedEl = root.querySelector('.js-spec-verified');
-    const rawVerified = (conf.lastVerified || (conf.crawled_at ? String(conf.crawled_at).slice(0, 10) : '')).trim();
+    const rawVerified = String(
+      conf.lastVerified
+      || conf.last_verified
+      || (conf.crawled_at ? String(conf.crawled_at).slice(0, 10) : '')
+    ).trim();
     if (verifiedEl) {
       if (rawVerified) {
         const formattedVerified = utils.formatDateVi(rawVerified);
@@ -672,212 +724,6 @@
         verifiedEl.textContent = 'Chưa cập nhật';
       }
     }
-  }
-
-  /**
-   * Sinh chuỗi HTML 5 ngôi sao tĩnh theo đúng điểm số truyền vào (tô sáng các sao <= Math.round(score)).
-   * @param {number} score Điểm đánh giá (0 - 5).
-   * @param {number} [size=18] Kích thước ngôi sao.
-   * @returns {string} Chuỗi HTML 5 biểu tượng sao.
-   */
-  function renderStaticStarsHtml(score, size = 18) {
-    const numScore = Number(score);
-    const rounded = Number.isFinite(numScore) && numScore > 0 ? Math.round(numScore) : 0;
-    let html = '';
-    for (let i = 1; i <= 5; i++) {
-      const litClass = i <= rounded ? ' is-lit' : '';
-      html += `
-        <svg class="conf-reviews__star-svg${litClass}" width="${size}" height="${size}" aria-hidden="true">
-          <use href="#icon-star"></use>
-        </svg>
-      `;
-    }
-    return html;
-  }
-
-  /**
-   * Cập nhật giao diện nhóm radio 5 sao chấm điểm của người dùng.
-   * @param {number} activeRating Số sao đang được chọn hoặc tô sáng (0 - 5).
-   * @param {number} savedRating Số sao đã lưu thực tế của người dùng (0 - 5).
-   */
-  function updateUserStarRadioGroup(activeRating, savedRating) {
-    const starsBox = document.querySelector('.js-star-rating');
-    if (!starsBox) return;
-
-    const buttons = starsBox.querySelectorAll('.js-star-btn');
-    buttons.forEach((btn, idx) => {
-      const starVal = idx + 1;
-      const isLit = starVal <= activeRating;
-      const isChecked = savedRating > 0 ? starVal === savedRating : false;
-      btn.classList.toggle('is-lit', isLit);
-      btn.setAttribute('aria-checked', String(isChecked));
-      btn.tabIndex = (savedRating > 0 ? starVal === savedRating : starVal === 1) ? 0 : -1;
-    });
-  }
-
-  /**
-   * Vẽ thanh phân bố tỷ lệ sao trong view #danh-gia nếu dữ liệu hội nghị có thông tin phân bố, ẩn nếu không có.
-   * @param {Object} conf Đối tượng hội nghị.
-   */
-  function renderRatingDistributionBars(conf) {
-    const barsEl = document.querySelector('.js-rv-bars');
-    if (!barsEl) return;
-
-    const dist = conf && (conf.rating_distribution || conf.ratingBreakdown);
-    if (!dist || typeof dist !== 'object') {
-      barsEl.innerHTML = '';
-      barsEl.hidden = true;
-      return;
-    }
-
-    const counts = [5, 4, 3, 2, 1].map(star => Number(dist[star] || 0));
-    const total = counts.reduce((sum, val) => sum + val, 0);
-    if (total <= 0) {
-      barsEl.innerHTML = '';
-      barsEl.hidden = true;
-      return;
-    }
-
-    barsEl.hidden = false;
-    barsEl.innerHTML = [5, 4, 3, 2, 1].map((star, idx) => {
-      const pct = Math.round((counts[idx] / total) * 100);
-      return `
-        <div class="reviews-view__bar-row">
-          <span>${star} sao</span>
-          <progress class="reviews-view__bar-progress" value="${pct}" max="100" aria-label="Tỷ lệ ${star} sao">${pct}%</progress>
-          <span class="reviews-view__bar-pct">${pct}%</span>
-        </div>
-      `;
-    }).join('');
-  }
-
-  /**
-   * Render khu vực Đánh giá & Nhận xét hợp nhất trên trang chi tiết và cập nhật danh sách ở view #danh-gia.
-   * @param {Object} conf Đối tượng hội nghị.
-   */
-  /**
-   * Render phần tóm tắt điểm đánh giá và nhóm nút radio 5 sao cá nhân trên trang Chi tiết.
-   * @param {HTMLElement} root - Phần tử gốc `.js-detail-root`.
-   * @param {Object} conf - Đối tượng hội nghị.
-   * @param {boolean} hasRating - True nếu hội nghị có điểm tham khảo từ dữ liệu.
-   * @param {number} ratingVal - Điểm số tham khảo.
-   * @param {number} savedRating - Số sao người dùng hiện tại đã chấm.
-   */
-  function renderReviewRatingControls(root, conf, hasRating, ratingVal, savedRating) {
-    const avgScoreEl = root.querySelector('.js-avg-score');
-    if (avgScoreEl) avgScoreEl.textContent = hasRating ? ratingVal.toFixed(1) : '—';
-
-    const headerStarsEl = root.querySelector('.js-header-stars');
-    if (headerStarsEl) headerStarsEl.innerHTML = renderStaticStarsHtml(ratingVal, 17);
-
-    const countTextEl = root.querySelector('.js-reviews-count-text');
-    if (countTextEl) {
-      countTextEl.textContent = conf.rating_count
-        ? `Số liệu tham khảo (${conf.rating_count} lượt)`
-        : (hasRating ? 'Điểm tham khảo từ dữ liệu hội nghị' : 'Chưa có điểm tham khảo');
-    }
-
-    const starsBox = root.querySelector('.js-star-rating');
-    if (starsBox) {
-      starsBox.innerHTML = [1, 2, 3, 4, 5].map(star => `
-        <button
-          type="button"
-          class="star-rating__btn js-star-btn"
-          role="radio"
-          aria-checked="${savedRating === star ? 'true' : 'false'}"
-          aria-label="${star} sao"
-          data-star="${star}"
-        >
-          <svg class="star-rating__svg" viewBox="0 0 24 24" aria-hidden="true">
-            <use href="#icon-star"></use>
-          </svg>
-          <span>${star}</span>
-        </button>
-      `).join('');
-      updateUserStarRadioGroup(savedRating, savedRating);
-    }
-
-    const rateMsgEl = root.querySelector('.js-rate-msg');
-    if (rateMsgEl) {
-      rateMsgEl.textContent = savedRating ? `Bạn đã chấm ${savedRating}/5 sao.` : 'Nhấn vào ngôi sao để chấm điểm.';
-    }
-  }
-
-  /**
-   * Render danh sách nhận xét lưu trên trình duyệt cho chế độ xem `#danh-gia`.
-   * @param {HTMLElement} root - Phần tử gốc `.js-detail-root`.
-   * @param {Array<Object>} reviews - Mảng nhận xét của hội nghị hiện tại.
-   * @param {Function} esc - Hàm thoát ký tự HTML.
-   */
-  function renderLocalReviewItems(root, reviews, esc) {
-    const rvList = root.querySelector('.js-rv-list');
-    if (!rvList) return;
-
-    if (reviews.length === 0) {
-      rvList.innerHTML =
-        '<p class="reviews-view__item">'
-        + 'Chưa có nhận xét nào được lưu trên trình duyệt này. Bạn có thể gửi nhận xét đầu tiên ở biểu mẫu phía trên.'
-        + '</p>';
-      return;
-    }
-
-    rvList.innerHTML = reviews.map(item => {
-      const createdIso = item.createdAt ? String(item.createdAt) : '';
-      const createdVi = createdIso ? new Date(createdIso).toLocaleString('vi-VN') : '';
-      return `
-        <article class="reviews-view__item">
-          <div class="reviews-view__item-head">
-            <strong class="reviews-view__author">${esc(item.author || 'Người dùng ConfGuide')}</strong>
-            ${createdIso
-              ? `<time class="reviews-view__time" datetime="${esc(createdIso)}">${esc(createdVi)}</time>`
-              : ''}
-          </div>
-          <p class="reviews-view__text">${esc(item.text || '')}</p>
-        </article>
-      `;
-    }).join('');
-  }
-
-  /**
-   * Render khu vực Đánh giá & Nhận xét hợp nhất (#danh-gia).
-   * @param {Object} conf - Đối tượng hội nghị.
-   */
-  function renderReviews(conf) {
-    const root = document.querySelector('.js-detail-root');
-    if (!root || !conf) return;
-
-    const utils = getDetailUtils();
-    const confId = utils.getConferenceId(conf) || 'conf';
-    const hasRating = Number.isFinite(Number(conf.rating)) && Number(conf.rating) > 0;
-    const ratingVal = hasRating ? Number(conf.rating) : 0;
-    const savedRating = Number(utils.readStorage(`confguide_rating_${confId}`, 0)) || 0;
-
-    renderReviewRatingControls(root, conf, hasRating, ratingVal, savedRating);
-
-    const rawReviews = utils.readStorage(`confguide_reviews_${confId}`, []);
-    const reviews = Array.isArray(rawReviews) ? rawReviews : [];
-
-    const localSummaryEl = root.querySelector('.js-local-review-summary');
-    if (localSummaryEl) {
-      localSummaryEl.textContent = reviews.length > 0
-        ? `Hiện có ${reviews.length} nhận xét được lưu trên trình duyệt này.`
-        : 'Chưa có nhận xét nào trên trình duyệt này. Hãy chia sẻ nhận xét đầu tiên.';
-    }
-
-    const rvPageTitle = root.querySelector('.js-rv-page-title');
-    if (rvPageTitle) rvPageTitle.textContent = `Nhận xét hội nghị · ${conf.name}`;
-
-    const rvAvg = root.querySelector('.js-rv-avg');
-    if (rvAvg) rvAvg.textContent = hasRating ? ratingVal.toFixed(1) : (savedRating ? savedRating.toFixed(1) : '—');
-
-    const rvStars = root.querySelector('.js-rv-stars');
-    if (rvStars) rvStars.innerHTML = renderStaticStarsHtml(hasRating ? ratingVal : savedRating, 20);
-
-    const rvTotal = root.querySelector('.js-rv-total');
-    if (rvTotal) rvTotal.textContent = `${reviews.length} nhận xét lưu trên trình duyệt này`;
-
-    renderRatingDistributionBars(conf);
-    renderLocalReviewItems(root, reviews, utils.escapeHtml);
   }
 
   /**
@@ -904,11 +750,12 @@
     }
 
     const monogram = String(item.name || 'CG').replace(/[^a-zA-Z0-9]/g, '').slice(0, 4).toUpperCase() || 'CONF';
-    const realRank = typeof utils.extractConferenceRank === 'function'
-      ? utils.extractConferenceRank(item.rank)
-      : (item.rank ? String(item.rank).trim() : '');
     const dateRange = utils.formatConferenceEventDate(item);
     const locationText = item.location || 'Chưa cập nhật';
+    const feeText = typeof utils.formatConferenceFee === 'function'
+      ? utils.formatConferenceFee(item)
+      : 'Chưa cập nhật';
+    const feeModifier = feeText !== 'Chưa cập nhật' ? ' related-card__meta-item--fee' : '';
     const compareBtnHtml = window.ConfGuideCompare ? window.ConfGuideCompare.renderToggleButton(item) : '';
     const avatarHtml = utils && typeof utils.renderConferenceAvatar === 'function'
       ? utils.renderConferenceAvatar(item, 'related-card__monogram')
@@ -926,7 +773,6 @@
                 </a>
               </h3>
             </div>
-            ${realRank ? `<span class="conf-badge conf-badge--rank">${esc(/^(a\*|a|b|c)$/i.test(realRank) ? `Rank ${realRank}` : realRank)}</span>` : ''}
           </div>
 
           <p class="related-card__fullname">${esc(item.fullName || item.full_name || item.summarization || '')}</p>
@@ -939,6 +785,10 @@
             <span class="related-card__meta-item">
               ${renderSpriteIcon('icon-calendar', 14)}
               <span>${esc(dateRange)}</span>
+            </span>
+            <span class="related-card__meta-item${feeModifier}">
+              ${renderSpriteIcon('icon-fee', 14)}
+              <span>Lệ phí: ${esc(feeText)}</span>
             </span>
           </div>
         </div>
@@ -970,15 +820,18 @@
 
     const utils = getDetailUtils();
     const currentId = utils.getConferenceId(current);
-    const curFields = Array.isArray(current.fields)
-      ? current.fields.map(f => String(f).toLowerCase())
-      : [];
+    const getTopicSet = item => (
+      typeof utils.extractTopicLabels === 'function'
+        ? utils.extractTopicLabels(item)
+        : (Array.isArray(item && item.fields) ? item.fields : [])
+    ).map(f => String(f).toLowerCase());
+    const curFields = getTopicSet(current);
 
     const relatedList = allConferences
       .filter(c => utils.getConferenceId(c) !== currentId)
       .sort((a, b) => {
-        const aMatch = (a.fields || []).filter(f => curFields.includes(String(f).toLowerCase())).length;
-        const bMatch = (b.fields || []).filter(f => curFields.includes(String(f).toLowerCase())).length;
+        const aMatch = getTopicSet(a).filter(f => curFields.includes(f)).length;
+        const bMatch = getTopicSet(b).filter(f => curFields.includes(f)).length;
         return bMatch - aMatch;
       })
       .slice(0, 3);
@@ -995,35 +848,9 @@
   }
 
   /**
-   * Đồng bộ chuyển đổi giữa View Chi tiết (#viewDetail) và View Nhận xét (#danh-gia).
-   */
-  function syncHashRoute() {
-    const root = document.querySelector('.js-detail-root');
-    if (!root || !currentConference) return;
-
-    const viewDetail = root.querySelector('.js-view-detail');
-    const viewReviews = root.querySelector('.js-view-reviews');
-    const backLabel = root.querySelector('.js-back-btn-label');
-    const isReviewsRoute = window.location.hash === '#danh-gia';
-
-    if (viewDetail) viewDetail.hidden = isReviewsRoute;
-    if (viewReviews) viewReviews.hidden = !isReviewsRoute;
-    if (backLabel) {
-      backLabel.textContent = isReviewsRoute ? 'Quay lại chi tiết hội nghị' : 'Quay lại danh sách';
-    }
-    window.scrollTo(0, 0);
-  }
-
-  /**
    * Điều hướng nút "Quay lại": giữ nguyên bộ lọc và chế độ xem của trang danh sách trước đó.
    */
   function navigateBackFromDetail() {
-    if (window.location.hash === '#danh-gia') {
-      history.replaceState(null, '', window.location.pathname + window.location.search);
-      syncHashRoute();
-      return;
-    }
-
     if (document.referrer) {
       try {
         const refUrl = new URL(document.referrer);
@@ -1045,85 +872,7 @@
   }
 
   /**
-   * Lưu điểm số sao của người dùng cho hội nghị hiện tại.
-   * @param {number} selectedStar Giá trị sao từ 1 đến 5.
-   */
-  function saveUserStarRating(selectedStar) {
-    if (!currentConference) return;
-    const utils = getDetailUtils();
-    const confId = utils.getConferenceId(currentConference) || 'conf';
-    const userRatingKey = `confguide_rating_${confId}`;
-    const currentSaved = Number(utils.readStorage(userRatingKey, 0)) || 0;
-    const nextRating = currentSaved === selectedStar ? 0 : selectedStar;
-
-    utils.writeStorage(userRatingKey, nextRating);
-    updateUserStarRadioGroup(nextRating, nextRating);
-
-    const rateMsgEl = document.querySelector('.js-rate-msg');
-    if (rateMsgEl) {
-      rateMsgEl.textContent = nextRating
-        ? `Bạn đã chấm ${nextRating}/5 sao. Cảm ơn đánh giá của bạn!`
-        : 'Đã xóa điểm chấm của bạn.';
-    }
-  }
-
-  /**
-   * Kiểm tra hợp lệ và lưu nhận xét mới từ form tại view #danh-gia (kết hợp HTML5 + Regex).
-   * @param {HTMLFormElement} formEl Phần tử form nhận xét.
-   */
-  function handleReviewFormSubmit(formEl) {
-    if (!currentConference || !formEl) return;
-    const utils = getDetailUtils();
-    const confId = utils.getConferenceId(currentConference) || 'conf';
-
-    const textarea = formEl.querySelector('.js-review-textarea');
-    const errorEl = formEl.querySelector('.js-field-error');
-    const msgEl = formEl.querySelector('.js-review-form-msg');
-    if (!textarea) return;
-
-    const rawText = textarea.value.trim();
-    const validTextRegex = /^[\s\S]{8,1200}$/;
-    const hasMeaningfulChars = /\S{2,}/.test(rawText);
-
-    if (msgEl) msgEl.textContent = '';
-
-    if (!validTextRegex.test(rawText) || !hasMeaningfulChars) {
-      if (errorEl) {
-        errorEl.textContent = 'Vui lòng nhập nội dung nhận xét hợp lệ từ 8 đến 1200 ký tự.';
-      }
-      textarea.setAttribute('aria-invalid', 'true');
-      textarea.focus();
-      return;
-    }
-
-    if (errorEl) errorEl.textContent = '';
-    textarea.setAttribute('aria-invalid', 'false');
-
-    const reviewsKey = `confguide_reviews_${confId}`;
-    const existing = utils.readStorage(reviewsKey, []);
-    const safeList = Array.isArray(existing) ? existing : [];
-    const currentUser = window.ConfGuideLayout && typeof window.ConfGuideLayout.getCurrentUser === 'function'
-      ? window.ConfGuideLayout.getCurrentUser()
-      : null;
-
-    safeList.unshift({
-      id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-      author: (currentUser && (currentUser.fullName || currentUser.name || currentUser.username)) || 'Người dùng ConfGuide',
-      text: rawText,
-      createdAt: new Date().toISOString()
-    });
-
-    if (utils.writeStorage(reviewsKey, safeList)) {
-      textarea.value = '';
-      if (msgEl) msgEl.textContent = 'Đã lưu nhận xét trên trình duyệt này.';
-      renderReviews(currentConference);
-    } else if (msgEl) {
-      msgEl.textContent = 'Không thể lưu nhận xét. Vui lòng kiểm tra dung lượng bộ nhớ trình duyệt.';
-    }
-  }
-
-  /**
-   * Xử lý các tương tác click trên `.js-detail-root` (lưu, quay lại, xuất lịch, chấm sao).
+   * Xử lý các tương tác click trên `.js-detail-root` (lưu, quay lại, xuất lịch).
    * @param {MouseEvent} event - Sự kiện click ủy quyền.
    */
   function handleDetailRootClick(event) {
@@ -1131,23 +880,13 @@
     if (!(target instanceof Element)) return;
 
     if (target.closest('.js-back-btn')) { navigateBackFromDetail(); return; }
-    if (target.closest('.js-back-to-detail-btn')) {
-      history.replaceState(null, '', window.location.pathname + window.location.search);
-      syncHashRoute();
-      return;
-    }
-    if (target.closest('.js-open-reviews')) { window.location.hash = '#danh-gia'; return; }
     if (target.closest('.js-save-btn')) { toggleSaveCurrentConference(); return; }
 
     const calActionBtn = target.closest('.js-cal-action');
     if (calActionBtn && currentConference) {
-      const actionMap = {
-        'google-next': ['google', getDetailUtils().getNextDeadline(currentConference)],
-        'ics-next': ['ics-single', getDetailUtils().getNextDeadline(currentConference)],
-        'ics-all': ['ics-all', null]
-      };
-      const entry = actionMap[calActionBtn.getAttribute('data-cal-action')];
-      if (entry) handleCalendarAction(entry[0], currentConference, entry[1]);
+      if (calActionBtn.getAttribute('data-cal-action') === 'google-next') {
+        handleCalendarAction('google', currentConference, getDetailUtils().getNextDeadline(currentConference));
+      }
       return;
     }
 
@@ -1155,45 +894,7 @@
     if (stepCalBtn && currentConference) {
       const milestone = coreMilestonesCache[Number(stepCalBtn.getAttribute('data-milestone-index'))];
       if (milestone) handleCalendarAction('google', currentConference, milestone);
-      return;
     }
-
-    const starBtn = target.closest('.js-star-btn');
-    if (starBtn) {
-      const starVal = Number(starBtn.getAttribute('data-star'));
-      if (starVal >= 1 && starVal <= 5) saveUserStarRating(starVal);
-    }
-  }
-
-  /**
-   * Đọc điểm sao người dùng đã lưu cho hội nghị hiện hành.
-   * @returns {number} Giá trị 1..5 hoặc 0 nếu chưa chấm.
-   */
-  function readSavedConferenceRating() {
-    if (!currentConference) return 0;
-    const confId = getDetailUtils().getConferenceId(currentConference) || 'conf';
-    return Number(getDetailUtils().readStorage(`confguide_rating_${confId}`, 0)) || 0;
-  }
-
-  /**
-   * Hỗ trợ điều hướng phím mũi tên trong nhóm radio 5 sao đánh giá hội nghị.
-   * @param {HTMLElement} root - Phần tử gốc `.js-detail-root`.
-   * @param {KeyboardEvent} event - Sự kiện bàn phím.
-   */
-  function handleStarRatingKeydown(root, event) {
-    const starBtn = event.target instanceof Element ? event.target.closest('.js-star-btn') : null;
-    if (!starBtn) return;
-
-    const currentStar = Number(starBtn.getAttribute('data-star')) || 1;
-    let nextStar = null;
-    if (event.key === 'ArrowRight' || event.key === 'ArrowUp') nextStar = currentStar < 5 ? currentStar + 1 : 1;
-    else if (event.key === 'ArrowLeft' || event.key === 'ArrowDown') nextStar = currentStar > 1 ? currentStar - 1 : 5;
-    if (nextStar === null) return;
-
-    event.preventDefault();
-    saveUserStarRating(nextStar);
-    const nextBtn = root.querySelector(`.js-star-btn[data-star="${nextStar}"]`);
-    if (nextBtn instanceof HTMLElement) nextBtn.focus();
   }
 
   /**
@@ -1205,40 +906,6 @@
 
     root.addEventListener('click', handleDetailRootClick);
 
-    root.addEventListener('mouseover', event => {
-      const starBtn = event.target instanceof Element ? event.target.closest('.js-star-btn') : null;
-      if (!starBtn || !currentConference) return;
-      updateUserStarRadioGroup(Number(starBtn.getAttribute('data-star')) || 0, readSavedConferenceRating());
-    });
-
-    root.addEventListener('mouseout', event => {
-      const ratingBox = event.target instanceof Element ? event.target.closest('.js-star-rating') : null;
-      if (!ratingBox || !currentConference) return;
-      if (event.relatedTarget instanceof Element && ratingBox.contains(event.relatedTarget)) return;
-      const saved = readSavedConferenceRating();
-      updateUserStarRadioGroup(saved, saved);
-    });
-
-    root.addEventListener('keydown', event => handleStarRatingKeydown(root, event));
-
-    root.addEventListener('input', event => {
-      const target = event.target;
-      if (!(target instanceof HTMLTextAreaElement) || !target.classList.contains('js-review-textarea')) return;
-      if (target.value.trim().length >= MIN_REVIEW_CHARS) {
-        const errEl = root.querySelector('.js-field-error');
-        if (errEl) errEl.textContent = '';
-        target.setAttribute('aria-invalid', 'false');
-      }
-    });
-
-    root.addEventListener('submit', event => {
-      const formEl = event.target;
-      if (!(formEl instanceof HTMLFormElement) || !formEl.classList.contains('js-review-form')) return;
-      event.preventDefault();
-      handleReviewFormSubmit(formEl);
-    });
-
-    window.addEventListener('hashchange', syncHashRoute);
     window.addEventListener('pagehide', stopCountdownTimer);
     window.addEventListener('beforeunload', stopCountdownTimer);
   }
@@ -1289,10 +956,8 @@
     const requestedId = (urlParams.get('id') || '').trim().toLowerCase();
 
     if (!requestedId) {
-      setPageState(
-        'error',
-        'Đường dẫn chưa có tham số mã hội nghị (?id=...). Vui lòng chọn một hội nghị từ danh sách tra cứu.'
-      );
+      const fromParam = encodeURIComponent(`detail.html${window.location.search || ''}`);
+      window.location.replace(`404.html?reason=missing-id&from=${fromParam}`);
       return;
     }
 
@@ -1305,10 +970,8 @@
       || null;
 
     if (!currentConference) {
-      setPageState(
-        'error',
-        `Không tìm thấy hội nghị có mã "${requestedId}". Hội nghị có thể đã bị gỡ hoặc đường dẫn không chính xác.`
-      );
+      const fromParam = encodeURIComponent(`detail.html${window.location.search || ''}`);
+      window.location.replace(`404.html?reason=conference&id=${encodeURIComponent(requestedId)}&from=${fromParam}`);
       return;
     }
 
@@ -1316,7 +979,6 @@
     renderTimeline(currentConference);
     renderOverview(currentConference);
     renderAcademicInfo(currentConference);
-    renderReviews(currentConference);
     renderNextDeadlineCard(currentConference);
     renderRelated(currentConference);
 
@@ -1326,8 +988,17 @@
   // Dọn dẹp bộ đếm ngược khi rời trang và khôi phục nếu người dùng quay lại qua bfcache
   window.addEventListener('pagehide', stopCountdownTimer);
   window.addEventListener('pageshow', event => {
+    if (currentConference) {
+      updateSaveButtonUi(getSavedList().includes(getDetailUtils().getConferenceId(currentConference)));
+    }
     if (event.persisted && currentConference) {
       renderNextDeadlineCard(currentConference);
+    }
+  });
+  window.addEventListener('storage', event => {
+    if (!currentConference) return;
+    if (!event.key || event.key === 'confguide_current_user' || event.key === getSavedStorageKey()) {
+      updateSaveButtonUi(getSavedList().includes(getDetailUtils().getConferenceId(currentConference)));
     }
   });
 

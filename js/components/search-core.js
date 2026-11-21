@@ -17,12 +17,85 @@
     acronym: 2,
     topics: 2,
     fullName: 1,
-    publisher: 1,
     summary: 0.5
   };
 
   /** Ngưỡng ngày tính trạng thái "Sắp hết hạn" */
   const CLOSING_SOON_DAYS = 14;
+
+  /** Bản đồ chuẩn hóa tên lĩnh vực đơn & bí danh (khóa đã bỏ dấu/viết thường -> tên hiển thị chuẩn) */
+  const TOPIC_ALIAS_MAP = {
+    'tri tue nhan tao': 'Trí tuệ nhân tạo',
+    ai: 'Trí tuệ nhân tạo',
+    'ai foundations': 'Trí tuệ nhân tạo',
+    'healthcare ai': 'Trí tuệ nhân tạo',
+    'artificial intelligence': 'Trí tuệ nhân tạo',
+    'hoc may': 'Học máy',
+    'machine learning': 'Học máy',
+    'deep learning': 'Học máy',
+    'khoa hoc du lieu': 'Khoa học dữ liệu',
+    'data science': 'Khoa học dữ liệu',
+    data: 'Khoa học dữ liệu',
+    'du lieu lon': 'Dữ liệu lớn',
+    'big data': 'Dữ liệu lớn',
+    'du lieu': 'Dữ liệu',
+    'thi giac may tinh': 'Thị giác máy tính',
+    'computer vision': 'Thị giác máy tính',
+    vision: 'Thị giác máy tính',
+    'pattern recognition': 'Thị giác máy tính',
+    'da phuong tien': 'Đa phương tiện',
+    multimedia: 'Đa phương tiện',
+    'an toan thong tin': 'An toàn thông tin',
+    'cyber security': 'An toàn thông tin',
+    security: 'An toàn thông tin',
+    privacy: 'An toàn thông tin',
+    'mang may tinh': 'Mạng máy tính',
+    network: 'Mạng máy tính',
+    'wireless networks': 'Mạng máy tính',
+    iot: 'IoT',
+    'internet of things': 'IoT',
+    'truyen thong': 'Truyền thông',
+    communications: 'Truyền thông',
+    robot: 'Robot',
+    robotics: 'Robot',
+    'tu dong hoa': 'Tự động hóa',
+    'dieu khien': 'Điều khiển',
+    'he thong thong tin': 'Hệ thống thông tin',
+    infosys: 'Hệ thống thông tin',
+    'knowledge engineering': 'Hệ thống thông tin',
+    'chuyen doi so': 'Chuyển đổi số',
+    'dien tu': 'Điện tử',
+    electronics: 'Điện tử',
+    'vien thong': 'Viễn thông',
+    'xu ly tin hieu': 'Xử lý tín hiệu',
+    'cong nghe phan mem': 'Công nghệ phần mềm',
+    'ky thuat phan mem': 'Công nghệ phần mềm',
+    'software engineering': 'Công nghệ phần mềm',
+    software: 'Công nghệ phần mềm',
+    'cntt tong hop': 'CNTT tổng hợp',
+    general: 'CNTT tổng hợp',
+    'xu ly ngon ngu tu nhien': 'Xử lý ngôn ngữ tự nhiên',
+    nlp: 'Xử lý ngôn ngữ tự nhiên',
+    'tuong tac nguoi-may': 'Tương tác người-máy',
+    'tuong tac nguoi may': 'Tương tác người-máy',
+    hci: 'Tương tác người-máy',
+    'cong nghe giao duc': 'Công nghệ giáo dục',
+    'dien toan dam may': 'Điện toán đám mây',
+    'cloud computing': 'Điện toán đám mây',
+    cloud: 'Điện toán đám mây',
+    'he thong phan tan': 'Hệ thống phân tán',
+    'high performance computing': 'Hệ thống phân tán'
+  };
+
+  /** Bảng mở rộng an toàn cho các khóa URL gộp cũ sang khóa lĩnh vực đơn tương ứng */
+  const LEGACY_TOPIC_EXPANSIONS = {
+    'ai-data': ['tri-tue-nhan-tao', 'hoc-may', 'khoa-hoc-du-lieu', 'du-lieu-lon'],
+    'network-iot': ['mang-may-tinh', 'iot', 'truyen-thong', 'vien-thong'],
+    electronics: ['dien-tu'],
+    software: ['cong-nghe-phan-mem'],
+    security: ['an-toan-thong-tin'],
+    'cross-domain': ['cntt-tong-hop']
+  };
 
   /* ================= 2. HÀM HỖ TRỢ CHUẨN HÓA & SO KHỚP CHUỖI ================= */
 
@@ -147,6 +220,140 @@
   }
 
   /**
+   * Tạo khóa slug ASCII dạng kebab-case từ tên lĩnh vực đơn.
+   * @param {string} label - Tên lĩnh vực đã chuẩn hóa.
+   * @returns {string} Khóa slug ASCII kebab-case.
+   */
+  function toTopicSlug(label) {
+    return normalizeText(label)
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+  }
+
+  /**
+   * Chuẩn hóa tên một lĩnh vực đơn: cắt khoảng trắng, bỏ chú thích ngoặc thừa và thống nhất chữ hoa/dấu.
+   * @param {string} rawPiece - Đoạn tên lĩnh vực sau khi tách theo dấu nối.
+   * @returns {string} Tên lĩnh vực đơn chuẩn hóa hoặc chuỗi rỗng nếu không hợp lệ.
+   */
+  function normalizeSingleTopicLabel(rawPiece) {
+    if (!rawPiece || typeof rawPiece !== 'string') return '';
+    const cleaned = rawPiece
+      .replace(/\s*\(nhiều lĩnh vực\)\s*/gi, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+    if (!cleaned) return '';
+
+    const normKey = normalizeText(cleaned);
+    if (Object.prototype.hasOwnProperty.call(TOPIC_ALIAS_MAP, normKey)) {
+      return TOPIC_ALIAS_MAP[normKey];
+    }
+    return cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
+  }
+
+  /**
+   * Trích xuất danh sách chuỗi lĩnh vực thô từ tham số truyền vào (chuỗi, mảng hoặc đối tượng hội nghị).
+   * @param {string|Array<string>|Object|null|undefined} fieldInput - Dữ liệu lĩnh vực đầu vào.
+   * @returns {Array<string>} Mảng chuỗi thô cần tách và chuẩn hóa.
+   */
+  function extractRawTopicSource(fieldInput) {
+    if (!fieldInput) return [];
+    if (typeof fieldInput === 'string') return [fieldInput];
+    if (Array.isArray(fieldInput)) return fieldInput;
+    if (typeof fieldInput === 'object') {
+      if (Array.isArray(fieldInput.topic_labels) && fieldInput.topic_labels.length > 0) {
+        return fieldInput.topic_labels;
+      }
+      if (typeof fieldInput.topic_labels === 'string' && fieldInput.topic_labels.trim()) {
+        return [fieldInput.topic_labels];
+      }
+      if (Array.isArray(fieldInput.fields) && fieldInput.fields.length > 0) return fieldInput.fields;
+      if (typeof fieldInput.fields === 'string' && fieldInput.fields.trim()) return [fieldInput.fields];
+      if (Array.isArray(fieldInput.topics) && fieldInput.topics.length > 0) return fieldInput.topics;
+    }
+    return [];
+  }
+
+  /**
+   * Chuẩn hóa và tách dữ liệu lĩnh vực của một hội nghị thành mảng các lĩnh vực đơn duy nhất:
+   * cắt khoảng trắng, tách theo các dấu nối (",", ";", "/", "&", " và "), gộp trùng theo khóa kebab-case
+   * và thống nhất cách viết hoa/thường, dấu tiếng Việt.
+   * @param {string|Array<string>|Object|null|undefined} fieldInput - Chuỗi gộp, mảng chuỗi hoặc đối tượng hội nghị.
+   * @returns {Array<{ key: string, label: string }>} Mảng các lĩnh vực đơn `{ key, label }`.
+   */
+  function normalizeTopicFields(fieldInput) {
+    const rawItems = extractRawTopicSource(fieldInput);
+    if (rawItems.length === 0) return [];
+
+    const seenKeys = new Set();
+    const result = [];
+
+    rawItems.forEach(item => {
+      if (item === null || item === undefined) return;
+      const text = String(item).trim();
+      if (!text) return;
+
+      // Chỉ tách theo dấu nối liệt kê thực tế, không cắt cụm từ có nghĩa (ví dụ "Cơ sở dữ liệu")
+      const pieces = text.split(/(?:\s*[,;/&\n]+\s*|\s+và\s+)/gi);
+      pieces.forEach(piece => {
+        const label = normalizeSingleTopicLabel(piece);
+        if (!label) return;
+        const key = toTopicSlug(label);
+        if (!key || seenKeys.has(key)) return;
+        seenKeys.add(key);
+        result.push({ key, label });
+      });
+    });
+
+    return result;
+  }
+
+  /**
+   * Mở rộng danh sách tham số lọc lĩnh vực từ URL (hỗ trợ cả khóa đơn và khóa gộp cũ).
+   * @param {Array<string>} rawChunks - Mảng chuỗi giá trị đọc từ tham số `topic` trên URL.
+   * @returns {Array<string>} Mảng khóa lĩnh vực đơn duy nhất dạng kebab-case.
+   */
+  function expandTopicFilterValues(rawChunks) {
+    if (!Array.isArray(rawChunks) || rawChunks.length === 0) return [];
+    const slugs = [];
+    const seen = new Set();
+
+    const pushSlug = slug => {
+      if (slug && !seen.has(slug)) {
+        seen.add(slug);
+        slugs.push(slug);
+      }
+    };
+
+    rawChunks.forEach(chunk => {
+      String(chunk || '')
+        .split(',')
+        .map(part => part.trim())
+        .filter(Boolean)
+        .forEach(token => {
+          const lower = token.toLowerCase();
+          if (Object.prototype.hasOwnProperty.call(LEGACY_TOPIC_EXPANSIONS, lower)) {
+            LEGACY_TOPIC_EXPANSIONS[lower].forEach(pushSlug);
+            return;
+          }
+          if (/^[a-z0-9-]+$/.test(lower)) {
+            const spaceForm = lower.replace(/-/g, ' ');
+            const aliasLabel = TOPIC_ALIAS_MAP[lower] || TOPIC_ALIAS_MAP[spaceForm];
+            pushSlug(aliasLabel ? toTopicSlug(aliasLabel) : lower);
+            return;
+          }
+          const normalized = normalizeTopicFields(token);
+          if (normalized.length > 0) {
+            normalized.forEach(item => pushSlug(item.key));
+          } else {
+            pushSlug(toTopicSlug(token));
+          }
+        });
+    });
+
+    return slugs;
+  }
+
+  /**
    * Xây dựng chỉ mục tìm kiếm tĩnh 1 lần cho danh sách hội nghị đã chuẩn hóa.
    * @param {Array<Object>} conferences Danh sách hội nghị.
    * @returns {Array<Object>} Danh sách kèm trường chỉ mục _searchIndex.
@@ -160,9 +367,8 @@
       const normName = normalizeText(conf.name || '');
       const normFullName = normalizeText(conf.full_name || conf.fullName || '');
       const normLocation = normalizeText(conf.location || '');
-      const topicsList = Array.isArray(conf.topics) ? conf.topics : [];
-      const normTopics = topicsList.map(t => normalizeText(t)).join(' ');
-      const normPublisher = normalizeText(conf.publisher || '');
+      const topicItems = normalizeTopicFields(conf);
+      const normTopics = topicItems.map(item => normalizeText(item.label)).join(' ');
       const normSummary = normalizeText(conf.summarization || conf.summary || '');
 
       // Tách tập từ khóa của từng trường để so khớp nhanh
@@ -170,7 +376,7 @@
       const fullNameTokens = tokenizeQuery(normFullName);
       const topicTokens = tokenizeQuery(normTopics);
 
-      const searchBlob = `${normName} ${normFullName} ${normLocation} ${normTopics} ${normPublisher} ${normSummary}`;
+      const searchBlob = `${normName} ${normFullName} ${normLocation} ${normTopics} ${normSummary}`;
 
       const indexed = Object.assign({}, conf, {
         _searchIndex: {
@@ -178,7 +384,6 @@
           normFullName,
           normLocation,
           normTopics,
-          normPublisher,
           normSummary,
           nameTokens,
           fullNameTokens,
@@ -259,7 +464,6 @@
         res: matchTokenInField(token, fields.normFullName, fields.fullNameTokens, true),
         weight: SEARCH_WEIGHTS.fullName
       },
-      { res: matchTokenInField(token, fields.normPublisher, [], false), weight: SEARCH_WEIGHTS.publisher },
       { res: matchTokenInField(token, fields.normSummary, [], false), weight: SEARCH_WEIGHTS.summary }
     ];
 
@@ -294,8 +498,7 @@
         : normalizeText(conf.full_name || conf.fullName || ''),
       normTopics: idx.normTopics !== undefined
         ? idx.normTopics
-        : (Array.isArray(conf.topics) ? conf.topics.map(t => normalizeText(t)).join(' ') : ''),
-      normPublisher: idx.normPublisher !== undefined ? idx.normPublisher : normalizeText(conf.publisher || ''),
+        : normalizeTopicFields(conf).map(item => normalizeText(item.label)).join(' '),
       normSummary: idx.normSummary !== undefined
         ? idx.normSummary
         : normalizeText(conf.summarization || conf.summary || '')
@@ -320,6 +523,54 @@
   }
 
   /* ================= 3. BỘ LỌC ĐA CHIỀU & FACET PRE-COUNTS ================= */
+
+  const VALID_RANK_CODES = new Set(['A*', 'A', 'B', 'C']);
+
+  /**
+   * Chuẩn hóa khóa phân hạng CORE của hội nghị về `'A*'`, `'A'`, `'B'`, `'C'` hoặc `'unranked'`.
+   * @param {Object|string} confOrRank - Đối tượng hội nghị hoặc chuỗi phân hạng.
+   * @returns {'A*'|'A'|'B'|'C'|'unranked'} Khóa phân hạng chuẩn hóa.
+   */
+  function normalizeRankKey(confOrRank) {
+    const rawSource = confOrRank && typeof confOrRank === 'object' && 'rank' in confOrRank
+      ? (confOrRank.rank && typeof confOrRank.rank === 'object' ? confOrRank.rank.core : confOrRank.rank)
+      : confOrRank;
+    const upper = String(rawSource || '').trim().toUpperCase();
+    return VALID_RANK_CODES.has(upper) ? upper : 'unranked';
+  }
+
+  /**
+   * Chuẩn hóa khóa hình thức tổ chức về 3 nhóm hợp lệ (`offline`, `online`, `hybrid`)
+   * hoặc `unknown` nếu hội nghị chưa cập nhật hình thức tổ chức (không gộp vào nhóm lọc).
+   * @param {Object|string} confOrMode - Đối tượng hội nghị hoặc giá trị mode.
+   * @returns {'offline'|'online'|'hybrid'|'unknown'} Khóa hình thức tổ chức chuẩn hóa.
+   */
+  function normalizeModeKey(confOrMode) {
+    if (confOrMode && typeof confOrMode === 'object' && typeof confOrMode.modeKey === 'string') {
+      const existing = confOrMode.modeKey.trim().toLowerCase();
+      if (existing === 'offline' || existing === 'online' || existing === 'hybrid' || existing === 'unknown') {
+        return existing;
+      }
+    }
+    const rawMode = confOrMode && typeof confOrMode === 'object'
+      ? (confOrMode.attendance_mode || confOrMode.attendanceMode || confOrMode.mode || '')
+      : confOrMode;
+    const rawLabel = confOrMode && typeof confOrMode === 'object'
+      ? (confOrMode.attendance_label || confOrMode.attendanceLabel || confOrMode.format || '')
+      : '';
+    const token = normalizeText(`${rawMode || ''} ${rawLabel || ''}`).trim();
+    if (!token || token === 'unknown' || token.includes('chua cap nhat')) {
+      return 'unknown';
+    }
+    const hasOffline = /\b(offline|in-person|inperson)\b/.test(token) || token.includes('truc tiep');
+    const hasOnline = /\b(online|virtual)\b/.test(token) || token.includes('truc tuyen');
+    if (/\bhybrid\b/.test(token) || token.includes('ket hop') || (hasOffline && hasOnline)) {
+      return 'hybrid';
+    }
+    if (hasOffline) return 'offline';
+    if (hasOnline) return 'online';
+    return 'unknown';
+  }
 
   /**
    * Kiểm tra giá trị trạng thái CFP của hội nghị có khớp lựa chọn lọc hay không.
@@ -351,22 +602,39 @@
   }
 
   /**
-   * Kiểm tra hội nghị có thỏa mãn nhóm lọc Thời gian & Hạn nộp hay không.
+   * Kiểm tra hội nghị có khớp khoảng thời gian diễn ra (`eventFrom` – `eventTo`), `month` hoặc trạng thái Đang diễn ra hay không.
+   * Hai khoảng `[startDate, endDate]` và `[eventFrom, eventTo]` giao nhau thì được tính là khớp.
    * @param {Object} conf - Đối tượng hội nghị.
    * @param {Object} filterState - Trạng thái bộ lọc.
    * @returns {boolean} True nếu thỏa mãn.
    */
-  function matchesWhenGroup(conf, filterState) {
+  function matchesMonthGroup(conf, filterState) {
+    if (filterState.eventFrom || filterState.eventTo) {
+      const confStart = conf.startDate || conf.start_date || conf.endDate || conf.end_date || '';
+      const confEnd = conf.endDate || conf.end_date || confStart;
+      if (!confStart || !confEnd) return false;
+      if (filterState.eventFrom && confEnd < filterState.eventFrom) return false;
+      if (filterState.eventTo && confStart > filterState.eventTo) return false;
+    }
     if (filterState.month && conf.eventMonth !== filterState.month) return false;
     if (filterState.ongoing && conf.eventPhase !== 'ongoing') return false;
+    return true;
+  }
+
+  /**
+   * Kiểm tra hội nghị có khớp khoảng ngày hạn nộp (`dateFrom` - `dateTo`) hay không.
+   * @param {Object} conf - Đối tượng hội nghị.
+   * @param {Object} filterState - Trạng thái bộ lọc.
+   * @returns {boolean} True nếu thỏa mãn.
+   */
+  function matchesDateRangeGroup(conf, filterState) {
     if (!filterState.dateFrom && !filterState.dateTo) return true;
 
-    const subDeadlines = Array.isArray(conf.submissionDeadlines) ? conf.submissionDeadlines : [];
-    return subDeadlines.some(dl => {
-      if (filterState.dateFrom && dl.date < filterState.dateFrom) return false;
-      if (filterState.dateTo && dl.date > filterState.dateTo) return false;
-      return true;
-    });
+    const targetDeadline = conf.firstSubmissionDeadline || (Array.isArray(conf.submissionDeadlines) ? conf.submissionDeadlines[0] : null);
+    if (!targetDeadline || !targetDeadline.date) return false;
+    if (filterState.dateFrom && targetDeadline.date < filterState.dateFrom) return false;
+    if (filterState.dateTo && targetDeadline.date > filterState.dateTo) return false;
+    return true;
   }
 
   /**
@@ -396,28 +664,57 @@
   function matchesFilters(
     conf,
     filterState,
-    enabledGroups = { rank: true, cfp: true, when: true, where: true, what: true }
+    enabledGroups = { rank: true, month: true, cfp: true, mode: true, when: true, where: true, what: true }
   ) {
     if (!conf || !filterState) return false;
 
     if (enabledGroups.rank !== false && Array.isArray(filterState.ranks) && filterState.ranks.length > 0) {
-      const confRank = String(conf.rank || '').trim().toUpperCase();
-      if (!filterState.ranks.includes(confRank)) return false;
+      const confRankKey = conf.rankKey || normalizeRankKey(conf);
+      if (!filterState.ranks.includes(confRankKey)) return false;
     }
-    if (enabledGroups.cfp && !matchesCfpGroup(conf, filterState.cfp)) return false;
-    if (enabledGroups.when && !matchesWhenGroup(conf, filterState)) return false;
-    if (enabledGroups.where && !matchesCityGroup(conf, filterState.city)) return false;
+    if (enabledGroups.month !== false && enabledGroups.when !== false && !matchesMonthGroup(conf, filterState)) {
+      return false;
+    }
+    if (enabledGroups.cfp !== false) {
+      if (!matchesCfpGroup(conf, filterState.cfp)) return false;
+      if (enabledGroups.when !== false && !matchesDateRangeGroup(conf, filterState)) return false;
+    }
+    if (enabledGroups.mode !== false && Array.isArray(filterState.modes) && filterState.modes.length > 0) {
+      const confModeKey = normalizeModeKey(conf);
+      if (!filterState.modes.includes(confModeKey)) return false;
+    }
+    if (enabledGroups.where !== false && !matchesCityGroup(conf, filterState.city)) return false;
 
-    if (enabledGroups.what && Array.isArray(filterState.topics) && filterState.topics.length > 0) {
-      const confTopics = Array.isArray(conf.topics) ? conf.topics : [];
-      if (!filterState.topics.some(tKey => confTopics.includes(tKey))) return false;
+    if (enabledGroups.what !== false && Array.isArray(filterState.topics) && filterState.topics.length > 0) {
+      const featuredKeys = Array.isArray(filterState.featuredTopicKeys)
+        ? filterState.featuredTopicKeys
+        : (Array.isArray(conf.featuredTopicKeys) ? conf.featuredTopicKeys : []);
+      if (!filterState.topics.some(tKey => matchesTopicValue(conf, tKey, featuredKeys))) return false;
     }
     return true;
   }
 
   /**
+   * Kiểm tra hội nghị có khớp một khóa lọc lĩnh vực đơn hoặc nhóm `other` (gồm các lĩnh vực còn lại ngoài top 3 nổi bật).
+   * @param {Object} conf - Đối tượng hội nghị.
+   * @param {string} targetTopicKey - Khóa lĩnh vực mục tiêu hoặc `'other'`.
+   * @param {Array<string>} featuredTopicKeys - Danh sách khóa 3 lĩnh vực nổi bật.
+   * @returns {boolean} True nếu khớp.
+   */
+  function matchesTopicValue(conf, targetTopicKey, featuredTopicKeys) {
+    const confTopics = Array.isArray(conf.topics)
+      ? conf.topics
+      : normalizeTopicFields(conf).map(item => item.key);
+    if (targetTopicKey === 'other') {
+      const featuredSet = new Set(Array.isArray(featuredTopicKeys) ? featuredTopicKeys : []);
+      return confTopics.some(key => !featuredSet.has(key));
+    }
+    return confTopics.includes(targetTopicKey);
+  }
+
+  /**
    * Tạo bản sao trạng thái lọc đã bỏ nhóm tương ứng và hàm kiểm tra lựa chọn facet.
-   * @param {string} groupPrefix - Tiền tố nhóm (`rank`, `cfp`, `ongoing`, `city`, `topic`).
+   * @param {string} groupPrefix - Tiền tố nhóm (`rank`, `cfp`, `ongoing`, `mode`, `city`, `topic`).
    * @param {string} optionValue - Giá trị tùy chọn của facet.
    * @param {Object} filterState - Trạng thái bộ lọc gốc.
    * @returns {{ subState: Object, matchesOption: Function|null }} Cấu hình đếm facet.
@@ -428,7 +725,7 @@
       subState.ranks = [];
       return {
         subState,
-        matchesOption: conf => String(conf.rank || '').trim().toUpperCase() === optionValue
+        matchesOption: conf => (conf.rankKey || normalizeRankKey(conf)) === optionValue
       };
     }
     if (groupPrefix === 'cfp') {
@@ -442,6 +739,13 @@
       subState.ongoing = false;
       return { subState, matchesOption: conf => conf.eventPhase === 'ongoing' };
     }
+    if (groupPrefix === 'mode') {
+      subState.modes = [];
+      return {
+        subState,
+        matchesOption: conf => normalizeModeKey(conf) === optionValue
+      };
+    }
     if (groupPrefix === 'city') {
       subState.city = 'all';
       return {
@@ -451,7 +755,15 @@
     }
     if (groupPrefix === 'topic') {
       subState.topics = [];
-      return { subState, matchesOption: conf => Array.isArray(conf.topics) && conf.topics.includes(optionValue) };
+      return {
+        subState,
+        matchesOption: conf => {
+          const featuredKeys = Array.isArray(filterState.featuredTopicKeys)
+            ? filterState.featuredTopicKeys
+            : (Array.isArray(conf.featuredTopicKeys) ? conf.featuredTopicKeys : []);
+          return matchesTopicValue(conf, optionValue, featuredKeys);
+        }
+      };
     }
     return { subState, matchesOption: null };
   }
@@ -588,16 +900,22 @@
         patch: { ranks: [] }
       },
       {
-        active: hasArrayChoice(filterState.cfp, true),
-        groupKey: 'cfp',
-        label: 'bộ lọc Hạn nộp bài',
-        patch: { cfp: 'all' }
+        active: Boolean(filterState.eventFrom || filterState.eventTo || filterState.month || filterState.ongoing),
+        groupKey: 'month',
+        label: 'bộ lọc Thời gian diễn ra',
+        patch: { eventFrom: '', eventTo: '', month: '', ongoing: false }
       },
       {
-        active: Boolean(filterState.month || filterState.ongoing || filterState.dateFrom || filterState.dateTo),
-        groupKey: 'when',
-        label: 'bộ lọc Thời gian & Hạn nộp',
-        patch: { month: '', ongoing: false, dateFrom: '', dateTo: '' }
+        active: hasArrayChoice(filterState.cfp, true) || Boolean(filterState.dateFrom || filterState.dateTo),
+        groupKey: 'cfp',
+        label: 'bộ lọc Hạn nộp bài',
+        patch: { cfp: 'all', dateFrom: '', dateTo: '' }
+      },
+      {
+        active: Array.isArray(filterState.modes) && filterState.modes.length > 0,
+        groupKey: 'mode',
+        label: 'bộ lọc Hình thức tổ chức',
+        patch: { modes: [] }
       },
       {
         active: hasArrayChoice(filterState.city, true),
@@ -608,7 +926,7 @@
       {
         active: Array.isArray(filterState.topics) && filterState.topics.length > 0,
         groupKey: 'what',
-        label: 'bộ lọc Chủ đề',
+        label: 'bộ lọc Lĩnh vực nghiên cứu',
         patch: { topics: [] }
       }
     ];
@@ -723,6 +1041,11 @@
     normalizeText,
     damerauLevenshtein,
     tokenizeQuery,
+    toTopicSlug,
+    normalizeRankKey,
+    normalizeModeKey,
+    normalizeTopicFields,
+    expandTopicFilterValues,
     buildIndex,
     scoreConference,
     matchesFilters,

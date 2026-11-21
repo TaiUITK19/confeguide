@@ -43,7 +43,7 @@ body.dark {
   background-color: var(--bg-primary);
   background-image:
     linear-gradient(var(--auth-overlay), var(--auth-overlay)),
-    url("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRzGOmyfwmKeVdCHiNrR1p3MfKebj37un92rcWKxLor3Bos6J8t1p-3uEM&s=10");
+    url("../../images/ben-cang-nha-rong.jpg");
   background-position: center;
   background-size: cover;
   background-attachment: fixed;
