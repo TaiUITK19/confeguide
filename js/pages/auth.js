@@ -128,8 +128,13 @@
     }
   }
 
+  const VALID_REDIRECT_PAGES = new Set([
+    '', 'index.html', 'search.html', 'detail.html', 'tracker.html',
+    'profile.html', 'about.html', 'contact.html', 'terms.html', 'privacy.html'
+  ]);
+
   /**
-   * Kiểm tra và lọc đường dẫn chuyển hướng nội bộ sau khi đăng nhập để tránh open-redirect.
+   * Kiểm tra và lọc đường dẫn chuyển hướng nội bộ sau khi đăng nhập để tránh open-redirect và kẹt lỗi 404.
    * @param {string|null} rawRedirect - Tham số redirect lấy từ query string.
    * @returns {string} Đường dẫn hợp lệ trên cùng nguồn (mặc định 'index.html').
    */
@@ -139,6 +144,12 @@
       const decoded = decodeURIComponent(rawRedirect).trim();
       if (!decoded || /^(?:https?:)?\/\//i.test(decoded) || /^\s*javascript:/i.test(decoded)) {
         return 'index.html';
+      }
+      const parsed = new URL(decoded, window.location.href);
+      const lastSeg = (parsed.pathname.split('/').pop() || 'index.html').toLowerCase();
+      if (lastSeg === '404.html') return 'index.html';
+      if (!VALID_REDIRECT_PAGES.has(lastSeg)) {
+        return `404.html?reason=invalid-redirect&from=${encodeURIComponent(decoded)}`;
       }
       return decoded;
     } catch {
@@ -364,14 +375,15 @@
       removeStorageKey(localStorage, REMEMBERED_EMAIL_KEY);
     }
 
-    const sessionUser = {
+    const { passwordHash: _omitPasswordHash, ...safeMatchedProfile } = matchedUser;
+    const sessionUser = Object.assign({}, safeMatchedProfile, {
       id: matchedUser.id,
       username: matchedUser.username,
       email: matchedUser.email,
       name: matchedUser.name,
       role: matchedUser.role || 'user',
       loggedInAt: new Date().toISOString()
-    };
+    });
     writeTextStorage(localStorage, CURRENT_USER_KEY, JSON.stringify(sessionUser));
 
     message.className = 'form-message success';

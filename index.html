@@ -32,7 +32,7 @@
   <div id="site-header"></div>
   <main id="mainContent">
     <!-- Giới thiệu, tìm kiếm nhanh & Slider nổi bật -->
-    <section class="hero-section" id="home">
+    <section class="hero-section js-hero-section" id="home">
       <div class="container hero-inner">
         <!-- Cột trái cố định: Giới thiệu & Tìm kiếm nhanh (đã bỏ huy hiệu và nút CTA theo bố cục tinh gọn) -->
         <div class="hero-content">
@@ -65,30 +65,30 @@
           <!-- Vùng hiển thị 3 slide -->
           <div class="hero-slider__viewport js-slider-viewport">
             <div class="hero-slider__track hero-slider__track--step-0 js-slider-track" aria-live="off">
-              <!-- Slide 1: Danh ngôn học thuật + Tóm tắt nhanh -->
+              <!-- Slide 1: Cá nhân hóa theo trạng thái đăng nhập và lĩnh vực nghiên cứu -->
               <div
-                class="hero-slider__slide hero-slider__slide--active js-slider-slide"
+                class="hero-slider__slide hero-slider__slide--active js-slider-slide js-hero-slide1"
                 role="group"
                 aria-roledescription="slide"
                 aria-label="1 của 3"
                 aria-hidden="false"
                 data-slide-index="0"
               >
-                <div class="hero-slider__slide-head">
-                  <p class="hero-slider__slide-title">Góc học thuật ConfGuide</p>
-                  <span class="hero-slider__slide-badge">Tổng quan nhanh</span>
-                </div>
-
-                <div class="hero-slider__quote-panel">
-                  <div class="hero-slider__quote-icon" aria-hidden="true">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-8.983z"/>
-                    </svg>
+                <div class="hero-slider__slide1-body js-slide1-content">
+                  <div class="hero-slider__slide-head">
+                    <h2 class="hero-slider__slide-title">Khám phá &amp; Chọn đúng Hội nghị Khoa học</h2>
+                    <span class="hero-slider__slide-badge">Cá nhân hóa</span>
                   </div>
-                  <blockquote>
-                    “Research is to see what everybody else has seen, and to think what nobody else has thought.”
-                  </blockquote>
-                  <cite>— Albert Szent-Györgyi (Giải Nobel Y học)</cite>
+                  <p class="hero-slider__intro-desc">
+                    Tra cứu nhanh chóng, đánh giá uy tín và theo dõi thời hạn nộp bài theo giờ Việt Nam (UTC+7) cho các hội nghị khoa học Công nghệ thông tin tại Việt Nam.
+                  </p>
+                  <div class="hero-slider__cta-box">
+                    <p class="hero-slider__cta-text">Đăng nhập để nhận gợi ý hội nghị theo lĩnh vực của bạn</p>
+                    <div class="hero-slider__cta-actions">
+                      <a href="login.html?redirect=index.html" class="btn btn-primary hero-slider__cta-btn js-slide1-login">Đăng nhập</a>
+                      <a href="register.html" class="btn btn-secondary hero-slider__cta-btn js-slide1-register">Đăng ký</a>
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -104,8 +104,8 @@
               >
                 <div class="hero-slider__slide-head">
                   <h2 class="hero-slider__slide-title">Hội nghị nổi bật</h2>
-                  <span class="hero-slider__slide-badge">CORE A* &amp; A</span>
-                  <p class="hero-slider__slide-subtitle">Các hội nghị khoa học CNTT uy tín diễn ra tại Việt Nam hiện có trên hệ thống.</p>
+                  <span class="hero-slider__slide-badge">Tiêu biểu</span>
+                  <p class="hero-slider__slide-subtitle">Các hội nghị khoa học CNTT diễn ra tại Việt Nam hiện có trên hệ thống.</p>
                 </div>
                 <div class="hero-slider__cards-grid js-slider-featured-grid">
                   <div class="hero-slider__loading" role="status" aria-live="polite">
@@ -162,6 +162,9 @@
               aria-label="Chuyển đến slide 3"
             ></button>
           </div>
+
+          <!-- Vùng thông báo cập nhật trạng thái Slide 1 cho trình đọc màn hình -->
+          <p class="sr-only js-slide1-live-region" role="status" aria-live="polite"></p>
         </div>
       </div>
     </section>
@@ -170,10 +173,11 @@
     <section class="section-pad conference-section" id="conferences">
       <div class="container">
         <div class="section-head">
-          <span class="eyebrow">Danh mục học thuật</span>
+          <span class="eyebrow">Danh mục hội nghị</span>
           <h2>Hội nghị khoa học sắp diễn ra</h2>
           <p>Khám phá các kỳ hội nghị khoa học Công nghệ thông tin (bao gồm cả hội nghị quốc tế tổ chức tại Việt Nam) sắp mở đợt nộp bài hoặc đang chuẩn bị diễn ra tại Việt Nam.</p>
         </div>
+        <div class="home-prefs-bar-wrap js-personalization-block" id="homePersonalizationBar" tabindex="-1"></div>
         <div class="conference-grid" id="conferenceGrid"></div>
         <div class="empty-box card-surface" id="emptyState" hidden>
           <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -214,12 +218,12 @@
                 <polyline points="2 12 12 17 22 12"/>
               </svg>
             </div>
-            <h3>Tra cứu đa chiều &amp; Phân hạng</h3>
-            <p>Hệ thống xếp hạng chuẩn mực theo CORE Ranking (A*, A, B), Scopus và danh mục uy tín IEEE, ACM, Springer giúp bạn định vị chính xác tầm vóc công trình.</p>
+            <h3>Tra cứu &amp; Lọc đa chiều</h3>
+            <p>Tìm kiếm nhanh theo tên hội nghị, lĩnh vực nghiên cứu, địa điểm, thời gian tổ chức và khoảng lệ phí minh bạch.</p>
             <ul class="feature-list">
               <li>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
-                <span>Phân loại chuẩn CORE A*, A, B</span>
+                <span>Lọc theo hạn nộp bài &amp; lĩnh vực</span>
               </li>
             </ul>
           </article>
@@ -260,7 +264,7 @@
               </li>
               <li>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
-                <span>Đánh giá từ cộng đồng nghiên cứu</span>
+                <span>So sánh trực quan nhiều hội nghị</span>
               </li>
             </ul>
           </article>
@@ -272,6 +276,7 @@
   <div id="site-footer"></div>
 
   <!-- Script thành phần và trang chủ -->
+  <script src="js/components/search-core.js" defer></script>
   <script src="js/components/compare.js" defer></script>
   <script src="js/pages/index.js" defer></script>
 </body>

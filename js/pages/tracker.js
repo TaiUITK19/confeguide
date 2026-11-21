@@ -45,16 +45,23 @@
   }
 
   /**
-   * Lấy thông tin người dùng hiện tại.
-   * @returns {Object|null}
+   * Lấy thông tin người dùng hiện tại đã xác thực.
+   * @returns {Object|null} Đối tượng user hợp lệ hoặc null nếu chưa đăng nhập.
    */
   function currentUser() {
-    return read('confguide_current_user', null);
+    const utils = getUtils();
+    if (utils && typeof utils.getAuthenticatedUser === 'function') {
+      return utils.getAuthenticatedUser();
+    }
+    const user = read('confguide_current_user', null);
+    if (!user || typeof user !== 'object') return null;
+    return (user.id || user.email || user.username) ? user : null;
   }
 
   /**
-   * Xác định khóa lưu danh sách hội nghị đã lưu của phiên hiện tại.
-   * @returns {string}
+   * Xác định khóa lưu danh sách hội nghị đã lưu của người dùng đã đăng nhập.
+   * Trả về chuỗi rỗng nếu chưa đăng nhập (không sử dụng khóa cho khách).
+   * @returns {string} Khóa localStorage hoặc chuỗi rỗng.
    */
   function savedKey() {
     const utils = getUtils();
@@ -62,38 +69,58 @@
       return utils.getSavedStorageKey(true);
     }
     const user = currentUser();
-    return user && (user.id || user.email) ? `confguide_saved_${user.id || user.email}` : 'confguide_saved_guest';
+    return user && (user.id || user.email || user.username)
+      ? `confguide_saved_${user.id || user.email || user.username}`
+      : '';
   }
 
   /**
-   * Lấy mảng mã hội nghị đã lưu (hỗ trợ các khóa cũ để giữ tương thích).
-   * @returns {Array<string>}
+   * Lấy mảng mã hội nghị đã lưu của người dùng hiện tại (luôn trả về [] nếu chưa đăng nhập).
+   * @returns {Array<string>} Danh sách ID hội nghị đã lưu.
    */
   function getSaved() {
-    const scoped = read(savedKey(), null);
-    if (Array.isArray(scoped)) return scoped;
-    const legacy = read('confguide_saved', null);
-    if (Array.isArray(legacy)) return legacy;
-    const old = read('savedConferences', []);
-    return Array.isArray(old) ? old : [];
+    const utils = getUtils();
+    if (utils && typeof utils.getSavedConferenceIds === 'function') {
+      return utils.getSavedConferenceIds(true);
+    }
+    const key = savedKey();
+    if (!key) return [];
+    const scoped = read(key, []);
+    return Array.isArray(scoped) ? scoped : [];
   }
 
   /**
-   * Lưu lại danh sách hội nghị vào localStorage và thông báo qua Toast nếu lỗi.
+   * Lưu lại danh sách hội nghị vào localStorage kèm kiểm tra quyền truy cập.
+   * Từ chối thao tác nếu người dùng chưa đăng nhập.
    * @param {Array<string>} ids Danh sách mã hội nghị.
+   * @returns {boolean} True nếu cập nhật thành công.
    */
   function setSaved(ids) {
     const utils = getUtils();
-    const ok = utils && utils.writeStorage ? utils.writeStorage(savedKey(), ids) : false;
+    if (!currentUser()) {
+      if (utils && typeof utils.promptLoginForTracking === 'function') {
+        utils.promptLoginForTracking({ redirectUrl: 'tracker.html' });
+      }
+      return false;
+    }
+    if (utils && typeof utils.setSavedConferenceIds === 'function') {
+      return utils.setSavedConferenceIds(ids, true);
+    }
+    const key = savedKey();
+    if (!key) return false;
+    const ok = utils && utils.writeStorage ? utils.writeStorage(key, ids) : false;
     if (!ok) {
       try {
-        localStorage.setItem(savedKey(), JSON.stringify(ids));
+        localStorage.setItem(key, JSON.stringify(ids));
+        return true;
       } catch (e) {
         if (utils && utils.showToast) {
           utils.showToast('Không thể cập nhật danh sách trong bộ nhớ trình duyệt.', 'error');
         }
+        return false;
       }
     }
+    return true;
   }
 
   /**
@@ -139,7 +166,10 @@
   function buildTrackerRowHtml(conf, utils) {
     const esc = utils && utils.escapeHtml ? utils.escapeHtml : val => String(val ?? '');
     const confId = utils && utils.getConferenceId ? utils.getConferenceId(conf) : String(conf.id || '');
-    const fields = (conf.fields || []).slice(0, 3).map(f => `<span class="tag">${esc(f)}</span>`).join('');
+    const topicList = utils && typeof utils.extractTopicLabels === 'function'
+      ? utils.extractTopicLabels(conf)
+      : (Array.isArray(conf.fields) ? conf.fields : []);
+    const fields = topicList.slice(0, 3).map(f => `<span class="tag">${esc(f)}</span>`).join('');
     const badgeLabel = esc(conf.acronym || conf.short_name || (conf.name ? conf.name.slice(0, 4) : 'CG'));
     const nearest = getDeadlineSummary(conf);
     const compareBtnHtml = window.ConfGuideCompare ? window.ConfGuideCompare.renderToggleButton(conf) : '';
@@ -157,7 +187,7 @@
             <div class="name-text"><a href="detail.html?id=${encodeURIComponent(confId)}">${esc(conf.name || confId)}</a></div>
           </div>
         </td>
-        <td><div class="tags">${fields || '<span class="tag">Chưa phân loại</span>'}</div></td>
+        <td><div class="tags">${fields || '<span class="tag">Chưa cập nhật</span>'}</div></td>
         <td><div class="deadline-cell"><div class="deadline">${esc(nearest.date)}</div>${remainingHtml}</div></td>
         <td>
           <div class="actions">
@@ -169,12 +199,23 @@
   }
 
   /**
-   * Hiển thị bảng danh sách hội nghị đang theo dõi.
+   * Hiển thị bảng danh sách hội nghị đang theo dõi hoặc thông báo yêu cầu đăng nhập nếu là khách.
    */
   function render() {
     const tbody = document.getElementById('conferenceBody');
     const count = document.getElementById('totalCount');
     if (!tbody) return;
+
+    const user = currentUser();
+    if (!user) {
+      if (count) count.textContent = '0';
+      tbody.innerHTML =
+        '<tr><td colspan="4" class="tracker-empty">'
+        + '<p class="tracker-auth-msg">Chỉ người dùng đã đăng nhập mới có thể theo dõi hội nghị và quản lý danh sách theo dõi.</p>'
+        + '<a class="primary-btn tracker-auth-btn" href="login.html?redirect=tracker.html">Đăng nhập để theo dõi</a>'
+        + '</td></tr>';
+      return;
+    }
 
     const utils = getUtils();
     const ids = getSaved();
@@ -203,6 +244,7 @@
 
   /**
    * Xử lý sự kiện nhấn nút Xóa khỏi danh sách theo dõi bằng Event Delegation trên `tbody`.
+   * Kiểm tra xác thực trước khi cho phép xóa để người chưa đăng nhập không thể thao tác dữ liệu.
    * @param {MouseEvent} event - Sự kiện click trên bảng.
    * @param {HTMLElement} tbody - Phần tử `<tbody>` của bảng theo dõi.
    */
@@ -210,11 +252,18 @@
     const btn = event.target instanceof Element ? event.target.closest('[data-remove]') : null;
     if (!btn || !tbody.contains(btn)) return;
 
+    const utils = getUtils();
+    if (!currentUser()) {
+      if (utils && typeof utils.promptLoginForTracking === 'function') {
+        utils.promptLoginForTracking({ redirectUrl: 'tracker.html' });
+      }
+      return;
+    }
+
     const targetId = btn.dataset.remove;
-    setSaved(getSaved().filter(item => String(item) !== targetId));
+    if (!setSaved(getSaved().filter(item => String(item) !== targetId))) return;
     render();
 
-    const utils = getUtils();
     if (utils && utils.showToast) {
       utils.showToast('Đã xóa hội nghị khỏi danh sách theo dõi.', 'info');
     }
@@ -257,8 +306,9 @@
 
     render();
 
+    window.addEventListener('pageshow', render);
     window.addEventListener('storage', event => {
-      if (event.key === savedKey()) render();
+      if (!event.key || event.key === 'confguide_current_user' || event.key === savedKey()) render();
     });
   }
 
