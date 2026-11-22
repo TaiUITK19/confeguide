@@ -402,9 +402,68 @@
   }
 
   /**
-   * Quy đổi mốc thời hạn nộp bài từ chuẩn AoE (UTC-12) hoặc chuỗi ISO có múi giờ sang giờ Việt Nam (Asia/Ho_Chi_Minh, UTC+7).
+   * Tính mốc thời gian tuyệt đối và quy đổi từ AoE (UTC-12) hoặc ISO có múi giờ sang giờ Việt Nam (UTC+7).
+   * @param {number} year - Năm 4 chữ số.
+   * @param {number} month - Tháng (1..12).
+   * @param {number} day - Ngày (1..31).
+   * @param {string} iso - Chuỗi ngày chuẩn YYYY-MM-DD.
+   * @param {string} aoeDateVi - Ngày định dạng DD/MM/YYYY.
+   * @param {string} trimmed - Chuỗi ngày giờ đầu vào đã trim.
+   * @returns {Object} Kết quả quy đổi đầy đủ kèm displayText và targetMs.
+   */
+  function computeConvertedVnDate(year, month, day, iso, aoeDateVi, trimmed) {
+    // Kiểm tra xem chuỗi có ghi kèm múi giờ ISO tường minh hay mặc định theo chuẩn 23:59:59 AoE (UTC-12)
+    let targetMs = NaN;
+    if (/[T\s]\d{1,2}:\d{2}(?::\d{2})?(?:\.\d+)?\s*(Z|[+-]\d{2}:?\d{2})$/i.test(trimmed)) {
+      targetMs = Date.parse(trimmed.replace(/\s+/, 'T'));
+    }
+
+    if (!Number.isFinite(targetMs)) {
+      let hourAoE = 23;
+      let minuteAoE = 59;
+      let secondAoE = 59;
+      const timeMatch = trimmed.match(/[T\s](\d{1,2}):(\d{2})(?::(\d{2}))?/);
+      if (timeMatch) {
+        hourAoE = Number(timeMatch[1]);
+        minuteAoE = Number(timeMatch[2]);
+        secondAoE = timeMatch[3] ? Number(timeMatch[3]) : 0;
+      }
+      // Mốc thời gian tuyệt đối (UTC epoch ms): giờ AoE (UTC-12) cộng 12 giờ để về UTC+0
+      targetMs = Date.UTC(year, month - 1, day, hourAoE, minuteAoE, secondAoE) + AOE_TO_UTC_OFFSET_MS;
+    }
+
+    // Quy đổi sang múi giờ cố định Asia/Ho_Chi_Minh (UTC+7): cộng 7 giờ từ UTC+0
+    const vnDateObj = new Date(targetMs + VN_UTC_OFFSET_MS);
+    const vnYear = vnDateObj.getUTCFullYear();
+    const vnMonth = String(vnDateObj.getUTCMonth() + 1).padStart(2, '0');
+    const vnDay = String(vnDateObj.getUTCDate()).padStart(2, '0');
+    const vnHour = String(vnDateObj.getUTCHours()).padStart(2, '0');
+    const vnMin = String(vnDateObj.getUTCMinutes()).padStart(2, '0');
+
+    const vnIsoDate = `${vnYear}-${vnMonth}-${vnDay}`;
+    const vnDateVi = `${vnDay}/${vnMonth}/${vnYear}`;
+    const vnTimeVi = `${vnHour}:${vnMin}`;
+    const timezoneLabel = VN_TIMEZONE_LABEL;
+
+    return {
+      rawDate: iso,
+      aoeDateVi,
+      vnIsoDate,
+      vnDateVi,
+      vnTimeVi,
+      timezoneLabel,
+      converted: true,
+      targetMs,
+      displayText: `${vnTimeVi} ${vnDateVi} — ${timezoneLabel}`
+    };
+  }
+
+  /**
+   * Quy đổi mốc thời hạn nộp bài từ chuẩn AoE (UTC-12) hoặc chuỗi ISO có múi giờ
+   * sang giờ Việt Nam (Asia/Ho_Chi_Minh, UTC+7).
    * Công thức mặc định cho deadline chỉ có ngày: 23:59 AoE (UTC-12) + 19 giờ = 18:59 ngày D+1 theo UTC+7.
-   * Khi dữ liệu không phải hạn nộp hoặc không có đủ thông tin giờ/múi giờ (hasExplicitTime = false), giữ nguyên giá trị ngày thô.
+   * Khi dữ liệu không phải hạn nộp hoặc không có đủ thông tin giờ/múi giờ (`hasExplicitTime = false`),
+   * giữ nguyên giá trị ngày thô.
    * @param {string} dateStr Chuỗi ngày hạn nộp (YYYY-MM-DD hoặc chuỗi có kèm giờ/múi giờ).
    * @param {Object} [options={}] Tùy chọn quy đổi ({ isDeadline: boolean, hasExplicitTime: boolean }).
    * @returns {Object|null} Thông tin mốc thời gian đã quy đổi kèm nhãn múi giờ rõ ràng hoặc null nếu không hợp lệ.
@@ -427,12 +486,12 @@
 
     const aoeDateVi = `${String(day).padStart(2, '0')}/${String(month).padStart(2, '0')}/${year}`;
 
-    // Nếu không phải hạn nộp bài hoặc dữ liệu chỉ có ngày thuần túy không đủ thông tin giờ/múi giờ nguồn: giữ nguyên ngày thô
+    // Nếu không phải hạn nộp bài hoặc chỉ có ngày thuần túy thiếu giờ/múi giờ nguồn: giữ nguyên ngày thô
     if (!isDeadline || !hasExplicitTime) {
       const fallbackTargetMs = Date.UTC(year, month - 1, day, 23, 59, 59) - VN_UTC_OFFSET_MS;
       return {
         rawDate: iso,
-        aoeDateVi: aoeDateVi,
+        aoeDateVi,
         vnIsoDate: iso,
         vnDateVi: aoeDateVi,
         vnTimeVi: '',
@@ -443,58 +502,14 @@
       };
     }
 
-    // Kiểm tra xem chuỗi có ghi kèm múi giờ ISO tường minh hay mặc định theo chuẩn 23:59:59 AoE (UTC-12)
-    let targetMs = NaN;
-    if (/[T\s]\d{1,2}:\d{2}(?::\d{2})?(?:\.\d+)?\s*(Z|[+-]\d{2}:?\d{2})$/i.test(trimmed)) {
-      targetMs = Date.parse(trimmed.replace(/\s+/, 'T'));
-    }
-
-    if (!Number.isFinite(targetMs)) {
-      let hourAoE = 23;
-      let minuteAoE = 59;
-      let secondAoE = 59;
-      const timeMatch = trimmed.match(/[T\s](\d{1,2}):(\d{2})(?::(\d{2}))?/);
-      if (timeMatch) {
-        hourAoE = Number(timeMatch[1]);
-        minuteAoE = Number(timeMatch[2]);
-        secondAoE = timeMatch[3] ? Number(timeMatch[3]) : 0;
-      }
-      // Mốc thời gian tuyệt đối (UTC epoch ms): giờ AoE (UTC-12) cộng 12 giờ để về UTC+0
-      targetMs = Date.UTC(year, month - 1, day, hourAoE, minuteAoE, secondAoE) + AOE_TO_UTC_OFFSET_MS;
-    }
-
-    // Quy đổi sang múi giờ cố định Asia/Ho_Chi_Minh (UTC+7): cộng 7 giờ từ UTC+0
-    const vnWallClockMs = targetMs + VN_UTC_OFFSET_MS;
-    const vnDateObj = new Date(vnWallClockMs);
-
-    const vnYear = vnDateObj.getUTCFullYear();
-    const vnMonth = String(vnDateObj.getUTCMonth() + 1).padStart(2, '0');
-    const vnDay = String(vnDateObj.getUTCDate()).padStart(2, '0');
-    const vnHour = String(vnDateObj.getUTCHours()).padStart(2, '0');
-    const vnMin = String(vnDateObj.getUTCMinutes()).padStart(2, '0');
-
-    const vnIsoDate = `${vnYear}-${vnMonth}-${vnDay}`;
-    const vnDateVi = `${vnDay}/${vnMonth}/${vnYear}`;
-    const vnTimeVi = `${vnHour}:${vnMin}`;
-    const timezoneLabel = VN_TIMEZONE_LABEL;
-
-    return {
-      rawDate: iso,
-      aoeDateVi: aoeDateVi,
-      vnIsoDate: vnIsoDate,
-      vnDateVi: vnDateVi,
-      vnTimeVi: vnTimeVi,
-      timezoneLabel: timezoneLabel,
-      converted: true,
-      targetMs: targetMs,
-      displayText: `${vnTimeVi} ${vnDateVi} — ${timezoneLabel}`
-    };
+    return computeConvertedVnDate(year, month, day, iso, aoeDateVi, trimmed);
   }
 
   /**
    * Định dạng chuỗi hiển thị hạn nộp bài theo UTC+7 (giờ Việt Nam) hoặc giữ ngày thô khi thiếu thông tin quy đổi.
    * @param {string} dateStr Chuỗi ngày hạn nộp.
-   * @param {Object} [options={}] Tùy chọn ({ isDeadline: boolean, hasExplicitTime: boolean, includeAoEOrigin: boolean }).
+   * @param {Object} [options={}] Tùy chọn
+   * ({ isDeadline: boolean, hasExplicitTime: boolean, includeAoEOrigin: boolean }).
    * @returns {string} Chuỗi ngày giờ kèm nhãn múi giờ minh bạch.
    */
   function formatDeadlineVi(dateStr, options) {
@@ -570,11 +585,70 @@
   }
 
   /**
+   * Tạo bản ghi mốc deadline chuẩn hóa dùng chung cho cả dữ liệu mảng và object.
+   * @param {{
+   *   rawIndex: number,
+   *   key: string,
+   *   name: string,
+   *   shortName: string,
+   *   type: string,
+   *   note: string,
+   *   rawDate: string
+   * }} fields - Thông tin mốc thô cần quy đổi sang UTC+7.
+   * @returns {Object} Mốc deadline đã chuẩn hóa (có cờ `hasValidDate`).
+   */
+  function buildNormalizedDeadlineItem({ rawIndex, key, name, shortName, type, note, rawDate }) {
+    const converted = rawDate ? convertDeadlineToVn(rawDate, { isDeadline: true }) : null;
+    if (converted && Number.isFinite(converted.targetMs)) {
+      return {
+        rawIndex,
+        hasValidDate: true,
+        key,
+        name,
+        shortName,
+        type,
+        note,
+        rawDate,
+        date: converted.rawDate,
+        vnDate: converted.vnIsoDate,
+        vnDateVi: converted.vnDateVi,
+        vnTimeVi: converted.vnTimeVi,
+        displayDate: converted.displayText,
+        timezoneLabel: converted.timezoneLabel,
+        targetMs: converted.targetMs,
+        daysLeft: daysLeft(rawDate),
+        isPassed: converted.targetMs <= Date.now()
+      };
+    }
+
+    return {
+      rawIndex,
+      hasValidDate: false,
+      key,
+      name,
+      shortName,
+      type,
+      note,
+      rawDate,
+      date: '',
+      vnDate: '',
+      vnDateVi: '',
+      vnTimeVi: '',
+      displayDate: rawDate || 'Chưa xác định ngày',
+      timezoneLabel: '',
+      targetMs: null,
+      daysLeft: null,
+      isPassed: false
+    };
+  }
+
+  /**
    * Phân tích thuộc tính deadlines (hỗ trợ cả dạng Array và Object) thành toàn bộ danh sách đồng nhất
    * kèm thông tin quy đổi sang múi giờ UTC+7 (giờ Việt Nam). Giữ nguyên mọi mốc thời gian trong dữ liệu gốc,
    * kể cả các mốc không phân tích được ngày (không tự tạo ngày thay thế).
    * @param {Array|Object|null} deadlines Dữ liệu hạn nộp thô của hội nghị.
-   * @returns {Array<Object>} Danh sách toàn bộ các mốc: các mốc có ngày hợp lệ xếp tăng dần trước, mốc chưa rõ ngày giữ ở sau theo thứ tự gốc.
+   * @returns {Array<Object>} Danh sách toàn bộ các mốc: mốc hợp lệ xếp tăng dần trước,
+   * mốc chưa rõ ngày giữ ở sau theo thứ tự gốc.
    */
   function parseDeadlinesList(deadlines) {
     if (!deadlines) return [];
@@ -588,99 +662,30 @@
         const rawNote = String(entry.description || entry.note || '').trim();
         const rawName = String(entry.name || '').trim();
         const classified = classifyMilestoneName(rawName);
-        const converted = rawDate ? convertDeadlineToVn(rawDate, { isDeadline: true }) : null;
-
-        if (converted && Number.isFinite(converted.targetMs)) {
-          const left = daysLeft(rawDate);
-          items.push({
-            rawIndex,
-            hasValidDate: true,
-            key: classified.key,
-            name: rawName || classified.shortName,
-            shortName: classified.shortName,
-            type: rawType,
-            note: rawNote,
-            rawDate,
-            date: converted.rawDate,
-            vnDate: converted.vnIsoDate,
-            vnDateVi: converted.vnDateVi,
-            vnTimeVi: converted.vnTimeVi,
-            displayDate: converted.displayText,
-            timezoneLabel: converted.timezoneLabel,
-            targetMs: converted.targetMs,
-            daysLeft: left,
-            isPassed: converted.targetMs <= Date.now()
-          });
-        } else {
-          items.push({
-            rawIndex,
-            hasValidDate: false,
-            key: classified.key,
-            name: rawName || classified.shortName,
-            shortName: classified.shortName,
-            type: rawType,
-            note: rawNote,
-            rawDate,
-            date: '',
-            vnDate: '',
-            vnDateVi: '',
-            vnTimeVi: '',
-            displayDate: rawDate || 'Chưa xác định ngày',
-            timezoneLabel: '',
-            targetMs: null,
-            daysLeft: null,
-            isPassed: false
-          });
-        }
+        items.push(buildNormalizedDeadlineItem({
+          rawIndex,
+          key: classified.key,
+          name: rawName || classified.shortName,
+          shortName: classified.shortName,
+          type: rawType,
+          note: rawNote,
+          rawDate
+        }));
       });
     } else if (typeof deadlines === 'object') {
       MILESTONE_DEFINITIONS.forEach((def, rawIndex) => {
         const rawVal = deadlines[def.key];
         const rawDate = rawVal !== undefined && rawVal !== null ? String(rawVal).trim() : '';
         if (!rawDate) return;
-        const converted = convertDeadlineToVn(rawDate, { isDeadline: true });
-        if (converted && Number.isFinite(converted.targetMs)) {
-          const left = daysLeft(rawDate);
-          items.push({
-            rawIndex,
-            hasValidDate: true,
-            key: def.key,
-            name: def.name,
-            shortName: def.shortName,
-            type: '',
-            note: '',
-            rawDate,
-            date: converted.rawDate,
-            vnDate: converted.vnIsoDate,
-            vnDateVi: converted.vnDateVi,
-            vnTimeVi: converted.vnTimeVi,
-            displayDate: converted.displayText,
-            timezoneLabel: converted.timezoneLabel,
-            targetMs: converted.targetMs,
-            daysLeft: left,
-            isPassed: converted.targetMs <= Date.now()
-          });
-        } else {
-          items.push({
-            rawIndex,
-            hasValidDate: false,
-            key: def.key,
-            name: def.name,
-            shortName: def.shortName,
-            type: '',
-            note: '',
-            rawDate,
-            date: '',
-            vnDate: '',
-            vnDateVi: '',
-            vnTimeVi: '',
-            displayDate: rawDate || 'Chưa xác định ngày',
-            timezoneLabel: '',
-            targetMs: null,
-            daysLeft: null,
-            isPassed: false
-          });
-        }
+        items.push(buildNormalizedDeadlineItem({
+          rawIndex,
+          key: def.key,
+          name: def.name,
+          shortName: def.shortName,
+          type: '',
+          note: '',
+          rawDate
+        }));
       });
     }
 
@@ -814,13 +819,18 @@
    * @param {Object} conf Đối tượng hội nghị.
    * @returns {{ min: number, max: number, currency: string }|null} Khoảng lệ phí hợp lệ hoặc null nếu chưa cập nhật.
    */
+  /** Kiểm tra giá trị lệ phí thô là số hữu hạn khác rỗng */
+  function isFiniteFeeValue(rawVal) {
+    return rawVal !== null && rawVal !== undefined && String(rawVal).trim() !== '' && Number.isFinite(Number(rawVal));
+  }
+
   function extractConferenceFeeRange(conf) {
     if (!conf || typeof conf !== 'object') return null;
 
     const rawMin = conf.fee_min;
     const rawMax = conf.fee_max;
-    const hasMin = rawMin !== null && rawMin !== undefined && String(rawMin).trim() !== '' && Number.isFinite(Number(rawMin));
-    const hasMax = rawMax !== null && rawMax !== undefined && String(rawMax).trim() !== '' && Number.isFinite(Number(rawMax));
+    const hasMin = isFiniteFeeValue(rawMin);
+    const hasMax = isFiniteFeeValue(rawMax);
     const currency = conf.fee_currency ? String(conf.fee_currency).trim() : '';
 
     if (hasMin && hasMax) {
@@ -834,9 +844,7 @@
     }
 
     if (Array.isArray(conf.registration_fees) && conf.registration_fees.length > 0) {
-      const numericFees = conf.registration_fees.filter(item =>
-        item && item.amount !== null && item.amount !== undefined && String(item.amount).trim() !== '' && Number.isFinite(Number(item.amount))
-      );
+      const numericFees = conf.registration_fees.filter(item => item && isFiniteFeeValue(item.amount));
       if (numericFees.length > 0) {
         const targetCurrency = currency
           || (numericFees[0].currency ? String(numericFees[0].currency).trim() : '');
@@ -1065,7 +1073,58 @@
   }
 
   /**
-   * Sinh nội dung tệp iCalendar (.ics) chứa danh sách các mốc sự kiện kèm nhắc nhở theo giờ Việt Nam (UTC+7 / Asia/Ho_Chi_Minh).
+   * Tạo các dòng VEVENT chuẩn RFC 5545 kèm 2 nhắc nhở (trước 7 ngày và 1 ngày) cho một sự kiện.
+   * @param {Object} ev - Dữ liệu sự kiện `{ title, description, location, date }`.
+   * @param {number} index - Chỉ số thứ tự để sinh UID không trùng.
+   * @param {string} stamp - Dấu thời gian DTSTAMP chuẩn UTC.
+   * @returns {Array<string>} Danh sách dòng văn bản của một VEVENT hoặc mảng rỗng nếu thiếu ngày.
+   */
+  function buildIcsEventLines(ev, index, stamp) {
+    const converted = convertDeadlineToVn(ev && ev.date, { isDeadline: true });
+    const iso = converted ? converted.vnIsoDate : normalizeDateIso(ev && ev.date);
+    if (!iso) return [];
+
+    const startCompact = iso.replace(/-/g, '');
+    let dtStartLine = '';
+    let dtEndLine = '';
+
+    if (converted && converted.converted && converted.vnTimeVi) {
+      const timeCompact = `${converted.vnTimeVi.replace(/:/g, '')}00`;
+      dtStartLine = `DTSTART;TZID=${VN_TIMEZONE_ID}:${startCompact}T${timeCompact}`;
+      dtEndLine = `DTEND;TZID=${VN_TIMEZONE_ID}:${startCompact}T${timeCompact}`;
+    } else {
+      const endCompact = new Date(Date.parse(`${iso}T00:00:00Z`) + 86400000)
+        .toISOString().slice(0, 10).replace(/-/g, '');
+      dtStartLine = `DTSTART;VALUE=DATE:${startCompact}`;
+      dtEndLine = `DTEND;VALUE=DATE:${endCompact}`;
+    }
+
+    return [
+      'BEGIN:VEVENT',
+      `UID:${stamp}-${index}-${Math.random().toString(36).slice(2, 8)}@confguide.vn`,
+      `DTSTAMP:${stamp}`,
+      dtStartLine,
+      dtEndLine,
+      `SUMMARY:${escapeIcsText(ev.title || 'ConfGuide Deadline')}`,
+      `DESCRIPTION:${escapeIcsText(ev.description || '')}`,
+      `LOCATION:${escapeIcsText(ev.location || '')}`,
+      'BEGIN:VALARM',
+      'ACTION:DISPLAY',
+      'DESCRIPTION:Nhắc nhở hạn nộp bài ConfGuide (trước 7 ngày)',
+      'TRIGGER:-P7D',
+      'END:VALARM',
+      'BEGIN:VALARM',
+      'ACTION:DISPLAY',
+      'DESCRIPTION:Nhắc nhở hạn nộp bài ConfGuide (trước 1 ngày)',
+      'TRIGGER:-P1D',
+      'END:VALARM',
+      'END:VEVENT'
+    ];
+  }
+
+  /**
+   * Sinh nội dung tệp iCalendar (.ics) chứa danh sách các mốc sự kiện kèm nhắc nhở
+   * theo giờ Việt Nam (UTC+7 / Asia/Ho_Chi_Minh).
    * @param {Array<Object>} events Danh sách sự kiện { title, description, location, date }.
    * @returns {string} Chuỗi nội dung file .ics.
    */
@@ -1090,45 +1149,8 @@
     ];
 
     (events || []).forEach((ev, index) => {
-      const converted = convertDeadlineToVn(ev && ev.date, { isDeadline: true });
-      const iso = converted ? converted.vnIsoDate : normalizeDateIso(ev && ev.date);
-      if (!iso) return;
-      const startCompact = iso.replace(/-/g, '');
-      let dtStartLine = '';
-      let dtEndLine = '';
-
-      if (converted && converted.converted && converted.vnTimeVi) {
-        const timeCompact = `${converted.vnTimeVi.replace(/:/g, '')}00`;
-        dtStartLine = `DTSTART;TZID=${VN_TIMEZONE_ID}:${startCompact}T${timeCompact}`;
-        dtEndLine = `DTEND;TZID=${VN_TIMEZONE_ID}:${startCompact}T${timeCompact}`;
-      } else {
-        const endCompact = new Date(Date.parse(`${iso}T00:00:00Z`) + 86400000)
-          .toISOString().slice(0, 10).replace(/-/g, '');
-        dtStartLine = `DTSTART;VALUE=DATE:${startCompact}`;
-        dtEndLine = `DTEND;VALUE=DATE:${endCompact}`;
-      }
-
-      lines.push(
-        'BEGIN:VEVENT',
-        `UID:${stamp}-${index}-${Math.random().toString(36).slice(2, 8)}@confguide.vn`,
-        `DTSTAMP:${stamp}`,
-        dtStartLine,
-        dtEndLine,
-        `SUMMARY:${escapeIcsText(ev.title || 'ConfGuide Deadline')}`,
-        `DESCRIPTION:${escapeIcsText(ev.description || '')}`,
-        `LOCATION:${escapeIcsText(ev.location || '')}`,
-        'BEGIN:VALARM',
-        'ACTION:DISPLAY',
-        'DESCRIPTION:Nhắc nhở hạn nộp bài ConfGuide (trước 7 ngày)',
-        'TRIGGER:-P7D',
-        'END:VALARM',
-        'BEGIN:VALARM',
-        'ACTION:DISPLAY',
-        'DESCRIPTION:Nhắc nhở hạn nộp bài ConfGuide (trước 1 ngày)',
-        'TRIGGER:-P1D',
-        'END:VALARM',
-        'END:VEVENT'
-      );
+      const eventLines = buildIcsEventLines(ev, index, stamp);
+      if (eventLines.length > 0) lines.push(...eventLines);
     });
 
     lines.push('END:VCALENDAR');
@@ -1212,7 +1234,9 @@
           <p class="cg-confirm-message">${escapeHtml(message)}</p>
           <div class="cg-confirm-actions">
             <button type="button" class="btn btn-secondary js-confirm-cancel">${escapeHtml(cancelLabel)}</button>
-            <button type="button" class="btn ${isDanger ? 'btn-danger' : 'btn-primary'} js-confirm-ok">${escapeHtml(confirmLabel)}</button>
+            <button type="button" class="btn ${isDanger ? 'btn-danger' : 'btn-primary'} js-confirm-ok">
+              ${escapeHtml(confirmLabel)}
+            </button>
           </div>
         </div>
       `;
@@ -1429,7 +1453,8 @@
    */
   function renderBrandHtml(extraClass = '') {
     const gradCapSvg = `
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
         <path d="M6 12v5c3 3 9 3 12 0v-5"></path>
       </svg>
@@ -1555,9 +1580,10 @@
     const isRegisterPage = currentPage === 'register.html';
     const isNotFoundPage = currentPage === '404.html'
       || Boolean(document.body && document.body.dataset && document.body.dataset.page === '404');
-    const redirectParam = (currentPage && currentPage !== 'index.html' && !isLoginPage && !isRegisterPage && !isNotFoundPage)
-      ? `?redirect=${encodeURIComponent(currentPage)}`
-      : '';
+    const shouldAppendRedirect = Boolean(
+      currentPage && currentPage !== 'index.html' && !isLoginPage && !isRegisterPage && !isNotFoundPage
+    );
+    const redirectParam = shouldAppendRedirect ? `?redirect=${encodeURIComponent(currentPage)}` : '';
 
     return `
       <div class="auth-buttons-group">
@@ -1574,42 +1600,6 @@
       </div>
     `;
   }
-
-  /** Danh sách mục đích sử dụng ConfGuide gắn trực tiếp với tiêu chí lọc và sắp xếp thực tế */
-  const USAGE_PURPOSES = [
-    {
-      key: 'submit-paper',
-      label: 'Nộp bài công bố nghiên cứu',
-      shortLabel: 'Nộp bài nghiên cứu',
-      desc: 'Ưu tiên hội nghị đang mở nhận bài (CFP mở) và hạn nộp gần nhất.',
-      searchCfp: 'open',
-      searchSort: 'deadline'
-    },
-    {
-      key: 'track-deadlines',
-      label: 'Theo dõi lịch & tham dự sự kiện',
-      shortLabel: 'Theo dõi lịch sự kiện',
-      desc: 'Sắp xếp theo thời gian diễn ra để chủ động lập kế hoạch tham dự.',
-      searchCfp: '',
-      searchSort: 'event'
-    },
-    {
-      key: 'explore-rank',
-      label: 'Tìm hội nghị uy tín (Rank CORE)',
-      shortLabel: 'Tìm hội nghị uy tín',
-      desc: 'Ưu tiên hội nghị đạt chuẩn phân hạng CORE A*, A, B, C.',
-      searchCfp: '',
-      searchSort: 'rank-desc'
-    },
-    {
-      key: 'budget-friendly',
-      label: 'Cân nhắc lệ phí hợp lý',
-      shortLabel: 'Cân nhắc lệ phí',
-      desc: 'Ưu tiên hội nghị có mức lệ phí tham dự từ thấp đến cao.',
-      searchCfp: '',
-      searchSort: 'fee-asc'
-    }
-  ];
 
   /** Danh mục 25 lĩnh vực đơn chuẩn hóa khớp 100% với topic slug trong data/conference_data.json */
   const PREFERENCE_TOPICS = [
@@ -1640,7 +1630,6 @@
     { key: 'he-thong-phan-tan', label: 'Hệ thống phân tán', primary: false }
   ];
 
-  const VALID_PURPOSE_KEYS = new Set(USAGE_PURPOSES.map(item => item.key));
   const VALID_PREF_TOPIC_KEYS = new Set(PREFERENCE_TOPICS.map(item => item.key));
   const PREF_TOPIC_LABEL_MAP = PREFERENCE_TOPICS.reduce((acc, item) => {
     acc[item.key] = item.label;
@@ -1830,7 +1819,10 @@
    * (đồng bộ cả `confguide_current_user` và `confguide_users`). Từ chối lưu nếu chưa đăng nhập.
    * @param {Array<string>} topicKeys - Danh sách khóa lĩnh vực muốn lưu.
    * @param {{ silent?: boolean }} [options={}] - Tùy chọn không phát sự kiện nếu đang gộp lưu cùng prefs.
-   * @returns {{ ok: boolean, requiresAuth: boolean, keys: Array<string>, labels: Array<string>, fieldsOfInterest: string }} Kết quả thao tác.
+   * @returns {{
+   *   ok: boolean, requiresAuth: boolean, keys: Array<string>,
+   *   labels: Array<string>, fieldsOfInterest: string
+   * }} Kết quả thao tác.
    */
   function setUserResearchTopicKeys(topicKeys, options = {}) {
     const activeUser = getCurrentUser();
@@ -1885,17 +1877,17 @@
   /**
    * Đọc và chuẩn hóa tùy chọn người dùng từ `confguide_user_preferences` kết hợp nguồn lĩnh vực
    * gắn với tài khoản đang đăng nhập (`confguide_current_user.fieldsOfInterest`).
-   * @returns {{ aoe: boolean, countdown: boolean, purpose: string, topics: string[], bannerDismissed: boolean, onboardingCompleted: boolean, updatedAt: string }}
+   * @returns {{
+   *   aoe: boolean, countdown: boolean, topics: string[],
+   *   bannerDismissed: boolean, onboardingCompleted: boolean, updatedAt: string
+   * }}
    */
   function getUserPreferences() {
     const raw = readStorage('confguide_user_preferences', {});
     const safeObj = (raw && typeof raw === 'object' && !Array.isArray(raw)) ? raw : {};
-    const rawPurpose = typeof safeObj.purpose === 'string' ? safeObj.purpose.trim() : '';
-    const purpose = VALID_PURPOSE_KEYS.has(rawPurpose) ? rawPurpose : '';
     return {
       aoe: safeObj.aoe !== false,
       countdown: safeObj.countdown !== false,
-      purpose,
       topics: getUserResearchTopicKeys(),
       bannerDismissed: Boolean(safeObj.bannerDismissed),
       onboardingCompleted: Boolean(safeObj.onboardingCompleted),
@@ -1904,26 +1896,20 @@
   }
 
   /**
-   * Cập nhật tóm tắt sở thích hiển thị bên trong modal Cài đặt toàn cục.
+   * Cập nhật tóm tắt lĩnh vực quan tâm hiển thị bên trong modal Cài đặt toàn cục.
    */
   function updateSettingsPrefSummary() {
     const summaryEl = document.getElementById('globalPrefPersonalSummary');
     if (!summaryEl) return;
     const prefs = getUserPreferences();
-    const purposeObj = USAGE_PURPOSES.find(item => item.key === prefs.purpose);
     const topicLabels = prefs.topics.map(key => PREF_TOPIC_LABEL_MAP[key] || key);
-    if (!purposeObj && topicLabels.length === 0) {
-      summaryEl.textContent = 'Chưa thiết lập mục đích sử dụng và lĩnh vực quan tâm.';
+    if (topicLabels.length === 0) {
+      summaryEl.textContent = 'Chưa chọn lĩnh vực nghiên cứu quan tâm.';
       return;
     }
-    const parts = [];
-    if (purposeObj) parts.push(`Mục đích: ${purposeObj.label}`);
-    if (topicLabels.length > 0) {
-      const preview = topicLabels.slice(0, 3).join(', ');
-      const extra = topicLabels.length > 3 ? ` (+${topicLabels.length - 3})` : '';
-      parts.push(`Lĩnh vực (${topicLabels.length}): ${preview}${extra}`);
-    }
-    summaryEl.textContent = parts.join(' • ');
+    const preview = topicLabels.slice(0, 3).join(', ');
+    const extra = topicLabels.length > 3 ? ` (+${topicLabels.length - 3})` : '';
+    summaryEl.textContent = `Đã chọn ${topicLabels.length} lĩnh vực: ${preview}${extra}`;
   }
 
   /**
@@ -1940,9 +1926,6 @@
       ...safePatch,
       updatedAt: new Date().toISOString()
     };
-    const nextPurpose = typeof merged.purpose === 'string' && VALID_PURPOSE_KEYS.has(merged.purpose.trim())
-      ? merged.purpose.trim()
-      : '';
 
     if (Object.prototype.hasOwnProperty.call(safePatch, 'topics') && isUserAuthenticated()) {
       setUserResearchTopicKeys(safePatch.topics, { silent: true });
@@ -1951,7 +1934,6 @@
     const storedPrefs = {
       aoe: merged.aoe !== false,
       countdown: merged.countdown !== false,
-      purpose: nextPurpose,
       bannerDismissed: Boolean(merged.bannerDismissed),
       onboardingCompleted: Boolean(merged.onboardingCompleted),
       updatedAt: merged.updatedAt
@@ -1972,7 +1954,7 @@
   }
 
   /**
-   * Tạo URL điều hướng tới trang Tra cứu (search.html) gắn sẵn lĩnh vực và tiêu chí theo mục đích.
+   * Tạo URL điều hướng tới trang Tra cứu (search.html) gắn sẵn lĩnh vực nghiên cứu.
    * @param {Object} [prefs] - Tùy chọn người dùng (mặc định đọc từ getUserPreferences()).
    * @returns {string} Đường dẫn tương đối tới search.html kèm tham số truy vấn.
    */
@@ -1981,11 +1963,6 @@
     const params = new URLSearchParams();
     if (Array.isArray(state.topics) && state.topics.length > 0) {
       params.set('topic', state.topics.join(','));
-    }
-    const purposeMeta = USAGE_PURPOSES.find(item => item.key === state.purpose);
-    if (purposeMeta) {
-      if (purposeMeta.searchCfp) params.set('cfp', purposeMeta.searchCfp);
-      if (purposeMeta.searchSort) params.set('sort', purposeMeta.searchSort);
     }
     const qs = params.toString();
     return qs ? `search.html?${qs}` : 'search.html';
@@ -2058,12 +2035,17 @@
               </div>
               <div class="modal-divider"></div>
               <div class="modal-section-block">
-                <h4 class="modal-block-title">Cá nhân hóa mục đích &amp; lĩnh vực</h4>
-                <p class="modal-block-desc">Chọn mục đích sử dụng và các lĩnh vực nghiên cứu quan tâm để hệ thống gợi ý hội nghị phù hợp hơn.</p>
+                <h4 class="modal-block-title">Lĩnh vực nghiên cứu quan tâm</h4>
+                <p class="modal-block-desc">
+                  Chọn các lĩnh vực nghiên cứu quan tâm để hệ thống gợi ý hội nghị phù hợp hơn.
+                </p>
                 <div class="modal-pref-summary-card">
-                  <p class="modal-pref-summary-text" id="globalPrefPersonalSummary">Chưa thiết lập mục đích sử dụng và lĩnh vực quan tâm.</p>
-                  <button type="button" class="btn btn-secondary modal-pref-open-btn" id="btnOpenPrefSurveyFromSettings">
-                    Thiết lập sở thích
+                  <p class="modal-pref-summary-text" id="globalPrefPersonalSummary">
+                    Chưa chọn lĩnh vực nghiên cứu quan tâm.
+                  </p>
+                  <button type="button" class="btn btn-secondary modal-pref-open-btn"
+                    id="btnOpenPrefSurveyFromSettings">
+                    Chọn lĩnh vực nghiên cứu
                   </button>
                 </div>
               </div>
@@ -2204,7 +2186,8 @@
   }
 
   /**
-   * Tạo HTML cho modal khảo sát sở thích & mục đích sử dụng ConfGuide toàn cục dạng bảng biểu có ô tích.
+   * Tạo HTML cho modal chọn lĩnh vực nghiên cứu toàn cục dạng bảng biểu có ô tích dùng chung
+   * (cho lần đăng nhập đầu sau đăng ký, Cài đặt, Trang chủ và Hồ sơ cá nhân).
    * Sử dụng đúng danh mục 25 lĩnh vực đơn thực tế từ dữ liệu hội nghị.
    * @returns {string} Chuỗi HTML `#globalPreferencesSurveyModal`.
    */
@@ -2216,45 +2199,23 @@
       </label>
     `;
 
-    const purposesHtml = USAGE_PURPOSES.map(item => `
-      <button type="button" class="pref-purpose-card" data-purpose="${escapeHtml(item.key)}" aria-pressed="false">
-        <span class="pref-purpose-card__check" aria-hidden="true">✓</span>
-        <span class="pref-purpose-card__body">
-          <span class="pref-purpose-card__title">${escapeHtml(item.label)}</span>
-          <span class="pref-purpose-card__desc">${escapeHtml(item.desc)}</span>
-        </span>
-      </button>
-    `).join('');
-
     return `
       <div class="layout-modal" id="globalPreferencesSurveyModal" role="dialog"
         aria-modal="true" aria-labelledby="prefSurveyModalTitle" hidden>
         <div class="layout-modal-backdrop"></div>
         <div class="layout-modal-box layout-modal-box--wide">
           <div class="layout-modal-header">
-            <h3 class="layout-modal-title" id="prefSurveyModalTitle">Cá nhân hóa trải nghiệm ConfGuide</h3>
+            <h3 class="layout-modal-title" id="prefSurveyModalTitle">Chọn lĩnh vực nghiên cứu</h3>
             <button type="button" class="layout-modal-close-btn" aria-label="Đóng">&times;</button>
           </div>
           <div class="layout-modal-body">
             <p class="modal-block-desc pref-survey-intro" id="prefSurveyIntro">
-              Chọn mục đích sử dụng và tích chọn các lĩnh vực nghiên cứu bạn quan tâm để ConfGuide ưu tiên gợi ý hội nghị phù hợp trên Trang chủ và trang Tra cứu.
+              Tích chọn các lĩnh vực nghiên cứu bạn quan tâm rồi nhấn Lưu thay đổi để lưu lại.
             </p>
-
-            <div class="modal-section-block" id="prefPurposeSection">
-              <div class="pref-survey-section-head">
-                <h4 class="modal-block-title">1. Mục đích tìm kiếm</h4>
-                <span class="pref-survey-optional">Tùy chọn (chọn 1)</span>
-              </div>
-              <div class="pref-purpose-grid" id="prefPurposeGrid" role="group" aria-label="Mục đích sử dụng trang web">
-                ${purposesHtml}
-              </div>
-            </div>
-
-            <div class="modal-divider" id="prefSurveyDivider"></div>
 
             <div class="modal-section-block" id="prefTopicsSection">
               <div class="pref-survey-section-head">
-                <h4 class="modal-block-title" id="prefTopicsHeading">2. Lĩnh vực nghiên cứu bạn quan tâm</h4>
+                <h4 class="modal-block-title" id="prefTopicsHeading">Bảng lĩnh vực nghiên cứu</h4>
                 <span class="pref-count-badge" id="prefTopicCountBadge">Đã chọn: 0 lĩnh vực</span>
               </div>
               <div class="pref-topic-table">
@@ -2268,10 +2229,12 @@
             </div>
           </div>
           <div class="pref-modal-actions">
-            <button type="button" class="btn btn-secondary pref-modal-reset-btn" id="prefSurveyResetBtn">Xóa lựa chọn</button>
+            <button type="button" class="btn btn-secondary pref-modal-reset-btn"
+              id="prefSurveyResetBtn">Xóa lựa chọn</button>
             <div class="pref-modal-actions__right">
-              <button type="button" class="btn btn-secondary layout-modal-cancel-btn">Hủy</button>
-              <button type="button" class="btn btn-primary" id="prefSurveySaveBtn">OK</button>
+              <button type="button" class="btn btn-secondary layout-modal-cancel-btn"
+                id="prefSurveyCancelBtn">Hủy</button>
+              <button type="button" class="btn btn-primary" id="prefSurveySaveBtn">Lưu thay đổi</button>
             </div>
           </div>
         </div>
@@ -2310,7 +2273,7 @@
       const bodyEl = modal.querySelector('.layout-modal-body');
       if (bodyEl) bodyEl.scrollTop = 0;
       const focusTarget = modalId === 'globalPreferencesSurveyModal'
-        ? (modal.querySelector('#prefPurposeSection:not([hidden]) .pref-purpose-card')
+        ? (modal.querySelector('.js-pref-topic-checkbox')
           || modal.querySelector('button.layout-modal-close-btn'))
         : modal.querySelector('input, select, textarea, button.layout-modal-close-btn');
       if (focusTarget) focusTarget.focus();
@@ -2319,7 +2282,9 @@
 
   /**
    * Mở hộp thoại Báo cáo sự cố toàn cục kèm dữ liệu điền sẵn (tùy chọn).
-   * @param {{ category?: string, confName?: string, title?: string, description?: string }} [preset={}] Dữ liệu điền sẵn.
+   * @param {{
+   *   category?: string, confName?: string, title?: string, description?: string
+   * }} [preset={}] Dữ liệu điền sẵn.
    */
   function openReportModal(preset = {}) {
     const categoryEl = document.getElementById('globalReportCategory');
@@ -2335,59 +2300,42 @@
     openLayoutModal('globalReportModal');
   }
 
-  /** Trạng thái nháp trong modal cá nhân hóa & chọn lĩnh vực nghiên cứu */
+  /** Trạng thái nháp trong modal bảng chọn lĩnh vực nghiên cứu dùng chung */
   const surveyDraftState = {
-    purpose: '',
     topics: new Set(),
-    topicsOnly: false,
+    isOnboarding: false,
     preserveOpenModals: false,
     onConfirm: null
   };
 
   /**
-   * Đồng bộ giao diện modal cá nhân hóa dạng bảng biểu từ trạng thái nháp `surveyDraftState`.
+   * Đồng bộ giao diện modal chọn lĩnh vực nghiên cứu dạng bảng biểu từ trạng thái nháp `surveyDraftState`.
    */
   function syncPreferencesSurveyModalUi() {
     const modal = document.getElementById('globalPreferencesSurveyModal');
     if (!modal) return;
 
-    const isTopicsOnly = Boolean(surveyDraftState.topicsOnly);
+    const isOnboarding = Boolean(surveyDraftState.isOnboarding);
     const titleEl = document.getElementById('prefSurveyModalTitle');
     const introEl = document.getElementById('prefSurveyIntro');
-    const purposeSection = document.getElementById('prefPurposeSection');
-    const dividerEl = document.getElementById('prefSurveyDivider');
     const topicsHeading = document.getElementById('prefTopicsHeading');
+    const cancelBtn = document.getElementById('prefSurveyCancelBtn');
 
     if (titleEl) {
-      titleEl.textContent = isTopicsOnly
-        ? 'Chọn lĩnh vực nghiên cứu'
-        : 'Cá nhân hóa trải nghiệm ConfGuide';
+      titleEl.textContent = 'Chọn lĩnh vực nghiên cứu';
     }
     if (introEl) {
-      introEl.textContent = isTopicsOnly
-        ? 'Tích chọn các lĩnh vực nghiên cứu bạn quan tâm rồi nhấn OK để lưu lại.'
-        : 'Chọn mục đích sử dụng và tích chọn các lĩnh vực nghiên cứu bạn quan tâm, sau đó nhấn OK để lưu lại.';
-    }
-    if (purposeSection) {
-      if (isTopicsOnly) purposeSection.setAttribute('hidden', '');
-      else purposeSection.removeAttribute('hidden');
-    }
-    if (dividerEl) {
-      if (isTopicsOnly) dividerEl.setAttribute('hidden', '');
-      else dividerEl.removeAttribute('hidden');
+      introEl.textContent = isOnboarding
+        ? 'Chào mừng bạn đến với ConfGuide! '
+          + 'Tích chọn các lĩnh vực nghiên cứu bạn quan tâm rồi nhấn Lưu thay đổi để lưu lại.'
+        : 'Tích chọn các lĩnh vực nghiên cứu bạn quan tâm rồi nhấn Lưu thay đổi để lưu lại.';
     }
     if (topicsHeading) {
-      topicsHeading.textContent = isTopicsOnly
-        ? 'Bảng lĩnh vực nghiên cứu'
-        : '2. Lĩnh vực nghiên cứu bạn quan tâm';
+      topicsHeading.textContent = 'Bảng lĩnh vực nghiên cứu';
     }
-
-    modal.querySelectorAll('.pref-purpose-card').forEach(btn => {
-      const pKey = btn.getAttribute('data-purpose') || '';
-      const isSelected = Boolean(pKey && surveyDraftState.purpose === pKey);
-      btn.classList.toggle('is-selected', isSelected);
-      btn.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
-    });
+    if (cancelBtn) {
+      cancelBtn.textContent = isOnboarding ? 'Bỏ qua' : 'Hủy';
+    }
 
     modal.querySelectorAll('.js-pref-topic-checkbox').forEach(checkbox => {
       const tKey = checkbox.value || '';
@@ -2404,14 +2352,15 @@
   }
 
   /**
-   * Mở modal bảng biểu cá nhân hóa (Trang chủ) hoặc bảng chọn lĩnh vực nghiên cứu (Trang cá nhân).
+   * Mở modal bảng chọn lĩnh vực nghiên cứu dùng chung (onboarding sau đăng ký, Cài đặt, Trang chủ, Hồ sơ).
    * @param {{
+   *   isOnboarding?: boolean,
    *   topicsOnly?: boolean,
    *   preserveOpenModals?: boolean,
    *   initialTopicKeys?: Array<string>,
    *   onConfirm?: Function|null,
    *   returnFocusEl?: HTMLElement|null
-   * }} [options={}] Tùy chọn hiển thị và callback khi nhấn OK.
+   * }} [options={}] Tùy chọn hiển thị và callback khi nhấn Lưu thay đổi.
    */
   function openPreferencesSurveyModal(options = {}) {
     const safeOpts = (options && typeof options === 'object') ? options : {};
@@ -2423,9 +2372,8 @@
         ? safeOpts.initialTopicKeys.filter(key => VALID_PREF_TOPIC_KEYS.has(key))
         : prefs.topics);
 
-    surveyDraftState.purpose = isOnboarding ? '' : prefs.purpose;
     surveyDraftState.topics = new Set(initialTopics);
-    surveyDraftState.topicsOnly = isOnboarding ? false : Boolean(safeOpts.topicsOnly);
+    surveyDraftState.isOnboarding = isOnboarding;
     surveyDraftState.preserveOpenModals = Boolean(safeOpts.preserveOpenModals);
     surveyDraftState.onConfirm = typeof safeOpts.onConfirm === 'function' ? safeOpts.onConfirm : null;
 
@@ -2460,6 +2408,7 @@
     if (!modal) return;
     modal.classList.remove('show', 'layout-modal--nested');
     if (modalId === 'globalPreferencesSurveyModal') {
+      surveyDraftState.isOnboarding = false;
       surveyDraftState.onConfirm = null;
       surveyDraftState.preserveOpenModals = false;
     }
@@ -2776,6 +2725,40 @@
   }
 
   /**
+   * Kiểm tra hợp lệ các ô nhập mật khẩu hiện tại, mật khẩu mới và xác nhận mật khẩu.
+   * @returns {{ ok: boolean, curPass: string, newPass: string }} Trạng thái hợp lệ và giá trị mật khẩu.
+   */
+  function validatePasswordChangeInputs({ curInput, newInput, conInput, curErr, newErr, conErr, alertBox }) {
+    if (curErr) curErr.textContent = '';
+    if (newErr) newErr.textContent = '';
+    if (conErr) conErr.textContent = '';
+    alertBox.className = 'modal-alert';
+    alertBox.textContent = '';
+
+    const curPass = curInput.value;
+    const newPass = newInput.value;
+    const conPass = conInput.value;
+    let hasError = false;
+    if (!curPass) {
+      if (curErr) curErr.textContent = 'Vui lòng nhập mật khẩu hiện tại.';
+      hasError = true;
+    }
+    if (newPass.length < 6) {
+      if (newErr) newErr.textContent = 'Mật khẩu mới phải có ít nhất 6 ký tự.';
+      hasError = true;
+    }
+    if (conPass !== newPass) {
+      if (conErr) conErr.textContent = 'Xác nhận mật khẩu mới không trùng khớp.';
+      hasError = true;
+    }
+    if (hasError) {
+      alertBox.textContent = 'Vui lòng kiểm tra lại các trường thông tin bên dưới.';
+      alertBox.className = 'modal-alert show error';
+    }
+    return { ok: !hasError, curPass, newPass };
+  }
+
+  /**
    * Kiểm tra dữ liệu nhập và xử lý lưu mật khẩu mới từ modal Cài đặt.
    * @param {SubmitEvent} e - Sự kiện submit của `#globalPasswordForm`.
    * @param {Object|null} user - Thông tin người dùng hiện tại.
@@ -2792,30 +2775,10 @@
     const alertBox = document.getElementById('settingsPasswordAlert');
     if (!curInput || !newInput || !conInput || !alertBox) return;
 
-    if (curErr) curErr.textContent = '';
-    if (newErr) newErr.textContent = '';
-    if (conErr) conErr.textContent = '';
-    alertBox.className = 'modal-alert';
-    alertBox.textContent = '';
-
-    const curPass = curInput.value;
-    const newPass = newInput.value;
-    const conPass = conInput.value;
-    let hasError = false;
-    if (!curPass) { if (curErr) curErr.textContent = 'Vui lòng nhập mật khẩu hiện tại.'; hasError = true; }
-    if (newPass.length < 6) {
-      if (newErr) newErr.textContent = 'Mật khẩu mới phải có ít nhất 6 ký tự.';
-      hasError = true;
-    }
-    if (conPass !== newPass) {
-      if (conErr) conErr.textContent = 'Xác nhận mật khẩu mới không trùng khớp.';
-      hasError = true;
-    }
-    if (hasError) {
-      alertBox.textContent = 'Vui lòng kiểm tra lại các trường thông tin bên dưới.';
-      alertBox.className = 'modal-alert show error';
-      return;
-    }
+    const validation = validatePasswordChangeInputs({
+      curInput, newInput, conInput, curErr, newErr, conErr, alertBox
+    });
+    if (!validation.ok) return;
 
     const users = readStorage('confguide_users', []);
     const matched = user && Array.isArray(users)
@@ -2826,10 +2789,11 @@
       )
       : null;
 
-    const currentHash = await hashTextSha256(curPass);
+    const currentHash = await hashTextSha256(validation.curPass);
     if (matched && matched.passwordHash) {
-      const isTestShortcut = curPass.startsWith('user') && curPass.endsWith('@')
-        && matched.username === curPass.slice(0, -1);
+      const isTestShortcut = validation.curPass.startsWith('user')
+        && validation.curPass.endsWith('@')
+        && matched.username === validation.curPass.slice(0, -1);
       if (matched.passwordHash !== currentHash && !isTestShortcut) {
         if (curErr) curErr.textContent = 'Mật khẩu hiện tại không chính xác.';
         alertBox.textContent = 'Mật khẩu hiện tại không chính xác.';
@@ -2838,7 +2802,7 @@
       }
     }
 
-    const newHash = await hashTextSha256(newPass);
+    const newHash = await hashTextSha256(validation.newPass);
     if (matched) {
       matched.passwordHash = newHash;
       writeStorage('confguide_users', users);
@@ -2896,26 +2860,54 @@
   }
 
   /**
-   * Gắn sự kiện tương tác cho modal bảng biểu cá nhân hóa & chọn lĩnh vực nghiên cứu.
+   * Lưu các lĩnh vực nghiên cứu đã chọn từ modal khảo sát và thông báo phản hồi tới người dùng.
+   */
+  function handlePreferencesSurveySave() {
+    const selectedTopics = PREFERENCE_TOPICS
+      .map(item => item.key)
+      .filter(key => surveyDraftState.topics.has(key));
+    const selectedLabels = selectedTopics.map(key => PREF_TOPIC_LABEL_MAP[key] || key);
+
+    if (typeof surveyDraftState.onConfirm === 'function') {
+      const confirmHandler = surveyDraftState.onConfirm;
+      confirmHandler({
+        topics: selectedTopics,
+        labels: selectedLabels
+      });
+      closeLayoutModal('globalPreferencesSurveyModal');
+      return;
+    }
+
+    if (!isUserAuthenticated()) {
+      showToast('Vui lòng đăng nhập để lưu lĩnh vực nghiên cứu.', 'info');
+      closeLayoutModal('globalPreferencesSurveyModal');
+      return;
+    }
+
+    saveUserPreferences({
+      topics: selectedTopics,
+      onboardingCompleted: true,
+      bannerDismissed: false
+    });
+    closeLayoutModal('globalPreferencesSurveyModal');
+    showToast(
+      selectedTopics.length > 0
+        ? `Đã lưu ${selectedTopics.length} lĩnh vực nghiên cứu.`
+        : 'Đã xóa danh sách lĩnh vực nghiên cứu.',
+      'success'
+    );
+  }
+
+  /**
+   * Gắn sự kiện tương tác cho modal bảng biểu chọn lĩnh vực nghiên cứu dùng chung.
    */
   function initPreferencesSurveyModal() {
     const modal = document.getElementById('globalPreferencesSurveyModal');
     if (!modal) return;
 
-    const purposeGrid = document.getElementById('prefPurposeGrid');
     const topicGrid = document.getElementById('prefTopicGrid');
     const resetBtn = document.getElementById('prefSurveyResetBtn');
     const saveBtn = document.getElementById('prefSurveySaveBtn');
-
-    if (purposeGrid) {
-      purposeGrid.addEventListener('click', event => {
-        const card = event.target.closest('.pref-purpose-card');
-        if (!card) return;
-        const pKey = card.getAttribute('data-purpose') || '';
-        surveyDraftState.purpose = surveyDraftState.purpose === pKey ? '' : pKey;
-        syncPreferencesSurveyModalUi();
-      });
-    }
 
     if (topicGrid) {
       topicGrid.addEventListener('change', event => {
@@ -2936,80 +2928,13 @@
 
     if (resetBtn) {
       resetBtn.addEventListener('click', () => {
-        if (!surveyDraftState.topicsOnly) {
-          surveyDraftState.purpose = '';
-        }
         surveyDraftState.topics.clear();
         syncPreferencesSurveyModalUi();
       });
     }
 
     if (saveBtn) {
-      saveBtn.addEventListener('click', () => {
-        const selectedTopics = PREFERENCE_TOPICS
-          .map(item => item.key)
-          .filter(key => surveyDraftState.topics.has(key));
-        const selectedLabels = selectedTopics.map(key => PREF_TOPIC_LABEL_MAP[key] || key);
-
-        if (typeof surveyDraftState.onConfirm === 'function') {
-          const confirmHandler = surveyDraftState.onConfirm;
-          confirmHandler({
-            purpose: surveyDraftState.purpose,
-            topics: selectedTopics,
-            labels: selectedLabels
-          });
-          closeLayoutModal('globalPreferencesSurveyModal');
-          return;
-        }
-
-        if (surveyDraftState.topicsOnly) {
-          if (!isUserAuthenticated()) {
-            showToast('Vui lòng đăng nhập để lưu lĩnh vực nghiên cứu.', 'info');
-            closeLayoutModal('globalPreferencesSurveyModal');
-            return;
-          }
-          const currentPrefs = getUserPreferences();
-          saveUserPreferences({
-            purpose: currentPrefs.purpose,
-            topics: selectedTopics,
-            onboardingCompleted: true,
-            bannerDismissed: false
-          });
-          closeLayoutModal('globalPreferencesSurveyModal');
-          showToast(
-            selectedTopics.length > 0
-              ? `Đã lưu ${selectedTopics.length} lĩnh vực nghiên cứu.`
-              : 'Đã xóa danh sách lĩnh vực nghiên cứu.',
-            'success'
-          );
-          return;
-        }
-
-        if (!isUserAuthenticated() && selectedTopics.length > 0) {
-          showToast('Vui lòng đăng nhập để lưu lĩnh vực nghiên cứu và nhận gợi ý.', 'info');
-          saveUserPreferences({
-            purpose: surveyDraftState.purpose,
-            onboardingCompleted: true,
-            bannerDismissed: false
-          });
-          closeLayoutModal('globalPreferencesSurveyModal');
-          return;
-        }
-        const hasAny = Boolean(surveyDraftState.purpose || selectedTopics.length > 0);
-        saveUserPreferences({
-          purpose: surveyDraftState.purpose,
-          topics: selectedTopics,
-          onboardingCompleted: true,
-          bannerDismissed: false
-        });
-        closeLayoutModal('globalPreferencesSurveyModal');
-        showToast(
-          hasAny
-            ? 'Đã lưu mục đích & lĩnh vực quan tâm.'
-            : 'Đã đặt lại thiết lập cá nhân hóa.',
-          'success'
-        );
-      });
+      saveBtn.addEventListener('click', handlePreferencesSurveySave);
     }
   }
 
@@ -3035,75 +2960,78 @@
   }
 
   /**
+   * Kiểm tra và lưu báo cáo sự cố từ modal toàn cục vào `localStorage`.
+   * @param {SubmitEvent} e - Sự kiện submit biểu mẫu.
+   * @param {HTMLFormElement} reportForm - Form `#globalReportForm`.
+   * @param {Object|null} user - Thông tin người dùng hiện tại.
+   */
+  function handleGlobalReportSubmit(e, reportForm, user) {
+    e.preventDefault();
+    const catEl = document.getElementById('globalReportCategory');
+    const confEl = document.getElementById('globalReportConf');
+    const titleEl = document.getElementById('globalReportTitle');
+    const descEl = document.getElementById('globalReportDesc');
+    const titleErr = document.getElementById('globalReportTitleError');
+    const descErr = document.getElementById('globalReportDescError');
+    const alertBox = document.getElementById('globalReportAlert');
+    if (!titleEl || !descEl || !alertBox) return;
+
+    if (titleErr) titleErr.textContent = '';
+    if (descErr) descErr.textContent = '';
+    alertBox.className = 'modal-alert';
+    alertBox.textContent = '';
+
+    const title = titleEl.value.trim();
+    const desc = descEl.value.trim();
+    let hasError = false;
+    if (title.length < 5) {
+      if (titleErr) titleErr.textContent = 'Tiêu đề cần tối thiểu 5 ký tự.';
+      hasError = true;
+    }
+    if (desc.length < 10) {
+      if (descErr) descErr.textContent = 'Mô tả chi tiết cần tối thiểu 10 ký tự.';
+      hasError = true;
+    }
+    if (hasError) {
+      alertBox.textContent = 'Vui lòng hoàn thiện đầy đủ nội dung báo cáo.';
+      alertBox.className = 'modal-alert show error';
+      return;
+    }
+
+    const repId = 'RP-' + Math.floor(1000 + Math.random() * 9000);
+    const reports = readStorage('confguide_reports', []);
+    const safeReports = Array.isArray(reports) ? reports : [];
+    safeReports.unshift({
+      id: repId,
+      category: catEl ? catEl.value : 'Khác',
+      confName: confEl ? confEl.value.trim() : '',
+      title,
+      description: desc,
+      userId: user ? (user.id || user.username || user.email) : 'guest',
+      createdAt: new Date().toLocaleDateString('vi-VN'),
+      status: 'Đã tiếp nhận'
+    });
+    writeStorage('confguide_reports', safeReports);
+
+    reportForm.reset();
+    alertBox.textContent = `Báo cáo [${repId}] đã được tiếp nhận thành công!`;
+    alertBox.className = 'modal-alert show success';
+    setTimeout(() => {
+      closeLayoutModal('globalReportModal');
+      alertBox.className = 'modal-alert';
+      alertBox.textContent = '';
+    }, 2000);
+  }
+
+  /**
    * Khởi tạo form gửi báo cáo sự cố trong modal toàn cục.
    * @param {Object|null} user Thông tin người dùng hiện tại.
    */
   function initGlobalReportForm(user) {
     const reportForm = document.getElementById('globalReportForm');
-    if (!reportForm) return;
-
-    reportForm.addEventListener('submit', e => {
-      e.preventDefault();
-      const catEl = document.getElementById('globalReportCategory');
-      const confEl = document.getElementById('globalReportConf');
-      const titleEl = document.getElementById('globalReportTitle');
-      const descEl = document.getElementById('globalReportDesc');
-      const titleErr = document.getElementById('globalReportTitleError');
-      const descErr = document.getElementById('globalReportDescError');
-      const alertBox = document.getElementById('globalReportAlert');
-      if (!titleEl || !descEl || !alertBox) return;
-
-      if (titleErr) titleErr.textContent = '';
-      if (descErr) descErr.textContent = '';
-      alertBox.className = 'modal-alert';
-      alertBox.textContent = '';
-
-      const cat = catEl ? catEl.value : 'Khác';
-      const conf = confEl ? confEl.value.trim() : '';
-      const title = titleEl.value.trim();
-      const desc = descEl.value.trim();
-      let hasError = false;
-
-      if (title.length < 5) {
-        if (titleErr) titleErr.textContent = 'Tiêu đề cần tối thiểu 5 ký tự.';
-        hasError = true;
-      }
-      if (desc.length < 10) {
-        if (descErr) descErr.textContent = 'Mô tả chi tiết cần tối thiểu 10 ký tự.';
-        hasError = true;
-      }
-      if (hasError) {
-        alertBox.textContent = 'Vui lòng hoàn thiện đầy đủ nội dung báo cáo.';
-        alertBox.className = 'modal-alert show error';
-        return;
-      }
-
-      const repId = 'RP-' + Math.floor(1000 + Math.random() * 9000);
-      const newRep = {
-        id: repId,
-        category: cat,
-        confName: conf,
-        title: title,
-        description: desc,
-        userId: user ? (user.id || user.username || user.email) : 'guest',
-        createdAt: new Date().toLocaleDateString('vi-VN'),
-        status: 'Đã tiếp nhận'
-      };
-
-      const reports = readStorage('confguide_reports', []);
-      const safeReports = Array.isArray(reports) ? reports : [];
-      safeReports.unshift(newRep);
-      writeStorage('confguide_reports', safeReports);
-
-      reportForm.reset();
-      alertBox.textContent = `Báo cáo [${repId}] đã được tiếp nhận thành công!`;
-      alertBox.className = 'modal-alert show success';
-      setTimeout(() => {
-        closeLayoutModal('globalReportModal');
-        alertBox.className = 'modal-alert';
-        alertBox.textContent = '';
-      }, 2000);
-    });
+    if (reportForm) {
+      reportForm.addEventListener('submit', e => handleGlobalReportSubmit(e, reportForm, user));
+    }
   }
 
   /**
@@ -3223,22 +3151,25 @@
     return `
       <ul class="footer-social-list">
         <li>
-          <a href="contact.html" class="footer-social-link" aria-label="Kênh Facebook cộng đồng ConfGuide">
+          <a href="404.html?reason=broken-link&from=social%2Ffacebook" class="footer-social-link"
+            aria-label="Kênh Facebook cộng đồng ConfGuide">
             ${fbSvg}<span>Facebook</span>
           </a>
         </li>
         <li>
-          <a href="contact.html" class="footer-social-link" aria-label="Mạng lưới LinkedIn của ConfGuide">
+          <a href="404.html?reason=broken-link&from=social%2Flinkedin" class="footer-social-link"
+            aria-label="Mạng lưới LinkedIn của ConfGuide">
             ${inSvg}<span>LinkedIn</span>
           </a>
         </li>
         <li>
-          <a href="about.html" class="footer-social-link" aria-label="Giới thiệu kênh video học thuật ConfGuide">
+          <a href="404.html?reason=broken-link&from=social%2Fyoutube" class="footer-social-link"
+            aria-label="Giới thiệu kênh video học thuật ConfGuide">
             ${ytSvg}<span>YouTube</span>
           </a>
         </li>
         <li>
-          <a href="search.html" class="footer-social-link researchgate"
+          <a href="404.html?reason=broken-link&from=social%2Fresearchgate" class="footer-social-link researchgate"
             aria-label="Tra cứu hội nghị học thuật trên ConfGuide">
             ${rgSvg}<span>ResearchGate</span>
           </a>
@@ -3304,8 +3235,8 @@
                 <ul class="footer-links-secondary">
                   <li><a href="about.html">Về chúng tôi</a></li>
                   <li><a href="contact.html">Liên hệ</a></li>
-                  <li><a href="terms.html">Điều khoản &amp; Điều kiện</a></li>
-                  <li><a href="privacy.html">Chính sách bảo mật</a></li>
+                  <li><a href="404.html?reason=broken-link&from=terms.html">Điều khoản &amp; Điều kiện</a></li>
+                  <li><a href="404.html?reason=broken-link&from=privacy.html">Chính sách bảo mật</a></li>
                 </ul>
               </div>
             </div>
@@ -3350,6 +3281,74 @@
   }
 
   /**
+   * Kiểm tra một trường nhập liệu trong form Liên hệ và cập nhật trạng thái lỗi ARIA.
+   * @param {HTMLElement|null} inputEl - Ô nhập cần kiểm tra.
+   * @param {HTMLElement|null} errEl - Phần tử hiển thị thông báo lỗi.
+   * @param {Function} checkFn - Hàm kiểm tra nhận chuỗi đã trim và trả về boolean.
+   * @param {string} messageText - Thông báo lỗi khi không hợp lệ.
+   * @returns {boolean} True nếu hợp lệ.
+   */
+  function validateContactField(inputEl, errEl, checkFn, messageText) {
+    if (!inputEl) return true;
+    const valid = checkFn(inputEl.value.trim());
+    if (errEl) errEl.textContent = valid ? '' : messageText;
+    inputEl.setAttribute('aria-invalid', String(!valid));
+    return valid;
+  }
+
+  /**
+   * Kiểm tra toàn bộ trường và lưu thông điệp từ trang Liên hệ (contact.html).
+   * @param {SubmitEvent} e - Sự kiện submit biểu mẫu Liên hệ.
+   * @param {Object} els - Các phần tử input, error và thông báo của form Liên hệ.
+   */
+  function handleContactFormSubmit(e, els) {
+    e.preventDefault();
+    const { form, msg, nameInput, emailInput, messageInput, nameErr, emailErr, messageErr } = els;
+    msg.className = 'contact-form__msg';
+    msg.textContent = '';
+
+    const okName = validateContactField(
+      nameInput,
+      nameErr,
+      v => v.length >= 2,
+      'Họ tên cần có ít nhất 2 ký tự.'
+    );
+    const okEmail = validateContactField(
+      emailInput,
+      emailErr,
+      v => EMAIL_REGEX.test(v),
+      'Vui lòng nhập địa chỉ email hợp lệ.'
+    );
+    const okMsg = validateContactField(
+      messageInput,
+      messageErr,
+      v => v.length >= 10,
+      'Nội dung cần tối thiểu 10 ký tự.'
+    );
+
+    if (!okName || !okEmail || !okMsg) {
+      msg.textContent = 'Vui lòng kiểm tra lại các thông tin còn thiếu hoặc chưa hợp lệ.';
+      msg.classList.add('contact-form__msg--error');
+      return;
+    }
+
+    const messages = readStorage('confguide_contact_messages', []);
+    const safeMessages = Array.isArray(messages) ? messages : [];
+    safeMessages.unshift({
+      id: `ct-${Date.now()}`,
+      fullName: nameInput ? nameInput.value.trim() : '',
+      email: emailInput ? emailInput.value.trim() : '',
+      message: messageInput ? messageInput.value.trim() : '',
+      createdAt: new Date().toISOString()
+    });
+    writeStorage('confguide_contact_messages', safeMessages);
+
+    msg.textContent = 'Cảm ơn bạn! Thông điệp của bạn đã được gửi thành công đến nhóm ConfGuide.';
+    msg.classList.add('contact-form__msg--success');
+    form.reset();
+  }
+
+  /**
    * Khởi tạo và kiểm tra hợp lệ biểu mẫu Liên hệ (contact.html) bằng Regex & HTML5.
    */
   function initContactForm() {
@@ -3358,75 +3357,49 @@
     if (!form || !msg || form.dataset.initialized) return;
 
     form.dataset.initialized = 'true';
-    const nameInput = document.getElementById('contactFullName');
-    const emailInput = document.getElementById('contactEmail');
-    const messageInput = document.getElementById('contactMessage');
-    const nameErr = document.getElementById('contactFullNameError');
-    const emailErr = document.getElementById('contactEmailError');
-    const messageErr = document.getElementById('contactMessageError');
+    const els = {
+      form,
+      msg,
+      nameInput: document.getElementById('contactFullName'),
+      emailInput: document.getElementById('contactEmail'),
+      messageInput: document.getElementById('contactMessage'),
+      nameErr: document.getElementById('contactFullNameError'),
+      emailErr: document.getElementById('contactEmailError'),
+      messageErr: document.getElementById('contactMessageError')
+    };
 
-    /**
-     * Kiểm tra một trường nhập liệu trong form Liên hệ và cập nhật trạng thái lỗi ARIA.
-     * @param {HTMLElement|null} inputEl - Ô nhập cần kiểm tra.
-     * @param {HTMLElement|null} errEl - Phần tử hiển thị thông báo lỗi.
-     * @param {Function} checkFn - Hàm kiểm tra nhận chuỗi đã trim và trả về boolean.
-     * @param {string} messageText - Thông báo lỗi khi không hợp lệ.
-     * @returns {boolean} True nếu hợp lệ.
-     */
-    function validateField(inputEl, errEl, checkFn, messageText) {
-      if (!inputEl) return true;
-      const valid = checkFn(inputEl.value.trim());
-      if (errEl) errEl.textContent = valid ? '' : messageText;
-      inputEl.setAttribute('aria-invalid', String(!valid));
-      return valid;
-    }
-
-    if (nameInput) {
-      nameInput.addEventListener('blur', () => {
-        validateField(nameInput, nameErr, v => v.length >= 2, 'Họ tên cần có ít nhất 2 ký tự.');
+    if (els.nameInput) {
+      els.nameInput.addEventListener('blur', () => {
+        validateContactField(
+          els.nameInput,
+          els.nameErr,
+          v => v.length >= 2,
+          'Họ tên cần có ít nhất 2 ký tự.'
+        );
       });
     }
-    if (emailInput) {
-      emailInput.addEventListener('blur', () => {
-        validateField(emailInput, emailErr, v => EMAIL_REGEX.test(v), 'Vui lòng nhập địa chỉ email hợp lệ.');
+    if (els.emailInput) {
+      els.emailInput.addEventListener('blur', () => {
+        validateContactField(
+          els.emailInput,
+          els.emailErr,
+          v => EMAIL_REGEX.test(v),
+          'Vui lòng nhập địa chỉ email hợp lệ.'
+        );
       });
     }
-    if (messageInput) {
-      messageInput.addEventListener('blur', () => {
-        validateField(messageInput, messageErr, v => v.length >= 10, 'Nội dung cần tối thiểu 10 ký tự.');
+    if (els.messageInput) {
+      els.messageInput.addEventListener('blur', () => {
+        validateContactField(
+          els.messageInput,
+          els.messageErr,
+          v => v.length >= 10,
+          'Nội dung cần tối thiểu 10 ký tự.'
+        );
       });
     }
 
-    form.addEventListener('submit', e => {
-      e.preventDefault();
-      msg.className = 'contact-form__msg';
-      msg.textContent = '';
-
-      const okName = validateField(nameInput, nameErr, v => v.length >= 2, 'Họ tên cần có ít nhất 2 ký tự.');
-      const okEmail = validateField(emailInput, emailErr, v => EMAIL_REGEX.test(v), 'Vui lòng nhập địa chỉ email hợp lệ.');
-      const okMsg = validateField(messageInput, messageErr, v => v.length >= 10, 'Nội dung cần tối thiểu 10 ký tự.');
-
-      if (!okName || !okEmail || !okMsg) {
-        msg.textContent = 'Vui lòng kiểm tra lại các thông tin còn thiếu hoặc chưa hợp lệ.';
-        msg.classList.add('contact-form__msg--error');
-        return;
-      }
-
-      const messages = readStorage('confguide_contact_messages', []);
-      const safeMessages = Array.isArray(messages) ? messages : [];
-      safeMessages.unshift({
-        id: `ct-${Date.now()}`,
-        fullName: nameInput ? nameInput.value.trim() : '',
-        email: emailInput ? emailInput.value.trim() : '',
-        message: messageInput ? messageInput.value.trim() : '',
-        createdAt: new Date().toISOString()
-      });
-      writeStorage('confguide_contact_messages', safeMessages);
-
-      msg.textContent = 'Cảm ơn bạn! Thông điệp của bạn đã được gửi thành công đến nhóm ConfGuide.';
-      msg.classList.add('contact-form__msg--success');
-      form.reset();
-    });
+    form.addEventListener('submit', e => handleContactFormSubmit(e, els));
   }
 
   /**
@@ -3457,7 +3430,7 @@
   }
 
   /**
-   * Tự động mở bảng cá nhân hóa đầy đủ (Mục đích sử dụng + Lĩnh vực nghiên cứu) một lần duy nhất
+   * Tự động mở bảng chọn lĩnh vực nghiên cứu một lần duy nhất
    * khi người dùng vừa đăng ký tài khoản mới và bắt đầu phiên sử dụng đầu tiên.
    * @param {string} currentPage - Tên trang hiện tại.
    */
@@ -3475,11 +3448,10 @@
     if (!document.getElementById('globalPreferencesSurveyModal')) return;
 
     consumeUserOnboardingFlag();
-    saveUserPreferences({ purpose: '', onboardingCompleted: false });
+    saveUserPreferences({ onboardingCompleted: false });
 
     const launchOnboardingModal = () => {
       openPreferencesSurveyModal({
-        topicsOnly: false,
         isOnboarding: true
       });
     };
@@ -3594,7 +3566,6 @@
     showToast: showToast,
     showConfirmModal: showConfirmModal,
     openReportModal: openReportModal,
-    USAGE_PURPOSES: USAGE_PURPOSES,
     PREFERENCE_TOPICS: PREFERENCE_TOPICS,
     parseTopicKeysFromText: parseTopicKeysFromText,
     parseTopicDisplayLabelsFromText: parseTopicDisplayLabelsFromText,

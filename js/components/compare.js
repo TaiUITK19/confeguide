@@ -27,6 +27,14 @@
   let dialogEl = null;
   let lastTriggerEl = null;
 
+  /** Trả về mã SVG dấu tích hoặc dấu cộng cho nút So sánh */
+  function getToggleIconSvg(selected) {
+    return selected
+      ? '<polyline points="20 6 9 17 4 12"></polyline>'
+      : '<line x1="12" y1="5" x2="12" y2="19"></line>'
+        + '<line x1="5" y1="12" x2="19" y2="12"></line>';
+  }
+
   /**
    * Lấy tập hàm tiện ích dùng chung từ window.ConfGuideUtils kèm dự phòng an toàn.
    * @returns {Object} Đối tượng tiện ích chuẩn hóa.
@@ -187,9 +195,7 @@
     const selected = getSelectedIds().includes(confId);
     const selectedClass = selected ? ' is-selected' : '';
     const labelText = selected ? 'Đã chọn' : 'So sánh';
-    const iconSvg = selected
-      ? '<polyline points="20 6 9 17 4 12"></polyline>'
-      : '<line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line>';
+    const iconSvg = getToggleIconSvg(selected);
 
     return `
       <button
@@ -243,9 +249,7 @@
 
       const iconEl = btn.querySelector('.compare-toggle__icon');
       if (iconEl) {
-        iconEl.innerHTML = selected
-          ? '<polyline points="20 6 9 17 4 12"></polyline>'
-          : '<line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line>';
+        iconEl.innerHTML = getToggleIconSvg(selected);
       }
     });
   }
@@ -269,7 +273,10 @@
           <span class="compare-bar__count js-compare-count">Đã chọn 0/3 hội nghị</span>
           <span class="compare-bar__hint js-compare-hint" hidden>Chọn thêm ít nhất 1 hội nghị</span>
         </div>
-        <div class="compare-bar__chips js-compare-chips" aria-label="Danh sách hội nghị đang chọn để so sánh"></div>
+        <div
+          class="compare-bar__chips js-compare-chips"
+          aria-label="Danh sách hội nghị đang chọn để so sánh"
+        ></div>
         <div class="compare-bar__actions">
           <button type="button" class="compare-bar__clear js-compare-clear">Xóa tất cả</button>
           <button type="button" class="compare-bar__submit js-compare-open" disabled>So sánh ngay</button>
@@ -287,6 +294,51 @@
   }
 
   /**
+   * Tạo mã HTML khung bên trong hộp thoại bảng so sánh hội nghị.
+   * @returns {string} Chuỗi HTML `.compare-dialog__box`.
+   */
+  function buildCompareDialogHtml() {
+    return `
+      <div class="compare-dialog__box js-compare-dialog-box">
+        <header class="compare-dialog__header">
+          <div class="compare-dialog__heading">
+            <h2 class="compare-dialog__title" id="compareDialogTitle">So sánh hội nghị khoa học</h2>
+            <p class="compare-dialog__subtitle js-compare-subtitle">
+              Đối chiếu học thuật, thời hạn nộp bài (UTC+7) và thông tin tổ chức
+            </p>
+          </div>
+          <button
+            type="button"
+            class="compare-dialog__close js-compare-close"
+            aria-label="Đóng bảng so sánh"
+          >&times;</button>
+        </header>
+
+        <div class="compare-dialog__swipe-hint" aria-hidden="true">
+          <span>&larr; Vuốt ngang để xem đủ các cột &rarr;</span>
+        </div>
+
+        <div class="compare-dialog__state js-compare-state" role="status" aria-live="polite" hidden></div>
+
+        <div
+          class="compare-dialog__scroll js-compare-scroll"
+          tabindex="0"
+          role="region"
+          aria-label="Bảng đối chiếu hội nghị"
+        >
+          <table class="compare-table js-compare-table"></table>
+        </div>
+
+        <footer class="compare-dialog__footer">
+          <p class="compare-dialog__footnote">
+            Lệ phí là thông tin ước tính theo dữ liệu hiện có, vui lòng đối chiếu trên website chính thức.
+          </p>
+        </footer>
+      </div>
+    `;
+  }
+
+  /**
    * Khởi tạo phần tử DOM cho hộp thoại bảng so sánh (<dialog class="compare-dialog">) một lần duy nhất.
    */
   function ensureCompareDialogDom() {
@@ -297,31 +349,7 @@
     const dialog = document.createElement('dialog');
     dialog.className = 'compare-dialog js-compare-dialog';
     dialog.setAttribute('aria-labelledby', 'compareDialogTitle');
-    dialog.innerHTML = `
-      <div class="compare-dialog__box js-compare-dialog-box">
-        <header class="compare-dialog__header">
-          <div class="compare-dialog__heading">
-            <h2 class="compare-dialog__title" id="compareDialogTitle">Bảng so sánh hội nghị cạnh nhau</h2>
-            <p class="compare-dialog__subtitle js-compare-subtitle">Đối chiếu học thuật, thời hạn nộp bài (UTC+7) và thông tin tổ chức</p>
-          </div>
-          <button type="button" class="compare-dialog__close js-compare-close" aria-label="Đóng bảng so sánh">&times;</button>
-        </header>
-
-        <div class="compare-dialog__swipe-hint" aria-hidden="true">
-          <span>&larr; Vuốt ngang để xem đủ các cột &rarr;</span>
-        </div>
-
-        <div class="compare-dialog__state js-compare-state" role="status" aria-live="polite" hidden></div>
-
-        <div class="compare-dialog__scroll js-compare-scroll" tabindex="0" role="region" aria-label="Bảng đối chiếu hội nghị">
-          <table class="compare-table js-compare-table"></table>
-        </div>
-
-        <footer class="compare-dialog__footer">
-          <p class="compare-dialog__footnote">Lệ phí là thông tin ước tính theo dữ liệu hiện có, vui lòng đối chiếu trên website chính thức.</p>
-        </footer>
-      </div>
-    `;
+    dialog.innerHTML = buildCompareDialogHtml();
 
     document.body.appendChild(dialog);
     dialogEl = dialog;
@@ -560,9 +588,12 @@
    */
   function createRankCell(conf, utils) {
     const esc = utils.escapeHtml;
+    const fallbackRank = conf && conf.rank && typeof conf.rank === 'object'
+      ? conf.rank.core
+      : conf && conf.rank;
     const rawRank = typeof utils.extractConferenceRank === 'function'
       ? utils.extractConferenceRank(conf && conf.rank)
-      : (conf && conf.rank && typeof conf.rank === 'object' ? String(conf.rank.core || '') : String((conf && conf.rank) || '')).trim();
+      : String(fallbackRank || '').trim();
     if (!rawRank || /^unranked$/i.test(rawRank)) return createMutedCell('Chưa xếp hạng');
     const upper = rawRank.toUpperCase();
     const displayRank = /^(A\*|A|B|C)$/i.test(upper) ? `Rank ${upper}` : rawRank;
@@ -770,9 +801,10 @@
             type="button"
             class="compare-table__remove-btn js-compare-remove"
             data-conf-id="${esc(confId)}"
+            title="Bỏ khỏi so sánh"
             aria-label="Bỏ hội nghị ${esc(shortName)} khỏi bảng so sánh"
           >
-            Bỏ khỏi so sánh
+            &times;
           </button>
         </div>
         ${fullName && fullName !== shortName
@@ -793,17 +825,11 @@
     const uniqueVals = new Set(row.cells.map(c => c.normVal || '__missing__'));
     const isDiff = !allEmpty && uniqueVals.size > 1;
     const rowClass = isDiff ? 'compare-table__row compare-table__row--diff' : 'compare-table__row';
-    const diffBadgeHtml = isDiff ? '<span class="compare-table__diff-badge">Khác nhau</span>' : '';
     const cellsHtml = row.cells.map(cell => `<td class="compare-table__cell">${cell.html}</td>`).join('');
 
     return `
       <tr class="${rowClass}">
-        <th scope="row" class="compare-table__criterion">
-          <div class="compare-table__criterion-wrap">
-            <span>${esc(row.label)}</span>
-            ${diffBadgeHtml}
-          </div>
-        </th>
+        <th scope="row" class="compare-table__criterion">${esc(row.label)}</th>
         ${cellsHtml}
       </tr>
     `;

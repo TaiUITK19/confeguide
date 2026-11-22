@@ -130,7 +130,7 @@
 
   const VALID_REDIRECT_PAGES = new Set([
     '', 'index.html', 'search.html', 'detail.html', 'tracker.html',
-    'profile.html', 'about.html', 'contact.html', 'terms.html', 'privacy.html'
+    'profile.html', 'about.html', 'contact.html'
   ]);
 
   /**
@@ -317,6 +317,55 @@
   /* ================= 4. LUỒNG XỬ LÝ ĐĂNG NHẬP ================= */
 
   /**
+   * Tìm tài khoản khớp email/username và đối chiếu mật khẩu (SHA-256 hoặc tài khoản mẫu `userX@`).
+   * @param {string} identifier - Email hoặc tên đăng nhập đã viết thường.
+   * @param {string} rawPassword - Mật khẩu người dùng nhập.
+   * @returns {Promise<Object|null>} Bản ghi người dùng nếu hợp lệ, ngược lại trả về null.
+   */
+  async function authenticateLocalUser(identifier, rawPassword) {
+    const hashedInput = await hashPassword(rawPassword);
+    const parsedUsers = readJsonStorage(USERS_STORAGE_KEY, []);
+    const users = Array.isArray(parsedUsers) ? parsedUsers : [];
+    const matchedUser = users.find(u =>
+      (u.email && u.email.toLowerCase() === identifier) ||
+      (u.username && u.username.toLowerCase() === identifier)
+    );
+    if (!matchedUser) return null;
+
+    // Hỗ trợ khớp qua mã băm SHA-256 hoặc tài khoản thử nghiệm userX@
+    const isDemoCred = rawPassword.startsWith('user')
+      && rawPassword.endsWith('@')
+      && matchedUser.username === rawPassword.slice(0, -1);
+    const isPasswordValid = matchedUser.passwordHash === hashedInput || isDemoCred;
+    return isPasswordValid ? matchedUser : null;
+  }
+
+  /**
+   * Lưu phiên đăng nhập an toàn (đã lược bỏ passwordHash) và tùy chọn ghi nhớ email.
+   * @param {Object} matchedUser - Bản ghi tài khoản vừa xác thực.
+   * @param {boolean} shouldRemember - Có ghi nhớ email đăng nhập hay không.
+   */
+  function persistLoginSession(matchedUser, shouldRemember) {
+    if (shouldRemember) {
+      writeTextStorage(localStorage, REMEMBERED_EMAIL_KEY, matchedUser.email);
+    } else {
+      removeStorageKey(localStorage, REMEMBERED_EMAIL_KEY);
+    }
+
+    const { passwordHash: _omitPasswordHash, ...safeMatchedProfile } = matchedUser;
+    const sessionUser = Object.assign({}, safeMatchedProfile, {
+      id: matchedUser.id,
+      username: matchedUser.username,
+      email: matchedUser.email,
+      name: matchedUser.name,
+      role: matchedUser.role || 'user',
+      needsOnboarding: Boolean(matchedUser.needsOnboarding),
+      loggedInAt: new Date().toISOString()
+    });
+    writeTextStorage(localStorage, CURRENT_USER_KEY, JSON.stringify(sessionUser));
+  }
+
+  /**
    * Xử lý sự kiện gửi biểu mẫu Đăng nhập và xác thực người dùng.
    * @param {SubmitEvent} event - Sự kiện submit của form.
    * @param {Object} refs - Tập tham chiếu các phần tử DOM của form Đăng nhập.
@@ -344,23 +393,9 @@
     if (seedPromise) await seedPromise;
 
     const identifier = emailInput.value.trim().toLowerCase();
-    const rawPassword = passwordInput.value;
-    const hashedInput = await hashPassword(rawPassword);
+    const matchedUser = await authenticateLocalUser(identifier, passwordInput.value);
 
-    const parsedUsers = readJsonStorage(USERS_STORAGE_KEY, []);
-    const users = Array.isArray(parsedUsers) ? parsedUsers : [];
-    const matchedUser = users.find(u =>
-      (u.email && u.email.toLowerCase() === identifier) ||
-      (u.username && u.username.toLowerCase() === identifier)
-    );
-
-    // Hỗ trợ khớp qua mã băm SHA-256 hoặc tài khoản thử nghiệm userX@
-    const isPasswordValid = matchedUser && (
-      matchedUser.passwordHash === hashedInput ||
-      (rawPassword.startsWith('user') && rawPassword.endsWith('@') && matchedUser.username === rawPassword.slice(0, -1))
-    );
-
-    if (!matchedUser || !isPasswordValid) {
+    if (!matchedUser) {
       message.className = 'form-message form-message--error';
       message.textContent = 'Email/Tên đăng nhập hoặc mật khẩu không chính xác.';
       submitButton.disabled = false;
@@ -369,23 +404,7 @@
       return;
     }
 
-    if (rememberInput && rememberInput.checked) {
-      writeTextStorage(localStorage, REMEMBERED_EMAIL_KEY, matchedUser.email);
-    } else {
-      removeStorageKey(localStorage, REMEMBERED_EMAIL_KEY);
-    }
-
-    const { passwordHash: _omitPasswordHash, ...safeMatchedProfile } = matchedUser;
-    const sessionUser = Object.assign({}, safeMatchedProfile, {
-      id: matchedUser.id,
-      username: matchedUser.username,
-      email: matchedUser.email,
-      name: matchedUser.name,
-      role: matchedUser.role || 'user',
-      needsOnboarding: Boolean(matchedUser.needsOnboarding),
-      loggedInAt: new Date().toISOString()
-    });
-    writeTextStorage(localStorage, CURRENT_USER_KEY, JSON.stringify(sessionUser));
+    persistLoginSession(matchedUser, Boolean(rememberInput && rememberInput.checked));
 
     message.className = 'form-message success';
     message.textContent = `Đăng nhập thành công! Xin chào ${matchedUser.name}.`;
@@ -398,20 +417,11 @@
   }
 
   /**
-   * Khởi tạo validation, nhớ email, gợi ý đăng nhập và sự kiện submit cho trang login.html.
+   * Tạo cặp hàm kiểm tra hợp lệ Email/Username và Mật khẩu cho form Đăng nhập.
+   * @param {Object} els - Các phần tử input và error của form Đăng nhập.
+   * @returns {{ validateIdentifier: Function, validatePassword: Function }}
    */
-  function initLoginForm() {
-    const loginForm = document.getElementById('loginForm');
-    const emailInput = document.getElementById('email');
-    const passwordInput = document.getElementById('password');
-    const rememberInput = document.getElementById('rememberMe');
-    const submitButton = document.getElementById('loginSubmit');
-    const message = document.getElementById('formMessage');
-    if (!loginForm || !emailInput || !passwordInput || !submitButton || !message) return;
-
-    const emailError = document.getElementById('emailError');
-    const passwordError = document.getElementById('passwordError');
-
+  function createLoginValidators({ emailInput, emailError, passwordInput, passwordError }) {
     const validateIdentifier = () => {
       const value = emailInput.value.trim();
       const error = !value
@@ -431,6 +441,27 @@
           : '';
       return setAuthFieldError(passwordInput, passwordError, error);
     };
+
+    return { validateIdentifier, validatePassword };
+  }
+
+  /**
+   * Khởi tạo validation, nhớ email, gợi ý đăng nhập và sự kiện submit cho trang login.html.
+   */
+  function initLoginForm() {
+    const loginForm = document.getElementById('loginForm');
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+    const rememberInput = document.getElementById('rememberMe');
+    const submitButton = document.getElementById('loginSubmit');
+    const message = document.getElementById('formMessage');
+    if (!loginForm || !emailInput || !passwordInput || !submitButton || !message) return;
+
+    const emailError = document.getElementById('emailError');
+    const passwordError = document.getElementById('passwordError');
+    const { validateIdentifier, validatePassword } = createLoginValidators({
+      emailInput, emailError, passwordInput, passwordError
+    });
 
     emailInput.addEventListener('input', () => { validateIdentifier(); message.textContent = ''; });
     emailInput.addEventListener('blur', validateIdentifier);
@@ -543,9 +574,6 @@
   }
 
   /**
-   * Khởi tạo validation thời gian thực, thanh quy tắc mật khẩu và sự kiện đăng ký cho register.html.
-   */
-  /**
    * Tạo bộ hàm kiểm tra hợp lệ các trường form Đăng ký và cập nhật trạng thái nút Submit.
    * @param {Object} els - Tham chiếu các phần tử input và lỗi của form Đăng ký.
    * @returns {Object} Bộ hàm validator cho từng trường và hàm cập nhật nút Submit.
@@ -601,6 +629,42 @@
   }
 
   /**
+   * Gắn sự kiện input/blur theo thời gian thực cho các trường nhập trên form Đăng ký.
+   * @param {Object} els - Các phần tử input, checkbox điều khoản và message thông báo.
+   * @param {Object} validators - Các hàm kiểm tra hợp lệ trả về từ createRegisterValidators.
+   */
+  function bindRegisterFieldListeners(els, validators) {
+    const { nameField, emailField, passwordField, confirmField, termsField, termsError, message } = els;
+    const { validateName, validateEmail, validatePassword, validateConfirm, updateButton } = validators;
+
+    [
+      [nameField, validateName],
+      [emailField, validateEmail],
+      [passwordField, validatePassword],
+      [confirmField, validateConfirm]
+    ].forEach(([input, validate]) => {
+      input.addEventListener('input', () => {
+        validate();
+        if (input === passwordField && confirmField.value) validateConfirm();
+        updateButton();
+        message.textContent = '';
+      });
+      input.addEventListener('blur', () => {
+        validate();
+        updateButton();
+      });
+    });
+
+    termsField.addEventListener('change', () => {
+      if (termsError) {
+        termsError.textContent = termsField.checked ? '' : 'Vui lòng đồng ý với các điều khoản để tiếp tục.';
+      }
+      updateButton();
+      message.textContent = '';
+    });
+  }
+
+  /**
    * Khởi tạo validation thời gian thực, thanh quy tắc mật khẩu và sự kiện đăng ký cho register.html.
    */
   function initRegisterForm() {
@@ -627,44 +691,23 @@
       terms: document.getElementById('termsError')
     };
 
-    const { validateName, validateEmail, validatePassword, validateConfirm, updateButton } =
-      createRegisterValidators({ nameField, emailField, passwordField, confirmField, termsField, submitButton, errors });
-
-    [
-      [nameField, validateName],
-      [emailField, validateEmail],
-      [passwordField, validatePassword],
-      [confirmField, validateConfirm]
-    ].forEach(([input, validate]) => {
-      input.addEventListener('input', () => {
-        validate();
-        if (input === passwordField && confirmField.value) validateConfirm();
-        updateButton();
-        message.textContent = '';
-      });
-      input.addEventListener('blur', () => {
-        validate();
-        updateButton();
-      });
+    const validators = createRegisterValidators({
+      nameField, emailField, passwordField, confirmField, termsField, submitButton, errors
     });
-
-    termsField.addEventListener('change', () => {
-      if (errors.terms) {
-        errors.terms.textContent = termsField.checked ? '' : 'Vui lòng đồng ý với các điều khoản để tiếp tục.';
-      }
-      updateButton();
-      message.textContent = '';
-    });
+    bindRegisterFieldListeners(
+      { nameField, emailField, passwordField, confirmField, termsField, termsError: errors.terms, message },
+      validators
+    );
 
     document.querySelectorAll('[data-password-target]').forEach(button => {
       bindPasswordToggleButton(button, document.getElementById(button.dataset.passwordTarget));
     });
 
     registerForm.addEventListener('submit', event => handleRegisterSubmit(event, {
-      nameField, emailField, passwordField, submitButton, message, updateButton
+      nameField, emailField, passwordField, submitButton, message, updateButton: validators.updateButton
     }));
 
-    updateButton();
+    validators.updateButton();
   }
 
   /**

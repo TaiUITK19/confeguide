@@ -184,7 +184,9 @@
         <td>
           <div class="conference-name">
             ${avatarHtml}
-            <div class="name-text"><a href="detail.html?id=${encodeURIComponent(confId)}">${esc(conf.name || confId)}</a></div>
+            <div class="name-text">
+              <a href="detail.html?id=${encodeURIComponent(confId)}">${esc(conf.name || confId)}</a>
+            </div>
           </div>
         </td>
         <td><div class="tags">${fields || '<span class="tag">Chưa cập nhật</span>'}</div></td>
@@ -211,8 +213,12 @@
       if (count) count.textContent = '0';
       tbody.innerHTML =
         '<tr><td colspan="4" class="tracker-empty">'
-        + '<p class="tracker-auth-msg">Chỉ người dùng đã đăng nhập mới có thể theo dõi hội nghị và quản lý danh sách theo dõi.</p>'
-        + '<a class="primary-btn tracker-auth-btn" href="login.html?redirect=tracker.html">Đăng nhập để theo dõi</a>'
+        + '<p class="tracker-auth-msg">'
+        + 'Chỉ người dùng đã đăng nhập mới có thể theo dõi hội nghị'
+        + ' và quản lý danh sách theo dõi.'
+        + '</p>'
+        + '<a class="primary-btn tracker-auth-btn"'
+        + ' href="login.html?redirect=tracker.html">Đăng nhập để theo dõi</a>'
         + '</td></tr>';
       return;
     }

@@ -87,7 +87,9 @@
     academicTitle: 'Nghiên cứu sinh / Giảng viên',
     affiliation: 'Đại học Quốc gia TP.HCM',
     fieldsOfInterest: 'Trí tuệ nhân tạo, Thị giác máy tính, Xử lý ngôn ngữ tự nhiên, Khoa học dữ liệu',
-    bio: 'Quan tâm đến các hội nghị khoa học Công nghệ thông tin diễn ra tại Việt Nam (gồm cả hội nghị quốc tế tổ chức tại Việt Nam) trong các lĩnh vực trí tuệ nhân tạo, khoa học dữ liệu và kỹ thuật phần mềm.',
+    bio: 'Quan tâm đến các hội nghị khoa học Công nghệ thông tin diễn ra tại Việt Nam '
+      + '(gồm cả hội nghị quốc tế tổ chức tại Việt Nam) trong các lĩnh vực trí tuệ nhân tạo, '
+      + 'khoa học dữ liệu và kỹ thuật phần mềm.',
     scholarUrl: 'https://scholar.google.com'
   };
 
@@ -152,9 +154,6 @@
   /* ================= 1. RENDER THÔNG TIN HỒ SƠ CÁ NHÂN ================= */
 
   /**
-   * Cập nhật toàn bộ giao diện thẻ hồ sơ cá nhân và nạp sẵn dữ liệu vào modal chỉnh sửa.
-   */
-  /**
    * Render ảnh đại diện hoặc chữ cái đầu vào khung hiển thị chỉ định.
    * @param {string} elementId - ID phần tử khung chứa ảnh đại diện.
    * @param {string|undefined} avatarUrl - URL dữ liệu ảnh đại diện nếu có.
@@ -218,6 +217,17 @@
   }
 
   /**
+   * Nạp sẵn dữ liệu hồ sơ người dùng vào các ô nhập trong modal Chỉnh sửa hồ sơ.
+   * @param {Object<string, string>} fieldValues - Bản đồ ID ô nhập -> giá trị hiển thị.
+   */
+  function populateEditProfileFields(fieldValues) {
+    Object.entries(fieldValues).forEach(([id, val]) => {
+      const inputEl = document.getElementById(id);
+      if (inputEl) inputEl.value = val;
+    });
+  }
+
+  /**
    * Render toàn bộ thông tin hồ sơ người dùng lên giao diện và điền sẵn dữ liệu vào form chỉnh sửa.
    */
   function renderUserProfile() {
@@ -270,7 +280,7 @@
     renderFieldsChips(document.getElementById('profileFieldsChips'), fieldsRaw);
     renderFieldsChips(document.getElementById('editProfileFieldsChips'), fieldsRaw);
 
-    const fieldValues = {
+    populateEditProfileFields({
       editFullName: fullName,
       editEmail: email,
       editTitle: academicTitle,
@@ -278,10 +288,6 @@
       editScholar: scholarUrl,
       editFields: fieldsRaw,
       editBio: bio
-    };
-    Object.entries(fieldValues).forEach(([id, val]) => {
-      const inputEl = document.getElementById(id);
-      if (inputEl) inputEl.value = val;
     });
   }
 
@@ -392,6 +398,57 @@
   }
 
   /**
+   * Gắn nút mở hộp thoại chọn lĩnh vực quan tâm bên trong modal Chỉnh sửa hồ sơ.
+   */
+  function bindEditModalTopicsPicker() {
+    const editChooseTopicsBtn = document.getElementById('editModalChooseTopicsBtn');
+    if (!editChooseTopicsBtn) return;
+
+    editChooseTopicsBtn.addEventListener('click', () => {
+      if (typeof utils.openPreferencesSurveyModal !== 'function') return;
+      const fieldsInput = document.getElementById('editFields');
+      const currentText = fieldsInput ? fieldsInput.value : '';
+      const initialTopicKeys = typeof utils.parseTopicKeysFromText === 'function'
+        ? utils.parseTopicKeysFromText(currentText)
+        : [];
+      utils.openPreferencesSurveyModal({
+        topicsOnly: true,
+        preserveOpenModals: true,
+        initialTopicKeys,
+        returnFocusEl: editChooseTopicsBtn,
+        onConfirm: ({ labels }) => {
+          const nextText = Array.isArray(labels) ? labels.join(', ') : '';
+          if (fieldsInput) fieldsInput.value = nextText;
+          renderFieldsChips(document.getElementById('editProfileFieldsChips'), nextText);
+        }
+      });
+    });
+  }
+
+  /**
+   * Gắn kiểm tra hợp lệ thời gian thực (blur/input) và sự kiện submit cho form Chỉnh sửa hồ sơ.
+   * @param {Object} ctx - Ngữ cảnh form gồm các phần tử input, validators và closeModal.
+   */
+  function bindEditProfileFormEvents(ctx) {
+    const { form, fullNameInput, emailInput, scholarInput, validators } = ctx;
+    [
+      [fullNameInput, validators.validateFullName],
+      [emailInput, validators.validateEmail],
+      [scholarInput, validators.validateScholarUrl]
+    ].forEach(([inputEl, validateFn]) => {
+      if (!inputEl) return;
+      inputEl.addEventListener('blur', validateFn);
+      inputEl.addEventListener('input', () => {
+        if (inputEl.getAttribute('aria-invalid') === 'true') validateFn();
+      });
+    });
+
+    if (form) {
+      form.addEventListener('submit', e => handleEditProfileSubmit(e, ctx));
+    }
+  }
+
+  /**
    * Khởi tạo hộp thoại Chỉnh sửa hồ sơ, bao gồm khôi phục focus và kiểm tra hợp lệ từng trường bằng Regex.
    */
   function initEditProfileModal() {
@@ -403,7 +460,6 @@
     const emailInput = document.getElementById('editEmail');
     const scholarInput = document.getElementById('editScholar');
     const modalAlert = document.getElementById('editModalAlert');
-
     const validators = createProfileFormValidators({
       fullNameInput,
       emailInput,
@@ -415,7 +471,6 @@
     });
 
     let lastFocusedElement = null;
-
     const openModal = () => {
       lastFocusedElement = document.activeElement;
       renderUserProfile();
@@ -425,7 +480,6 @@
       requestAnimationFrame(() => modal.classList.add('show'));
       if (fullNameInput) setTimeout(() => fullNameInput.focus(), 150);
     };
-
     const closeModal = () => {
       modal.classList.remove('show');
       document.body.classList.remove('modal-open');
@@ -443,53 +497,16 @@
       const el = document.getElementById(id);
       if (el) el.addEventListener('click', closeModal);
     });
-
     document.addEventListener('keydown', e => {
       const prefModal = document.getElementById('globalPreferencesSurveyModal');
       if (prefModal && prefModal.classList.contains('show')) return;
       if (e.key === 'Escape' && modal.classList.contains('show')) closeModal();
     });
 
-    const editChooseTopicsBtn = document.getElementById('editModalChooseTopicsBtn');
-    if (editChooseTopicsBtn) {
-      editChooseTopicsBtn.addEventListener('click', () => {
-        if (typeof utils.openPreferencesSurveyModal !== 'function') return;
-        const fieldsInput = document.getElementById('editFields');
-        const currentText = fieldsInput ? fieldsInput.value : '';
-        const initialTopicKeys = typeof utils.parseTopicKeysFromText === 'function'
-          ? utils.parseTopicKeysFromText(currentText)
-          : [];
-        utils.openPreferencesSurveyModal({
-          topicsOnly: true,
-          preserveOpenModals: true,
-          initialTopicKeys,
-          returnFocusEl: editChooseTopicsBtn,
-          onConfirm: ({ labels }) => {
-            const nextText = Array.isArray(labels) ? labels.join(', ') : '';
-            if (fieldsInput) fieldsInput.value = nextText;
-            renderFieldsChips(document.getElementById('editProfileFieldsChips'), nextText);
-          }
-        });
-      });
-    }
-
-    [
-      [fullNameInput, validators.validateFullName],
-      [emailInput, validators.validateEmail],
-      [scholarInput, validators.validateScholarUrl]
-    ].forEach(([inputEl, validateFn]) => {
-      if (!inputEl) return;
-      inputEl.addEventListener('blur', validateFn);
-      inputEl.addEventListener('input', () => {
-        if (inputEl.getAttribute('aria-invalid') === 'true') validateFn();
-      });
+    bindEditModalTopicsPicker();
+    bindEditProfileFormEvents({
+      form, fullNameInput, emailInput, scholarInput, modalAlert, validators, closeModal
     });
-
-    if (form) {
-      form.addEventListener('submit', e => handleEditProfileSubmit(e, {
-        form, fullNameInput, emailInput, scholarInput, modalAlert, validators, closeModal
-      }));
-    }
   }
 
   /* ================= 2B. XỬ LÝ TẢI VÀ NÉN ẢNH ĐẠI DIỆN ================= */
@@ -625,7 +642,10 @@
     try {
       const json = typeof utils.fetchJsonCached === 'function'
         ? await utils.fetchJsonCached('data/conference_data.json')
-        : await fetch('data/conference_data.json').then(r => { if (!r.ok) throw new Error(r.status); return r.json(); });
+        : await fetch('data/conference_data.json').then(res => {
+          if (!res.ok) throw new Error(res.status);
+          return res.json();
+        });
       if (Array.isArray(json) && json.length > 0) {
         cachedConferencesData = typeof utils.normalizeConference === 'function'
           ? json.map(item => utils.normalizeConference(item)).filter(Boolean)
@@ -687,9 +707,12 @@
 
     if (found) {
       const acronym = found.name ? found.name.split(/[\s-]+/)[0].toUpperCase().slice(0, 6) : 'CONF';
+      const fallbackRank = found.rank && typeof found.rank === 'object'
+        ? found.rank.core
+        : found.rank;
       const rawRank = utils && typeof utils.extractConferenceRank === 'function'
         ? utils.extractConferenceRank(found.rank)
-        : (found.rank && typeof found.rank === 'object' ? String(found.rank.core || '') : String(found.rank || ''));
+        : String(fallbackRank || '');
       return {
         id: found.id || itemStr,
         name: found.name || itemStr,
@@ -740,7 +763,9 @@
         </svg>
         <h3 class="empty-state-title">Chưa có hội nghị nào được lưu</h3>
         <p class="empty-state-desc">
-          Khám phá danh sách hội nghị khoa học Công nghệ thông tin diễn ra tại Việt Nam (bao gồm cả hội nghị quốc tế tổ chức tại Việt Nam), bấm biểu tượng lưu để theo dõi thời gian nộp bài tại đây.
+          Khám phá danh sách hội nghị khoa học Công nghệ thông tin diễn ra tại Việt Nam
+          (bao gồm cả hội nghị quốc tế tổ chức tại Việt Nam), bấm biểu tượng lưu để
+          theo dõi thời gian nộp bài tại đây.
         </p>
         <a href="search.html" class="btn btn-primary btn--compact-md">
           <span>Khám phá danh mục hội nghị &rarr;</span>
@@ -767,6 +792,8 @@
       ? (/^(A\*|A|B|C)$/i.test(c.rank) ? `Rank ${c.rank}` : c.rank)
       : 'Chưa xếp hạng';
 
+    const rankBadgeCls = hasRank ? '' : ' saved-badge-rank--unranked';
+
     return `
       <div class="saved-card">
         <div class="saved-card-main">
@@ -774,7 +801,7 @@
           <div class="saved-info">
             <div class="saved-title">
               <strong>${escapeHtml(c.name)}</strong>
-              <span class="saved-badge-rank${hasRank ? '' : ' saved-badge-rank--unranked'}">${escapeHtml(rankLabel)}</span>
+              <span class="saved-badge-rank${rankBadgeCls}">${escapeHtml(rankLabel)}</span>
             </div>
             <div class="saved-meta-line">
               ${c.fullName ? `${escapeHtml(c.fullName)}` : 'Chưa cập nhật tên đầy đủ'}
@@ -1060,7 +1087,13 @@
 
     // Đồng bộ lại Lịch khi danh sách đã lưu hoặc Tracker thay đổi từ tab khác
     window.addEventListener('storage', event => {
-      const watchKeys = [getSavedStorageKey(), 'confguide_saved', 'savedConferences', 'confguides', 'confguide_current_user'];
+      const watchKeys = [
+        getSavedStorageKey(),
+        'confguide_saved',
+        'savedConferences',
+        'confguides',
+        'confguide_current_user'
+      ];
       if (!event.key || watchKeys.includes(event.key)) {
         if (document.getElementById('profileCalendarRoot')) {
           initCalendarSection();

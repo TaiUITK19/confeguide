@@ -24,18 +24,15 @@
   const EVENT_META = {
     deadline: {
       symbol: '◆',
-      label: 'Deadline',
-      legendLabel: 'Deadline (UTC+7)'
+      label: 'Deadline'
     },
     event: {
       symbol: '●',
-      label: 'Hội nghị',
-      legendLabel: 'Ngày diễn ra'
+      label: 'Hội nghị'
     },
     tracker: {
       symbol: '▲',
-      label: 'Tracker',
-      legendLabel: 'Mốc Tracker'
+      label: 'Tracker'
     }
   };
 
@@ -59,7 +56,8 @@
   function escapeHtml(value) {
     const utils = getCalendarUtils();
     if (typeof utils.escapeHtml === 'function') return utils.escapeHtml(value);
-    return String(value ?? '').replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[ch]));
+    const entities = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+    return String(value ?? '').replace(/[&<>"']/g, ch => entities[ch]);
   }
 
   /**
@@ -181,15 +179,6 @@
     return new Date(Date.UTC(year, month, 0)).getUTCDate();
   }
 
-  /**
-   * Quy đổi mốc thời hạn nộp bài từ AoE (UTC-12) sang ngày & giờ Việt Nam (UTC+7),
-   * ưu tiên gọi ConfGuideUtils.convertDeadlineToVn để khớp tuyệt đối với trang detail.html.
-   * Quy ước: mốc deadline hội nghị mặc định 23:59:59 AoE (+19h = 18:59 ngày D+1 UTC+7);
-   * mốc không kèm giờ tường minh (hasExplicitTime: false) giữ nguyên ngày YYYY-MM-DD và nhãn (AoE).
-   * @param {string} dateStr Chuỗi ngày/giờ hạn nộp thô.
-   * @param {Object} [options={}] Tùy chọn ({ isDeadline, hasExplicitTime }).
-   * @returns {Object|null} Thông tin đã quy đổi gồm vnIsoDate, displayText, targetMs hoặc null.
-   */
   /**
    * Tính giờ và ngày Việt Nam (UTC+7) từ chuỗi mốc AoE đã phân tích.
    * @param {{ year: number, month: number, day: number }} parts - Thành phần ngày gốc.
@@ -610,10 +599,6 @@
   }
 
   /**
-   * Render phần lưới ngày của tháng đang xem và cập nhật tiêu đề tháng trong vùng aria-live.
-   * @param {HTMLElement} container Phần tử gốc chứa lịch.
-   */
-  /**
    * Tạo mã HTML các thẻ sự kiện hiển thị trong một ô ngày của lưới lịch.
    * @param {Object} ev - Dữ liệu sự kiện trong ngày.
    * @returns {string} Chuỗi HTML `.profile-calendar__chip`.
@@ -707,6 +692,54 @@
   }
 
   /**
+   * Tạo mã HTML badge loại sự kiện (Deadline / Hội nghị / Tracker).
+   * @param {Object} ev - Dữ liệu sự kiện đã chuẩn hóa.
+   * @returns {string} Chuỗi HTML `.profile-calendar__type-pill`.
+   */
+  function buildEventTypeBadgeHtml(ev) {
+    const meta = EVENT_META[ev.type] || EVENT_META.deadline;
+    return `
+      <span class="profile-calendar__type-pill profile-calendar__type-pill--${escapeHtml(ev.type)}">
+        <span aria-hidden="true">${meta.symbol}</span>
+        <span>${escapeHtml(meta.label)}</span>
+      </span>
+    `;
+  }
+
+  /**
+   * Tạo HTML cho một mục sự kiện trong danh sách "Sắp tới".
+   * @param {Object} ev - Sự kiện sắp diễn ra.
+   * @returns {string} Chuỗi HTML thẻ `<li>`.
+   */
+  function buildUpcomingItemHtml(ev) {
+    const parts = parseIsoParts(ev.date);
+    const dayNum = parts ? String(parts.day).padStart(2, '0') : '--';
+    const monthLabel = parts ? `Th${parts.month}` : '';
+    const detailLinkHtml = renderDetailLinkHtml(ev);
+
+    return `
+      <li class="profile-calendar__upcoming-item">
+        <button type="button" class="profile-calendar__upcoming-jump js-calendar-jump"
+          data-date="${escapeHtml(ev.date)}"
+          aria-label="Xem ngày ${escapeHtml(formatDateVi(ev.date))}: ${escapeHtml(ev.title)}">
+          <span class="profile-calendar__upcoming-date" aria-hidden="true">
+            <span class="profile-calendar__upcoming-day">${escapeHtml(dayNum)}</span>
+            <span class="profile-calendar__upcoming-month">${escapeHtml(monthLabel)}</span>
+          </span>
+          <span class="profile-calendar__upcoming-body">
+            <span class="profile-calendar__upcoming-meta">
+              ${buildEventTypeBadgeHtml(ev)}
+            </span>
+            <span class="profile-calendar__upcoming-title">${escapeHtml(ev.title)}</span>
+            <span class="profile-calendar__upcoming-sub">${escapeHtml(ev.subtitle)}</span>
+          </span>
+        </button>
+        ${detailLinkHtml ? `<div class="profile-calendar__upcoming-footer">${detailLinkHtml}</div>` : ''}
+      </li>
+    `;
+  }
+
+  /**
    * Render panel danh sách sự kiện của ngày đang chọn.
    * @param {HTMLElement} container Phần tử gốc chứa lịch.
    */
@@ -724,16 +757,12 @@
       ? `
         <ul class="profile-calendar__event-list">
           ${dayEvents.map(ev => {
-            const meta = EVENT_META[ev.type] || EVENT_META.deadline;
             const pastClass = ev.isPast ? ' profile-calendar__event-item--past' : '';
             const detailLinkHtml = renderDetailLinkHtml(ev);
             return `
               <li class="profile-calendar__event-item profile-calendar__event-item--${escapeHtml(ev.type)}${pastClass}">
                 <div class="profile-calendar__event-badges">
-                  <span class="profile-calendar__type-pill profile-calendar__type-pill--${escapeHtml(ev.type)}">
-                    <span aria-hidden="true">${meta.symbol}</span>
-                    <span>${escapeHtml(meta.label)}</span>
-                  </span>
+                  ${buildEventTypeBadgeHtml(ev)}
                   ${ev.isPast ? '<span class="profile-calendar__past-pill">Đã qua</span>' : ''}
                 </div>
                 <h4 class="profile-calendar__event-title">${escapeHtml(ev.title)}</h4>
@@ -770,41 +799,7 @@
     const upcoming = getUpcomingEvents(state.events, state.todayInfo.iso);
 
     const bodyHtml = upcoming.length > 0
-      ? `
-        <ul class="profile-calendar__upcoming-list">
-          ${upcoming.map(ev => {
-            const parts = parseIsoParts(ev.date);
-            const dayNum = parts ? String(parts.day).padStart(2, '0') : '--';
-            const monthLabel = parts ? `Th${parts.month}` : '';
-            const meta = EVENT_META[ev.type] || EVENT_META.deadline;
-            const detailLinkHtml = renderDetailLinkHtml(ev);
-
-            return `
-              <li class="profile-calendar__upcoming-item">
-                <button type="button" class="profile-calendar__upcoming-jump js-calendar-jump"
-                  data-date="${escapeHtml(ev.date)}"
-                  aria-label="Xem ngày ${escapeHtml(formatDateVi(ev.date))}: ${escapeHtml(ev.title)}">
-                  <span class="profile-calendar__upcoming-date" aria-hidden="true">
-                    <span class="profile-calendar__upcoming-day">${escapeHtml(dayNum)}</span>
-                    <span class="profile-calendar__upcoming-month">${escapeHtml(monthLabel)}</span>
-                  </span>
-                  <span class="profile-calendar__upcoming-body">
-                    <span class="profile-calendar__upcoming-meta">
-                      <span class="profile-calendar__type-pill profile-calendar__type-pill--${escapeHtml(ev.type)}">
-                        <span aria-hidden="true">${meta.symbol}</span>
-                        <span>${escapeHtml(meta.label)}</span>
-                      </span>
-                    </span>
-                    <span class="profile-calendar__upcoming-title">${escapeHtml(ev.title)}</span>
-                    <span class="profile-calendar__upcoming-sub">${escapeHtml(ev.subtitle)}</span>
-                  </span>
-                </button>
-                ${detailLinkHtml ? `<div class="profile-calendar__upcoming-footer">${detailLinkHtml}</div>` : ''}
-              </li>
-            `;
-          }).join('')}
-        </ul>
-      `
+      ? `<ul class="profile-calendar__upcoming-list">${upcoming.map(buildUpcomingItemHtml).join('')}</ul>`
       : `
         <p class="profile-calendar__panel-empty">
           Chưa có sự kiện nào sắp diễn ra từ hôm nay.
@@ -1050,11 +1045,6 @@
     `;
   }
 
-  /**
-   * Dựng khung HTML chính của Lịch (thanh điều hướng, chú thích, lưới tháng T2..CN và panel bên cạnh).
-   * @param {HTMLElement} container Phần tử gốc chứa lịch.
-   * @param {boolean} showNoDatesNotice Hiển thị ghi chú nếu có hội nghị đã lưu nhưng chưa có ngày công bố.
-   */
   /**
    * Tạo mã HTML chú giải các loại sự kiện (Deadline, Hội nghị, Tracker, Đã qua).
    * @returns {string} Chuỗi HTML `.profile-calendar__legend`.
