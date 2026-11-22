@@ -4,7 +4,7 @@
  * Phụ thuộc: js/core/page-transition.js, js/core/layout.js (ConfGuideUtils), js/components/search-core.js, js/components/compare.js
  * Chức năng: Quản lý Hero 2 cột cân đối (cột trái tìm kiếm nhanh; cột phải Hero Slider 3 slide:
  * Slide 1 cá nhân hóa theo trạng thái đăng nhập và lĩnh vực quan tâm, Slide 2 hội nghị nổi bật,
- * Slide 3 sắp hết hạn UTC+7), khối Cá nhân hóa trải nghiệm, nạp dữ liệu conference_data.json
+ * Slide 3 sắp hết hạn UTC+7), modal Cá nhân hóa dạng bảng biểu, nạp dữ liệu conference_data.json
  * (fetch + fallback file:///) và hiển thị 6 hội nghị tiêu biểu kèm nút Lưu.
  */
 
@@ -42,9 +42,6 @@
   let allConferences = [];
   let isDataLoaded = false;
   let currentTab = 'all';
-  let isMoreTopicsExpanded = false;
-  let guestTopicPromptVisible = false;
-  let hasRecentTopicUpdate = false;
 
   /** Trạng thái điều khiển của Hero Slider */
   const sliderState = {
@@ -677,28 +674,6 @@
   }
 
   /**
-   * Cuộn mượt tới khối "Cá nhân hóa trải nghiệm" và đưa focus bàn phím vào bộ chọn lĩnh vực.
-   */
-  function focusPersonalizationSection() {
-    const bar = document.getElementById('homePersonalizationBar');
-    if (!bar) return;
-
-    const behavior = sliderState.prefersReducedMotion ? 'auto' : 'smooth';
-    if (typeof bar.scrollIntoView === 'function') {
-      bar.scrollIntoView({ behavior, block: 'start' });
-    }
-
-    const delayMs = sliderState.prefersReducedMotion ? 20 : 320;
-    window.setTimeout(() => {
-      const firstTopicBtn = bar.querySelector('.js-personalization-topic-btn');
-      const focusTarget = firstTopicBtn || bar;
-      if (focusTarget && typeof focusTarget.focus === 'function') {
-        focusTarget.focus({ preventScroll: true });
-      }
-    }, delayMs);
-  }
-
-  /**
    * Render nội dung Slide 1 của Hero Slider theo 3 trạng thái thực:
    * A (Chưa đăng nhập), B (Đã đăng nhập, chưa chọn lĩnh vực hoặc không có hội nghị khớp),
    * C (Đã đăng nhập và có lĩnh vực + danh sách khuyến nghị tối đa 2 thẻ).
@@ -747,15 +722,18 @@
       ? utils.getUserResearchTopicLabels()
       : [];
 
-    // Trạng thái B (chưa có lĩnh vực nào được chọn)
+    // Trạng thái B (chưa có lĩnh vực nào được chọn: đặt nút Thêm lĩnh vực vào giữa ô)
     if (selectedLabels.length === 0) {
       contentEl.innerHTML = `
         ${introBlockHtml}
-        <div class="hero-slider__cta-box">
-          <p class="hero-slider__cta-text">Chọn lĩnh vực nghiên cứu để nhận gợi ý</p>
+        <div class="hero-slider__cta-box hero-slider__cta-box--centered">
           <div class="hero-slider__cta-actions">
             <button type="button" class="btn btn-primary hero-slider__cta-btn js-hero-choose-topics">
-              Chọn lĩnh vực
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+              <span>Thêm lĩnh vực</span>
             </button>
           </div>
         </div>
@@ -1022,7 +1000,14 @@
       const chooseTopicsBtn = event.target.closest('.js-hero-choose-topics');
       if (chooseTopicsBtn) {
         event.preventDefault();
-        focusPersonalizationSection();
+        pauseSliderAutoplayTemporarily();
+        const utils = getUtils();
+        if (utils && typeof utils.openPreferencesSurveyModal === 'function') {
+          utils.openPreferencesSurveyModal({
+            topicsOnly: true,
+            returnFocusEl: chooseTopicsBtn
+          });
+        }
         return;
       }
 
@@ -1289,9 +1274,7 @@
     }
 
     const refreshAllDynamicViews = () => {
-      guestTopicPromptVisible = false;
       renderHeroSlide1();
-      renderHomePersonalizationBar();
       syncSaveButtonsUi();
     };
 
@@ -1362,7 +1345,6 @@
 
     isDataLoaded = true;
     renderHeroSlider();
-    renderHomePersonalizationBar();
     renderFeaturedConferences();
   }
 
@@ -1440,176 +1422,6 @@
       }
     }
     return 0;
-  }
-
-  /**
-   * Cuộn lên Hero Slider, chuyển về Slide 1 và đưa focus vào nội dung Slide 1.
-   */
-  function scrollToHeroSlide1() {
-    const heroEl = document.querySelector('.js-hero-section');
-    goToSlide(0, 'user');
-    pauseSliderAutoplayTemporarily();
-
-    const behavior = sliderState.prefersReducedMotion ? 'auto' : 'smooth';
-    if (heroEl && typeof heroEl.scrollIntoView === 'function') {
-      heroEl.scrollIntoView({ behavior, block: 'start' });
-    } else {
-      window.scrollTo({ top: 0, behavior });
-    }
-
-    const delayMs = sliderState.prefersReducedMotion ? 20 : 320;
-    window.setTimeout(() => {
-      const slide1FocusTarget = document.querySelector('.js-slide1-content a, .js-slide1-content button, .js-hero-slide1');
-      if (slide1FocusTarget && typeof slide1FocusTarget.focus === 'function') {
-        if (!slide1FocusTarget.hasAttribute('tabindex') && slide1FocusTarget.matches('.js-hero-slide1')) {
-          slide1FocusTarget.setAttribute('tabindex', '-1');
-        }
-        slide1FocusTarget.focus({ preventScroll: true });
-      }
-    }, delayMs);
-  }
-
-  /**
-   * Kết xuất khối tương tác "Cá nhân hóa trải nghiệm" gồm chọn nhanh mục đích và chọn nhiều lĩnh vực nghiên cứu trực tiếp.
-   */
-  function renderHomePersonalizationBar() {
-    const container = document.getElementById('homePersonalizationBar');
-    const utils = getUtils();
-    if (!container || !utils || typeof utils.getUserPreferences !== 'function') return;
-
-    const esc = utils.escapeHtml || (val => String(val ?? ''));
-    const prefs = utils.getUserPreferences();
-    const purposes = Array.isArray(utils.USAGE_PURPOSES) ? utils.USAGE_PURPOSES : [];
-    const topicCatalog = Array.isArray(utils.PREFERENCE_TOPICS) ? utils.PREFERENCE_TOPICS : [];
-    const isAuthenticated = Boolean(typeof utils.isUserAuthenticated === 'function'
-      ? utils.isUserAuthenticated()
-      : readStorageSafe('confguide_current_user', null));
-
-    const selectedTopicKeys = isAuthenticated && typeof utils.getUserResearchTopicKeys === 'function'
-      ? utils.getUserResearchTopicKeys()
-      : [];
-    const selectedTopicSet = new Set(selectedTopicKeys);
-
-    const purposeButtonsHtml = purposes.map(item => {
-      const isSelected = prefs.purpose === item.key;
-      const iconText = isSelected ? '✓' : '•';
-      return `
-        <button
-          type="button"
-          class="home-prefs-pill${isSelected ? ' is-selected' : ''}"
-          data-quick-purpose="${esc(item.key)}"
-          aria-pressed="${isSelected ? 'true' : 'false'}"
-        >
-          <span class="home-prefs-pill__icon" aria-hidden="true">${iconText}</span>
-          <span>${esc(item.shortLabel || item.label)}</span>
-        </button>
-      `;
-    }).join('');
-
-    const visibleTopics = topicCatalog.filter(topic => (
-      topic.primary || selectedTopicSet.has(topic.key) || isMoreTopicsExpanded
-    ));
-    const hiddenTopicsCount = topicCatalog.filter(topic => (
-      !topic.primary && !selectedTopicSet.has(topic.key)
-    )).length;
-
-    const topicButtonsHtml = visibleTopics.map(topic => {
-      const isSelected = selectedTopicSet.has(topic.key);
-      return `
-        <button
-          type="button"
-          class="home-topic-chip js-personalization-topic-btn${isSelected ? ' is-selected' : ''}"
-          data-topic-key="${esc(topic.key)}"
-          aria-pressed="${isSelected ? 'true' : 'false'}"
-        >
-          <span class="home-topic-chip__icon" aria-hidden="true">${isSelected ? '✓' : '+'}</span>
-          <span>${esc(topic.label)}</span>
-        </button>
-      `;
-    }).join('');
-
-    const toggleMoreTopicsHtml = (hiddenTopicsCount > 0 || isMoreTopicsExpanded)
-      ? `
-        <button
-          type="button"
-          class="home-topic-chip home-topic-chip--toggle js-home-toggle-more-topics"
-          aria-expanded="${isMoreTopicsExpanded ? 'true' : 'false'}"
-        >
-          ${isMoreTopicsExpanded ? 'Thu gọn bớt' : `Xem thêm ${hiddenTopicsCount} lĩnh vực`}
-        </button>
-      `
-      : '';
-
-    let topicFeedbackHtml = '';
-    if (!isAuthenticated) {
-      topicFeedbackHtml = guestTopicPromptVisible
-        ? `
-          <div class="home-prefs-auth-notice js-home-guest-notice" role="status" aria-live="polite" tabindex="-1">
-            <span class="home-prefs-auth-notice__text">Đăng nhập để lưu lĩnh vực và nhận gợi ý</span>
-            <div class="home-prefs-auth-notice__actions">
-              <a href="login.html?redirect=index.html" class="btn btn-primary home-prefs-btn-sm">Đăng nhập</a>
-              <a href="register.html" class="btn btn-secondary home-prefs-btn-sm">Đăng ký</a>
-            </div>
-          </div>
-        `
-        : '<p class="home-prefs-topic-hint">Chọn lĩnh vực nghiên cứu để lưu vào tài khoản và nhận gợi ý ngay tại Slide 1 (cần đăng nhập).</p>';
-    } else if (selectedTopicKeys.length > 0) {
-      const statusCopy = hasRecentTopicUpdate
-        ? `Đã cập nhật gợi ý cho <strong>${selectedTopicKeys.length}</strong> lĩnh vực trên Slide 1.`
-        : `Đang chọn <strong>${selectedTopicKeys.length}</strong> lĩnh vực nghiên cứu cho gợi ý trên Slide 1.`;
-      topicFeedbackHtml = `
-        <div class="home-prefs-active-note" role="status" aria-live="polite">
-          <span class="home-prefs-active-note__text">${statusCopy}</span>
-          <div class="home-prefs-active-note__actions">
-            <button type="button" class="hero-prefs-jump-link js-jump-to-hero-slide1">
-              Xem gợi ý ở khung đầu trang &uarr;
-            </button>
-            <button type="button" class="home-prefs-clear-btn js-personalization-clear-topics">
-              Bỏ chọn tất cả
-            </button>
-          </div>
-        </div>
-      `;
-    } else {
-      topicFeedbackHtml = hasRecentTopicUpdate
-        ? '<p class="home-prefs-topic-hint" role="status" aria-live="polite">Đã bỏ chọn lĩnh vực. Hãy chọn ít nhất một lĩnh vực bên trên để Slide 1 hiển thị gợi ý.</p>'
-        : '<p class="home-prefs-topic-hint">Chọn một hoặc nhiều lĩnh vực bên trên để nhận gợi ý hội nghị phù hợp ngay tại Slide 1.</p>';
-    }
-
-    container.innerHTML = `
-      <div class="home-prefs-bar" role="region" aria-label="Cá nhân hóa trải nghiệm">
-        <div class="home-prefs-bar__head">
-          <div class="home-prefs-bar__title-group">
-            <span class="home-prefs-bar__eyebrow">Cá nhân hóa trải nghiệm</span>
-            <h3 class="home-prefs-bar__heading">Bạn đang tìm hội nghị theo mục đích hoặc lĩnh vực nào?</h3>
-            <p class="home-prefs-bar__sub">Chọn nhanh mục đích để sắp xếp danh sách bên dưới hoặc chọn lĩnh vực nghiên cứu để nhận gợi ý trên khung đầu trang.</p>
-          </div>
-        </div>
-
-        <div class="home-prefs-group">
-          <div class="home-prefs-group__head">
-            <span class="home-prefs-group__label">Mục đích tìm kiếm</span>
-            ${prefs.purpose ? '<button type="button" class="home-prefs-clear-btn js-home-clear-purpose">Bỏ chọn mục đích</button>' : ''}
-          </div>
-          <div class="home-prefs-pill-row" role="group" aria-label="Chọn nhanh mục đích sử dụng">
-            ${purposeButtonsHtml}
-          </div>
-        </div>
-
-        <div class="home-prefs-group">
-          <div class="home-prefs-group__head">
-            <span class="home-prefs-group__label">Lĩnh vực nghiên cứu <span class="home-prefs-group__note">(lưu theo tài khoản)</span></span>
-          </div>
-          <div class="home-topic-grid" role="group" aria-label="Chọn nhiều lĩnh vực nghiên cứu">
-            ${topicButtonsHtml}
-            ${toggleMoreTopicsHtml}
-          </div>
-          <div class="home-prefs-topic-feedback">
-            ${topicFeedbackHtml}
-          </div>
-        </div>
-      </div>
-    `;
   }
 
   /**
@@ -1790,143 +1602,21 @@
   }
 
   /**
-   * Gắn sự kiện tương tác cho khối Cá nhân hóa trên Trang chủ và đồng bộ Slide 1 theo tài khoản/lĩnh vực.
+   * Lắng nghe sự kiện cập nhật cá nhân hóa từ modal để đồng bộ Slide 1 và danh sách hội nghị Trang chủ.
    */
-  function initPersonalizationBar() {
-    const barWrap = document.getElementById('homePersonalizationBar');
-    if (barWrap) {
-      barWrap.addEventListener('click', event => {
-        if (!(event.target instanceof Element)) return;
-        const utils = getUtils();
-        if (!utils) return;
-
-        // 1. Chọn nhanh mục đích (hoạt động độc lập ở mọi trạng thái, không làm đổi Slide 1)
-        const quickPurposeBtn = event.target.closest('[data-quick-purpose]');
-        if (quickPurposeBtn) {
-          const purposeKey = quickPurposeBtn.getAttribute('data-quick-purpose') || '';
-          const currentPrefs = typeof utils.getUserPreferences === 'function' ? utils.getUserPreferences() : { purpose: '' };
-          const nextPurpose = currentPrefs.purpose === purposeKey ? '' : purposeKey;
-          if (typeof utils.saveUserPreferences === 'function') {
-            utils.saveUserPreferences({
-              purpose: nextPurpose,
-              onboardingCompleted: true,
-              bannerDismissed: false
-            });
-          }
-          renderHomePersonalizationBar();
-          renderFeaturedConferences();
-          const restoredBtn = barWrap.querySelector(`[data-quick-purpose="${purposeKey}"]`);
-          if (restoredBtn && typeof restoredBtn.focus === 'function') {
-            restoredBtn.focus({ preventScroll: true });
-          }
-          if (nextPurpose && typeof utils.showToast === 'function') {
-            utils.showToast('Đã cập nhật mục đích ưu tiên cho danh sách bên dưới.', 'success');
-          }
-          return;
-        }
-
-        // 2. Bỏ chọn mục đích tìm kiếm
-        if (event.target.closest('.js-home-clear-purpose')) {
-          if (typeof utils.saveUserPreferences === 'function') {
-            utils.saveUserPreferences({ purpose: '', bannerDismissed: false });
-          }
-          renderHomePersonalizationBar();
-          renderFeaturedConferences();
-          return;
-        }
-
-        // 3. Mở rộng / thu gọn danh sách lĩnh vực nghiên cứu
-        if (event.target.closest('.js-home-toggle-more-topics')) {
-          isMoreTopicsExpanded = !isMoreTopicsExpanded;
-          renderHomePersonalizationBar();
-          const toggleBtn = barWrap.querySelector('.js-home-toggle-more-topics');
-          if (toggleBtn && typeof toggleBtn.focus === 'function') {
-            toggleBtn.focus({ preventScroll: true });
-          }
-          return;
-        }
-
-        // 4. Chọn / bỏ chọn lĩnh vực nghiên cứu
-        const topicBtn = event.target.closest('.js-personalization-topic-btn');
-        if (topicBtn) {
-          const topicKey = topicBtn.getAttribute('data-topic-key') || '';
-          if (!topicKey) return;
-
-          const isAuthenticated = Boolean(typeof utils.isUserAuthenticated === 'function' && utils.isUserAuthenticated());
-          if (!isAuthenticated) {
-            guestTopicPromptVisible = true;
-            renderHomePersonalizationBar();
-            const noticeEl = barWrap.querySelector('.js-home-guest-notice');
-            if (noticeEl && typeof noticeEl.focus === 'function') {
-              noticeEl.focus({ preventScroll: true });
-            }
-            return;
-          }
-
-          guestTopicPromptVisible = false;
-          const currentKeys = typeof utils.getUserResearchTopicKeys === 'function'
-            ? utils.getUserResearchTopicKeys()
-            : [];
-          const exists = currentKeys.includes(topicKey);
-          const nextKeys = exists
-            ? currentKeys.filter(k => k !== topicKey)
-            : [...currentKeys, topicKey];
-
-          if (typeof utils.setUserResearchTopicKeys === 'function') {
-            utils.setUserResearchTopicKeys(nextKeys, { silent: true });
-          }
-
-          hasRecentTopicUpdate = true;
-          renderHomePersonalizationBar();
-          renderHeroSlide1();
-          goToSlide(0, 'user');
-          pauseSliderAutoplayTemporarily();
-
-          const liveMsg = nextKeys.length > 0
-            ? `Đã cập nhật gợi ý trên Slide 1 cho ${nextKeys.length} lĩnh vực đã chọn.`
-            : 'Đã bỏ chọn lĩnh vực. Slide 1 yêu cầu chọn lĩnh vực nghiên cứu để nhận gợi ý.';
-          announceSlide1Status(liveMsg);
-
-          const safeAttrKey = typeof CSS !== 'undefined' && typeof CSS.escape === 'function'
-            ? CSS.escape(topicKey)
-            : topicKey;
-          const restoredTopicBtn = barWrap.querySelector(`.js-personalization-topic-btn[data-topic-key="${safeAttrKey}"]`);
-          if (restoredTopicBtn && typeof restoredTopicBtn.focus === 'function') {
-            restoredTopicBtn.focus({ preventScroll: true });
-          }
-          return;
-        }
-
-        // 5. Bỏ chọn tất cả lĩnh vực của tài khoản hiện tại
-        if (event.target.closest('.js-personalization-clear-topics')) {
-          if (typeof utils.setUserResearchTopicKeys === 'function') {
-            utils.setUserResearchTopicKeys([], { silent: true });
-          }
-          hasRecentTopicUpdate = true;
-          renderHomePersonalizationBar();
-          renderHeroSlide1();
-          goToSlide(0, 'user');
-          pauseSliderAutoplayTemporarily();
-          announceSlide1Status('Đã xóa toàn bộ lĩnh vực nghiên cứu. Chọn lĩnh vực mới để nhận gợi ý.');
-          const firstTopicBtn = barWrap.querySelector('.js-personalization-topic-btn');
-          if (firstTopicBtn && typeof firstTopicBtn.focus === 'function') {
-            firstTopicBtn.focus({ preventScroll: true });
-          }
-          return;
-        }
-
-        // 6. Bấm liên kết thông báo cuộn lên xem gợi ý ở Hero Slide 1
-        if (event.target.closest('.js-jump-to-hero-slide1')) {
-          scrollToHeroSlide1();
-        }
-      });
-    }
-
-    renderHomePersonalizationBar();
+  function initPersonalizationSync() {
     window.addEventListener('confguide:preferences-changed', () => {
-      guestTopicPromptVisible = false;
-      renderHomePersonalizationBar();
       renderHeroSlide1();
+      goToSlide(0, 'user');
+      pauseSliderAutoplayTemporarily();
+      const utils = getUtils();
+      const selectedKeys = utils && typeof utils.getUserResearchTopicKeys === 'function'
+        ? utils.getUserResearchTopicKeys()
+        : [];
+      const liveMsg = selectedKeys.length > 0
+        ? `Đã cập nhật gợi ý trên Slide 1 cho ${selectedKeys.length} lĩnh vực đã chọn.`
+        : 'Đã cập nhật thiết lập cá nhân hóa.';
+      announceSlide1Status(liveMsg);
       if (allConferences.length > 0) {
         renderFeaturedConferences();
       }
@@ -1957,7 +1647,7 @@
     initSearchGateway();
     initHeroSliderEvents();
     initSaveConferences();
-    initPersonalizationBar();
+    initPersonalizationSync();
     initTabs();
     loadData();
   }

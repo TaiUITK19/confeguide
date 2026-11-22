@@ -210,7 +210,7 @@
           </ul>
         </header>
 
-        <!-- Bố cục 2 cột: Cột trái (Toàn bộ mốc deadline, Giới thiệu) | Cột phải Sticky (Mốc tiếp theo) -->
+        <!-- Bố cục 2 cột: Cột trái (Toàn bộ mốc deadline, Giới thiệu, Thông tin học thuật) | Cột phải Sticky (Mốc tiếp theo) -->
         <div class="conf-layout">
           <div class="conf-layout__main">
             <!-- 1. Toàn bộ mốc thời gian từ dữ liệu gốc -->
@@ -243,6 +243,31 @@
                 <span>Giới thiệu</span>
               </h2>
               <div class="conf-overview__body js-overview-text" id="detailOverviewText"></div>
+            </section>
+
+            <!-- 3. Thông tin học thuật (<dl> gồm 3 trường: Xếp hạng, Lĩnh vực nghiên cứu, Xác minh lần cuối) -->
+            <section class="conf-section academic-specs" aria-labelledby="academicSpecsHeading">
+              <h2 class="conf-section__title" id="academicSpecsHeading">
+                <svg class="conf-section__icon" width="20" height="20" aria-hidden="true">
+                  <use href="#icon-info"></use>
+                </svg>
+                <span>Thông tin học thuật</span>
+              </h2>
+
+              <dl class="academic-specs__list">
+                <div class="academic-specs__item">
+                  <dt class="academic-specs__term">Xếp hạng</dt>
+                  <dd class="academic-specs__desc js-spec-rank" id="infoRank">Chưa cập nhật</dd>
+                </div>
+                <div class="academic-specs__item">
+                  <dt class="academic-specs__term">Lĩnh vực nghiên cứu</dt>
+                  <dd class="academic-specs__desc js-spec-fields" id="infoFields">Chưa cập nhật</dd>
+                </div>
+                <div class="academic-specs__item">
+                  <dt class="academic-specs__term">Xác minh lần cuối</dt>
+                  <dd class="academic-specs__desc js-spec-verified" id="infoVerified">Chưa cập nhật</dd>
+                </div>
+              </dl>
             </section>
           </div>
 

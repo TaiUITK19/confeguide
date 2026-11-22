@@ -249,6 +249,7 @@
   ];
 
   const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+  const modalReturnFocusMap = new Map();
   let activeModalLastFocus = null;
   let lastFeedbackSubmitTime = 0;
   let layoutInitialized = false;
@@ -2203,25 +2204,25 @@
   }
 
   /**
-   * Tạo HTML cho modal khảo sát sở thích & mục đích sử dụng ConfGuide toàn cục.
+   * Tạo HTML cho modal khảo sát sở thích & mục đích sử dụng ConfGuide toàn cục dạng bảng biểu có ô tích.
    * Sử dụng đúng danh mục 25 lĩnh vực đơn thực tế từ dữ liệu hội nghị.
    * @returns {string} Chuỗi HTML `#globalPreferencesSurveyModal`.
    */
   function buildPreferencesSurveyModalHtml() {
-    const primaryTopics = PREFERENCE_TOPICS.filter(item => item.primary);
-    const extraTopics = PREFERENCE_TOPICS.filter(item => !item.primary);
-
-    const renderTopicChip = item => `
-      <button type="button" class="pref-topic-chip" data-topic="${escapeHtml(item.key)}" aria-pressed="false">
-        <span class="pref-topic-chip__check" aria-hidden="true">✓</span>
-        <span>${escapeHtml(item.label)}</span>
-      </button>
+    const renderTopicCheckboxRow = item => `
+      <label class="pref-topic-row">
+        <input type="checkbox" class="pref-topic-row__input js-pref-topic-checkbox" value="${escapeHtml(item.key)}">
+        <span class="pref-topic-row__label">${escapeHtml(item.label)}</span>
+      </label>
     `;
 
     const purposesHtml = USAGE_PURPOSES.map(item => `
       <button type="button" class="pref-purpose-card" data-purpose="${escapeHtml(item.key)}" aria-pressed="false">
-        <span class="pref-purpose-card__title">${escapeHtml(item.label)}</span>
-        <span class="pref-purpose-card__desc">${escapeHtml(item.desc)}</span>
+        <span class="pref-purpose-card__check" aria-hidden="true">✓</span>
+        <span class="pref-purpose-card__body">
+          <span class="pref-purpose-card__title">${escapeHtml(item.label)}</span>
+          <span class="pref-purpose-card__desc">${escapeHtml(item.desc)}</span>
+        </span>
       </button>
     `).join('');
 
@@ -2235,13 +2236,13 @@
             <button type="button" class="layout-modal-close-btn" aria-label="Đóng">&times;</button>
           </div>
           <div class="layout-modal-body">
-            <p class="modal-block-desc pref-survey-intro">
-              Chọn mục đích sử dụng và các lĩnh vực nghiên cứu bạn quan tâm để ConfGuide ưu tiên gợi ý hội nghị phù hợp trên Trang chủ và trang Tra cứu.
+            <p class="modal-block-desc pref-survey-intro" id="prefSurveyIntro">
+              Chọn mục đích sử dụng và tích chọn các lĩnh vực nghiên cứu bạn quan tâm để ConfGuide ưu tiên gợi ý hội nghị phù hợp trên Trang chủ và trang Tra cứu.
             </p>
 
-            <div class="modal-section-block">
+            <div class="modal-section-block" id="prefPurposeSection">
               <div class="pref-survey-section-head">
-                <h4 class="modal-block-title">1. Mục đích chính khi bạn sử dụng trang web?</h4>
+                <h4 class="modal-block-title">1. Mục đích tìm kiếm</h4>
                 <span class="pref-survey-optional">Tùy chọn (chọn 1)</span>
               </div>
               <div class="pref-purpose-grid" id="prefPurposeGrid" role="group" aria-label="Mục đích sử dụng trang web">
@@ -2249,25 +2250,20 @@
               </div>
             </div>
 
-            <div class="modal-divider"></div>
+            <div class="modal-divider" id="prefSurveyDivider"></div>
 
-            <div class="modal-section-block">
+            <div class="modal-section-block" id="prefTopicsSection">
               <div class="pref-survey-section-head">
-                <h4 class="modal-block-title">2. Lĩnh vực nghiên cứu bạn quan tâm</h4>
+                <h4 class="modal-block-title" id="prefTopicsHeading">2. Lĩnh vực nghiên cứu bạn quan tâm</h4>
                 <span class="pref-count-badge" id="prefTopicCountBadge">Đã chọn: 0 lĩnh vực</span>
               </div>
-              <div class="pref-topic-grid" id="prefPrimaryTopicGrid" role="group" aria-label="Lĩnh vực nghiên cứu chính">
-                ${primaryTopics.map(renderTopicChip).join('')}
-              </div>
-              <div class="pref-more-topics-wrap" id="prefMoreTopicsWrap" hidden>
-                <div class="pref-topic-grid pref-topic-grid--extra" id="prefMoreTopicGrid" role="group" aria-label="Các lĩnh vực nghiên cứu bổ sung">
-                  ${extraTopics.map(renderTopicChip).join('')}
+              <div class="pref-topic-table">
+                <div class="pref-topic-table__head">
+                  <span>Tích chọn một hoặc nhiều lĩnh vực nghiên cứu</span>
                 </div>
-              </div>
-              <div class="pref-more-toggle-row">
-                <button type="button" class="btn-link-inline pref-more-toggle-btn" id="prefMoreTopicsBtn" aria-expanded="false" aria-controls="prefMoreTopicsWrap">
-                  Xem thêm ${extraTopics.length} lĩnh vực khác
-                </button>
+                <div class="pref-topic-table__grid" id="prefTopicGrid" role="group" aria-labelledby="prefTopicsHeading">
+                  ${PREFERENCE_TOPICS.map(renderTopicCheckboxRow).join('')}
+                </div>
               </div>
             </div>
           </div>
@@ -2275,7 +2271,7 @@
             <button type="button" class="btn btn-secondary pref-modal-reset-btn" id="prefSurveyResetBtn">Xóa lựa chọn</button>
             <div class="pref-modal-actions__right">
               <button type="button" class="btn btn-secondary layout-modal-cancel-btn">Hủy</button>
-              <button type="button" class="btn btn-primary" id="prefSurveySaveBtn">Lưu thiết lập</button>
+              <button type="button" class="btn btn-primary" id="prefSurveySaveBtn">OK</button>
             </div>
           </div>
         </div>
@@ -2299,16 +2295,24 @@
   /**
    * Mở modal toàn cục, lưu vị trí focus và khóa cuộn nền.
    * @param {string} modalId Mã id của phần tử modal.
+   * @param {HTMLElement|null} [customReturnFocusEl=null] Phần tử ưu tiên khôi phục focus khi đóng.
    */
-  function openLayoutModal(modalId) {
+  function openLayoutModal(modalId, customReturnFocusEl = null) {
     const modal = document.getElementById(modalId);
     if (!modal) return;
-    activeModalLastFocus = document.activeElement;
+    const focusAnchor = customReturnFocusEl instanceof HTMLElement ? customReturnFocusEl : document.activeElement;
+    activeModalLastFocus = focusAnchor;
+    modalReturnFocusMap.set(modalId, focusAnchor);
     modal.removeAttribute('hidden');
     document.body.classList.add('modal-open');
     requestAnimationFrame(() => {
       modal.classList.add('show');
-      const focusTarget = modal.querySelector('input, select, textarea, button.layout-modal-close-btn');
+      const bodyEl = modal.querySelector('.layout-modal-body');
+      if (bodyEl) bodyEl.scrollTop = 0;
+      const focusTarget = modalId === 'globalPreferencesSurveyModal'
+        ? (modal.querySelector('#prefPurposeSection:not([hidden]) .pref-purpose-card')
+          || modal.querySelector('button.layout-modal-close-btn'))
+        : modal.querySelector('input, select, textarea, button.layout-modal-close-btn');
       if (focusTarget) focusTarget.focus();
     });
   }
@@ -2331,20 +2335,52 @@
     openLayoutModal('globalReportModal');
   }
 
-  /** Trạng thái nháp trong modal khảo sát sở thích & mục đích */
-  const SURVEY_EXTRA_TOPICS_COUNT = PREFERENCE_TOPICS.filter(item => !item.primary).length;
+  /** Trạng thái nháp trong modal cá nhân hóa & chọn lĩnh vực nghiên cứu */
   const surveyDraftState = {
     purpose: '',
     topics: new Set(),
-    extraExpanded: false
+    topicsOnly: false,
+    preserveOpenModals: false,
+    onConfirm: null
   };
 
   /**
-   * Đồng bộ giao diện modal khảo sát sở thích từ trạng thái nháp `surveyDraftState`.
+   * Đồng bộ giao diện modal cá nhân hóa dạng bảng biểu từ trạng thái nháp `surveyDraftState`.
    */
   function syncPreferencesSurveyModalUi() {
     const modal = document.getElementById('globalPreferencesSurveyModal');
     if (!modal) return;
+
+    const isTopicsOnly = Boolean(surveyDraftState.topicsOnly);
+    const titleEl = document.getElementById('prefSurveyModalTitle');
+    const introEl = document.getElementById('prefSurveyIntro');
+    const purposeSection = document.getElementById('prefPurposeSection');
+    const dividerEl = document.getElementById('prefSurveyDivider');
+    const topicsHeading = document.getElementById('prefTopicsHeading');
+
+    if (titleEl) {
+      titleEl.textContent = isTopicsOnly
+        ? 'Chọn lĩnh vực nghiên cứu'
+        : 'Cá nhân hóa trải nghiệm ConfGuide';
+    }
+    if (introEl) {
+      introEl.textContent = isTopicsOnly
+        ? 'Tích chọn các lĩnh vực nghiên cứu bạn quan tâm rồi nhấn OK để lưu lại.'
+        : 'Chọn mục đích sử dụng và tích chọn các lĩnh vực nghiên cứu bạn quan tâm, sau đó nhấn OK để lưu lại.';
+    }
+    if (purposeSection) {
+      if (isTopicsOnly) purposeSection.setAttribute('hidden', '');
+      else purposeSection.removeAttribute('hidden');
+    }
+    if (dividerEl) {
+      if (isTopicsOnly) dividerEl.setAttribute('hidden', '');
+      else dividerEl.removeAttribute('hidden');
+    }
+    if (topicsHeading) {
+      topicsHeading.textContent = isTopicsOnly
+        ? 'Bảng lĩnh vực nghiên cứu'
+        : '2. Lĩnh vực nghiên cứu bạn quan tâm';
+    }
 
     modal.querySelectorAll('.pref-purpose-card').forEach(btn => {
       const pKey = btn.getAttribute('data-purpose') || '';
@@ -2353,56 +2389,66 @@
       btn.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
     });
 
-    modal.querySelectorAll('.pref-topic-chip').forEach(btn => {
-      const tKey = btn.getAttribute('data-topic') || '';
+    modal.querySelectorAll('.js-pref-topic-checkbox').forEach(checkbox => {
+      const tKey = checkbox.value || '';
       const isSelected = Boolean(tKey && surveyDraftState.topics.has(tKey));
-      btn.classList.toggle('is-selected', isSelected);
-      btn.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
+      checkbox.checked = isSelected;
+      const row = checkbox.closest('.pref-topic-row');
+      if (row) row.classList.toggle('is-selected', isSelected);
     });
 
     const countBadge = document.getElementById('prefTopicCountBadge');
     if (countBadge) {
       countBadge.textContent = `Đã chọn: ${surveyDraftState.topics.size} lĩnh vực`;
     }
-
-    const moreWrap = document.getElementById('prefMoreTopicsWrap');
-    const moreBtn = document.getElementById('prefMoreTopicsBtn');
-    if (moreWrap && moreBtn) {
-      if (surveyDraftState.extraExpanded) {
-        moreWrap.removeAttribute('hidden');
-        moreBtn.setAttribute('aria-expanded', 'true');
-        moreBtn.textContent = 'Thu gọn danh sách lĩnh vực';
-      } else {
-        moreWrap.setAttribute('hidden', 'true');
-        moreBtn.setAttribute('aria-expanded', 'false');
-        moreBtn.textContent = `Xem thêm ${SURVEY_EXTRA_TOPICS_COUNT} lĩnh vực khác`;
-      }
-    }
   }
 
   /**
-   * Mở modal khảo sát lĩnh vực quan tâm và mục đích sử dụng trang web.
+   * Mở modal bảng biểu cá nhân hóa (Trang chủ) hoặc bảng chọn lĩnh vực nghiên cứu (Trang cá nhân).
+   * @param {{
+   *   topicsOnly?: boolean,
+   *   preserveOpenModals?: boolean,
+   *   initialTopicKeys?: Array<string>,
+   *   onConfirm?: Function|null,
+   *   returnFocusEl?: HTMLElement|null
+   * }} [options={}] Tùy chọn hiển thị và callback khi nhấn OK.
    */
-  function openPreferencesSurveyModal() {
+  function openPreferencesSurveyModal(options = {}) {
+    const safeOpts = (options && typeof options === 'object') ? options : {};
     const prefs = getUserPreferences();
-    surveyDraftState.purpose = prefs.purpose;
-    surveyDraftState.topics = new Set(prefs.topics);
-    const hasExtraSelected = prefs.topics.some(tKey => {
-      const meta = PREFERENCE_TOPICS.find(item => item.key === tKey);
-      return Boolean(meta && !meta.primary);
-    });
-    surveyDraftState.extraExpanded = hasExtraSelected;
+    const isOnboarding = Boolean(safeOpts.isOnboarding);
+    const initialTopics = isOnboarding
+      ? []
+      : (Array.isArray(safeOpts.initialTopicKeys)
+        ? safeOpts.initialTopicKeys.filter(key => VALID_PREF_TOPIC_KEYS.has(key))
+        : prefs.topics);
 
-    // Đóng nhanh các modal toàn cục khác nếu đang mở để tránh chồng backdrop
-    document.querySelectorAll('.layout-modal.show').forEach(otherModal => {
-      if (otherModal.id !== 'globalPreferencesSurveyModal') {
-        otherModal.classList.remove('show');
-        otherModal.setAttribute('hidden', 'true');
-      }
-    });
+    surveyDraftState.purpose = isOnboarding ? '' : prefs.purpose;
+    surveyDraftState.topics = new Set(initialTopics);
+    surveyDraftState.topicsOnly = isOnboarding ? false : Boolean(safeOpts.topicsOnly);
+    surveyDraftState.preserveOpenModals = Boolean(safeOpts.preserveOpenModals);
+    surveyDraftState.onConfirm = typeof safeOpts.onConfirm === 'function' ? safeOpts.onConfirm : null;
+
+    const modalEl = document.getElementById('globalPreferencesSurveyModal');
+    if (modalEl) {
+      modalEl.classList.toggle('layout-modal--nested', surveyDraftState.preserveOpenModals);
+    }
+
+    // Đóng nhanh các modal toàn cục khác nếu không mở chồng lên modal chỉnh sửa hồ sơ
+    if (!surveyDraftState.preserveOpenModals) {
+      document.querySelectorAll('.layout-modal.show').forEach(otherModal => {
+        if (otherModal.id !== 'globalPreferencesSurveyModal') {
+          otherModal.classList.remove('show');
+          otherModal.setAttribute('hidden', 'true');
+        }
+      });
+    }
 
     syncPreferencesSurveyModalUi();
-    openLayoutModal('globalPreferencesSurveyModal');
+    openLayoutModal(
+      'globalPreferencesSurveyModal',
+      safeOpts.returnFocusEl instanceof HTMLElement ? safeOpts.returnFocusEl : null
+    );
   }
 
   /**
@@ -2412,14 +2458,20 @@
   function closeLayoutModal(modalId) {
     const modal = document.getElementById(modalId);
     if (!modal) return;
-    modal.classList.remove('show');
+    modal.classList.remove('show', 'layout-modal--nested');
+    if (modalId === 'globalPreferencesSurveyModal') {
+      surveyDraftState.onConfirm = null;
+      surveyDraftState.preserveOpenModals = false;
+    }
     if (document.querySelectorAll('.layout-modal.show').length === 0) {
       document.body.classList.remove('modal-open');
     }
     setTimeout(() => modal.setAttribute('hidden', 'true'), 180);
-    if (activeModalLastFocus && typeof activeModalLastFocus.focus === 'function') {
-      activeModalLastFocus.focus();
-      activeModalLastFocus = null;
+    const savedFocus = modalReturnFocusMap.get(modalId) || activeModalLastFocus;
+    modalReturnFocusMap.delete(modalId);
+    activeModalLastFocus = null;
+    if (savedFocus && typeof savedFocus.focus === 'function') {
+      savedFocus.focus();
     }
   }
 
@@ -2696,9 +2748,13 @@
       });
     });
     document.addEventListener('keydown', e => {
-      if (e.key === 'Escape') {
-        document.querySelectorAll('.layout-modal.show').forEach(m => closeLayoutModal(m.id));
+      if (e.key !== 'Escape') return;
+      const prefModal = document.getElementById('globalPreferencesSurveyModal');
+      if (prefModal && prefModal.classList.contains('show') && prefModal.classList.contains('layout-modal--nested')) {
+        closeLayoutModal('globalPreferencesSurveyModal');
+        return;
       }
+      document.querySelectorAll('.layout-modal.show').forEach(m => closeLayoutModal(m.id));
     });
 
     const userAvatarBtn = document.getElementById('userAvatarBtn');
@@ -2840,14 +2896,14 @@
   }
 
   /**
-   * Gắn sự kiện tương tác cho modal khảo sát lĩnh vực quan tâm và mục đích sử dụng.
+   * Gắn sự kiện tương tác cho modal bảng biểu cá nhân hóa & chọn lĩnh vực nghiên cứu.
    */
   function initPreferencesSurveyModal() {
     const modal = document.getElementById('globalPreferencesSurveyModal');
     if (!modal) return;
 
     const purposeGrid = document.getElementById('prefPurposeGrid');
-    const moreBtn = document.getElementById('prefMoreTopicsBtn');
+    const topicGrid = document.getElementById('prefTopicGrid');
     const resetBtn = document.getElementById('prefSurveyResetBtn');
     const saveBtn = document.getElementById('prefSurveySaveBtn');
 
@@ -2861,29 +2917,28 @@
       });
     }
 
-    modal.addEventListener('click', event => {
-      const topicBtn = event.target.closest('.pref-topic-chip');
-      if (!topicBtn) return;
-      const tKey = topicBtn.getAttribute('data-topic') || '';
-      if (!VALID_PREF_TOPIC_KEYS.has(tKey)) return;
-      if (surveyDraftState.topics.has(tKey)) {
-        surveyDraftState.topics.delete(tKey);
-      } else {
-        surveyDraftState.topics.add(tKey);
-      }
-      syncPreferencesSurveyModalUi();
-    });
-
-    if (moreBtn) {
-      moreBtn.addEventListener('click', () => {
-        surveyDraftState.extraExpanded = !surveyDraftState.extraExpanded;
+    if (topicGrid) {
+      topicGrid.addEventListener('change', event => {
+        const checkbox = event.target;
+        if (!(checkbox instanceof HTMLInputElement) || !checkbox.classList.contains('js-pref-topic-checkbox')) {
+          return;
+        }
+        const tKey = checkbox.value || '';
+        if (!VALID_PREF_TOPIC_KEYS.has(tKey)) return;
+        if (checkbox.checked) {
+          surveyDraftState.topics.add(tKey);
+        } else {
+          surveyDraftState.topics.delete(tKey);
+        }
         syncPreferencesSurveyModalUi();
       });
     }
 
     if (resetBtn) {
       resetBtn.addEventListener('click', () => {
-        surveyDraftState.purpose = '';
+        if (!surveyDraftState.topicsOnly) {
+          surveyDraftState.purpose = '';
+        }
         surveyDraftState.topics.clear();
         syncPreferencesSurveyModalUi();
       });
@@ -2894,6 +2949,42 @@
         const selectedTopics = PREFERENCE_TOPICS
           .map(item => item.key)
           .filter(key => surveyDraftState.topics.has(key));
+        const selectedLabels = selectedTopics.map(key => PREF_TOPIC_LABEL_MAP[key] || key);
+
+        if (typeof surveyDraftState.onConfirm === 'function') {
+          const confirmHandler = surveyDraftState.onConfirm;
+          confirmHandler({
+            purpose: surveyDraftState.purpose,
+            topics: selectedTopics,
+            labels: selectedLabels
+          });
+          closeLayoutModal('globalPreferencesSurveyModal');
+          return;
+        }
+
+        if (surveyDraftState.topicsOnly) {
+          if (!isUserAuthenticated()) {
+            showToast('Vui lòng đăng nhập để lưu lĩnh vực nghiên cứu.', 'info');
+            closeLayoutModal('globalPreferencesSurveyModal');
+            return;
+          }
+          const currentPrefs = getUserPreferences();
+          saveUserPreferences({
+            purpose: currentPrefs.purpose,
+            topics: selectedTopics,
+            onboardingCompleted: true,
+            bannerDismissed: false
+          });
+          closeLayoutModal('globalPreferencesSurveyModal');
+          showToast(
+            selectedTopics.length > 0
+              ? `Đã lưu ${selectedTopics.length} lĩnh vực nghiên cứu.`
+              : 'Đã xóa danh sách lĩnh vực nghiên cứu.',
+            'success'
+          );
+          return;
+        }
+
         if (!isUserAuthenticated() && selectedTopics.length > 0) {
           showToast('Vui lòng đăng nhập để lưu lĩnh vực nghiên cứu và nhận gợi ý.', 'info');
           saveUserPreferences({
@@ -3339,6 +3430,68 @@
   }
 
   /**
+   * Đánh dấu tài khoản đang đăng nhập đã được hiển thị bảng khảo sát cá nhân hóa lần đầu
+   * bằng cách đặt `needsOnboarding: false` ở cả phiên hiện tại và danh sách tài khoản.
+   */
+  function consumeUserOnboardingFlag() {
+    const activeUser = getCurrentUser();
+    if (!activeUser || !activeUser.needsOnboarding) return;
+
+    const updatedSession = Object.assign({}, activeUser, { needsOnboarding: false });
+    writeStorage('confguide_current_user', updatedSession);
+
+    const users = readStorage('confguide_users', []);
+    if (Array.isArray(users)) {
+      let modified = false;
+      const nextUsers = users.map(candidate => {
+        if (!isMatchingStoredAccount(candidate, updatedSession) || !candidate.needsOnboarding) {
+          return candidate;
+        }
+        modified = true;
+        return Object.assign({}, candidate, { needsOnboarding: false });
+      });
+      if (modified) {
+        writeStorage('confguide_users', nextUsers);
+      }
+    }
+  }
+
+  /**
+   * Tự động mở bảng cá nhân hóa đầy đủ (Mục đích sử dụng + Lĩnh vực nghiên cứu) một lần duy nhất
+   * khi người dùng vừa đăng ký tài khoản mới và bắt đầu phiên sử dụng đầu tiên.
+   * @param {string} currentPage - Tên trang hiện tại.
+   */
+  function maybeTriggerNewUserOnboarding(currentPage) {
+    if (
+      currentPage === 'login.html'
+      || currentPage === 'register.html'
+      || currentPage === '404.html'
+    ) {
+      return;
+    }
+
+    const activeUser = getCurrentUser();
+    if (!activeUser || activeUser.needsOnboarding !== true) return;
+    if (!document.getElementById('globalPreferencesSurveyModal')) return;
+
+    consumeUserOnboardingFlag();
+    saveUserPreferences({ purpose: '', onboardingCompleted: false });
+
+    const launchOnboardingModal = () => {
+      openPreferencesSurveyModal({
+        topicsOnly: false,
+        isOnboarding: true
+      });
+    };
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', () => setTimeout(launchOnboardingModal, 80), { once: true });
+    } else {
+      setTimeout(launchOnboardingModal, 80);
+    }
+  }
+
+  /**
    * Khởi tạo toàn bộ bố cục trang dùng chung khi DOM sẵn sàng.
    */
   function initLayout() {
@@ -3350,6 +3503,7 @@
     renderFooter(page);
     initContactForm();
     layoutInitialized = true;
+    maybeTriggerNewUserOnboarding(page);
   }
 
   if (document.getElementById('site-header')) {

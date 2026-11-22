@@ -9,7 +9,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ConfGuide — Tra cứu Hội nghị Khoa học CNTT tại Việt Nam</title>
-  <meta name="description" content="Tra cứu và lọc hội nghị khoa học Công nghệ thông tin diễn ra tại Việt Nam (bao gồm cả hội nghị quốc tế tổ chức tại Việt Nam) theo phân hạng CORE, tháng diễn ra, hạn nộp bài UTC+7, hình thức tổ chức, địa điểm và lĩnh vực nghiên cứu | ConfGuide.">
+  <meta name="description" content="Tra cứu và lọc hội nghị khoa học Công nghệ thông tin diễn ra tại Việt Nam (bao gồm cả hội nghị quốc tế tổ chức tại Việt Nam) theo phân hạng CORE, thời gian diễn ra, hạn nộp bài UTC+7, hình thức tổ chức, địa điểm và lĩnh vực nghiên cứu | ConfGuide.">
 
   <link rel="icon" type="image/svg+xml" href="images/logo.svg">
   <link rel="stylesheet" href="css/base/base.css">
@@ -40,7 +40,7 @@
       <div class="hero-overlay"></div>
       <div class="container hero-content">
         <h1>Tra cứu Hội nghị Khoa học CNTT tại Việt Nam</h1>
-        <p id="searchInputHint">Tìm kiếm và lọc hội nghị theo phân hạng CORE, tháng diễn ra, hạn nộp bài UTC+7, hình thức tổ chức, địa điểm và lĩnh vực nghiên cứu.</p>
+        <p id="searchInputHint">Tìm kiếm và lọc hội nghị theo phân hạng CORE, thời gian diễn ra, hạn nộp bài UTC+7, hình thức tổ chức, địa điểm và lĩnh vực nghiên cứu.</p>
 
         <div class="search-box__container">
           <form class="search-box js-search-form" id="searchForm" role="search">
@@ -108,27 +108,34 @@
               </div>
             </div>
 
-            <!-- 2. Tháng diễn ra -->
+            <!-- 2. Thời gian diễn ra -->
             <div class="filter-group filter-accordion js-filter-accordion open" data-group="month">
               <h3 class="filter-group__heading">
                 <button type="button" class="filter-group__toggle accordion-head js-filter-toggle js-accordion-head" id="accHeadMonth" aria-expanded="true" aria-controls="accBodyMonth">
-                  <span class="accordion-head__title filter-group__title">Tháng diễn ra</span>
+                  <span class="accordion-head__title filter-group__title">Thời gian diễn ra</span>
                   <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
                 </button>
               </h3>
               <div class="filter-group__panel accordion-body" id="accBodyMonth" role="region" aria-labelledby="accHeadMonth">
                 <fieldset class="filter-group__fieldset filter-fieldset">
-                  <legend class="sr-only">Lọc theo tháng tổ chức hội nghị</legend>
-                  <div class="filter-field-group">
-                    <label class="filter-sub-label" for="monthSelect">Chọn tháng tổ chức:</label>
-                    <select id="monthSelect" class="filter-select js-filter-month" name="month">
-                      <option value="">Tất cả các tháng</option>
-                    </select>
+                  <legend class="sr-only">Lọc theo khoảng thời gian diễn ra hội nghị</legend>
+                  <div class="date-range date-range--inline">
+                    <div class="date-range__inline-row">
+                      <label class="date-range__inline-field" for="eventFromDate">
+                        <span class="sr-only">Thời gian diễn ra từ ngày</span>
+                        <input type="date" id="eventFromDate" class="js-event-date-from" name="eventFrom" title="Từ ngày" aria-describedby="eventDateRangeError">
+                      </label>
+                      <span class="date-range__separator" aria-hidden="true">&ndash;</span>
+                      <label class="date-range__inline-field" for="eventToDate">
+                        <span class="sr-only">Thời gian diễn ra đến ngày</span>
+                        <input type="date" id="eventToDate" class="js-event-date-to" name="eventTo" title="Đến ngày" aria-describedby="eventDateRangeError">
+                      </label>
+                    </div>
+                    <p id="eventDateRangeError" class="date-range__error field-error js-event-date-range-error" role="alert" hidden></p>
                   </div>
                   <label class="filter-option js-filter-option check-row check-row--compact js-option-row" data-option-key="ongoing:1" id="ongoingOptionRow" hidden>
                     <input type="checkbox" id="ongoingCheck" class="filter-option__input js-filter-input js-filter-ongoing" data-group="month" name="ongoing" value="1">
                     <span class="filter-option__text check-row__label">Đang diễn ra</span>
-                    <span class="filter-option__count check-row__count js-filter-count" data-count-for="ongoing:1">(0)</span>
                   </label>
                 </fieldset>
               </div>
@@ -148,27 +155,22 @@
                   <label class="filter-option js-filter-option check-row js-option-row" data-option-key="cfp:all">
                     <input type="checkbox" class="filter-option__input js-filter-input js-filter-cfp" data-group="cfp" value="all" checked>
                     <span class="filter-option__text check-row__label">Tất cả trạng thái</span>
-                    <span class="filter-option__count check-row__count js-filter-count" data-count-for="cfp:all">(0)</span>
                   </label>
                   <label class="filter-option js-filter-option check-row js-option-row" data-option-key="cfp:open">
                     <input type="checkbox" class="filter-option__input js-filter-input js-filter-cfp" data-group="cfp" value="open">
                     <span class="filter-option__text check-row__label">Đang mở nộp bài</span>
-                    <span class="filter-option__count check-row__count js-filter-count" data-count-for="cfp:open">(0)</span>
                   </label>
                   <label class="filter-option js-filter-option check-row js-option-row" data-option-key="cfp:closingSoon" title="Sắp hết hạn (&le; 14 ngày)">
                     <input type="checkbox" class="filter-option__input js-filter-input js-filter-cfp" data-group="cfp" value="closingSoon" aria-label="Sắp hết hạn (&le; 14 ngày)">
                     <span class="filter-option__text check-row__label">Sắp hết hạn (&le; 14 ngày)</span>
-                    <span class="filter-option__count check-row__count js-filter-count" data-count-for="cfp:closingSoon">(0)</span>
                   </label>
                   <label class="filter-option js-filter-option check-row js-option-row" data-option-key="cfp:closed">
                     <input type="checkbox" class="filter-option__input js-filter-input js-filter-cfp" data-group="cfp" value="closed">
                     <span class="filter-option__text check-row__label">Đã đóng đợt nộp</span>
-                    <span class="filter-option__count check-row__count js-filter-count" data-count-for="cfp:closed">(0)</span>
                   </label>
                   <label class="filter-option js-filter-option check-row js-option-row" data-option-key="cfp:unknown">
                     <input type="checkbox" class="filter-option__input js-filter-input js-filter-cfp" data-group="cfp" value="unknown">
                     <span class="filter-option__text check-row__label">Chưa rõ hạn nộp</span>
-                    <span class="filter-option__count check-row__count js-filter-count" data-count-for="cfp:unknown">(0)</span>
                   </label>
 
                   <div class="date-range">
@@ -218,22 +220,18 @@
                   <label class="filter-option js-filter-option check-row js-option-row" data-option-key="city:all">
                     <input type="checkbox" class="filter-option__input js-filter-input js-filter-city" data-group="where" name="city" value="all" checked>
                     <span class="filter-option__text check-row__label">Tất cả địa điểm</span>
-                    <span class="filter-option__count check-row__count js-filter-count" data-count-for="city:all">(0)</span>
                   </label>
                   <label class="filter-option js-filter-option check-row js-option-row" data-option-key="city:ha-noi">
                     <input type="checkbox" class="filter-option__input js-filter-input js-filter-city" data-group="where" name="city" value="ha-noi">
                     <span class="filter-option__text check-row__label">Hà Nội</span>
-                    <span class="filter-option__count check-row__count js-filter-count" data-count-for="city:ha-noi">(0)</span>
                   </label>
                   <label class="filter-option js-filter-option check-row js-option-row" data-option-key="city:ho-chi-minh">
                     <input type="checkbox" class="filter-option__input js-filter-input js-filter-city" data-group="where" name="city" value="ho-chi-minh">
                     <span class="filter-option__text check-row__label">TP. Hồ Chí Minh</span>
-                    <span class="filter-option__count check-row__count js-filter-count" data-count-for="city:ho-chi-minh">(0)</span>
                   </label>
                   <label class="filter-option js-filter-option check-row js-option-row" data-option-key="city:other">
                     <input type="checkbox" class="filter-option__input js-filter-input js-filter-city" data-group="where" name="city" value="other">
                     <span class="filter-option__text check-row__label">Tỉnh / thành khác</span>
-                    <span class="filter-option__count check-row__count js-filter-count" data-count-for="city:other">(0)</span>
                   </label>
                 </fieldset>
               </div>
@@ -251,9 +249,6 @@
                 <fieldset class="filter-group__fieldset filter-fieldset" id="topicFieldset">
                   <legend class="sr-only">Chọn một hoặc nhiều lĩnh vực nghiên cứu</legend>
                 </fieldset>
-                <button type="button" class="topic-toggle-btn js-toggle-more-topics" id="btnToggleMoreTopics" aria-expanded="false" aria-controls="topicFieldset" hidden>
-                  Xem thêm (0)
-                </button>
               </div>
             </div>
           </div>
@@ -277,9 +272,6 @@
 
           <!-- Vùng thông báo trạng thái kết quả (chờ kết quả ổn định mới thông báo) -->
           <p class="search-results__status js-search-status sr-only" role="status"></p>
-
-          <!-- Thanh gợi ý cá nhân hóa theo lĩnh vực & mục đích sử dụng -->
-          <div class="search-prefs-banner js-search-prefs-banner" id="searchPrefsPrompt" hidden></div>
 
           <!-- Nhóm chip bộ lọc đang áp dụng -->
           <div class="filter-chips-wrapper js-filter-chips-wrapper" id="filterChipsWrapper" hidden>

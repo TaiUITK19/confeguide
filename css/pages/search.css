@@ -942,6 +942,31 @@ body.dark {
   border-top: 1px dashed var(--border);
 }
 
+/* Bộ chọn khoảng thời gian diễn ra gọn trên 1 dòng (Từ ngày – Đến ngày) */
+.date-range--inline {
+  padding-top: 0;
+  margin-top: 0;
+  border-top: none;
+}
+
+.date-range__inline-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 6px;
+}
+
+.date-range__inline-field {
+  min-width: 0;
+}
+
+.date-range__separator {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+  user-select: none;
+}
+
 .date-range__grid {
   display: flex;
   flex-direction: column;
@@ -973,6 +998,23 @@ body.dark {
   color: var(--text);
   font-size: 13px;
   font-family: inherit;
+}
+
+.date-range--inline input[type="date"] {
+  padding: 6px 6px;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.date-range--inline input[type="date"]::-webkit-datetime-edit,
+.date-range--inline input[type="date"]::-webkit-datetime-edit-fields-wrapper {
+  padding: 0;
+}
+
+.date-range--inline input[type="date"]::-webkit-calendar-picker-indicator {
+  margin-left: 2px;
+  padding: 0;
+  cursor: pointer;
 }
 
 .date-range input[type="date"][aria-invalid="true"] {
@@ -2344,154 +2386,5 @@ body.dark {
     flex-basis: 100%;
     text-align: center;
     margin-left: 0;
-  }
-}
-
-/* ================= GỢI Ý CÁ NHÂN HÓA TRÊN TRANG TRA CỨU ================= */
-.search-prefs-banner {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 14px;
-  padding: 12px 16px;
-  margin-bottom: 16px;
-  border-radius: var(--radius);
-  border: 1px solid color-mix(in oklch, var(--primary) 26%, var(--border));
-  background: linear-gradient(135deg, var(--primary-soft) 0%, var(--surface) 72%);
-  box-shadow: var(--shadow-sm);
-}
-
-.search-prefs-banner--neutral {
-  background: var(--surface);
-  border-color: var(--border);
-  box-shadow: none;
-}
-
-.search-prefs-banner__info {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  min-width: 0;
-  flex: 1;
-}
-
-.search-prefs-banner__title {
-  margin: 0;
-  font-size: 13.5px;
-  font-weight: 700;
-  color: var(--text);
-  line-height: 1.4;
-}
-
-.search-prefs-banner__desc {
-  margin: 0;
-  font-size: 13px;
-  color: var(--text-muted);
-  line-height: 1.45;
-}
-
-.search-prefs-banner__chips {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.search-prefs-chip {
-  display: inline-flex;
-  align-items: center;
-  padding: 3px 10px;
-  border-radius: var(--radius-pill);
-  font-size: 12px;
-  font-weight: 600;
-  background: var(--primary-soft);
-  color: var(--primary);
-  border: 1px solid color-mix(in oklch, var(--primary) 26%, var(--surface));
-}
-
-.search-prefs-chip--purpose {
-  background: var(--status-open-bg);
-  color: var(--status-open-text);
-  border-color: var(--status-open-border);
-}
-
-.search-prefs-banner__actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-shrink: 0;
-}
-
-.search-prefs-banner__btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 36px;
-  padding: 7px 13px;
-  border-radius: var(--radius-sm);
-  font-family: inherit;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: background-color 140ms ease, border-color 140ms ease, color 140ms ease;
-}
-
-.search-prefs-banner__btn--primary {
-  border: 1px solid var(--primary);
-  background: var(--primary);
-  color: var(--on-primary);
-}
-
-.search-prefs-banner__btn--primary:hover {
-  background: var(--primary-hover);
-  border-color: var(--primary-hover);
-}
-
-.search-prefs-banner__btn--secondary {
-  border: 1px solid var(--border-strong);
-  background: var(--surface);
-  color: var(--text);
-}
-
-.search-prefs-banner__btn--secondary:hover {
-  border-color: var(--primary);
-  color: var(--primary);
-}
-
-.search-prefs-banner__dismiss {
-  background: transparent;
-  border: 1px solid transparent;
-  color: var(--text-muted);
-  width: 32px;
-  height: 32px;
-  border-radius: 6px;
-  font-size: 20px;
-  line-height: 1;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-}
-
-.search-prefs-banner__dismiss:hover {
-  background: var(--surface-muted);
-  color: var(--text);
-}
-
-@media (max-width: 768px) {
-  .search-prefs-banner {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .search-prefs-banner__actions {
-    width: 100%;
-    flex-wrap: wrap;
-  }
-
-  .search-prefs-banner__btn {
-    min-height: 44px;
-    flex: 1 1 auto;
   }
 }

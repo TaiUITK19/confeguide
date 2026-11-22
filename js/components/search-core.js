@@ -540,25 +540,35 @@
   }
 
   /**
-   * Chuẩn hóa khóa hình thức tổ chức thực tế từ JSON (`offline`, `hybrid`, `online`, `unknown`).
+   * Chuẩn hóa khóa hình thức tổ chức về 3 nhóm hợp lệ (`offline`, `online`, `hybrid`)
+   * hoặc `unknown` nếu hội nghị chưa cập nhật hình thức tổ chức (không gộp vào nhóm lọc).
    * @param {Object|string} confOrMode - Đối tượng hội nghị hoặc giá trị mode.
-   * @returns {'offline'|'hybrid'|'online'|'unknown'} Khóa hình thức tổ chức chuẩn hóa.
+   * @returns {'offline'|'online'|'hybrid'|'unknown'} Khóa hình thức tổ chức chuẩn hóa.
    */
   function normalizeModeKey(confOrMode) {
+    if (confOrMode && typeof confOrMode === 'object' && typeof confOrMode.modeKey === 'string') {
+      const existing = confOrMode.modeKey.trim().toLowerCase();
+      if (existing === 'offline' || existing === 'online' || existing === 'hybrid' || existing === 'unknown') {
+        return existing;
+      }
+    }
     const rawMode = confOrMode && typeof confOrMode === 'object'
-      ? (confOrMode.modeKey || confOrMode.attendance_mode || confOrMode.attendanceMode || '')
+      ? (confOrMode.attendance_mode || confOrMode.attendanceMode || confOrMode.mode || '')
       : confOrMode;
     const rawLabel = confOrMode && typeof confOrMode === 'object'
-      ? (confOrMode.attendance_label || confOrMode.attendanceLabel || '')
+      ? (confOrMode.attendance_label || confOrMode.attendanceLabel || confOrMode.format || '')
       : '';
-    const token = normalizeText(rawMode || rawLabel).trim();
-    if (!token) return 'unknown';
-    if (token === 'offline' || token === 'in-person' || token === 'inperson' || token.includes('truc tiep')) {
-      if (token.includes('ket hop') || token.includes('hybrid') || token.includes('truc tuyen')) return 'hybrid';
-      return 'offline';
+    const token = normalizeText(`${rawMode || ''} ${rawLabel || ''}`).trim();
+    if (!token || token === 'unknown' || token.includes('chua cap nhat')) {
+      return 'unknown';
     }
-    if (token === 'hybrid' || token.includes('ket hop')) return 'hybrid';
-    if (token === 'online' || token.includes('truc tuyen') || token.includes('virtual')) return 'online';
+    const hasOffline = /\b(offline|in-person|inperson)\b/.test(token) || token.includes('truc tiep');
+    const hasOnline = /\b(online|virtual)\b/.test(token) || token.includes('truc tuyen');
+    if (/\bhybrid\b/.test(token) || token.includes('ket hop') || (hasOffline && hasOnline)) {
+      return 'hybrid';
+    }
+    if (hasOffline) return 'offline';
+    if (hasOnline) return 'online';
     return 'unknown';
   }
 
@@ -592,12 +602,20 @@
   }
 
   /**
-   * Kiểm tra hội nghị có khớp điều kiện Tháng diễn ra / Đang diễn ra hay không.
+   * Kiểm tra hội nghị có khớp khoảng thời gian diễn ra (`eventFrom` – `eventTo`), `month` hoặc trạng thái Đang diễn ra hay không.
+   * Hai khoảng `[startDate, endDate]` và `[eventFrom, eventTo]` giao nhau thì được tính là khớp.
    * @param {Object} conf - Đối tượng hội nghị.
    * @param {Object} filterState - Trạng thái bộ lọc.
    * @returns {boolean} True nếu thỏa mãn.
    */
   function matchesMonthGroup(conf, filterState) {
+    if (filterState.eventFrom || filterState.eventTo) {
+      const confStart = conf.startDate || conf.start_date || conf.endDate || conf.end_date || '';
+      const confEnd = conf.endDate || conf.end_date || confStart;
+      if (!confStart || !confEnd) return false;
+      if (filterState.eventFrom && confEnd < filterState.eventFrom) return false;
+      if (filterState.eventTo && confStart > filterState.eventTo) return false;
+    }
     if (filterState.month && conf.eventMonth !== filterState.month) return false;
     if (filterState.ongoing && conf.eventPhase !== 'ongoing') return false;
     return true;
@@ -668,12 +686,30 @@
     if (enabledGroups.where !== false && !matchesCityGroup(conf, filterState.city)) return false;
 
     if (enabledGroups.what !== false && Array.isArray(filterState.topics) && filterState.topics.length > 0) {
-      const confTopics = Array.isArray(conf.topics)
-        ? conf.topics
-        : normalizeTopicFields(conf).map(item => item.key);
-      if (!filterState.topics.some(tKey => confTopics.includes(tKey))) return false;
+      const featuredKeys = Array.isArray(filterState.featuredTopicKeys)
+        ? filterState.featuredTopicKeys
+        : (Array.isArray(conf.featuredTopicKeys) ? conf.featuredTopicKeys : []);
+      if (!filterState.topics.some(tKey => matchesTopicValue(conf, tKey, featuredKeys))) return false;
     }
     return true;
+  }
+
+  /**
+   * Kiểm tra hội nghị có khớp một khóa lọc lĩnh vực đơn hoặc nhóm `other` (gồm các lĩnh vực còn lại ngoài top 3 nổi bật).
+   * @param {Object} conf - Đối tượng hội nghị.
+   * @param {string} targetTopicKey - Khóa lĩnh vực mục tiêu hoặc `'other'`.
+   * @param {Array<string>} featuredTopicKeys - Danh sách khóa 3 lĩnh vực nổi bật.
+   * @returns {boolean} True nếu khớp.
+   */
+  function matchesTopicValue(conf, targetTopicKey, featuredTopicKeys) {
+    const confTopics = Array.isArray(conf.topics)
+      ? conf.topics
+      : normalizeTopicFields(conf).map(item => item.key);
+    if (targetTopicKey === 'other') {
+      const featuredSet = new Set(Array.isArray(featuredTopicKeys) ? featuredTopicKeys : []);
+      return confTopics.some(key => !featuredSet.has(key));
+    }
+    return confTopics.includes(targetTopicKey);
   }
 
   /**
@@ -722,10 +758,10 @@
       return {
         subState,
         matchesOption: conf => {
-          const confTopics = Array.isArray(conf.topics)
-            ? conf.topics
-            : normalizeTopicFields(conf).map(item => item.key);
-          return confTopics.includes(optionValue);
+          const featuredKeys = Array.isArray(filterState.featuredTopicKeys)
+            ? filterState.featuredTopicKeys
+            : (Array.isArray(conf.featuredTopicKeys) ? conf.featuredTopicKeys : []);
+          return matchesTopicValue(conf, optionValue, featuredKeys);
         }
       };
     }
@@ -864,10 +900,10 @@
         patch: { ranks: [] }
       },
       {
-        active: Boolean(filterState.month || filterState.ongoing),
+        active: Boolean(filterState.eventFrom || filterState.eventTo || filterState.month || filterState.ongoing),
         groupKey: 'month',
-        label: 'bộ lọc Tháng diễn ra',
-        patch: { month: '', ongoing: false }
+        label: 'bộ lọc Thời gian diễn ra',
+        patch: { eventFrom: '', eventTo: '', month: '', ongoing: false }
       },
       {
         active: hasArrayChoice(filterState.cfp, true) || Boolean(filterState.dateFrom || filterState.dateTo),

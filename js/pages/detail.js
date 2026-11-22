@@ -3,8 +3,8 @@
  * Trang sử dụng: detail.html
  * Phụ thuộc: js/core/layout.js (ConfGuideUtils), js/components/compare.js
  * Chức năng: Quản lý tải dữ liệu hội nghị theo `?id=<slug>`, hiển thị bố cục ưu tiên hành động chính,
- * đếm ngược mốc tiếp theo (1 bộ `setInterval` duy nhất), timeline đầy đủ mốc hạn múi giờ UTC+7/AoE
- * và thêm lịch Google Calendar.
+ * đếm ngược mốc tiếp theo (1 bộ `setInterval` duy nhất), timeline đầy đủ mốc hạn múi giờ UTC+7/AoE,
+ * thông tin học thuật (Xếp hạng, Lĩnh vực nghiên cứu, Xác minh lần cuối) và thêm lịch Google Calendar.
  */
 
 (function () {
@@ -58,6 +58,8 @@
       formatRangeVi: s => s || '',
       formatConferenceMode: () => 'Chưa cập nhật',
       formatConferenceEventDate: () => 'Chưa cập nhật',
+      extractTopicLabels: c => (c && Array.isArray(c.topic_labels) ? c.topic_labels : (c && Array.isArray(c.fields) ? c.fields : [])),
+      extractConferenceRank: r => (r && typeof r === 'object' ? String(r.core || r.ccf || '').trim() : String(r || '').trim()),
       getAoETimeRemaining: () => ({ days: 0, hours: 0, minutes: 0, seconds: 0, isPassed: true }),
       getGoogleCalendarUrl: () => 'https://calendar.google.com/calendar/render',
       showToast: () => {}
@@ -646,6 +648,85 @@
   }
 
   /**
+   * Chuẩn hóa chuỗi hiển thị xếp hạng học thuật từ đối tượng `rankInfo` (CORE/ICORE, CCF) hoặc chuỗi `rank`.
+   * @param {Object} conf Đối tượng hội nghị chuẩn hóa.
+   * @param {Object} utils Tập tiện ích ConfGuideUtils.
+   * @returns {string} Chuỗi xếp hạng dễ đọc hoặc "Chưa xếp hạng" / "Chưa cập nhật".
+   */
+  function formatAcademicRankValue(conf, utils) {
+    if (!conf || typeof conf !== 'object') return 'Chưa cập nhật';
+
+    const rankObj = conf.rankInfo && typeof conf.rankInfo === 'object'
+      ? conf.rankInfo
+      : (conf.rank && typeof conf.rank === 'object' ? conf.rank : null);
+
+    if (rankObj) {
+      const parts = [];
+      const coreVal = rankObj.core !== undefined && rankObj.core !== null ? String(rankObj.core).trim() : '';
+      const coreSource = rankObj.core_source !== undefined && rankObj.core_source !== null ? String(rankObj.core_source).trim() : '';
+      const ccfVal = rankObj.ccf !== undefined && rankObj.ccf !== null ? String(rankObj.ccf).trim() : '';
+
+      if (coreVal && !/^unranked$/i.test(coreVal)) {
+        const coreLabel = /^(a\*|a|b|c)$/i.test(coreVal) ? `CORE ${coreVal.toUpperCase()}` : coreVal;
+        parts.push(coreSource ? `${coreLabel} (${coreSource})` : coreLabel);
+      }
+      if (ccfVal && !/^unranked$/i.test(ccfVal)) {
+        parts.push(/^ccf\b/i.test(ccfVal) ? ccfVal : `CCF ${ccfVal.toUpperCase()}`);
+      }
+
+      if (parts.length > 0) return parts.join(' · ');
+      return 'Chưa xếp hạng';
+    }
+
+    const rawRank = typeof utils.extractConferenceRank === 'function'
+      ? utils.extractConferenceRank(conf.rank)
+      : String(conf.rank || '').trim();
+    if (!rawRank) return 'Chưa cập nhật';
+    if (/^unranked$/i.test(rawRank)) return 'Chưa xếp hạng';
+    return /^(a\*|a|b|c)$/i.test(rawRank) ? `CORE ${rawRank.toUpperCase()}` : rawRank;
+  }
+
+  /**
+   * Render phần Thông tin học thuật với 3 mục: Xếp hạng, Lĩnh vực nghiên cứu và Xác minh lần cuối.
+   * @param {Object} conf Đối tượng hội nghị chuẩn hóa.
+   */
+  function renderAcademicInfo(conf) {
+    const root = document.querySelector('.js-detail-root');
+    if (!root || !conf) return;
+
+    const utils = getDetailUtils();
+    const esc = utils.escapeHtml;
+
+    const rankEl = root.querySelector('.js-spec-rank');
+    if (rankEl) {
+      rankEl.textContent = formatAcademicRankValue(conf, utils);
+    }
+
+    const fieldsEl = root.querySelector('.js-spec-fields');
+    const realFields = typeof utils.extractTopicLabels === 'function'
+      ? utils.extractTopicLabels(conf)
+      : (Array.isArray(conf.fields) ? conf.fields.map(f => String(f).trim()).filter(Boolean) : []);
+    if (fieldsEl) {
+      fieldsEl.textContent = realFields.length > 0 ? realFields.join(', ') : 'Chưa cập nhật';
+    }
+
+    const verifiedEl = root.querySelector('.js-spec-verified');
+    const rawVerified = String(
+      conf.lastVerified
+      || conf.last_verified
+      || (conf.crawled_at ? String(conf.crawled_at).slice(0, 10) : '')
+    ).trim();
+    if (verifiedEl) {
+      if (rawVerified) {
+        const formattedVerified = utils.formatDateVi(rawVerified);
+        verifiedEl.innerHTML = `<time datetime="${esc(rawVerified)}">${esc(formattedVerified)}</time>`;
+      } else {
+        verifiedEl.textContent = 'Chưa cập nhật';
+      }
+    }
+  }
+
+  /**
    * Hàm dùng chung dựng thẻ hội nghị dạng Grid (mỗi thẻ là <article> có đúng 1 thẻ <a> phủ ::after, hiển thị hạn nộp UTC+7).
    * Được đăng ký vào window.ConfGuideUtils.renderGridConferenceCard để tái sử dụng.
    * @param {Object} item Đối tượng hội nghị đã chuẩn hóa.
@@ -897,6 +978,7 @@
     renderHeader(currentConference);
     renderTimeline(currentConference);
     renderOverview(currentConference);
+    renderAcademicInfo(currentConference);
     renderNextDeadlineCard(currentConference);
     renderRelated(currentConference);
 

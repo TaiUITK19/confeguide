@@ -202,6 +202,22 @@
   }
 
   /**
+   * Kết xuất danh sách nhãn lĩnh vực nghiên cứu vào phần tử container chỉ định.
+   * @param {HTMLElement|null} containerEl - Phần tử chứa các pill lĩnh vực.
+   * @param {string} fieldsText - Chuỗi lĩnh vực ngăn cách bằng dấu phẩy.
+   */
+  function renderFieldsChips(containerEl, fieldsText) {
+    if (!containerEl) return;
+    const rawText = typeof fieldsText === 'string' ? fieldsText : '';
+    const fieldList = typeof utils.parseTopicDisplayLabelsFromText === 'function'
+      ? utils.parseTopicDisplayLabelsFromText(rawText)
+      : (rawText ? rawText.split(',').map(f => f.trim()).filter(Boolean) : []);
+    containerEl.innerHTML = fieldList.length > 0
+      ? fieldList.map(f => `<span class="profile-field-pill">${escapeHtml(f)}</span>`).join('')
+      : '<span class="profile-field-pill profile-field-pill--empty">Chưa chọn lĩnh vực nghiên cứu</span>';
+  }
+
+  /**
    * Render toàn bộ thông tin hồ sơ người dùng lên giao diện và điền sẵn dữ liệu vào form chỉnh sửa.
    */
   function renderUserProfile() {
@@ -251,15 +267,8 @@
       scholarLink.classList.toggle('is-hidden', !hasValidScholar);
     }
 
-    const fieldsContainer = document.getElementById('profileFieldsChips');
-    if (fieldsContainer) {
-      const fieldList = fieldsRaw
-        ? fieldsRaw.split(',').map(f => f.trim()).filter(Boolean)
-        : [];
-      fieldsContainer.innerHTML = fieldList.length > 0
-        ? fieldList.map(f => `<span class="profile-field-pill">${escapeHtml(f)}</span>`).join('')
-        : '<span class="profile-field-pill profile-field-pill--empty">Chưa chọn lĩnh vực nghiên cứu</span>';
-    }
+    renderFieldsChips(document.getElementById('profileFieldsChips'), fieldsRaw);
+    renderFieldsChips(document.getElementById('editProfileFieldsChips'), fieldsRaw);
 
     const fieldValues = {
       editFullName: fullName,
@@ -436,8 +445,33 @@
     });
 
     document.addEventListener('keydown', e => {
+      const prefModal = document.getElementById('globalPreferencesSurveyModal');
+      if (prefModal && prefModal.classList.contains('show')) return;
       if (e.key === 'Escape' && modal.classList.contains('show')) closeModal();
     });
+
+    const editChooseTopicsBtn = document.getElementById('editModalChooseTopicsBtn');
+    if (editChooseTopicsBtn) {
+      editChooseTopicsBtn.addEventListener('click', () => {
+        if (typeof utils.openPreferencesSurveyModal !== 'function') return;
+        const fieldsInput = document.getElementById('editFields');
+        const currentText = fieldsInput ? fieldsInput.value : '';
+        const initialTopicKeys = typeof utils.parseTopicKeysFromText === 'function'
+          ? utils.parseTopicKeysFromText(currentText)
+          : [];
+        utils.openPreferencesSurveyModal({
+          topicsOnly: true,
+          preserveOpenModals: true,
+          initialTopicKeys,
+          returnFocusEl: editChooseTopicsBtn,
+          onConfirm: ({ labels }) => {
+            const nextText = Array.isArray(labels) ? labels.join(', ') : '';
+            if (fieldsInput) fieldsInput.value = nextText;
+            renderFieldsChips(document.getElementById('editProfileFieldsChips'), nextText);
+          }
+        });
+      });
+    }
 
     [
       [fullNameInput, validators.validateFullName],
@@ -998,6 +1032,22 @@
     renderUserProfile();
     initEditProfileModal();
     initAvatarUpload();
+
+    const profileChooseBtn = document.getElementById('profileChooseTopicsBtn');
+    if (profileChooseBtn) {
+      profileChooseBtn.addEventListener('click', () => {
+        if (typeof utils.openPreferencesSurveyModal === 'function') {
+          utils.openPreferencesSurveyModal({
+            topicsOnly: true,
+            returnFocusEl: profileChooseBtn
+          });
+        }
+      });
+    }
+
+    window.addEventListener('confguide:preferences-changed', () => {
+      renderUserProfile();
+    });
     if (document.getElementById('savedConferencesList')) {
       initSavedSection();
     }

@@ -94,8 +94,17 @@
             <!-- Lĩnh vực nghiên cứu -->
             <div class="profile-fields-wrap">
               <span class="profile-fields-label">Lĩnh vực nghiên cứu:</span>
-              <div class="profile-fields-chips" id="profileFieldsChips">
-                <!-- Nạp động -->
+              <div class="profile-fields-body">
+                <div class="profile-fields-chips" id="profileFieldsChips">
+                  <!-- Nạp động -->
+                </div>
+                <button type="button" class="btn btn-secondary btn--compact-sm profile-fields-add-btn js-profile-choose-topics" id="profileChooseTopicsBtn">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                  </svg>
+                  <span>Thêm lĩnh vực nghiên cứu</span>
+                </button>
               </div>
             </div>
 
@@ -233,9 +242,20 @@
           </div>
 
           <div class="modal-form-group">
-            <label for="editFields">Lĩnh vực nghiên cứu chính</label>
-            <input type="text" id="editFields" class="modal-input">
-            <span class="modal-hint">Ngăn cách các lĩnh vực nghiên cứu bằng dấu phẩy (,).</span>
+            <span class="modal-field-label" id="editFieldsLabel">Lĩnh vực nghiên cứu chính</span>
+            <input type="hidden" id="editFields" value="">
+            <div class="profile-modal-fields-picker" aria-labelledby="editFieldsLabel">
+              <div class="profile-fields-chips" id="editProfileFieldsChips">
+                <!-- Nạp động -->
+              </div>
+              <button type="button" class="btn btn-secondary btn--compact-sm profile-fields-add-btn js-edit-choose-topics" id="editModalChooseTopicsBtn">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <line x1="12" y1="5" x2="12" y2="19"></line>
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                <span>Thêm lĩnh vực nghiên cứu</span>
+              </button>
+            </div>
           </div>
 
           <div class="modal-form-group">

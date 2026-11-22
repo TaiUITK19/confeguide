@@ -382,6 +382,7 @@
       email: matchedUser.email,
       name: matchedUser.name,
       role: matchedUser.role || 'user',
+      needsOnboarding: Boolean(matchedUser.needsOnboarding),
       loggedInAt: new Date().toISOString()
     });
     writeTextStorage(localStorage, CURRENT_USER_KEY, JSON.stringify(sessionUser));
@@ -519,6 +520,7 @@
           name: nameField.value.trim(),
           role: 'user',
           passwordHash: hashed,
+          needsOnboarding: true,
           createdAt: new Date().toISOString()
         });
         writeTextStorage(localStorage, USERS_STORAGE_KEY, JSON.stringify(users));
