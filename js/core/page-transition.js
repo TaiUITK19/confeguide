@@ -41,7 +41,7 @@
   const NON_HTML_EXT_RE = /\.(pdf|zip|rar|7z|ics|json|csv|xml|png|jpe?g|webp|gif|svg|ico|mp4|mp3|webm)$/i;
   const KNOWN_HTML_PAGES = new Set([
     'index.html', 'search.html', 'detail.html', 'tracker.html', 'profile.html',
-    'about.html', 'contact.html', 'login.html', 'register.html', 'terms.html', 'privacy.html', '404.html'
+    'about.html', 'contact.html', 'login.html', 'register.html', '404.html'
   ]);
   const isFileProtocol = window.location.protocol === 'file:';
 

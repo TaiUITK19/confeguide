@@ -58,8 +58,17 @@
       formatRangeVi: s => s || '',
       formatConferenceMode: () => 'Chưa cập nhật',
       formatConferenceEventDate: () => 'Chưa cập nhật',
-      extractTopicLabels: c => (c && Array.isArray(c.topic_labels) ? c.topic_labels : (c && Array.isArray(c.fields) ? c.fields : [])),
-      extractConferenceRank: r => (r && typeof r === 'object' ? String(r.core || r.ccf || '').trim() : String(r || '').trim()),
+      extractTopicLabels: conf => {
+        if (!conf) return [];
+        if (Array.isArray(conf.topic_labels)) return conf.topic_labels;
+        return Array.isArray(conf.fields) ? conf.fields : [];
+      },
+      extractConferenceRank: rank => {
+        if (rank && typeof rank === 'object') {
+          return String(rank.core || rank.ccf || '').trim();
+        }
+        return String(rank || '').trim();
+      },
       getAoETimeRemaining: () => ({ days: 0, hours: 0, minutes: 0, seconds: 0, isPassed: true }),
       getGoogleCalendarUrl: () => 'https://calendar.google.com/calendar/render',
       showToast: () => {}
@@ -173,21 +182,22 @@
    * Tạo đối tượng dữ liệu sự kiện lịch chuẩn hóa cho một mốc hạn nộp của hội nghị (DRY).
    * @param {Object} conf Đối tượng hội nghị hiện tại.
    * @param {Object} milestone Đối tượng mốc hạn nộp ({ key, name, shortName, date }).
-   * @returns {{ title: string, description: string, location: string, date: string, fileSlug: string }|null}
+   * @returns {{ title: string, description: string, location: string, date: string }|null}
    */
   function buildCalendarEvent(conf, milestone) {
     if (!conf || !milestone || !milestone.date || milestone.hasValidDate === false) return null;
     const utils = getDetailUtils();
-    const confId = utils.getConferenceId(conf) || 'confguide';
     const dlText = utils.formatDeadlineVi
       ? utils.formatDeadlineVi(milestone.date, { includeAoEOrigin: true })
       : milestone.date;
     const label = milestone.shortName || milestone.name || 'Deadline';
     const site = conf.website || conf.website_url || '';
+    const confTitle = conf.fullName || conf.name;
+    const siteSuffix = site ? `\nWebsite: ${site}` : '';
 
     return {
       title: `[ConfGuide] ${conf.name} - Hạn ${label}`,
-      description: `Hạn mốc ${milestone.name || label} của hội nghị ${conf.fullName || conf.name}: ${dlText}.${site ? `\nWebsite: ${site}` : ''}`,
+      description: `Hạn mốc ${milestone.name || label} của hội nghị ${confTitle}: ${dlText}.${siteSuffix}`,
       location: conf.location || '',
       date: milestone.date
     };
@@ -267,15 +277,20 @@
    */
   function renderHeaderBadgesAndTags(root, conf, utils) {
     const rankBadge = root.querySelector('.js-rank-badge');
+    const fallbackRank = conf && conf.rank && typeof conf.rank === 'object'
+      ? String(conf.rank.core || '')
+      : String((conf && conf.rank) || '');
     const rawRank = typeof utils.extractConferenceRank === 'function'
       ? utils.extractConferenceRank(conf.rank)
-      : (conf && conf.rank && typeof conf.rank === 'object' ? String(conf.rank.core || '') : String((conf && conf.rank) || ''));
+      : fallbackRank;
     const realRank = String(rawRank || '').trim().toUpperCase();
     if (rankBadge) {
       if (realRank && !/^UNRANKED$/i.test(realRank)) {
         rankBadge.textContent = /^(A\*|A|B|C)$/i.test(realRank) ? `Rank ${realRank}` : realRank;
         rankBadge.classList.remove('conf-badge--rank-unranked');
-        const sourceName = conf && conf.rank && typeof conf.rank === 'object' ? String(conf.rank.core_source || '').trim() : '';
+        const sourceName = conf && conf.rank && typeof conf.rank === 'object'
+          ? String(conf.rank.core_source || '').trim()
+          : '';
         if (sourceName) rankBadge.title = `Nguồn xếp hạng: ${sourceName}`;
         else rankBadge.removeAttribute('title');
       } else {
@@ -492,16 +507,14 @@
   }
 
   /**
-   * Tạo mã HTML một bước trong danh sách toàn bộ các mốc deadline của hội nghị.
-   * Giữ nguyên tên, loại, nội dung và ngày tháng theo dữ liệu gốc; không tự tạo ngày thay thế khi thiếu/lỗi.
+   * Tính trạng thái hiển thị (modifier class, nhãn trạng thái, giờ UTC+7) cho 1 mốc timeline.
    * @param {Object} milestone - Dữ liệu mốc deadline đã phân tích.
    * @param {number} idx - Chỉ số thứ tự mốc (0..N-1).
-   * @param {Object|null} next - Mốc hợp lệ sắp tới gần nhất để đánh dấu active.
+   * @param {Object|null} next - Mốc hợp lệ sắp tới gần nhất.
    * @param {Object} utils - Tập tiện ích ConfGuideUtils.
-   * @returns {string} Chuỗi HTML `.deadline-timeline__step`.
+   * @returns {Object} Trạng thái đã tính sẵn để ghép vào HTML timeline step.
    */
-  function buildTimelineStepHtml(milestone, idx, next, utils) {
-    const esc = utils.escapeHtml;
+  function resolveTimelineStepState(milestone, idx, next, utils) {
     const rawDate = milestone.rawDate !== undefined && milestone.rawDate !== null
       ? String(milestone.rawDate).trim()
       : String(milestone.date || '').trim();
@@ -522,7 +535,9 @@
     );
 
     let modifierClass = 'deadline-timeline__step--upcoming';
-    let statusLabel = hasValidDate ? `Sắp tới · Còn ${Math.max(0, left ?? 0)} ngày` : 'Chưa xác định ngày';
+    let statusLabel = hasValidDate
+      ? `Sắp tới · Còn ${Math.max(0, left ?? 0)} ngày`
+      : 'Chưa xác định ngày';
     let badgeContent = String(idx + 1);
 
     if (!hasValidDate) {
@@ -541,6 +556,36 @@
     const timeDisplay = hasValidDate
       ? (converted.vnTimeVi ? `${converted.vnTimeVi} ${converted.vnDateVi}` : converted.vnDateVi)
       : (rawDate || 'Chưa có ngày hợp lệ');
+
+    return {
+      rawDate,
+      converted,
+      hasValidDate,
+      isPassed,
+      modifierClass,
+      statusLabel,
+      badgeContent,
+      timeDisplay
+    };
+  }
+
+  /**
+   * Tạo mã HTML một bước trong danh sách toàn bộ các mốc deadline của hội nghị.
+   * Giữ nguyên tên, loại, nội dung và ngày tháng theo dữ liệu gốc; không tự tạo ngày thay thế khi thiếu/lỗi.
+   * @param {Object} milestone - Dữ liệu mốc deadline đã phân tích.
+   * @param {number} idx - Chỉ số thứ tự mốc (0..N-1).
+   * @param {Object|null} next - Mốc hợp lệ sắp tới gần nhất để đánh dấu active.
+   * @param {Object} utils - Tập tiện ích ConfGuideUtils.
+   * @returns {string} Chuỗi HTML `.deadline-timeline__step`.
+   */
+  function buildTimelineStepHtml(milestone, idx, next, utils) {
+    const esc = utils.escapeHtml;
+    const state = resolveTimelineStepState(milestone, idx, next, utils);
+    const {
+      rawDate, converted, hasValidDate, isPassed,
+      modifierClass, statusLabel, badgeContent, timeDisplay
+    } = state;
+
     const rawDateHtml = hasValidDate && rawDate
       ? `<span class="deadline-timeline__raw-date">Ngày gốc: ${esc(rawDate)}</span>`
       : '';
@@ -663,7 +708,10 @@
     if (rankObj) {
       const parts = [];
       const coreVal = rankObj.core !== undefined && rankObj.core !== null ? String(rankObj.core).trim() : '';
-      const coreSource = rankObj.core_source !== undefined && rankObj.core_source !== null ? String(rankObj.core_source).trim() : '';
+      const rawSource = rankObj.core_source !== undefined && rankObj.core_source !== null
+        ? rankObj.core_source
+        : '';
+      const coreSource = String(rawSource).trim();
       const ccfVal = rankObj.ccf !== undefined && rankObj.ccf !== null ? String(rankObj.ccf).trim() : '';
 
       if (coreVal && !/^unranked$/i.test(coreVal)) {
@@ -727,14 +775,12 @@
   }
 
   /**
-   * Hàm dùng chung dựng thẻ hội nghị dạng Grid (mỗi thẻ là <article> có đúng 1 thẻ <a> phủ ::after, hiển thị hạn nộp UTC+7).
-   * Được đăng ký vào window.ConfGuideUtils.renderGridConferenceCard để tái sử dụng.
-   * @param {Object} item Đối tượng hội nghị đã chuẩn hóa.
-   * @param {Object} [customUtils] Đối tượng tiện ích tùy chọn.
-   * @returns {string} Chuỗi HTML thẻ <article class="related-card">.
+   * Chuẩn bị thông tin hiển thị (hạn nộp, lệ phí, avatar, nút so sánh) cho thẻ hội nghị dạng Grid.
+   * @param {Object} item - Đối tượng hội nghị đã chuẩn hóa.
+   * @param {Object} utils - Tập tiện ích ConfGuideUtils.
+   * @returns {Object} Các giá trị văn bản và đoạn HTML phụ trợ của thẻ.
    */
-  function renderGridConferenceCard(item, customUtils) {
-    const utils = customUtils || getDetailUtils();
+  function resolveGridCardMeta(item, utils) {
     const esc = utils.escapeHtml;
     const itemId = utils.getConferenceId(item);
     const nextDl = utils.getNextDeadline(item);
@@ -749,17 +795,42 @@
         : `${nextDl.shortName}: ${formattedDl}`;
     }
 
-    const monogram = String(item.name || 'CG').replace(/[^a-zA-Z0-9]/g, '').slice(0, 4).toUpperCase() || 'CONF';
-    const dateRange = utils.formatConferenceEventDate(item);
-    const locationText = item.location || 'Chưa cập nhật';
+    const cleanName = String(item.name || 'CG').replace(/[^a-zA-Z0-9]/g, '');
+    const monogram = cleanName.slice(0, 4).toUpperCase() || 'CONF';
     const feeText = typeof utils.formatConferenceFee === 'function'
       ? utils.formatConferenceFee(item)
       : 'Chưa cập nhật';
     const feeModifier = feeText !== 'Chưa cập nhật' ? ' related-card__meta-item--fee' : '';
-    const compareBtnHtml = window.ConfGuideCompare ? window.ConfGuideCompare.renderToggleButton(item) : '';
     const avatarHtml = utils && typeof utils.renderConferenceAvatar === 'function'
       ? utils.renderConferenceAvatar(item, 'related-card__monogram')
       : `<div class="conf-badge-logo related-card__monogram" aria-hidden="true">${esc(monogram)}</div>`;
+
+    return {
+      itemId,
+      deadlineText,
+      dateRange: utils.formatConferenceEventDate(item),
+      locationText: item.location || 'Chưa cập nhật',
+      feeText,
+      feeModifier,
+      compareBtnHtml: window.ConfGuideCompare ? window.ConfGuideCompare.renderToggleButton(item) : '',
+      avatarHtml
+    };
+  }
+
+  /**
+   * Hàm dùng chung dựng thẻ hội nghị dạng Grid (mỗi thẻ là `<article>` có đúng 1 thẻ `<a>` phủ `::after`,
+   * hiển thị hạn nộp UTC+7). Đăng ký vào `window.ConfGuideUtils.renderGridConferenceCard` để tái sử dụng.
+   * @param {Object} item Đối tượng hội nghị đã chuẩn hóa.
+   * @param {Object} [customUtils] Đối tượng tiện ích tùy chọn.
+   * @returns {string} Chuỗi HTML thẻ `<article class="related-card">`.
+   */
+  function renderGridConferenceCard(item, customUtils) {
+    const utils = customUtils || getDetailUtils();
+    const esc = utils.escapeHtml;
+    const {
+      itemId, deadlineText, dateRange, locationText,
+      feeText, feeModifier, compareBtnHtml, avatarHtml
+    } = resolveGridCardMeta(item, utils);
 
     return `
       <article class="related-card">
@@ -775,7 +846,9 @@
             </div>
           </div>
 
-          <p class="related-card__fullname">${esc(item.fullName || item.full_name || item.summarization || '')}</p>
+          <p class="related-card__fullname">
+            ${esc(item.fullName || item.full_name || item.summarization || '')}
+          </p>
 
           <div class="related-card__meta">
             <span class="related-card__meta-item">
@@ -843,7 +916,8 @@
     }
 
     if (sectionEl) sectionEl.hidden = false;
-    const cardRenderer = (window.ConfGuideUtils && window.ConfGuideUtils.renderGridConferenceCard) || renderGridConferenceCard;
+    const sharedRenderer = window.ConfGuideUtils && window.ConfGuideUtils.renderGridConferenceCard;
+    const cardRenderer = sharedRenderer || renderGridConferenceCard;
     gridEl.innerHTML = relatedList.map(item => cardRenderer(item, utils)).join('');
   }
 
@@ -906,7 +980,6 @@
 
     root.addEventListener('click', handleDetailRootClick);
 
-    window.addEventListener('pagehide', stopCountdownTimer);
     window.addEventListener('beforeunload', stopCountdownTimer);
   }
 

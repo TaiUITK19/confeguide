@@ -1,7 +1,8 @@
 /**
  * ConfGuide — Kịch bản Trang Tra cứu & Lọc Hội nghị (js/pages/search.js)
  * Trang sử dụng: search.html
- * Phụ thuộc: js/core/page-transition.js, js/core/layout.js, js/components/search-core.js, js/components/compare.js
+ * Phụ thuộc: js/core/page-transition.js, js/core/layout.js,
+ * js/components/search-core.js, js/components/compare.js
  * Chức năng: Quản lý trạng thái lọc phản ứng (`filterState` Proxy) theo kiến trúc một chiều,
  * tích hợp lõi tìm kiếm `ConfGuideSearchCore` (chuẩn hóa, khớp mờ Levenshtein, facet pre-counts),
  * tìm kiếm trực tiếp theo từ khóa, ngăn kéo bộ lọc di động (draft state), kết xuất `DocumentFragment`
@@ -25,14 +26,11 @@
     publisher: false
   };
 
-  /** Hiển thị đầy đủ mọi hội nghị, kể cả hội nghị thiếu dữ liệu */
-  const HIDE_EMPTY_RECORDS = false;
-
   /** Ngưỡng ngày tính trạng thái "Sắp hết hạn" */
   const CLOSING_SOON_DAYS = 14;
 
-  /** Số lượng lĩnh vực nghiên cứu nổi bật hiển thị trực tiếp (các lĩnh vực còn lại gộp vào Khác) */
-  const TOPIC_FEATURED_LIMIT = 3;
+  /** Số lượng chủ đề hiển thị mặc định trước khi thu gọn */
+  const TOPIC_VISIBLE_LIMIT = 5;
 
   /** Số lượng bản ghi trên một trang kết quả */
   const PAGE_SIZE = 9;
@@ -51,21 +49,6 @@
     'MobiSys 2027|Abstract Registration': 'submission'
   };
 
-  const CFP_LABEL_MAP = {
-    all: 'Tất cả trạng thái',
-    open: 'Đang mở nộp bài',
-    closingSoon: 'Sắp hết hạn (≤ 14 ngày)',
-    closed: 'Đã đóng đợt nộp',
-    unknown: 'Chưa rõ hạn nộp'
-  };
-
-  const CITY_LABEL_MAP = {
-    all: 'Tất cả địa điểm',
-    'ha-noi': 'Hà Nội',
-    'ho-chi-minh': 'TP. Hồ Chí Minh',
-    other: 'Tỉnh / thành khác'
-  };
-
   const RANK_CATALOG_DEFS = [
     { key: 'A*', label: 'Rank A*' },
     { key: 'A', label: 'Rank A' },
@@ -73,25 +56,17 @@
     { key: 'C', label: 'Rank C' },
     { key: 'unranked', label: 'Chưa xếp hạng' }
   ];
-  const RANK_LABEL_MAP = RANK_CATALOG_DEFS.reduce((acc, item) => {
-    acc[item.key] = item.label;
-    return acc;
-  }, {});
   const RANK_VALUES = ['A*', 'A', 'B', 'C'];
   const VALID_RANK_VALUES = new Set(RANK_VALUES);
   const ALL_RANK_KEYS = new Set(RANK_CATALOG_DEFS.map(item => item.key));
   const RANK_WEIGHT = { 'A*': 0, A: 1, B: 2, C: 3 };
 
-  /** Danh mục cố định 3 hình thức tổ chức trong bộ lọc Tra cứu: Trực tiếp, Trực tuyến, Kết hợp */
   const MODE_CATALOG_DEFS = [
     { key: 'offline', label: 'Trực tiếp' },
     { key: 'online', label: 'Trực tuyến' },
-    { key: 'hybrid', label: 'Kết hợp' }
+    { key: 'hybrid', label: 'Kết hợp' },
+    { key: 'unknown', label: 'Chưa rõ hình thức' }
   ];
-  const MODE_LABEL_MAP = MODE_CATALOG_DEFS.reduce((acc, item) => {
-    acc[item.key] = item.label;
-    return acc;
-  }, {});
   const MODE_ORDER = MODE_CATALOG_DEFS.map(item => item.key);
   const ALL_MODE_KEYS = new Set(MODE_ORDER);
 
@@ -110,20 +85,6 @@
     'name-desc'
   ]);
 
-  /** Tập hợp các khóa facet cố định của các nhóm tĩnh */
-  const BASE_FACET_KEYS = [
-    'cfp:all',
-    'cfp:open',
-    'cfp:closingSoon',
-    'cfp:closed',
-    'cfp:unknown',
-    'ongoing:1',
-    'city:all',
-    'city:ha-noi',
-    'city:ho-chi-minh',
-    'city:other'
-  ];
-
   /* ================= 2. BIẾN TRẠNG THÁI TOÀN CỤC MODULE ================= */
 
   let rankCatalog = [];
@@ -131,22 +92,27 @@
   let modeCatalog = [];
   let validModeKeys = new Set();
   let topicCatalog = [];
-  let topicLabelMap = {};
   let validTopicValues = new Set();
-  let allKnownTopicValues = new Set();
-  let featuredTopicKeys = [];
-  let allFacetKeys = [...BASE_FACET_KEYS];
+  /** Ánh xạ khóa lĩnh vực đơn (vd. `hoc-may`) sang khóa nhóm lĩnh vực trong dữ liệu (vd. `ai`) */
+  const singleTopicToGroupKey = new Map();
 
   let allNormalizedConferences = [];
   let baseSearchConferences = [];
   let indexedConferences = [];
   let filteredConferences = [];
-  let hiddenEmptyCount = 0;
+  /** Các khoảng "Thời gian diễn ra" hợp lệ (lưu trong `filterState.month`) */
+  const TIME_RANGE_LABELS = {
+    ongoing: 'Đang diễn ra',
+    next1: 'Trong 1 tháng tới',
+    next3: 'Trong 3 tháng tới',
+    next6: 'Trong 6 tháng tới',
+    unknown: 'Chưa có ngày diễn ra'
+  };
   let isDataLoaded = false;
-  let dataLoadError = null;
 
   let isFilterDrawerOpen = false;
   let draftFilterState = null;
+  let isTopicsExpanded = false;
 
   let searchDebounceTimer = null;
   let urlSyncTimer = null;
@@ -164,9 +130,7 @@
     q: '',
     ranks: [],
     cfp: 'all',
-    eventFrom: '',
-    eventTo: '',
-    ongoing: false,
+    month: '',
     dateFrom: '',
     dateTo: '',
     modes: [],
@@ -222,7 +186,6 @@
       toTopicSlug: str => String(str || '').toLowerCase().trim(),
       normalizeTopicFields: () => [],
       expandTopicFilterValues: list => (Array.isArray(list) ? list : []),
-      normalizeModeKey: () => 'unknown',
       buildIndex: list => list,
       scoreConference: () => ({ matched: true, score: 0 }),
       matchesFilters: () => true,
@@ -238,7 +201,8 @@
   function escapeHtml(val) {
     const utils = getUtils();
     if (utils && typeof utils.escapeHtml === 'function') return utils.escapeHtml(val);
-    return String(val ?? '').replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[ch]));
+    const entities = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+    return String(val ?? '').replace(/[&<>"']/g, ch => entities[ch]);
   }
 
   /**
@@ -368,8 +332,8 @@
    * Kết xuất dùng chung danh sách checkbox bộ lọc (Phân hạng, Hình thức, Lĩnh vực) vào một `<fieldset>`.
    * @param {string} fieldsetId - ID phần tử `<fieldset>`.
    * @param {string} legendText - Nhãn `<legend class="sr-only">` cho trình đọc màn hình.
-   * @param {Array<{ key: string, label: string, count: number }>} catalog - Danh sách tùy chọn thực có trong dữ liệu.
-   * @param {{ group: string, prefix: string, inputClass: string, inputName: string }} config - Cấu hình định danh nhóm & thuộc tính.
+   * @param {Array<{ key: string, label: string, count: number }>} catalog - Danh sách tùy chọn thực có.
+   * @param {{ group: string, prefix: string, inputClass: string, inputName: string }} config
    */
   function renderCheckboxFieldset(fieldsetId, legendText, catalog, config) {
     const fieldset = document.getElementById(fieldsetId);
@@ -423,7 +387,7 @@
       const mKey = conf.modeKey || 'unknown';
       modeCounts.set(mKey, (modeCounts.get(mKey) || 0) + 1);
 
-      const items = Array.isArray(conf && conf.topicItems) ? conf.topicItems : [];
+      const items = Array.isArray(conf && conf.topicGroups) ? conf.topicGroups : [];
       items.forEach(item => {
         if (!item || !item.key || !item.label) return;
         const existing = topicMap.get(item.key);
@@ -437,53 +401,22 @@
       .filter(item => item.count > 0);
     validRankKeys = new Set(rankCatalog.map(item => item.key));
 
-    // Giữ đủ cả 3 hình thức tổ chức (Trực tiếp, Trực tuyến, Kết hợp) kể cả khi một nhóm đang có 0 bản ghi; nhóm chưa cập nhật không tạo tùy chọn lọc
+    // "Trực tuyến" luôn hiển thị để người dùng thấy đủ các hình thức, kể cả khi hiện chưa có hội nghị nào
     modeCatalog = MODE_CATALOG_DEFS
-      .map(def => ({ key: def.key, label: def.label, count: modeCounts.get(def.key) || 0 }));
+      .map(def => ({ key: def.key, label: def.label, count: modeCounts.get(def.key) || 0 }))
+      .filter(item => item.count > 0 || item.key === 'online');
     validModeKeys = new Set(modeCatalog.map(item => item.key));
 
-    const sortedTopics = [...topicMap.values()].sort(
+    topicCatalog = [...topicMap.values()].sort(
       (a, b) => (b.count - a.count) || a.label.localeCompare(b.label, 'vi')
     );
-    const featuredTopics = sortedTopics.slice(0, TOPIC_FEATURED_LIMIT);
-    featuredTopicKeys = featuredTopics.map(item => item.key);
-    const featuredTopicSet = new Set(featuredTopicKeys);
-
-    let otherTopicCount = 0;
-    list.forEach(conf => {
-      const confTopicKeys = Array.isArray(conf && conf.topics) ? conf.topics : [];
-      if (confTopicKeys.some(key => !featuredTopicSet.has(key))) {
-        otherTopicCount += 1;
-      }
-      if (conf && typeof conf === 'object') {
-        conf.featuredTopicKeys = featuredTopicKeys;
-      }
-    });
-
-    topicCatalog = featuredTopics.concat(
-      otherTopicCount > 0 ? [{ key: 'other', label: 'Khác', count: otherTopicCount }] : []
-    );
-    topicLabelMap = sortedTopics.reduce((acc, item) => {
-      acc[item.key] = item.label;
-      return acc;
-    }, { other: 'Khác' });
     validTopicValues = new Set(topicCatalog.map(item => item.key));
-    allKnownTopicValues = new Set([
-      ...sortedTopics.map(item => item.key),
-      ...validTopicValues
-    ]);
-
-    allFacetKeys = BASE_FACET_KEYS
-      .concat(rankCatalog.map(item => `rank:${item.key}`))
-      .concat(modeCatalog.map(item => `mode:${item.key}`))
-      .concat(topicCatalog.map(item => `topic:${item.key}`));
   }
 
   /**
-   * Kết xuất các lựa chọn bộ lọc Phân hạng, Hình thức và Lĩnh vực từ dữ liệu thật;
-   * đồng thời ẩn các tùy chọn tĩnh có 0 bản ghi trong toàn tập dữ liệu gốc (ví dụ: Đang diễn ra khi = 0).
+   * Kết xuất các lựa chọn bộ lọc Phân hạng, Hình thức và Lĩnh vực từ dữ liệu thật.
    */
-  function renderDynamicFilterOptions(conferences) {
+  function renderDynamicFilterOptions() {
     renderCheckboxFieldset('rankFieldset', 'Chọn phân hạng CORE của hội nghị', rankCatalog, {
       group: 'rank',
       prefix: 'rank',
@@ -503,31 +436,6 @@
       inputName: 'topic'
     });
 
-    const core = getCore();
-    const emptyState = {
-      q: '',
-      ranks: [],
-      cfp: 'all',
-      eventFrom: '',
-      eventTo: '',
-      ongoing: false,
-      dateFrom: '',
-      dateTo: '',
-      modes: [],
-      city: 'all',
-      topics: []
-    };
-    const baseCounts = core.computeFacetCounts(conferences, emptyState, BASE_FACET_KEYS, [], '');
-    document.querySelectorAll('#accBodyCfp .js-option-row, #cityFieldset .js-option-row, #ongoingOptionRow').forEach(row => {
-      const key = row.getAttribute('data-option-key') || '';
-      if (!key || key.endsWith(':all')) {
-        row.hidden = false;
-        return;
-      }
-      const totalForOption = baseCounts[key] !== undefined ? baseCounts[key] : 0;
-      if (totalForOption <= 0) row.setAttribute('hidden', '');
-      else row.removeAttribute('hidden');
-    });
   }
 
   /**
@@ -558,7 +466,7 @@
   }
 
   /**
-   * Chuẩn hóa mảng mốc deadline của hội nghị (giữ nguyên toàn bộ trường dữ liệu gốc, không làm mất mốc nào).
+   * Chuẩn hóa mảng mốc deadline của hội nghị (giữ nguyên toàn bộ dữ liệu gốc).
    * @param {Object} raw Đối tượng hội nghị thô.
    * @returns {Array<Object>} Danh sách mốc thời gian đã gắn loại (`kind`) và chỉ số gốc (`rawIndex`).
    */
@@ -594,10 +502,15 @@
   }
 
   /**
-   * Đánh giá trạng thái CFP (open, closingSoon, closed, unknown) và trích xuất mốc deadline nộp bài đầu tiên theo UTC+7.
+   * Đánh giá trạng thái CFP (open, closingSoon, closed, unknown) và mốc nộp bài đầu tiên (UTC+7).
    * Không tự tạo deadline giả nếu hội nghị không có mốc nộp bài hợp lệ.
-   * @param {Array<Object>} submissionDeadlines - Danh sách các mốc nộp bài đã quy đổi UTC+7 và sắp xếp tăng dần.
-   * @returns {{ cfpStatus: string, firstSubmissionDeadline: Object|null, nextDeadline: Object|null, lastDeadline: Object|null }}
+   * @param {Array<Object>} submissionDeadlines - Các mốc nộp bài đã quy đổi UTC+7 và sắp xếp tăng dần.
+   * @returns {{
+   *   cfpStatus: string,
+   *   firstSubmissionDeadline: Object|null,
+   *   nextDeadline: Object|null,
+   *   lastDeadline: Object|null
+   * }}
    */
   function evaluateSubmissionStatus(submissionDeadlines) {
     if (!submissionDeadlines.length) {
@@ -631,6 +544,19 @@
   }
 
   /**
+   * Tính số ngày từ ngày `fromIso` tới ngày `toIso` (âm nếu `toIso` đã qua).
+   * @param {string} fromIso - Ngày bắt đầu đếm ISO YYYY-MM-DD.
+   * @param {string} toIso - Ngày đích ISO YYYY-MM-DD.
+   * @returns {number|null} Số ngày chênh lệch hoặc null nếu ngày không hợp lệ.
+   */
+  function diffDaysIso(fromIso, toIso) {
+    const fromMs = Date.parse(`${fromIso}T00:00:00Z`);
+    const toMs = Date.parse(`${toIso}T00:00:00Z`);
+    if (Number.isNaN(fromMs) || Number.isNaN(toMs)) return null;
+    return Math.round((toMs - fromMs) / 86400000);
+  }
+
+  /**
    * Suy luận giai đoạn diễn ra của hội nghị (`upcoming`, `ongoing`, `ended`, `unknown`).
    * @param {string} startDate - Ngày bắt đầu ISO YYYY-MM-DD.
    * @param {string} endDate - Ngày kết thúc ISO YYYY-MM-DD.
@@ -644,38 +570,63 @@
     return 'ongoing';
   }
 
+
   /**
-   * Chuẩn hóa một bản ghi hội nghị đầy đủ các thuộc tính camelCase một lần duy nhất.
-   * Chỉ sử dụng dữ liệu thực có từ JSON, không suy luận thêm thuộc tính bị thiếu.
-   * @param {Object} raw - Dữ liệu thô một hội nghị từ JSON.
-   * @returns {Object|null} Bản ghi đã chuẩn hóa hoặc null nếu không hợp lệ.
+   * Lấy danh sách nhóm lĩnh vực đúng như dữ liệu đã phân loại khi thu thập (`topics` + `topic_labels`),
+   * ví dụ `ai` → "Trí tuệ nhân tạo & Học máy", đồng thời ghi nhớ lĩnh vực đơn thuộc nhóm nào
+   * để chuyển các liên kết cũ dạng `?topic=hoc-may` về đúng nhóm.
+   * @param {Object} raw - Bản ghi hội nghị gốc từ JSON.
+   * @param {Array<{ key: string, label: string }>} topicItems - Lĩnh vực đơn đã tách (dự phòng khi thiếu nhóm).
+   * @returns {Array<{ key: string, label: string }>} Mảng nhóm lĩnh vực không trùng lặp.
    */
-  function normalizeConference(raw) {
-    if (!raw || typeof raw !== 'object') return null;
+  function extractTopicGroups(raw, topicItems) {
+    const keys = Array.isArray(raw.topics) ? raw.topics : [];
+    const labels = Array.isArray(raw.topic_labels) ? raw.topic_labels : [];
+    const core = getCore();
+    const groups = [];
+    const seen = new Set();
 
-    const todayIso = getTodayIso();
-    const id = resolveConferenceId(raw);
-    const rawName = String(raw.name || '').trim();
-    const dataQuality = (raw.full_name === null && !raw.fullName)
-      ? 'empty'
-      : (raw.status === 'partial' ? 'partial' : 'full');
+    keys.forEach((rawKey, idx) => {
+      const key = String(rawKey || '').trim();
+      const label = String(labels[idx] || '').trim() || key;
+      if (!key || seen.has(key)) return;
+      seen.add(key);
+      groups.push({ key, label });
+      core.normalizeTopicFields({ topic_labels: [label] }).forEach(single => {
+        if (!singleTopicToGroupKey.has(single.key)) {
+          singleTopicToGroupKey.set(single.key, key);
+        }
+      });
+    });
 
-    const fullNameText = raw.full_name !== undefined && raw.full_name !== null
-      ? String(raw.full_name).trim()
-      : (raw.fullName !== undefined && raw.fullName !== null ? String(raw.fullName).trim() : '');
+    if (groups.length > 0) return groups;
+    return Array.isArray(topicItems) ? topicItems.slice() : [];
+  }
 
-    const utils = getUtils();
+  /**
+   * Chuyển đổi danh sách mốc deadline có loại `submission` sang giờ Việt Nam (UTC+7)
+   * và sắp xếp tăng dần để xác định hạn nộp đầu tiên.
+   * @param {Array<Object>} deadlinesWithKind - Danh sách mốc đã phân loại kind.
+   * @param {Object|null} utils - Đối tượng tiện ích ConfGuideUtils.
+   * @param {string} todayIso - Ngày hiện tại ISO YYYY-MM-DD (UTC+7).
+   * @returns {Array<Object>} Mảng mốc nộp bài hợp lệ đã sắp xếp tăng dần.
+   */
+  function buildSubmissionDeadlines(deadlinesWithKind, utils, todayIso) {
     const hasConverter = Boolean(utils && typeof utils.convertDeadlineToVn === 'function');
     const hasDaysLeft = Boolean(utils && typeof utils.daysLeft === 'function');
-    const deadlinesWithKind = normalizeDeadlinesArray(raw);
-    // Chỉ lọc các mốc thuộc loại nộp bài (submission) có ngày hợp lệ và sắp xếp tăng dần để lấy mốc nộp bài đầu tiên
-    const submissionDeadlines = deadlinesWithKind
+
+    return deadlinesWithKind
       .map(d => {
-        const converted = hasConverter && d.date ? utils.convertDeadlineToVn(d.date, { isDeadline: true }) : null;
-        const vnDate = (converted && converted.vnIsoDate) || normalizeIsoDate(d.date);
-        const daysLeftVal = d.date
-          ? (hasDaysLeft ? utils.daysLeft(d.date) : (vnDate ? diffCalendarDays(vnDate, todayIso) : null))
+        const converted = hasConverter && d.date
+          ? utils.convertDeadlineToVn(d.date, { isDeadline: true })
           : null;
+        const vnDate = (converted && converted.vnIsoDate) || normalizeIsoDate(d.date);
+        let daysLeftVal = null;
+        if (d.date) {
+          daysLeftVal = hasDaysLeft
+            ? utils.daysLeft(d.date)
+            : (vnDate ? diffCalendarDays(vnDate, todayIso) : null);
+        }
         return {
           rawIndex: d.rawIndex,
           name: d.name,
@@ -695,46 +646,81 @@
         const dateCmp = String(a.date).localeCompare(String(b.date));
         return dateCmp !== 0 ? dateCmp : (a.rawIndex - b.rawIndex);
       });
+  }
 
-    const { cfpStatus, firstSubmissionDeadline, nextDeadline, lastDeadline } = evaluateSubmissionStatus(submissionDeadlines);
-    const startDate = normalizeIsoDate(raw.start_date || raw.startDate);
-    const endDate = normalizeIsoDate(raw.end_date || raw.endDate) || startDate;
+  /**
+   * Chuẩn hóa thông tin phân hạng, hình thức tổ chức và danh sách lĩnh vực cho một bản ghi hội nghị.
+   * @param {Object} raw - Dữ liệu thô một hội nghị từ JSON.
+   * @param {Object|null} utils - Đối tượng tiện ích ConfGuideUtils.
+   * @param {Object} core - Tham chiếu ConfGuideSearchCore.
+   * @returns {Object} Các trường rank, modeKey và topics đã chuẩn hóa.
+   */
+  function resolveConferenceTaxonomy(raw, utils, core) {
+    const fallbackRank = raw.rank && typeof raw.rank === 'object' ? raw.rank.core : raw.rank;
     const rawRankText = utils && typeof utils.extractConferenceRank === 'function'
       ? utils.extractConferenceRank(raw.rank)
-      : (raw.rank && typeof raw.rank === 'object' ? String(raw.rank.core || '') : String(raw.rank || ''));
+      : String(fallbackRank || '');
     const rawRank = rawRankText.trim().toUpperCase();
 
-    const core = getCore();
     const topicItems = core.normalizeTopicFields(raw);
+    const topicGroups = extractTopicGroups(raw, topicItems);
+    const fallbackLabels = Array.isArray(raw.topic_labels)
+      ? raw.topic_labels.map(t => String(t || '').trim()).filter(Boolean)
+      : topicItems.map(item => item.label);
     const displayTopics = utils && typeof utils.extractTopicLabels === 'function'
       ? utils.extractTopicLabels(raw)
-      : (Array.isArray(raw.topic_labels) ? raw.topic_labels.map(t => String(t || '').trim()).filter(Boolean) : topicItems.map(item => item.label));
-    const rankKey = VALID_RANK_VALUES.has(rawRank) ? rawRank : 'unranked';
-    const modeKey = typeof core.normalizeModeKey === 'function' ? core.normalizeModeKey(raw) : 'unknown';
+      : fallbackLabels;
 
-    return Object.assign({}, raw, {
-      id,
+    return {
       rank: VALID_RANK_VALUES.has(rawRank) ? rawRank : '',
-      rankKey,
-      modeKey,
+      rankKey: VALID_RANK_VALUES.has(rawRank) ? rawRank : 'unranked',
+      modeKey: typeof core.normalizeModeKey === 'function' ? core.normalizeModeKey(raw) : 'unknown',
       rankInfo: raw.rank && typeof raw.rank === 'object' ? raw.rank : null,
-      fullName: fullNameText,
+      topics: topicGroups.map(group => group.key),
+      topicGroups,
+      topicItems,
+      displayTopics
+    };
+  }
+
+  /**
+   * Chuẩn hóa một bản ghi hội nghị đầy đủ các thuộc tính camelCase một lần duy nhất.
+   * Chỉ sử dụng dữ liệu thực có từ JSON, không suy luận thêm thuộc tính bị thiếu.
+   * @param {Object} raw - Dữ liệu thô một hội nghị từ JSON.
+   * @returns {Object|null} Bản ghi đã chuẩn hóa hoặc null nếu không hợp lệ.
+   */
+  function normalizeConference(raw) {
+    if (!raw || typeof raw !== 'object') return null;
+
+    const todayIso = getTodayIso();
+    const utils = getUtils();
+    const core = getCore();
+    const rawName = String(raw.name || '').trim();
+    const rawFullName = raw.full_name ?? raw.fullName ?? '';
+    const dataQuality = (raw.full_name === null && !raw.fullName)
+      ? 'empty'
+      : (raw.status === 'partial' ? 'partial' : 'full');
+
+    const deadlinesWithKind = normalizeDeadlinesArray(raw);
+    const submissionDeadlines = buildSubmissionDeadlines(deadlinesWithKind, utils, todayIso);
+    const deadlineSummary = evaluateSubmissionStatus(submissionDeadlines);
+    const startDate = normalizeIsoDate(raw.start_date || raw.startDate);
+    const endDate = normalizeIsoDate(raw.end_date || raw.endDate) || startDate;
+    const taxonomy = resolveConferenceTaxonomy(raw, utils, core);
+
+    return Object.assign({}, raw, taxonomy, deadlineSummary, {
+      id: resolveConferenceId(raw),
+      fullName: String(rawFullName).trim(),
       website: raw.website_url || raw.website || '',
       startDate,
       endDate,
       eventMonth: startDate ? startDate.slice(0, 7) : 'unknown',
+      daysUntilStart: startDate ? diffDaysIso(todayIso, startDate) : null,
       isDuplicate: DUPLICATE_RAW_NAMES.has(rawName),
       dataQuality,
       cityKey: extractCityKey(raw.location),
-      topics: topicItems.map(item => item.key),
-      topicItems,
-      displayTopics,
       deadlines: deadlinesWithKind,
       submissionDeadlines,
-      firstSubmissionDeadline,
-      cfpStatus,
-      nextDeadline,
-      lastDeadline,
       eventPhase: resolveEventPhase(startDate, endDate, todayIso)
     });
   }
@@ -776,6 +762,20 @@
   }
 
   /**
+   * Đồng bộ trạng thái giao diện của một nút Lưu (class `.saved`, `aria-pressed`, nhãn và icon SVG).
+   * @param {HTMLElement} btn - Phần tử nút `.js-card-save`.
+   * @param {boolean} isSaved - Trạng thái đã lưu hiện tại.
+   */
+  function applySaveButtonUi(btn, isSaved) {
+    const labelSpan = btn.querySelector('span');
+    const svg = btn.querySelector('svg');
+    btn.classList.toggle('saved', Boolean(isSaved));
+    btn.setAttribute('aria-pressed', isSaved ? 'true' : 'false');
+    if (labelSpan) labelSpan.textContent = isSaved ? 'Đã lưu' : 'Lưu lại';
+    if (svg) svg.setAttribute('fill', isSaved ? 'currentColor' : 'none');
+  }
+
+  /**
    * Đảo trạng thái lưu/bỏ lưu của một hội nghị (yêu cầu đăng nhập; khách sẽ nhận thông báo yêu cầu đăng nhập).
    * @param {string} confId
    * @param {HTMLElement} btn
@@ -795,21 +795,12 @@
       return;
     }
 
-    const labelSpan = btn.querySelector('span');
-    const svg = btn.querySelector('svg');
-    if (result.isSaved) {
-      btn.classList.add('saved');
-      btn.setAttribute('aria-pressed', 'true');
-      if (labelSpan) labelSpan.textContent = 'Đã lưu';
-      if (svg) svg.setAttribute('fill', 'currentColor');
-      showToast('Đã lưu hội nghị vào danh sách theo dõi.');
-    } else {
-      btn.classList.remove('saved');
-      btn.setAttribute('aria-pressed', 'false');
-      if (labelSpan) labelSpan.textContent = 'Lưu lại';
-      if (svg) svg.setAttribute('fill', 'none');
-      showToast('Đã xóa hội nghị khỏi danh sách đã lưu.');
-    }
+    applySaveButtonUi(btn, result.isSaved);
+    showToast(
+      result.isSaved
+        ? 'Đã lưu hội nghị vào danh sách theo dõi.'
+        : 'Đã xóa hội nghị khỏi danh sách đã lưu.'
+    );
   }
 
   /**
@@ -842,9 +833,7 @@
     rawFilterState.q = '';
     rawFilterState.ranks = [];
     rawFilterState.cfp = 'all';
-    rawFilterState.eventFrom = '';
-    rawFilterState.eventTo = '';
-    rawFilterState.ongoing = false;
+    rawFilterState.month = '';
     rawFilterState.dateFrom = '';
     rawFilterState.dateTo = '';
     rawFilterState.modes = [];
@@ -876,6 +865,21 @@
   }
 
   /**
+   * Trích xuất tham số thời gian diễn ra (`when` hoặc liên kết cũ `?ongoing=1`) từ URL.
+   * @param {URLSearchParams} params - Tham số truy vấn URL hiện tại.
+   * @returns {string} Khóa thời gian hợp lệ hoặc chuỗi rỗng.
+   */
+  function resolveWhenParamFromUrl(params) {
+    const rawWhen = (params.get('when') || '').trim();
+    if (Object.prototype.hasOwnProperty.call(TIME_RANGE_LABELS, rawWhen)) {
+      return rawWhen;
+    }
+    const rawOngoing = (params.get('ongoing') || '').trim().toLowerCase();
+    // Hỗ trợ liên kết cũ dạng ?ongoing=1
+    return rawOngoing === '1' || rawOngoing === 'true' ? 'ongoing' : '';
+  }
+
+  /**
    * Đọc tham số URL an toàn vào filterState khi khởi tạo.
    */
   function readUrlIntoFilterState() {
@@ -896,51 +900,16 @@
     if (ENABLED_FILTER_GROUPS.cfp) {
       const rawCfp = (params.get('cfp') || '').trim();
       if (VALID_CFP_VALUES.has(rawCfp)) rawFilterState.cfp = rawCfp;
-
-      const rawFrom = normalizeIsoDate(params.get('from') || params.get('dateFrom') || '');
-      if (rawFrom) rawFilterState.dateFrom = rawFrom;
-
-      const rawTo = normalizeIsoDate(params.get('to') || params.get('dateTo') || '');
-      if (rawTo) rawFilterState.dateTo = rawTo;
+      rawFilterState.dateFrom = normalizeIsoDate(params.get('from') || params.get('dateFrom') || '') || '';
+      rawFilterState.dateTo = normalizeIsoDate(params.get('to') || params.get('dateTo') || '') || '';
     }
 
     if (ENABLED_FILTER_GROUPS.month) {
-      const rawEventFrom = normalizeIsoDate(params.get('eventFrom') || '');
-      const rawEventTo = normalizeIsoDate(params.get('eventTo') || '');
-      if (rawEventFrom) rawFilterState.eventFrom = rawEventFrom;
-      if (rawEventTo) rawFilterState.eventTo = rawEventTo;
-
-      // Hỗ trợ tương thích tham số URL cũ ?month=YYYY-MM -> quy đổi sang khoảng đầu..cuối tháng
-      if (!rawFilterState.eventFrom && !rawFilterState.eventTo) {
-        const rawMonth = (params.get('month') || '').trim();
-        const monthMatch = rawMonth.match(/^(\d{4})-(\d{2})$/);
-        if (monthMatch) {
-          const yearNum = Number(monthMatch[1]);
-          const monthNum = Number(monthMatch[2]);
-          if (monthNum >= 1 && monthNum <= 12) {
-            const lastDay = String(new Date(Date.UTC(yearNum, monthNum, 0)).getUTCDate()).padStart(2, '0');
-            rawFilterState.eventFrom = `${monthMatch[1]}-${monthMatch[2]}-01`;
-            rawFilterState.eventTo = `${monthMatch[1]}-${monthMatch[2]}-${lastDay}`;
-          }
-        }
-      }
-
-      const rawOngoing = (params.get('ongoing') || '').trim().toLowerCase();
-      if (rawOngoing === '1' || rawOngoing === 'true') rawFilterState.ongoing = true;
+      rawFilterState.month = resolveWhenParamFromUrl(params);
     }
 
     if (ENABLED_FILTER_GROUPS.mode) {
-      rawFilterState.modes = parseMultiUrlParam(
-        params,
-        'mode',
-        ALL_MODE_KEYS,
-        val => {
-          const lower = val.toLowerCase();
-          // Chuẩn hóa các biến thể URL sang nhóm Kết hợp (hybrid); bỏ qua khóa chưa rõ / other
-          if (lower === 'ket-hop' || lower === 'ket_hop') return 'hybrid';
-          return lower;
-        }
-      );
+      rawFilterState.modes = parseMultiUrlParam(params, 'mode', ALL_MODE_KEYS, val => val.toLowerCase());
     }
 
     if (ENABLED_FILTER_GROUPS.where) {
@@ -975,9 +944,7 @@
           params.set('rank', filterState.ranks.join(','));
         }
         if (ENABLED_FILTER_GROUPS.month) {
-          if (filterState.eventFrom) params.set('eventFrom', filterState.eventFrom);
-          if (filterState.eventTo) params.set('eventTo', filterState.eventTo);
-          if (filterState.ongoing) params.set('ongoing', '1');
+          if (filterState.month) params.set('when', filterState.month);
         }
         if (ENABLED_FILTER_GROUPS.cfp) {
           if (filterState.cfp && filterState.cfp !== 'all') params.set('cfp', filterState.cfp);
@@ -1014,20 +981,20 @@
   /* ================= 7. KIỂM TRA TÍNH HỢP LỆ & ĐẾM BỘ LỌC ĐANG BẬT ================= */
 
   /**
-   * Kiểm tra một cặp ô ngày (Từ <= Đến), đồng bộ `aria-invalid` và thông báo lỗi inline.
-   * @param {string} fromId - ID ô ngày bắt đầu.
-   * @param {string} toId - ID ô ngày kết thúc.
-   * @param {string} errorId - ID phần tử hiển thị lỗi.
-   * @param {string} fromVal - Giá trị ngày bắt đầu ISO.
-   * @param {string} toVal - Giá trị ngày kết thúc ISO.
-   * @returns {boolean} True nếu hợp lệ.
+   * Kiểm tra khoảng ngày (Từ ngày <= Đến ngày) và hiển thị thông báo lỗi.
+   * @param {Object} state
+   * @returns {boolean}
    */
-  function validateDatePair(fromId, toId, errorId, fromVal, toVal) {
-    const fromEl = document.getElementById(fromId);
-    const toEl = document.getElementById(toId);
-    const errorEl = document.getElementById(errorId);
+  function validateDateRange(state) {
+    const fromEl = document.getElementById('fromDate');
+    const toEl = document.getElementById('toDate');
+    const errorEl = document.getElementById('dateRangeError');
 
-    const isInvalid = Boolean(fromVal && toVal && fromVal > toVal);
+    const isInvalid = Boolean(
+      state.dateFrom &&
+      state.dateTo &&
+      state.dateFrom > state.dateTo
+    );
 
     if (fromEl) fromEl.setAttribute('aria-invalid', isInvalid ? 'true' : 'false');
     if (toEl) toEl.setAttribute('aria-invalid', isInvalid ? 'true' : 'false');
@@ -1045,29 +1012,6 @@
   }
 
   /**
-   * Kiểm tra hợp lệ cả hai khoảng ngày (Thời gian diễn ra và Khoảng hạn nộp bài).
-   * @param {Object} state
-   * @returns {boolean}
-   */
-  function validateDateRange(state) {
-    const isEventValid = validateDatePair(
-      'eventFromDate',
-      'eventToDate',
-      'eventDateRangeError',
-      state.eventFrom,
-      state.eventTo
-    );
-    const isDeadlineValid = validateDatePair(
-      'fromDate',
-      'toDate',
-      'dateRangeError',
-      state.dateFrom,
-      state.dateTo
-    );
-    return isEventValid && isDeadlineValid;
-  }
-
-  /**
    * Đếm số bộ lọc đang chọn theo từng nhóm bộ lọc.
    * @param {Object} state
    * @returns {{rank: number, month: number, cfp: number, mode: number, where: number, what: number, total: number}}
@@ -1076,8 +1020,7 @@
     const rankCount = (ENABLED_FILTER_GROUPS.rank && Array.isArray(state.ranks)) ? state.ranks.length : 0;
     let monthCount = 0;
     if (ENABLED_FILTER_GROUPS.month) {
-      if (state.eventFrom || state.eventTo) monthCount += 1;
-      if (state.ongoing) monthCount += 1;
+      if (state.month) monthCount += 1;
     }
     let cfpCount = (ENABLED_FILTER_GROUPS.cfp && state.cfp && state.cfp !== 'all') ? 1 : 0;
     if (ENABLED_FILTER_GROUPS.cfp && (state.dateFrom || state.dateTo)) cfpCount += 1;
@@ -1094,110 +1037,6 @@
       what: whatCount,
       total: rankCount + monthCount + cfpCount + modeCount + whereCount + whatCount
     };
-  }
-
-  /**
-   * Danh sách các chip bộ lọc đang áp dụng.
-   * @param {Object} state
-   * @returns {Array<{id: string, groupKey: string, label: string, clear: Function}>}
-   */
-  /**
-   * Tạo đối tượng mô tả một chip bộ lọc đang áp dụng kèm hàm xóa tương ứng.
-   * @param {string} id - Mã định danh chip.
-   * @param {string} groupKey - Khóa nhóm bộ lọc.
-   * @param {string} label - Nhãn hiển thị của chip.
-   * @param {Function} resetFn - Hàm đặt lại trường trạng thái tương ứng.
-   * @returns {{ id: string, groupKey: string, label: string, clear: Function }}
-   */
-  function createActiveChip(id, groupKey, label, resetFn) {
-    return {
-      id,
-      groupKey,
-      label,
-      clear: () => {
-        resetFn();
-        filterState.page = 1;
-      }
-    };
-  }
-
-  /**
-   * Danh sách các chip bộ lọc đang áp dụng.
-   * @param {Object} state - Trạng thái bộ lọc hiện tại.
-   * @returns {Array<{id: string, groupKey: string, label: string, clear: Function}>}
-   */
-  function getActiveFilterChips(state) {
-    const chips = [];
-
-    if (state.q) {
-      chips.push(createActiveChip('q', 'query', `Từ khóa: "${state.q}"`, () => {
-        const input = document.getElementById('searchInput');
-        if (input) input.value = '';
-        filterState.q = '';
-      }));
-    }
-
-    if (ENABLED_FILTER_GROUPS.rank && Array.isArray(state.ranks)) {
-      state.ranks.forEach(rVal => {
-        chips.push(createActiveChip(`rank:${rVal}`, 'rank', `Phân hạng: ${RANK_LABEL_MAP[rVal] || rVal}`, () => {
-          filterState.ranks = filterState.ranks.filter(item => item !== rVal);
-        }));
-      });
-    }
-
-    if (state.eventFrom || state.eventTo) {
-      const fromText = state.eventFrom ? formatIsoToDdMmYyyy(state.eventFrom) : '...';
-      const toText = state.eventTo ? formatIsoToDdMmYyyy(state.eventTo) : '...';
-      chips.push(createActiveChip('eventDateRange', 'month', `Thời gian diễn ra: ${fromText} – ${toText}`, () => {
-        filterState.eventFrom = '';
-        filterState.eventTo = '';
-      }));
-    }
-
-    if (state.ongoing) {
-      chips.push(createActiveChip('ongoing', 'month', 'Đang diễn ra', () => {
-        filterState.ongoing = false;
-      }));
-    }
-
-    if (state.cfp && state.cfp !== 'all') {
-      chips.push(createActiveChip(`cfp:${state.cfp}`, 'cfp', `Hạn nộp: ${CFP_LABEL_MAP[state.cfp] || state.cfp}`, () => {
-        filterState.cfp = 'all';
-      }));
-    }
-
-    if (state.dateFrom || state.dateTo) {
-      const fromText = state.dateFrom ? formatIsoToDdMmYyyy(state.dateFrom) : '...';
-      const toText = state.dateTo ? formatIsoToDdMmYyyy(state.dateTo) : '...';
-      chips.push(createActiveChip('dateRange', 'cfp', `Khoảng hạn nộp: ${fromText} – ${toText}`, () => {
-        filterState.dateFrom = '';
-        filterState.dateTo = '';
-      }));
-    }
-
-    if (ENABLED_FILTER_GROUPS.mode && Array.isArray(state.modes)) {
-      state.modes.forEach(mVal => {
-        chips.push(createActiveChip(`mode:${mVal}`, 'mode', `Hình thức: ${MODE_LABEL_MAP[mVal] || mVal}`, () => {
-          filterState.modes = filterState.modes.filter(item => item !== mVal);
-        }));
-      });
-    }
-
-    if (state.city && state.city !== 'all') {
-      chips.push(createActiveChip(`city:${state.city}`, 'where', `Địa điểm: ${CITY_LABEL_MAP[state.city] || state.city}`, () => {
-        filterState.city = 'all';
-      }));
-    }
-
-    if (Array.isArray(state.topics)) {
-      state.topics.forEach(tKey => {
-        chips.push(createActiveChip(`topic:${tKey}`, 'what', `Lĩnh vực: ${topicLabelMap[tKey] || tKey}`, () => {
-          filterState.topics = filterState.topics.filter(item => item !== tKey);
-        }));
-      });
-    }
-
-    return chips;
   }
 
   /* ================= 8. TIÊU CHÍ SO SÁNH SẮP XẾP ================= */
@@ -1476,25 +1315,14 @@
     filteredConferences = filtered;
     sortConferencesForPipeline(filteredConferences, effectiveState, queryTokens, scoreMap);
 
-    const facetCounts = core.computeFacetCounts(
-      baseSearchConferences,
-      effectiveState,
-      allFacetKeys,
-      queryTokens,
-      effectiveState.q
-    );
-
     syncSidebarInputsFromState(effectiveState);
-    updateSidebarUI(effectiveState, facetCounts);
+    updateSidebarUI(effectiveState);
 
     // Khi đang mở drawer trên di động thì chỉ cập nhật bộ đếm nháp, chưa vẽ lại danh sách nền
     if (isFilterDrawerOpen) {
       updateDraftButtonCount();
       return;
     }
-
-    const activeChips = getActiveFilterChips(effectiveState);
-    renderFilterChipsUI(activeChips);
 
     const totalCount = baseSearchConferences.length;
     const matchCount = filteredConferences.length;
@@ -1515,19 +1343,6 @@
   }
 
   /* ================= 10. KẾT XUẤT GIAO DIỆN THANH BÊN (SIDEBAR) ================= */
-
-  /**
-   * Đảm bảo toàn bộ các tùy chọn bộ lọc trên thanh bên luôn có thể tích chọn,
-   * kể cả khi số hội nghị khớp hiện tại bằng 0 (ví dụ: hình thức Trực tuyến).
-   */
-  function updateSidebarOptionRows() {
-    document.querySelectorAll('.js-option-row').forEach(row => {
-      const inputEl = row.querySelector('.js-filter-input');
-      row.classList.remove('is-empty', 'is-disabled');
-      if (inputEl) inputEl.disabled = false;
-      else if (row instanceof HTMLButtonElement) row.disabled = false;
-    });
-  }
 
   /**
    * Cập nhật nhãn số lượng lựa chọn đang bật theo từng nhóm và nút Xóa nhóm / Đặt lại.
@@ -1562,14 +1377,16 @@
   }
 
   /**
-   * Cập nhật trạng thái các dòng tùy chọn, bộ đếm nhóm đang bật và nhãn nút thanh bên.
+   * Cập nhật bộ đếm nhóm, nút Đặt lại và nhãn cho toàn bộ thanh bên.
+   * Mọi lựa chọn luôn bấm được, kể cả khi hiện chưa có hội nghị phù hợp.
    * @param {Object} state - Trạng thái bộ lọc hiện tại.
    */
   function updateSidebarUI(state) {
-    updateSidebarOptionRows();
 
     const groupCounts = getGroupActiveCounts(state);
     updateSidebarGroupCounters(state, groupCounts);
+
+    syncTopicOverflowToggle();
 
     const mobileFilterLabel = document.getElementById('mobileFilterBtnLabel');
     if (mobileFilterLabel) mobileFilterLabel.textContent = `Bộ lọc (${groupCounts.total})`;
@@ -1605,6 +1422,20 @@
   }
 
   /**
+   * Đồng bộ trạng thái tích và lớp `.is-selected` cho một nhóm ô chọn trên thanh bên.
+   * @param {string} selector - Bộ chọn CSS của nhóm input.
+   * @param {(cb: HTMLInputElement) => boolean} isCheckedFn - Hàm xác định input có được chọn không.
+   */
+  function syncFilterCheckboxes(selector, isCheckedFn) {
+    document.querySelectorAll(selector).forEach(cb => {
+      const isChecked = Boolean(isCheckedFn(cb));
+      cb.checked = isChecked;
+      const row = cb.closest('.js-option-row');
+      if (row) row.classList.toggle('is-selected', isChecked);
+    });
+  }
+
+  /**
    * Đồng bộ giá trị của ô tìm kiếm, các phần tử input và nút trên sidebar theo một đối tượng state.
    * @param {Object} state
    */
@@ -1626,25 +1457,13 @@
       if (row) row.classList.toggle('is-selected', isSelected);
     });
 
-    document.querySelectorAll('.js-filter-cfp').forEach(cb => {
-      const isChecked = cb.value === 'all' ? state.cfp === 'all' : state.cfp === cb.value;
-      cb.checked = isChecked;
-      const row = cb.closest('.js-option-row');
-      if (row) row.classList.toggle('is-selected', isChecked);
-    });
-
-    const eventFromDate = document.getElementById('eventFromDate');
-    if (eventFromDate) eventFromDate.value = state.eventFrom;
-
-    const eventToDate = document.getElementById('eventToDate');
-    if (eventToDate) eventToDate.value = state.eventTo;
-
-    const ongoingCheck = document.getElementById('ongoingCheck');
-    if (ongoingCheck) {
-      ongoingCheck.checked = Boolean(state.ongoing);
-      const row = ongoingCheck.closest('.js-option-row');
-      if (row) row.classList.toggle('is-selected', ongoingCheck.checked);
-    }
+    syncFilterCheckboxes('.js-filter-cfp', cb => (cb.value === 'all' ? state.cfp === 'all' : state.cfp === cb.value));
+    syncFilterCheckboxes('.js-filter-time', cb => cb.value === (state.month || 'all'));
+    syncFilterCheckboxes('.js-filter-mode', cb => Array.isArray(state.modes) && state.modes.includes(cb.value));
+    syncFilterCheckboxes('.js-filter-city', cb => (
+      cb.value === 'all' ? state.city === 'all' : state.city === cb.value
+    ));
+    syncFilterCheckboxes('.js-filter-topic', cb => Array.isArray(state.topics) && state.topics.includes(cb.value));
 
     const fromDate = document.getElementById('fromDate');
     if (fromDate) fromDate.value = state.dateFrom;
@@ -1652,29 +1471,47 @@
     const toDate = document.getElementById('toDate');
     if (toDate) toDate.value = state.dateTo;
 
-    document.querySelectorAll('.js-filter-mode').forEach(cb => {
-      const isChecked = Array.isArray(state.modes) && state.modes.includes(cb.value);
-      cb.checked = isChecked;
-      const row = cb.closest('.js-option-row');
-      if (row) row.classList.toggle('is-selected', isChecked);
-    });
-
-    document.querySelectorAll('.js-filter-city').forEach(cb => {
-      const isChecked = cb.value === 'all' ? state.city === 'all' : state.city === cb.value;
-      cb.checked = isChecked;
-      const row = cb.closest('.js-option-row');
-      if (row) row.classList.toggle('is-selected', isChecked);
-    });
-
-    document.querySelectorAll('.js-filter-topic').forEach(cb => {
-      const isChecked = Array.isArray(state.topics) && state.topics.includes(cb.value);
-      cb.checked = isChecked;
-      const row = cb.closest('.js-option-row');
-      if (row) row.classList.toggle('is-selected', isChecked);
-    });
-
     const sortSelect = document.getElementById('sortSelect');
     if (sortSelect) sortSelect.value = state.sort;
+  }
+
+  /**
+   * Đồng bộ trạng thái xem thêm/thu gọn cho danh sách chủ đề.
+   */
+  function syncTopicOverflowToggle() {
+    const container = document.getElementById('dynamicFieldsContainer');
+    const fieldset = document.getElementById('topicFieldset');
+    const toggleBtn = document.getElementById('btnToggleMoreTopics');
+    if (!container || !toggleBtn) return;
+
+    const topicRows = [...container.querySelectorAll('.js-option-row')];
+    if (topicRows.length <= TOPIC_VISIBLE_LIMIT) {
+      topicRows.forEach(row => row.classList.remove('is-topic-collapsed'));
+      if (fieldset) fieldset.classList.remove('is-expanded');
+      toggleBtn.hidden = true;
+      toggleBtn.setAttribute('aria-expanded', 'false');
+      return;
+    }
+
+    if (fieldset) fieldset.classList.toggle('is-expanded', isTopicsExpanded);
+
+    let hiddenCount = 0;
+    topicRows.forEach((row, index) => {
+      const inputEl = row.querySelector('input');
+      const isChecked = Boolean(inputEl && inputEl.checked);
+      const shouldCollapse = !isTopicsExpanded && index >= TOPIC_VISIBLE_LIMIT && !isChecked;
+      row.classList.toggle('is-topic-collapsed', shouldCollapse);
+      if (shouldCollapse) hiddenCount += 1;
+    });
+
+    if (!isTopicsExpanded && hiddenCount === 0) {
+      toggleBtn.hidden = true;
+      return;
+    }
+
+    toggleBtn.hidden = false;
+    toggleBtn.setAttribute('aria-expanded', isTopicsExpanded ? 'true' : 'false');
+    toggleBtn.textContent = isTopicsExpanded ? 'Thu gọn' : `Xem thêm (${hiddenCount})`;
   }
 
   /**
@@ -1695,17 +1532,18 @@
   }
 
   /**
-   * Khởi tạo trạng thái mở accordion:
-   * Desktop mở cả 6 nhóm bộ lọc theo bố cục cổ điển;
-   * Mobile mở 2 nhóm đầu tiên và các nhóm đang có bộ lọc.
+   * Khởi tạo trạng thái mở accordion (thứ tự nhóm: Hạn nộp, Lĩnh vực, Địa điểm, Tháng, Hình thức, Phân hạng):
+   * Desktop mở 4 nhóm dùng nhiều đầu tiên, thu gọn Hình thức và Phân hạng;
+   * Mobile mở 2 nhóm đầu tiên. Nhóm nào đang có bộ lọc luôn được mở.
    */
   function syncInitialAccordionStates() {
     const isMobile = window.innerWidth <= 767;
+    const openLimit = isMobile ? 2 : 4;
     const groupCounts = getGroupActiveCounts(filterState);
     document.querySelectorAll('.js-filter-accordion').forEach((acc, idx) => {
       const groupKey = acc.getAttribute('data-group') || '';
       const hasActive = (groupCounts[groupKey] || 0) > 0;
-      const shouldOpen = isMobile ? (idx <= 1 || hasActive) : true;
+      const shouldOpen = idx < openLimit || hasActive;
       setAccordionOpen(acc, shouldOpen);
     });
   }
@@ -1719,9 +1557,7 @@
     if (groupKey === 'rank') {
       targetState.ranks = [];
     } else if (groupKey === 'month' || groupKey === 'when') {
-      targetState.eventFrom = '';
-      targetState.eventTo = '';
-      targetState.ongoing = false;
+      targetState.month = '';
       if (groupKey === 'when') {
         targetState.dateFrom = '';
         targetState.dateTo = '';
@@ -1740,72 +1576,12 @@
     targetState.page = 1;
     syncSidebarInputsFromState(targetState);
     if (isFilterDrawerOpen) {
-      const core = getCore();
-      const qTokens = core.tokenizeQuery(targetState.q);
-      const counts = core.computeFacetCounts(baseSearchConferences, targetState, allFacetKeys, qTokens, targetState.q);
-      updateSidebarUI(targetState, counts);
+      updateSidebarUI(targetState);
       updateDraftButtonCount();
     }
   }
 
-  /* ================= 11. KẾT XUẤT THẺ CHIP & QUẢN LÝ FOCUS ================= */
-
-  /**
-   * Render các chip bộ lọc vào container #activeFilterChips.
-   * @param {Array<Object>} chips
-   */
-  function renderFilterChipsUI(chips) {
-    const wrapper = document.getElementById('filterChipsWrapper');
-    const container = document.getElementById('activeFilterChips');
-    if (!wrapper || !container) return;
-
-    if (chips.length === 0) {
-      wrapper.setAttribute('hidden', '');
-      container.innerHTML = '';
-      return;
-    }
-
-    wrapper.removeAttribute('hidden');
-    const fragment = document.createDocumentFragment();
-
-    chips.forEach((chip, index) => {
-      const li = document.createElement('li');
-      li.className = 'filter-chip';
-      li.innerHTML = `
-        <span class="filter-chip__label">${escapeHtml(chip.label)}</span>
-        <button type="button" class="filter-chip__remove js-remove-chip" data-chip-index="${index}" aria-label="Bỏ bộ lọc ${escapeHtml(chip.label)}">&times;</button>
-      `;
-      fragment.appendChild(li);
-    });
-
-    container.replaceChildren(fragment);
-  }
-
-  /**
-   * Xử lý gỡ bỏ một chip và quản lý chuyển dịch tiêu điểm (focus management).
-   * @param {number} chipIndex
-   */
-  function handleChipRemove(chipIndex) {
-    const currentChips = getActiveFilterChips(filterState);
-    const targetChip = currentChips[chipIndex];
-    if (!targetChip) return;
-
-    targetChip.clear();
-
-    queueMicrotask(() => {
-      const remainingButtons = document.querySelectorAll('#activeFilterChips .js-remove-chip');
-      if (remainingButtons.length > 0) {
-        if (chipIndex < remainingButtons.length) {
-          remainingButtons[chipIndex].focus();
-        } else {
-          remainingButtons[remainingButtons.length - 1].focus();
-        }
-      } else {
-        const heading = document.getElementById('searchResultsHeading');
-        if (heading) heading.focus();
-      }
-    });
-  }
+  /* ================= 11. ĐẶT LẠI BỘ LỌC ================= */
 
   /**
    * Xóa toàn bộ bộ lọc và chuyển tiêu điểm về tiêu đề kết quả.
@@ -1815,9 +1591,7 @@
       draftFilterState.q = '';
       draftFilterState.ranks = [];
       draftFilterState.cfp = 'all';
-      draftFilterState.eventFrom = '';
-      draftFilterState.eventTo = '';
-      draftFilterState.ongoing = false;
+      draftFilterState.month = '';
       draftFilterState.dateFrom = '';
       draftFilterState.dateTo = '';
       draftFilterState.modes = [];
@@ -1825,9 +1599,7 @@
       draftFilterState.topics = [];
       draftFilterState.page = 1;
       syncSidebarInputsFromState(draftFilterState);
-      const core = getCore();
-      const counts = core.computeFacetCounts(baseSearchConferences, draftFilterState, allFacetKeys, [], '');
-      updateSidebarUI(draftFilterState, counts);
+      updateSidebarUI(draftFilterState);
       updateDraftButtonCount();
       return;
     }
@@ -1848,18 +1620,32 @@
   /* ================= 12. KẾT XUẤT THẺ HỘI NGHỊ (DOCUMENT FRAGMENT & INP) ================= */
 
   /**
+   * Tạo thẻ SVG nội tuyến cho badge trạng thái CFP.
+   * @param {number} strokeWidth - Độ dày nét vẽ.
+   * @param {string} body - Nội dung các thẻ hình học SVG.
+   * @returns {string} Chuỗi HTML thẻ `<svg>`.
+   */
+  function buildCfpBadgeSvg(strokeWidth, body) {
+    return `<svg class="conference-card__badge-icon" viewBox="0 0 24 24" fill="none" `
+      + `stroke="currentColor" stroke-width="${strokeWidth}" aria-hidden="true">${body}</svg>`;
+  }
+
+  /**
    * Tạo HTML cho badge trạng thái CFP đạt chuẩn WCAG 1.4.1.
    * @param {Object} conf
    * @returns {string}
    */
   function renderCfpBadgeHtml(conf) {
+    const iconClock = '<circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline>';
+    const iconLock = '<rect x="3" y="11" width="18" height="11" rx="2"></rect>'
+      + '<path d="M7 11V7a5 5 0 0 1 10 0v4"></path>';
+    const iconInfo = '<circle cx="12" cy="12" r="10"></circle>'
+      + '<line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line>';
+
     if (conf.cfpStatus === 'closingSoon') {
       return `
         <span class="conference-card__badge conference-card__badge--closing-soon">
-          <svg class="conference-card__badge-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" aria-hidden="true">
-            <circle cx="12" cy="12" r="10"></circle>
-            <polyline points="12 6 12 12 16 14"></polyline>
-          </svg>
+          ${buildCfpBadgeSvg(2.3, iconClock)}
           <span>Sắp hết hạn</span>
         </span>
       `;
@@ -1867,9 +1653,7 @@
     if (conf.cfpStatus === 'open') {
       return `
         <span class="conference-card__badge conference-card__badge--open">
-          <svg class="conference-card__badge-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true">
-            <polyline points="20 6 9 17 4 12"></polyline>
-          </svg>
+          ${buildCfpBadgeSvg(2.4, '<polyline points="20 6 9 17 4 12"></polyline>')}
           <span>Đang mở nộp bài</span>
         </span>
       `;
@@ -1877,33 +1661,19 @@
     if (conf.cfpStatus === 'closed') {
       return `
         <span class="conference-card__badge conference-card__badge--closed">
-          <svg class="conference-card__badge-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
-            <rect x="3" y="11" width="18" height="11" rx="2"></rect>
-            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-          </svg>
+          ${buildCfpBadgeSvg(2.2, iconLock)}
           <span>Đã đóng</span>
         </span>
       `;
     }
     return `
       <span class="conference-card__badge conference-card__badge--unknown">
-        <svg class="conference-card__badge-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
-          <circle cx="12" cy="12" r="10"></circle>
-          <line x1="12" y1="8" x2="12" y2="12"></line>
-          <line x1="12" y1="16" x2="12.01" y2="16"></line>
-        </svg>
+        ${buildCfpBadgeSvg(2.2, iconInfo)}
         <span>Chưa rõ hạn nộp</span>
       </span>
     `;
   }
 
-  /**
-   * Tạo chuỗi HTML thẻ hội nghị hoàn chỉnh.
-   * @param {Object} conf
-   * @param {Array<string>} savedIds
-   * @param {string} rawQuery
-   * @returns {string}
-   */
   /**
    * Trích xuất thông tin tiêu đề, ngày và nhãn đếm ngược theo mốc deadline nộp bài đầu tiên trên trang tra cứu.
    * @param {Object} conf - Đối tượng hội nghị chuẩn hóa.
@@ -1962,9 +1732,10 @@
 
     const rankSlugMap = { 'A*': 'astar', A: 'a', B: 'b', C: 'c' };
     const rankMod = conf.rank ? (rankSlugMap[conf.rank] || '') : '';
+    const rankBaseCls = 'conference-card__badge conference-card__badge--rank';
     const rankBadgeHtml = conf.rank && rankMod
-      ? `<span class="conference-card__badge conference-card__badge--rank conference-card__badge--rank-${rankMod}">Rank ${escapeHtml(conf.rank)}</span>`
-      : '<span class="conference-card__badge conference-card__badge--rank conference-card__badge--rank-unranked">Chưa xếp hạng</span>';
+      ? `<span class="${rankBaseCls} ${rankBaseCls}-${rankMod}">Rank ${escapeHtml(conf.rank)}</span>`
+      : `<span class="${rankBaseCls} ${rankBaseCls}-unranked">Chưa xếp hạng</span>`;
 
     const cfpBadgeHtml = renderCfpBadgeHtml(conf);
     let phaseBadgeHtml = '';
@@ -1976,7 +1747,8 @@
 
     const fullTitleText = conf.fullName && conf.fullName !== conf.name ? conf.fullName : '';
     const fullNameHtml = fullTitleText
-      ? `<div class="card-full-name" title="${escapeHtml(fullTitleText)}">${core.highlightMatches(fullTitleText, rawQuery)}</div>`
+      ? `<div class="card-full-name" title="${escapeHtml(fullTitleText)}">`
+        + `${core.highlightMatches(fullTitleText, rawQuery)}</div>`
       : '';
     return `
       <div class="conference-card__head">
@@ -1999,6 +1771,95 @@
   }
 
   /**
+   * Chuẩn bị danh sách nhãn lĩnh vực, metadata hiển thị và nút So sánh cho 1 thẻ tra cứu.
+   * @param {Object} conf - Đối tượng hội nghị chuẩn hóa.
+   * @param {Object} core - Tham chiếu window.ConfGuideSearchCore.
+   * @param {string} rawQuery - Từ khóa tìm kiếm thô để tô sáng.
+   * @returns {Object} Các giá trị văn bản và HTML phụ trợ của thẻ hội nghị.
+   */
+  function resolveCardDisplayMeta(conf, core, rawQuery) {
+    const utils = getUtils();
+    const fallbackLabels = Array.isArray(conf.topicItems) ? conf.topicItems.map(item => item.label) : [];
+    const topicLabelsFromUtils = utils && typeof utils.extractTopicLabels === 'function'
+      ? utils.extractTopicLabels(conf)
+      : fallbackLabels;
+    const displayTopics = Array.isArray(conf.displayTopics) ? conf.displayTopics : topicLabelsFromUtils;
+
+    const hiddenLabels = displayTopics.slice(2);
+    const hiddenLabelsText = hiddenLabels.join(', ');
+    const overflowCount = hiddenLabels.length;
+    const tagsListHtml = displayTopics.map((label, idx) => {
+      const extraModifier = idx >= 2 ? ' conference-card__topic--mobile-extra' : '';
+      return `<span class="tag-field conference-card__topic${extraModifier}">`
+        + `${core.highlightMatches(label, rawQuery)}</span>`;
+    }).join('');
+    const overflowTagHtml = overflowCount > 0
+      ? `<span class="tag-field conference-card__topic conference-card__topic--more"`
+        + ` title="${escapeHtml(`Các lĩnh vực khác: ${hiddenLabelsText}`)}"`
+        + ` aria-label="${escapeHtml(`Còn ${overflowCount} lĩnh vực khác: ${hiddenLabelsText}`)}">`
+        + `+${overflowCount}</span>`
+      : '';
+
+    const feeText = utils && typeof utils.formatConferenceFee === 'function'
+      ? utils.formatConferenceFee(conf)
+      : 'Chưa cập nhật';
+    const hasCompareApi = window.ConfGuideCompare && typeof window.ConfGuideCompare.renderToggleButton === 'function';
+    const cfpModifierMap = { open: 'open', closingSoon: 'closing-soon', closed: 'closed', unknown: 'unknown' };
+
+    return {
+      cfpMod: cfpModifierMap[conf.cfpStatus] || 'unknown',
+      deadlineMeta: resolveCardDeadlineSummary(conf),
+      cardTagsHtml: displayTopics.length > 0 ? `<div class="card-tags">${tagsListHtml}${overflowTagHtml}</div>` : '',
+      locationText: conf.location && String(conf.location).trim() !== '' ? String(conf.location).trim() : 'Chưa rõ',
+      eventDateText: formatEventDateRange(conf.startDate, conf.endDate),
+      feeText,
+      feeMetaMod: feeText !== 'Chưa cập nhật' ? ' card-meta-item--fee' : '',
+      compareBtnHtml: hasCompareApi ? window.ConfGuideCompare.renderToggleButton(conf) : ''
+    };
+  }
+
+  const SAVE_STAR_POLYGON =
+    '<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 '
+    + '18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>';
+
+  /**
+   * Tạo chuỗi HTML hàng metadata địa điểm, ngày diễn ra và lệ phí trên thẻ tra cứu.
+   * @param {Object} meta - Metadata hiển thị đã chuẩn hóa từ `resolveCardDisplayMeta`.
+   * @param {Object} core - Tham chiếu window.ConfGuideSearchCore.
+   * @param {string} rawQuery - Từ khóa tìm kiếm để tô sáng tên địa điểm.
+   * @returns {string} Chuỗi HTML `.card-meta-row`.
+   */
+  function buildCardMetaRowHtml(meta, core, rawQuery) {
+    return `
+      <div class="card-meta-row">
+        <span class="card-meta-item">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2" aria-hidden="true">
+            <path d="M12 2a8 8 0 0 0-8 8c0 5.25 8 12 8 12s8-6.75 8-12a8 8 0 0 0-8-8z"></path>
+            <circle cx="12" cy="10" r="3"></circle>
+          </svg>
+          <span>${core.highlightMatches(meta.locationText, rawQuery)}</span>
+        </span>
+        <span class="card-meta-item">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2" aria-hidden="true">
+            <rect x="3" y="4" width="18" height="18" rx="2"></rect>
+            <path d="M16 2v4M8 2v4M3 10h18"></path>
+          </svg>
+          <span>${escapeHtml(meta.eventDateText)}</span>
+        </span>
+        <span class="card-meta-item${meta.feeMetaMod}">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+          </svg>
+          <span>Lệ phí: ${escapeHtml(meta.feeText)}</span>
+        </span>
+      </div>
+    `;
+  }
+
+  /**
    * Tạo chuỗi HTML thẻ hội nghị hoàn chỉnh.
    * @param {Object} conf - Đối tượng hội nghị chuẩn hóa.
    * @param {Array<string>} savedIds - Danh sách ID hội nghị đã lưu.
@@ -2009,86 +1870,24 @@
     const core = getCore();
     const confId = conf.id;
     const isSaved = savedIds.includes(confId);
-    const cfpModifierMap = { open: 'open', closingSoon: 'closing-soon', closed: 'closed', unknown: 'unknown' };
-    const cfpMod = cfpModifierMap[conf.cfpStatus] || 'unknown';
-    const deadlineMeta = resolveCardDeadlineSummary(conf);
-
-    const utils = getUtils();
-    const displayTopics = Array.isArray(conf.displayTopics)
-      ? conf.displayTopics
-      : (utils && typeof utils.extractTopicLabels === 'function'
-        ? utils.extractTopicLabels(conf)
-        : (Array.isArray(conf.topicItems) ? conf.topicItems.map(item => item.label) : []));
-    const hiddenLabels = displayTopics.slice(2);
-    const hiddenLabelsText = hiddenLabels.join(', ');
-    const overflowCount = hiddenLabels.length;
-
-    const tagsListHtml = displayTopics.map((label, idx) => {
-      const extraModifier = idx >= 2 ? ' conference-card__topic--mobile-extra' : '';
-      return `<span class="tag-field conference-card__topic${extraModifier}">${core.highlightMatches(label, rawQuery)}</span>`;
-    }).join('');
-    const overflowTagHtml = overflowCount > 0
-      ? `<span class="tag-field conference-card__topic conference-card__topic--more"`
-        + ` title="${escapeHtml(`Các lĩnh vực khác: ${hiddenLabelsText}`)}"`
-        + ` aria-label="${escapeHtml(`Còn ${overflowCount} lĩnh vực khác: ${hiddenLabelsText}`)}">`
-        + `+${overflowCount}</span>`
-      : '';
-    const cardTagsHtml = displayTopics.length > 0
-      ? `<div class="card-tags">${tagsListHtml}${overflowTagHtml}</div>`
-      : '';
-    const locationText = conf.location && String(conf.location).trim() !== ''
-      ? String(conf.location).trim()
-      : 'Chưa rõ';
-    const eventDateText = formatEventDateRange(conf.startDate, conf.endDate);
-    const feeText = utils && typeof utils.formatConferenceFee === 'function'
-      ? utils.formatConferenceFee(conf)
-      : 'Chưa cập nhật';
-    const feeMetaMod = feeText !== 'Chưa cập nhật' ? ' card-meta-item--fee' : '';
-    const compareBtnHtml = window.ConfGuideCompare && typeof window.ConfGuideCompare.renderToggleButton === 'function'
-      ? window.ConfGuideCompare.renderToggleButton(conf)
-      : '';
+    const meta = resolveCardDisplayMeta(conf, core, rawQuery);
 
     return `
-      <article class="conference-card search-conf-card conference-card--cfp-${cfpMod}" data-id="${escapeHtml(confId)}">
+      <article class="conference-card search-conf-card conference-card--cfp-${meta.cfpMod}"
+        data-id="${escapeHtml(confId)}">
         <div class="card-main-col">
           ${buildCardHeadHtml(conf, core, rawQuery)}
-
-          <div class="card-meta-row">
-            <span class="card-meta-item">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                stroke-width="2" aria-hidden="true">
-                <path d="M12 2a8 8 0 0 0-8 8c0 5.25 8 12 8 12s8-6.75 8-12a8 8 0 0 0-8-8z"></path>
-                <circle cx="12" cy="10" r="3"></circle>
-              </svg>
-              <span>${core.highlightMatches(locationText, rawQuery)}</span>
-            </span>
-            <span class="card-meta-item">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                stroke-width="2" aria-hidden="true">
-                <rect x="3" y="4" width="18" height="18" rx="2"></rect>
-                <path d="M16 2v4M8 2v4M3 10h18"></path>
-              </svg>
-              <span>${escapeHtml(eventDateText)}</span>
-            </span>
-            <span class="card-meta-item${feeMetaMod}">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-              </svg>
-              <span>Lệ phí: ${escapeHtml(feeText)}</span>
-            </span>
-          </div>
-
-          ${cardTagsHtml}
+          ${buildCardMetaRowHtml(meta, core, rawQuery)}
+          ${meta.cardTagsHtml}
         </div>
 
         <div class="card-action-col">
           <div class="deadline-indicator">
-            <span class="deadline-label" title="${escapeHtml(deadlineMeta.deadlineHeader)}">
-              ${escapeHtml(deadlineMeta.deadlineHeader)}
+            <span class="deadline-label" title="${escapeHtml(meta.deadlineMeta.deadlineHeader)}">
+              ${escapeHtml(meta.deadlineMeta.deadlineHeader)}
             </span>
-            <span class="deadline-val">${deadlineMeta.deadlineDateHtml}</span>
-            <span class="${deadlineMeta.countdownClass}">${escapeHtml(deadlineMeta.countdownText)}</span>
+            <span class="deadline-val">${meta.deadlineMeta.deadlineDateHtml}</span>
+            <span class="${meta.deadlineMeta.countdownClass}">${escapeHtml(meta.deadlineMeta.countdownText)}</span>
           </div>
 
           <div class="card-buttons-group">
@@ -2100,11 +1899,11 @@
               <svg width="14" height="14" viewBox="0 0 24 24"
                 fill="${isSaved ? 'currentColor' : 'none'}" stroke="currentColor"
                 stroke-width="2" aria-hidden="true">
-                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                ${SAVE_STAR_POLYGON}
               </svg>
               <span>${isSaved ? 'Đã lưu' : 'Lưu lại'}</span>
             </button>
-            ${compareBtnHtml}
+            ${meta.compareBtnHtml}
           </div>
         </div>
       </article>
@@ -2125,7 +1924,9 @@
 
     if (pageItems.length <= BATCH_RENDER) {
       if (currentToken !== renderToken) return null;
-      batchTemplate.innerHTML = pageItems.map(conf => renderCardMarkup(conf, savedIds, filterState.q).trim()).join('');
+      batchTemplate.innerHTML = pageItems
+        .map(conf => renderCardMarkup(conf, savedIds, filterState.q).trim())
+        .join('');
       fragment.appendChild(batchTemplate.content);
       return fragment;
     }
@@ -2133,7 +1934,9 @@
     for (let i = 0; i < pageItems.length; i += BATCH_RENDER) {
       if (currentToken !== renderToken) return null;
       const batch = pageItems.slice(i, i + BATCH_RENDER);
-      batchTemplate.innerHTML = batch.map(conf => renderCardMarkup(conf, savedIds, filterState.q).trim()).join('');
+      batchTemplate.innerHTML = batch
+        .map(conf => renderCardMarkup(conf, savedIds, filterState.q).trim())
+        .join('');
       fragment.appendChild(batchTemplate.content);
       if (i + BATCH_RENDER < pageItems.length) {
         await getCore().yieldToMain();
@@ -2199,59 +2002,26 @@
   }
 
   /**
-   * Kết xuất trạng thái rỗng không ngõ cụt: nguyên nhân, nới lỏng, gợi ý chính tả và liên kết đề xuất.
+   * Hiển thị trạng thái không có kết quả, kèm gợi ý sửa chính tả từ khóa nếu có.
    */
   function renderEmptyStateUI() {
     const emptyState = document.getElementById('emptyState');
-    const causeEl = document.getElementById('emptyStateCause');
-    const suggestionsEl = document.getElementById('emptyStateSuggestions');
     const spellingWrapper = document.getElementById('emptySpellingSuggestion');
     const spellingBtn = document.getElementById('btnSpellingSuggestion');
     if (!emptyState) return;
 
     emptyState.removeAttribute('hidden');
-    const core = getCore();
-    const groupCounts = getGroupActiveCounts(filterState);
-    const hasQuery = Boolean(filterState.q);
-    const hasFilters = groupCounts.total > 0;
 
-    // 1. Nguyên nhân
-    if (causeEl) {
-      if (hasQuery && hasFilters) {
-        causeEl.textContent = `Không tìm thấy hội nghị nào khớp với từ khóa "${filterState.q}" và tổ hợp các bộ lọc đang chọn.`;
-      } else if (hasQuery) {
-        causeEl.textContent = `Không tìm thấy hội nghị nào khớp với từ khóa "${filterState.q}".`;
-      } else {
-        causeEl.textContent = 'Tổ hợp các bộ lọc đang chọn quá hẹp, không có hội nghị nào thỏa mãn tất cả tiêu chí.';
-      }
-    }
-
-    // 2. Gợi ý nới lỏng
-    const relaxData = core.getRelaxSuggestions(baseSearchConferences, filterState, filterState.q);
-    if (suggestionsEl) {
-      if (relaxData.relaxations.length > 0) {
-        const fragment = document.createDocumentFragment();
-        relaxData.relaxations.forEach(item => {
-          const btn = document.createElement('button');
-          btn.type = 'button';
-          btn.className = 'empty-state__suggestion-btn js-relax-filter';
-          btn.dataset.groupKey = item.groupKey;
-          btn.innerHTML = `<span>Bỏ ${escapeHtml(item.label)} &rarr; còn <strong>${item.count}</strong> hội nghị</span>`;
-          fragment.appendChild(btn);
-        });
-        suggestionsEl.replaceChildren(fragment);
-        suggestionsEl.removeAttribute('hidden');
-      } else {
-        suggestionsEl.innerHTML = '';
-        suggestionsEl.setAttribute('hidden', '');
-      }
-    }
-
-    // 3. Gợi ý chính tả (Damerau-Levenshtein)
+    // Gợi ý chính tả (Damerau-Levenshtein) khi từ khóa có thể bị gõ sai
     if (spellingWrapper && spellingBtn) {
-      if (relaxData.spellingSuggestion) {
-        spellingBtn.textContent = relaxData.spellingSuggestion;
-        spellingBtn.dataset.suggestion = relaxData.spellingSuggestion;
+      const { spellingSuggestion } = getCore().getRelaxSuggestions(
+        baseSearchConferences,
+        filterState,
+        filterState.q
+      );
+      if (spellingSuggestion) {
+        spellingBtn.textContent = spellingSuggestion;
+        spellingBtn.dataset.suggestion = spellingSuggestion;
         spellingWrapper.removeAttribute('hidden');
       } else {
         spellingWrapper.setAttribute('hidden', '');
@@ -2268,12 +2038,15 @@
   function renderPaginationUI(host, total, pageCount) {
     const cur = filterState.page;
     host.innerHTML = `
-      <button type="button" class="pagination-button js-page-step" data-page-step="-1" ${cur === 1 ? 'disabled' : ''} aria-label="Trang trước">&lsaquo;</button>
+      <button type="button" class="pagination-button js-page-step" data-page-step="-1"
+        ${cur === 1 ? 'disabled' : ''} aria-label="Trang trước">&lsaquo;</button>
       <label class="pagination-jump" for="pageJump">Trang
-        <input id="pageJump" class="js-page-jump" type="number" inputmode="numeric" min="1" max="${pageCount}" value="${cur}" aria-label="Chuyển đến trang">
+        <input id="pageJump" class="js-page-jump" type="number" inputmode="numeric"
+          min="1" max="${pageCount}" value="${cur}" aria-label="Chuyển đến trang">
         <span>/ ${pageCount}</span>
       </label>
-      <button type="button" class="pagination-button js-page-step" data-page-step="1" ${cur === pageCount ? 'disabled' : ''} aria-label="Trang sau">&rsaquo;</button>
+      <button type="button" class="pagination-button js-page-step" data-page-step="1"
+        ${cur === pageCount ? 'disabled' : ''} aria-label="Trang sau">&rsaquo;</button>
       <span class="pagination-total">${total} hội nghị</span>
     `;
   }
@@ -2329,9 +2102,7 @@
       q: filterState.q,
       ranks: [...filterState.ranks],
       cfp: filterState.cfp,
-      eventFrom: filterState.eventFrom,
-      eventTo: filterState.eventTo,
-      ongoing: filterState.ongoing,
+      month: filterState.month,
       dateFrom: filterState.dateFrom,
       dateTo: filterState.dateTo,
       modes: [...filterState.modes],
@@ -2374,9 +2145,7 @@
       filterState.q = draftFilterState.q;
       filterState.ranks = [...draftFilterState.ranks];
       filterState.cfp = draftFilterState.cfp;
-      filterState.eventFrom = draftFilterState.eventFrom;
-      filterState.eventTo = draftFilterState.eventTo;
-      filterState.ongoing = draftFilterState.ongoing;
+      filterState.month = draftFilterState.month;
       filterState.dateFrom = draftFilterState.dateFrom;
       filterState.dateTo = draftFilterState.dateTo;
       filterState.modes = [...draftFilterState.modes];
@@ -2386,16 +2155,7 @@
     } else {
       // Hủy bỏ: khôi phục giao diện sidebar về đúng filterState thực
       syncSidebarInputsFromState(filterState);
-      const core = getCore();
-      const qTokens = core.tokenizeQuery(filterState.q);
-      const counts = core.computeFacetCounts(
-        baseSearchConferences,
-        filterState,
-        allFacetKeys,
-        qTokens,
-        filterState.q
-      );
-      updateSidebarUI(filterState, counts);
+      updateSidebarUI(filterState);
     }
 
     draftFilterState = null;
@@ -2440,17 +2200,14 @@
    */
   function updateDraftButtonCount() {
     if (!draftFilterState) return;
-    const isDateValid = validateDateRange(draftFilterState);
     const core = getCore();
     const qTokens = core.tokenizeQuery(draftFilterState.q);
-    const count = isDateValid
-      ? baseSearchConferences.filter(conf => {
-        if (qTokens.length > 0 && !core.scoreConference(conf, qTokens, draftFilterState.q).matched) {
-          return false;
-        }
-        return core.matchesFilters(conf, draftFilterState, ENABLED_FILTER_GROUPS);
-      }).length
-      : 0;
+    const count = baseSearchConferences.filter(conf => {
+      if (qTokens.length > 0 && !core.scoreConference(conf, qTokens, draftFilterState.q).matched) {
+        return false;
+      }
+      return core.matchesFilters(conf, draftFilterState, ENABLED_FILTER_GROUPS);
+    }).length;
 
     const label = document.querySelector('.js-apply-filters-label');
     if (label) {
@@ -2461,21 +2218,12 @@
   /* ================= 15. GẮN SỰ KIỆN TĨNH & EVENT DELEGATION ================= */
 
   /**
-   * Đồng bộ số đếm trước và nút Áp dụng nháp khi ngăn kéo bộ lọc di động đang mở.
+   * Đồng bộ thanh bên và nút Áp dụng nháp khi ngăn kéo bộ lọc di động đang mở.
    * @param {Object} targetState - Trạng thái bộ lọc đang thao tác.
    */
   function refreshDrawerDraftUI(targetState) {
     if (!isFilterDrawerOpen) return;
-    const core = getCore();
-    const qTokens = core.tokenizeQuery(targetState.q);
-    const counts = core.computeFacetCounts(
-      baseSearchConferences,
-      targetState,
-      allFacetKeys,
-      qTokens,
-      targetState.q
-    );
-    updateSidebarUI(targetState, counts);
+    updateSidebarUI(targetState);
     updateDraftButtonCount();
   }
 
@@ -2535,12 +2283,10 @@
       targetState.ranks = rankCatalog.map(item => item.key).filter(r => selectedRanks.has(r));
     } else if (target.classList.contains('js-filter-cfp') && target instanceof HTMLInputElement) {
       targetState.cfp = target.value === 'all' ? 'all' : (target.checked ? target.value : 'all');
-    } else if (target.classList.contains('js-event-date-from') && target instanceof HTMLInputElement) {
-      targetState.eventFrom = normalizeIsoDate(target.value) || '';
-    } else if (target.classList.contains('js-event-date-to') && target instanceof HTMLInputElement) {
-      targetState.eventTo = normalizeIsoDate(target.value) || '';
-    } else if (target.classList.contains('js-filter-ongoing') && target instanceof HTMLInputElement) {
-      targetState.ongoing = target.checked;
+    } else if (target.classList.contains('js-filter-time') && target instanceof HTMLInputElement) {
+      // Hoạt động như cụm chọn một giống nhóm Hạn nộp / Địa điểm:
+      // bỏ tích sẽ quay về "Mọi thời gian"
+      targetState.month = target.value === 'all' ? '' : (target.checked ? target.value : '');
     } else if (target.classList.contains('js-date-from') && target instanceof HTMLInputElement) {
       targetState.dateFrom = normalizeIsoDate(target.value) || '';
     } else if (target.classList.contains('js-date-to') && target instanceof HTMLInputElement) {
@@ -2573,7 +2319,7 @@
    */
   function handleSidebarClickEvent(event) {
     const target = event.target;
-    if (!(target instanceof HTMLElement)) return;
+    if (!(target instanceof Element)) return;
 
     const toggleBtn = target.closest('.js-filter-toggle');
     if (toggleBtn) {
@@ -2585,6 +2331,11 @@
     const clearBtn = target.closest('.js-clear-group');
     if (clearBtn) { clearFilterGroup(clearBtn.getAttribute('data-clear-group') || ''); return; }
 
+    if (target.closest('.js-toggle-more-topics')) {
+      isTopicsExpanded = !isTopicsExpanded;
+      syncTopicOverflowToggle();
+      return;
+    }
     if (target.closest('.js-filter-reset')) { clearAllFilters(); return; }
     if (target.closest('.js-close-filters-drawer')) { closeFiltersDrawer(false); return; }
     if (target.closest('.js-apply-filters')) {
@@ -2620,29 +2371,18 @@
     });
 
     window.addEventListener('resize', () => {
-      if (window.innerWidth >= 768 && isFilterDrawerOpen) closeFiltersDrawer(false);
+      if (window.innerWidth > 960 && isFilterDrawerOpen) closeFiltersDrawer(false);
     }, { passive: true });
   }
 
   /**
-   * Gắn sự kiện trên thanh chip, danh sách thẻ hội nghị, trạng thái rỗng, phân trang và sắp xếp.
+   * Gắn sự kiện trên danh sách thẻ hội nghị, trạng thái rỗng, phân trang và sắp xếp.
    */
   function bindResultsAreaDelegation() {
-    const chipsWrapper = document.getElementById('filterChipsWrapper');
-    if (chipsWrapper) {
-      chipsWrapper.addEventListener('click', event => {
-        const target = event.target instanceof HTMLElement ? event.target : null;
-        if (!target) return;
-        const removeBtn = target.closest('.js-remove-chip');
-        if (removeBtn) handleChipRemove(Number.parseInt(removeBtn.getAttribute('data-chip-index') || '0', 10));
-        else if (target.closest('.js-filter-reset')) clearAllFilters();
-      });
-    }
-
     const confList = document.getElementById('conferenceList');
     if (confList) {
       confList.addEventListener('click', event => {
-        const saveBtn = event.target instanceof HTMLElement ? event.target.closest('.js-card-save') : null;
+        const saveBtn = event.target instanceof Element ? event.target.closest('.js-card-save') : null;
         if (saveBtn) toggleSaveConference(saveBtn.getAttribute('data-save-id') || '', saveBtn);
       });
     }
@@ -2650,36 +2390,25 @@
     const emptyState = document.getElementById('emptyState');
     if (emptyState) {
       emptyState.addEventListener('click', event => {
-        const target = event.target instanceof HTMLElement ? event.target : null;
+        const target = event.target instanceof Element ? event.target : null;
         if (!target) return;
-        const relaxBtn = target.closest('.js-relax-filter');
-        if (relaxBtn) {
-          if (relaxBtn.dataset.groupKey === 'query') {
-            const input = document.getElementById('searchInput');
-            if (input) input.value = '';
-            filterState.q = '';
-          } else {
-            clearFilterGroup(relaxBtn.dataset.groupKey);
-          }
-          return;
-        }
         const spellBtn = target.closest('.js-spelling-suggestion');
         if (spellBtn) {
           const sug = spellBtn.dataset.suggestion || spellBtn.textContent;
           const input = document.getElementById('searchInput');
           if (input) input.value = sug;
           filterState.q = sug;
-          return;
         }
-        if (target.closest('.js-filter-reset')) clearAllFilters();
       });
     }
 
     const pagination = document.getElementById('pagination');
     if (pagination) {
       pagination.addEventListener('click', event => {
-        const stepBtn = event.target instanceof HTMLElement ? event.target.closest('.js-page-step') : null;
-        if (stepBtn) goToPage(filterState.page + Number.parseInt(stepBtn.getAttribute('data-page-step') || '0', 10));
+        const stepBtn = event.target instanceof Element ? event.target.closest('.js-page-step') : null;
+        if (!stepBtn) return;
+        const delta = Number.parseInt(stepBtn.getAttribute('data-page-step') || '0', 10);
+        goToPage(filterState.page + delta);
       });
       pagination.addEventListener('change', event => {
         if (event.target instanceof HTMLInputElement && event.target.classList.contains('js-page-jump')) {
@@ -2757,17 +2486,36 @@
   }
 
   /**
+   * Tải mảng dữ liệu hội nghị thô từ `data/conference_data.json` hoặc fallback cục bộ khi mở qua `file:///`.
+   * @param {Object|null} utils - Đối tượng tiện ích ConfGuideUtils.
+   * @returns {Promise<Array<Object>|null>} Mảng hội nghị thô hoặc null nếu không nạp được dữ liệu.
+   */
+  async function fetchConferencesRaw(utils) {
+    const fallbackList = utils && Array.isArray(utils.FALLBACK_CONFERENCES) ? utils.FALLBACK_CONFERENCES : [];
+    try {
+      const data = utils && typeof utils.fetchJsonCached === 'function'
+        ? await utils.fetchJsonCached('data/conference_data.json')
+        : await fetch('data/conference_data.json').then(res => {
+          if (!res.ok) throw new Error(res.status);
+          return res.json();
+        });
+      if (!Array.isArray(data) || data.length === 0) throw new Error('Dữ liệu trống');
+      return data;
+    } catch {
+      return fallbackList.length > 0 ? fallbackList : null;
+    }
+  }
+
+  /**
    * Tải dữ liệu hội nghị từ data/conference_data.json kèm try/catch fallback về FALLBACK_CONFERENCES.
    */
   async function loadData() {
     const utils = getUtils();
     const core = getCore();
-    const fallbackList = utils && Array.isArray(utils.FALLBACK_CONFERENCES) ? utils.FALLBACK_CONFERENCES : [];
     const container = document.getElementById('conferenceList');
     const errorState = document.getElementById('searchErrorState');
 
     isDataLoaded = false;
-    dataLoadError = null;
 
     if (container) {
       container.removeAttribute('hidden');
@@ -2776,59 +2524,44 @@
     }
     if (errorState) errorState.setAttribute('hidden', '');
 
-    let rawList = [];
-    try {
-      const utils = getUtils();
-      const data = utils && typeof utils.fetchJsonCached === 'function'
-        ? await utils.fetchJsonCached('data/conference_data.json')
-        : await fetch('data/conference_data.json').then(r => { if (!r.ok) throw new Error(r.status); return r.json(); });
-      if (!Array.isArray(data) || data.length === 0) throw new Error('Dữ liệu trống');
-      rawList = data;
-      isDataLoaded = true;
-    } catch (e) {
-      if (fallbackList.length > 0) {
-        rawList = fallbackList;
-        isDataLoaded = true;
-      } else {
-        dataLoadError = 'Không thể nạp dữ liệu hội nghị. Vui lòng thử lại hoặc kiểm tra kết nối mạng.';
-        isDataLoaded = false;
-        const msg = document.getElementById('searchErrorMessage');
-        if (msg) msg.textContent = dataLoadError;
-        if (container) container.setAttribute('hidden', '');
-        if (errorState) errorState.removeAttribute('hidden');
-        return;
+    const rawList = await fetchConferencesRaw(utils);
+    if (!rawList) {
+      const msg = document.getElementById('searchErrorMessage');
+      if (msg) {
+        msg.textContent = 'Không thể nạp dữ liệu hội nghị. Vui lòng thử lại hoặc kiểm tra kết nối mạng.';
       }
+      if (container) container.setAttribute('hidden', '');
+      if (errorState) errorState.removeAttribute('hidden');
+      return;
     }
+    isDataLoaded = true;
 
     // 1. Chuẩn hóa bản ghi 1 lần duy nhất
     allNormalizedConferences = rawList.map(item => normalizeConference(item)).filter(Boolean);
-
-    // 2. Sử dụng toàn bộ 100% bản ghi hội nghị (kể cả bản ghi chưa đủ dữ liệu)
-    hiddenEmptyCount = 0;
     baseSearchConferences = allNormalizedConferences;
 
-    // 3. Xây dựng danh mục Phân hạng, Hình thức, Lĩnh vực đơn thực có từ dữ liệu & lọc lại khóa URL an toàn
+    // 2. Xây dựng danh mục Phân hạng, Hình thức, Lĩnh vực thực có & lọc lại khóa URL an toàn
     buildFilterCatalogs(baseSearchConferences);
-    renderDynamicFilterOptions(baseSearchConferences);
+    renderDynamicFilterOptions();
     rawFilterState.ranks = rawFilterState.ranks.filter((key, idx, arr) =>
       validRankKeys.has(key) && arr.indexOf(key) === idx
     );
     rawFilterState.modes = rawFilterState.modes.filter((key, idx, arr) =>
       validModeKeys.has(key) && arr.indexOf(key) === idx
     );
-    rawFilterState.topics = rawFilterState.topics.filter((key, idx, arr) =>
-      allKnownTopicValues.has(key) && arr.indexOf(key) === idx
-    );
+    rawFilterState.topics = rawFilterState.topics
+      .map(key => (validTopicValues.has(key) ? key : (singleTopicToGroupKey.get(key) || key)))
+      .filter((key, idx, arr) => validTopicValues.has(key) && arr.indexOf(key) === idx);
 
-    // 4. Xây dựng chỉ mục tìm kiếm và khớp mờ 1 lần duy nhất bằng ConfGuideSearchCore
+    // 3. Xây dựng chỉ mục tìm kiếm và khớp mờ 1 lần duy nhất bằng ConfGuideSearchCore
     indexedConferences = core.buildIndex(baseSearchConferences);
     baseSearchConferences = indexedConferences;
 
-    // 5. Đồng bộ trạng thái hiển thị ô tìm kiếm, sidebar & accordions
+    // 4. Đồng bộ trạng thái hiển thị ô tìm kiếm, sidebar & accordions
     syncSidebarInputsFromState(filterState);
     syncInitialAccordionStates();
 
-    // 6. Kích hoạt luồng lọc và vẽ giao diện
+    // 5. Kích hoạt luồng lọc và vẽ giao diện
     await executePipeline();
   }
 
@@ -2839,13 +2572,7 @@
     const savedIds = getSavedList();
     document.querySelectorAll('.js-card-save').forEach(btn => {
       const confId = btn.getAttribute('data-save-id') || '';
-      const isSaved = Boolean(confId && savedIds.includes(confId));
-      const labelSpan = btn.querySelector('span');
-      const svg = btn.querySelector('svg');
-      btn.classList.toggle('saved', isSaved);
-      btn.setAttribute('aria-pressed', isSaved ? 'true' : 'false');
-      if (labelSpan) labelSpan.textContent = isSaved ? 'Đã lưu' : 'Lưu lại';
-      if (svg) svg.setAttribute('fill', isSaved ? 'currentColor' : 'none');
+      applySaveButtonUi(btn, Boolean(confId && savedIds.includes(confId)));
     });
   }
 

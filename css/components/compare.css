@@ -555,17 +555,18 @@ body.is-compare-open {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 4px;
-  padding: 4px 9px;
+  width: 28px;
+  height: 28px;
+  padding: 0;
   border-radius: var(--radius-sm);
   border: 1px solid var(--border-strong);
   background: var(--surface);
   color: var(--text-muted);
   font-family: inherit;
-  font-size: 11.5px;
+  font-size: 18px;
   font-weight: 600;
+  line-height: 1;
   cursor: pointer;
-  white-space: nowrap;
   flex-shrink: 0;
   transition: background-color 140ms ease, color 140ms ease, border-color 140ms ease;
 }
@@ -601,13 +602,6 @@ body.is-compare-open {
   line-height: 1.35;
 }
 
-.compare-table__criterion-wrap {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 5px;
-}
-
 /* Ô dữ liệu của từng hội nghị */
 .compare-table__cell {
   min-width: 230px;
@@ -625,19 +619,6 @@ body.is-compare-open {
 
 .compare-table__row--diff > .compare-table__cell {
   background: var(--compare-diff-cell-bg);
-}
-
-.compare-table__diff-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 2px 7px;
-  border-radius: var(--radius-pill);
-  background: var(--compare-diff-badge-bg);
-  color: var(--compare-diff-badge-text);
-  border: 1px solid var(--compare-diff-badge-border);
-  font-size: 11px;
-  font-weight: 700;
-  line-height: 1.25;
 }
 
 /* Thành phần hiển thị bên trong ô dữ liệu */
@@ -875,8 +856,11 @@ body.is-compare-open {
   }
 
   .compare-table__remove-btn {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
     min-height: 36px;
-    padding: 6px 10px;
+    padding: 0;
   }
 
   .compare-dialog__footer {

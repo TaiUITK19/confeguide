@@ -166,9 +166,7 @@ body.dark .hero-slider {
 
 .hero-slider__dot:focus-visible,
 .hero-slide-card__link:focus-visible,
-.hero-slider__cta-btn:focus-visible,
-.hero-slider__rec-viewall:focus-visible,
-.hero-slider__rec-change:focus-visible {
+.hero-slider__cta-btn:focus-visible {
   outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
   box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--focus-ring);
@@ -284,42 +282,6 @@ body.dark .hero-slider__cta-box {
   font-size: 13.5px;
 }
 
-.hero-slider__slide-head--rec {
-  gap: 6px 10px;
-}
-
-.hero-slider__selected-topics {
-  order: 3;
-  flex-basis: 100%;
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 5px;
-}
-
-.hero-slider__topic-pill {
-  display: inline-flex;
-  align-items: center;
-  padding: 2px 9px;
-  border-radius: var(--radius-pill);
-  font-size: 11.5px;
-  font-weight: 600;
-  background: var(--surface-alt);
-  color: var(--text);
-  border: 1px solid var(--border-strong);
-  max-width: 100%;
-}
-
-.hero-slider__topic-pill--more {
-  background: var(--primary-soft);
-  color: var(--primary);
-  border-color: var(--conf-badge-border);
-}
-
-body.dark .hero-slider__topic-pill--more {
-  color: var(--navy);
-}
-
 .hero-slider__rec-list {
   display: flex;
   flex-direction: column;
@@ -410,42 +372,6 @@ body.dark .hero-slider__topic-pill--more {
 .hero-rec-card__detail {
   min-height: 32px;
   padding: 5px 11px;
-  font-size: 12.5px;
-}
-
-.hero-slider__rec-actions {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 8px 12px;
-  margin-top: auto;
-  padding-top: 2px;
-}
-
-.hero-slider__rec-viewall {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--primary);
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  min-height: 32px;
-}
-
-body.dark .hero-slider__rec-viewall {
-  color: var(--navy);
-}
-
-.hero-slider__rec-viewall:hover {
-  opacity: 0.85;
-}
-
-.hero-slider__rec-change {
-  min-height: 32px;
-  padding: 5px 12px;
   font-size: 12.5px;
 }
 
@@ -1321,13 +1247,11 @@ body.dark .hero-slide-card__meta-item svg {
 }
 
 @media (max-width: 480px) {
-  .hero-slider__cta-actions,
-  .hero-slider__rec-actions {
+  .hero-slider__cta-actions {
     width: 100%;
   }
 
-  .hero-slider__cta-actions .btn,
-  .hero-slider__rec-change {
+  .hero-slider__cta-actions .btn {
     flex: 1 1 auto;
     justify-content: center;
   }

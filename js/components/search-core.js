@@ -602,21 +602,84 @@
   }
 
   /**
-   * Kiểm tra hội nghị có khớp khoảng thời gian diễn ra (`eventFrom` – `eventTo`), `month` hoặc trạng thái Đang diễn ra hay không.
-   * Hai khoảng `[startDate, endDate]` và `[eventFrom, eventTo]` giao nhau thì được tính là khớp.
+   * Lấy ngày hiện tại dạng ISO `YYYY-MM-DD` theo múi giờ UTC+7 (Việt Nam).
+   * @returns {string} Ngày hiện tại ISO `YYYY-MM-DD`.
+   */
+  function getTodayVnIso() {
+    if (
+      typeof window !== 'undefined'
+      && window.ConfGuideUtils
+      && typeof window.ConfGuideUtils.getTodayVnIso === 'function'
+    ) {
+      return window.ConfGuideUtils.getTodayVnIso();
+    }
+    const vnNow = new Date(Date.now() + 7 * 3600000);
+    const year = vnNow.getUTCFullYear();
+    const month = String(vnNow.getUTCMonth() + 1).padStart(2, '0');
+    const day = String(vnNow.getUTCDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  /**
+   * Tính chênh lệch số ngày lịch giữa hai mốc ISO `YYYY-MM-DD`.
+   * @param {string} fromIso - Ngày mốc.
+   * @param {string} toIso - Ngày đích.
+   * @returns {number|null} Số ngày chênh lệch hoặc null nếu thiếu/sai định dạng.
+   */
+  function diffDaysIsoUtc(fromIso, toIso) {
+    if (!fromIso || !toIso) return null;
+    const fromMs = Date.parse(`${fromIso}T00:00:00Z`);
+    const toMs = Date.parse(`${toIso}T00:00:00Z`);
+    if (Number.isNaN(fromMs) || Number.isNaN(toMs)) return null;
+    return Math.round((toMs - fromMs) / 86400000);
+  }
+
+  /** Ngưỡng số ngày cho các mốc lọc nhanh "Trong 1 / 3 / 6 tháng tới" */
+  const TIME_RANGE_MAX_DAYS = {
+    next1: 30,
+    next3: 90,
+    next6: 180
+  };
+
+  /**
+   * Kiểm tra hội nghị có khớp tiêu chí thời gian diễn ra (`ongoing`, `next1`, `next3`, `next6`, `unknown`),
+   * `YYYY-MM` hoặc khoảng ngày `eventFrom` – `eventTo` hay không.
    * @param {Object} conf - Đối tượng hội nghị.
    * @param {Object} filterState - Trạng thái bộ lọc.
    * @returns {boolean} True nếu thỏa mãn.
    */
   function matchesMonthGroup(conf, filterState) {
+    const confStart = String(conf.startDate || conf.start_date || '').trim();
+    const confEnd = String(conf.endDate || conf.end_date || confStart).trim();
+
     if (filterState.eventFrom || filterState.eventTo) {
-      const confStart = conf.startDate || conf.start_date || conf.endDate || conf.end_date || '';
-      const confEnd = conf.endDate || conf.end_date || confStart;
       if (!confStart || !confEnd) return false;
       if (filterState.eventFrom && confEnd < filterState.eventFrom) return false;
       if (filterState.eventTo && confStart > filterState.eventTo) return false;
     }
-    if (filterState.month && conf.eventMonth !== filterState.month) return false;
+
+    const timeVal = String(filterState.month || '').trim();
+    if (timeVal && timeVal !== 'all') {
+      if (timeVal === 'unknown') {
+        if (confStart || (conf.eventPhase && conf.eventPhase !== 'unknown')) return false;
+      } else if (timeVal === 'ongoing') {
+        if (conf.eventPhase) {
+          if (conf.eventPhase !== 'ongoing') return false;
+        } else {
+          const todayIso = getTodayVnIso();
+          if (!confStart || !confEnd || todayIso < confStart || todayIso > confEnd) return false;
+        }
+      } else if (Object.prototype.hasOwnProperty.call(TIME_RANGE_MAX_DAYS, timeVal)) {
+        const maxDays = TIME_RANGE_MAX_DAYS[timeVal];
+        const days = Number.isFinite(conf.daysUntilStart)
+          ? conf.daysUntilStart
+          : diffDaysIsoUtc(getTodayVnIso(), confStart);
+        if (!Number.isFinite(days) || days < 0 || days > maxDays) return false;
+      } else if (conf.eventMonth !== timeVal) {
+        return false;
+      }
+    }
+
     if (filterState.ongoing && conf.eventPhase !== 'ongoing') return false;
     return true;
   }
@@ -630,7 +693,8 @@
   function matchesDateRangeGroup(conf, filterState) {
     if (!filterState.dateFrom && !filterState.dateTo) return true;
 
-    const targetDeadline = conf.firstSubmissionDeadline || (Array.isArray(conf.submissionDeadlines) ? conf.submissionDeadlines[0] : null);
+    const firstSub = Array.isArray(conf.submissionDeadlines) ? conf.submissionDeadlines[0] : null;
+    const targetDeadline = conf.firstSubmissionDeadline || firstSub;
     if (!targetDeadline || !targetDeadline.date) return false;
     if (filterState.dateFrom && targetDeadline.date < filterState.dateFrom) return false;
     if (filterState.dateTo && targetDeadline.date > filterState.dateTo) return false;
@@ -695,7 +759,8 @@
   }
 
   /**
-   * Kiểm tra hội nghị có khớp một khóa lọc lĩnh vực đơn hoặc nhóm `other` (gồm các lĩnh vực còn lại ngoài top 3 nổi bật).
+   * Kiểm tra hội nghị có khớp một khóa lọc lĩnh vực đơn hoặc nhóm `other`
+   * (gồm các lĩnh vực còn lại ngoài top 3 nổi bật).
    * @param {Object} conf - Đối tượng hội nghị.
    * @param {string} targetTopicKey - Khóa lĩnh vực mục tiêu hoặc `'other'`.
    * @param {Array<string>} featuredTopicKeys - Danh sách khóa 3 lĩnh vực nổi bật.
@@ -738,6 +803,16 @@
     if (groupPrefix === 'ongoing') {
       subState.ongoing = false;
       return { subState, matchesOption: conf => conf.eventPhase === 'ongoing' };
+    }
+    if (groupPrefix === 'when' || groupPrefix === 'month') {
+      subState.month = '';
+      subState.ongoing = false;
+      subState.eventFrom = '';
+      subState.eventTo = '';
+      return {
+        subState,
+        matchesOption: conf => matchesMonthGroup(conf, { month: optionValue })
+      };
     }
     if (groupPrefix === 'mode') {
       subState.modes = [];
@@ -861,32 +936,11 @@
   }
 
   /**
-   * Tính các gợi ý nới lỏng bộ lọc khi kết quả trả về bằng 0:
-   * thử bỏ riêng từng nhóm đang bật, chọn tối đa 3 nhóm cho nhiều kết quả nhất,
-   * đồng thời tìm gợi ý chính tả gần nhất bằng Damerau-Levenshtein.
-   * @param {Array<Object>} conferences - Toàn bộ hội nghị.
-   * @param {Object} filterState - Trạng thái lọc hiện tại.
-   * @param {string} [currentQuery=''] - Từ khóa tìm kiếm hiện tại.
-   * @returns {{ relaxations: Array<{groupKey: string, label: string, count: number}>, spellingSuggestion: string|null }}
+   * Tạo danh sách các nhóm lọc đang bật có thể nới lỏng để gợi ý khi 0 kết quả.
+   * @param {Object} filterState - Trạng thái bộ lọc hiện tại.
+   * @returns {Array<{ groupKey: string, label: string, patch: Object }>} Danh sách ứng viên nới lỏng đang kích hoạt.
    */
-  function getRelaxSuggestions(conferences, filterState, currentQuery = '') {
-    const relaxations = [];
-    if (!Array.isArray(conferences) || conferences.length === 0) {
-      return { relaxations, spellingSuggestion: null };
-    }
-
-    const queryTokens = tokenizeQuery(currentQuery);
-    if (queryTokens.length > 0) {
-      const countWithoutQuery = conferences.filter(conf => matchesFilters(conf, filterState)).length;
-      if (countWithoutQuery > 0) {
-        relaxations.push({
-          groupKey: 'query',
-          label: `từ khóa "${currentQuery.trim()}"`,
-          count: countWithoutQuery
-        });
-      }
-    }
-
+  function getActiveRelaxationCandidates(filterState) {
     const hasArrayChoice = (val, ignoreAll) => (
       (Array.isArray(val) && val.length > 0 && (!ignoreAll || !val.includes('all')))
       || (ignoreAll && typeof val === 'string' && Boolean(val) && val !== 'all')
@@ -900,7 +954,12 @@
         patch: { ranks: [] }
       },
       {
-        active: Boolean(filterState.eventFrom || filterState.eventTo || filterState.month || filterState.ongoing),
+        active: Boolean(
+          filterState.eventFrom
+          || filterState.eventTo
+          || (filterState.month && filterState.month !== 'all')
+          || filterState.ongoing
+        ),
         groupKey: 'month',
         label: 'bộ lọc Thời gian diễn ra',
         patch: { eventFrom: '', eventTo: '', month: '', ongoing: false }
@@ -931,8 +990,40 @@
       }
     ];
 
-    candidates.forEach(item => {
-      if (!item.active) return;
+    return candidates.filter(item => item.active);
+  }
+
+  /**
+   * Tính các gợi ý nới lỏng bộ lọc khi kết quả trả về bằng 0:
+   * thử bỏ riêng từng nhóm đang bật, chọn tối đa 3 nhóm cho nhiều kết quả nhất,
+   * đồng thời tìm gợi ý chính tả gần nhất bằng Damerau-Levenshtein.
+   * @param {Array<Object>} conferences - Toàn bộ hội nghị.
+   * @param {Object} filterState - Trạng thái lọc hiện tại.
+   * @param {string} [currentQuery=''] - Từ khóa tìm kiếm hiện tại.
+   * @returns {{
+   *   relaxations: Array<{groupKey: string, label: string, count: number}>,
+   *   spellingSuggestion: string|null
+   * }}
+   */
+  function getRelaxSuggestions(conferences, filterState, currentQuery = '') {
+    const relaxations = [];
+    if (!Array.isArray(conferences) || conferences.length === 0) {
+      return { relaxations, spellingSuggestion: null };
+    }
+
+    const queryTokens = tokenizeQuery(currentQuery);
+    if (queryTokens.length > 0) {
+      const countWithoutQuery = conferences.filter(conf => matchesFilters(conf, filterState)).length;
+      if (countWithoutQuery > 0) {
+        relaxations.push({
+          groupKey: 'query',
+          label: `từ khóa "${currentQuery.trim()}"`,
+          count: countWithoutQuery
+        });
+      }
+    }
+
+    getActiveRelaxationCandidates(filterState).forEach(item => {
       const count = countRelaxedMatches(conferences, filterState, item.patch, queryTokens, currentQuery);
       if (count > 0) relaxations.push({ groupKey: item.groupKey, label: item.label, count });
     });
@@ -945,8 +1036,8 @@
   }
 
   /**
-   * Tạo chuỗi HTML an toàn đã tô sáng từ khóa tìm kiếm khớp chính xác bằng <mark class="search-highlight">.
-   * Tuyệt đối không chèn HTML thô của người dùng.
+   * Tạo chuỗi HTML an toàn đã tô sáng từ khóa tìm kiếm khớp chính xác
+   * bằng `<mark class="search-highlight">`. Tuyệt đối không chèn HTML thô của người dùng.
    * @param {*} rawText Văn bản gốc cần hiển thị.
    * @param {string} rawQuery Từ khóa tìm kiếm.
    * @returns {string} Chuỗi HTML đã thoát ký tự và bọc thẻ <mark>.
@@ -1004,7 +1095,11 @@
    * @returns {string}
    */
   function escapeHtml(val) {
-    if (typeof window !== 'undefined' && window.ConfGuideUtils && typeof window.ConfGuideUtils.escapeHtml === 'function') {
+    if (
+      typeof window !== 'undefined'
+      && window.ConfGuideUtils
+      && typeof window.ConfGuideUtils.escapeHtml === 'function'
+    ) {
       return window.ConfGuideUtils.escapeHtml(val);
     }
     if (val === null || val === undefined) return '';
@@ -1021,7 +1116,11 @@
    * @returns {Promise<void>}
    */
   async function yieldToMain() {
-    if (typeof globalThis !== 'undefined' && globalThis.scheduler && typeof globalThis.scheduler.yield === 'function') {
+    if (
+      typeof globalThis !== 'undefined'
+      && globalThis.scheduler
+      && typeof globalThis.scheduler.yield === 'function'
+    ) {
       return await globalThis.scheduler.yield();
     }
     if (typeof MessageChannel !== 'undefined') {

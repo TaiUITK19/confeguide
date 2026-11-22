@@ -154,23 +154,70 @@
     }
   };
 
-  // Biểu tượng SVG nội tuyến dùng chung (có aria-hidden="true")
+  /**
+   * Tạo thẻ SVG nội tuyến chuẩn hóa thuộc tính nét vẽ và `aria-hidden="true"`.
+   * @param {number} size - Kích thước chiều rộng/cao (px).
+   * @param {string} body - Nội dung các thẻ hình học bên trong `<svg>`.
+   * @param {number} [strokeWidth=2] - Độ dày nét vẽ.
+   * @returns {string} Chuỗi HTML phần tử `<svg>`.
+   */
+  function svgIcon(size, body, strokeWidth = 2) {
+    return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" `
+      + `stroke="currentColor" stroke-width="${strokeWidth}" stroke-linecap="round" `
+      + `stroke-linejoin="round" aria-hidden="true">${body}</svg>`;
+  }
+
+  // Biểu tượng SVG nội tuyến dùng chung
   const ICONS = {
-    award: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline></svg>',
-    clock: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>',
-    filter: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>',
-    check: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>',
-    database: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>',
-    code: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>',
-    advisor: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 10v6M2 10l10-5 10 5-10 5z"></path><path d="M6 12v5c3 3 9 3 12 0v-5"></path></svg>',
-    idCard: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"></rect><circle cx="9" cy="10" r="2"></circle><line x1="15" y1="8" x2="17" y2="8"></line><line x1="15" y1="12" x2="17" y2="12"></line><line x1="7" y1="16" x2="17" y2="16"></line></svg>',
-    info: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>'
+    award: svgIcon(
+      24,
+      '<circle cx="12" cy="8" r="7"></circle>'
+        + '<polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline>'
+    ),
+    clock: svgIcon(
+      24,
+      '<circle cx="12" cy="12" r="10"></circle>'
+        + '<polyline points="12 6 12 12 16 14"></polyline>'
+    ),
+    filter: svgIcon(24, '<polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>'),
+    check: svgIcon(18, '<polyline points="20 6 9 17 4 12"></polyline>', 2.5),
+    database: svgIcon(
+      20,
+      '<ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>'
+        + '<path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path>'
+        + '<path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path>'
+    ),
+    code: svgIcon(
+      20,
+      '<polyline points="16 18 22 12 16 6"></polyline>'
+        + '<polyline points="8 6 2 12 8 18"></polyline>'
+    ),
+    advisor: svgIcon(
+      28,
+      '<path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>'
+        + '<path d="M6 12v5c3 3 9 3 12 0v-5"></path>'
+    ),
+    idCard: svgIcon(
+      14,
+      '<rect x="3" y="4" width="18" height="16" rx="2"></rect>'
+        + '<circle cx="9" cy="10" r="2"></circle>'
+        + '<line x1="15" y1="8" x2="17" y2="8"></line>'
+        + '<line x1="15" y1="12" x2="17" y2="12"></line>'
+        + '<line x1="7" y1="16" x2="17" y2="16"></line>'
+    ),
+    info: svgIcon(
+      18,
+      '<circle cx="12" cy="12" r="10"></circle>'
+        + '<line x1="12" y1="16" x2="12" y2="12"></line>'
+        + '<line x1="12" y1="8" x2="12.01" y2="8"></line>'
+    )
   };
 
   /** Thoát ký tự HTML đặc biệt (tái sử dụng ConfGuideUtils.escapeHtml). */
   function escapeHtml(str) {
     if (typeof utils.escapeHtml === 'function') return utils.escapeHtml(str);
-    return String(str || '').replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[ch]));
+    const entities = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+    return String(str || '').replace(/[&<>"']/g, ch => entities[ch]);
   }
 
   /** Đọc JSON từ localStorage an toàn (tái sử dụng ConfGuideUtils.readStorage). */
@@ -204,23 +251,54 @@
    * @param {string} text - Chuỗi văn bản đầu vào.
    * @returns {string} Chuỗi văn bản đã chuẩn hóa theo định hướng dự án.
    */
+  const ABOUT_HERO_DESC_OLD_RE = new RegExp(
+    'quản lý các mốc thời hạn công bố khoa học\\. Hệ thống giải quyết các rào cản phổ biến '
+      + 'trong tiếp cận thông tin học thuật, hướng tới trở thành công cụ hỗ trợ tin cậy '
+      + 'cho cộng đồng nghiên cứu tại Việt Nam\\.',
+    'g'
+  );
+  const ABOUT_MISSION_OLD_RE = new RegExp(
+    'minh bạch hóa thông tin hội nghị khoa học công nghệ thông tin '
+      + 'trên một nền tảng thống nhất',
+    'g'
+  );
+
   function normalizeAboutText(text) {
     if (typeof text !== 'string') return text;
     return text
       .replace(/Lệch chuẩn múi giờ quốc tế/g, 'Lệch chuẩn múi giờ nộp bài')
-      .replace(/Đếm ngược Deadline theo múi giờ quốc tế/g, 'Đếm ngược Deadline theo giờ Việt Nam (UTC+7)')
-      .replace(/múi giờ chuẩn quốc tế Anywhere on Earth \(AoE, UTC-12\) sang giờ Việt Nam \(ICT, UTC\+7\)/g, 'mốc 23:59 Anywhere on Earth (AoE, UTC-12) sang 18:59 ngày kế tiếp theo giờ Việt Nam (UTC+7)')
-      .replace(/múi giờ quốc tế Anywhere on Earth \(AoE, UTC-12\) hoặc giờ địa phương của nước chủ nhà/g, 'múi giờ Anywhere on Earth (AoE, UTC-12) khi chưa quy đổi sang giờ Việt Nam (UTC+7)')
-      .replace(/đếm ngược deadline thời gian thực chuẩn AoE/g, 'đếm ngược deadline thời gian thực theo múi giờ UTC+7 (giờ Việt Nam)')
-      .replace(/\s*quốc tế/gi, '')
-      .replace(/^Nền tảng Tra cứu & Theo dõi Hội nghị Khoa học$/g, 'Nền tảng Tra cứu & Khuyến nghị Hội nghị Khoa học CNTT tại Việt Nam')
       .replace(
-        /quản lý các mốc thời hạn công bố khoa học\. Hệ thống giải quyết các rào cản phổ biến trong tiếp cận thông tin học thuật, hướng tới trở thành công cụ hỗ trợ tin cậy cho cộng đồng nghiên cứu tại Việt Nam\./g,
-        'quản lý các mốc thời hạn công bố tại các hội nghị khoa học Công nghệ thông tin diễn ra tại Việt Nam (bao gồm cả hội nghị quốc tế tổ chức tại Việt Nam). Hệ thống giải quyết các rào cản phổ biến trong tiếp cận thông tin học thuật, hướng tới trở thành công cụ hỗ trợ tin cậy cho cộng đồng nghiên cứu.'
+        /Đếm ngược Deadline theo múi giờ quốc tế/g,
+        'Đếm ngược Deadline theo giờ Việt Nam (UTC+7)'
       )
       .replace(
-        /minh bạch hóa thông tin hội nghị khoa học công nghệ thông tin trên một nền tảng thống nhất/g,
-        'minh bạch hóa thông tin các hội nghị khoa học Công nghệ thông tin diễn ra tại Việt Nam (bao gồm cả hội nghị quốc tế được tổ chức tại Việt Nam) trên một nền tảng thống nhất'
+        /múi giờ chuẩn quốc tế Anywhere on Earth \(AoE, UTC-12\) sang giờ Việt Nam \(ICT, UTC\+7\)/g,
+        'mốc 23:59 Anywhere on Earth (AoE, UTC-12) sang 18:59 ngày kế tiếp theo giờ Việt Nam (UTC+7)'
+      )
+      .replace(
+        /múi giờ quốc tế Anywhere on Earth \(AoE, UTC-12\) hoặc giờ địa phương của nước chủ nhà/g,
+        'múi giờ Anywhere on Earth (AoE, UTC-12) khi chưa quy đổi sang giờ Việt Nam (UTC+7)'
+      )
+      .replace(
+        /đếm ngược deadline thời gian thực chuẩn AoE/g,
+        'đếm ngược deadline thời gian thực theo múi giờ UTC+7 (giờ Việt Nam)'
+      )
+      .replace(/\s*quốc tế/gi, '')
+      .replace(
+        /^Nền tảng Tra cứu & Theo dõi Hội nghị Khoa học$/g,
+        'Nền tảng Tra cứu & Khuyến nghị Hội nghị Khoa học CNTT tại Việt Nam'
+      )
+      .replace(
+        ABOUT_HERO_DESC_OLD_RE,
+        'quản lý các mốc thời hạn công bố tại các hội nghị khoa học Công nghệ thông tin '
+          + 'diễn ra tại Việt Nam (bao gồm cả hội nghị quốc tế tổ chức tại Việt Nam). '
+          + 'Hệ thống giải quyết các rào cản phổ biến trong tiếp cận thông tin học thuật, '
+          + 'hướng tới trở thành công cụ hỗ trợ tin cậy cho cộng đồng nghiên cứu.'
+      )
+      .replace(
+        ABOUT_MISSION_OLD_RE,
+        'minh bạch hóa thông tin các hội nghị khoa học Công nghệ thông tin diễn ra tại Việt Nam '
+          + '(bao gồm cả hội nghị quốc tế được tổ chức tại Việt Nam) trên một nền tảng thống nhất'
       );
   }
 
@@ -266,7 +344,10 @@
     try {
       const json = typeof utils.fetchJsonCached === 'function'
         ? await utils.fetchJsonCached('data/about.json')
-        : await fetch('data/about.json').then(r => { if (!r.ok) throw new Error(r.status); return r.json(); });
+        : await fetch('data/about.json').then(res => {
+          if (!res.ok) throw new Error(res.status);
+          return res.json();
+        });
       if (json && json.hero) {
         data = normalizeAboutDataForDisplay(json);
       }
@@ -350,6 +431,22 @@
   }
 
   /**
+   * Tạo danh sách dòng mô tả dùng chung cho cột Nguồn dữ liệu và Công nghệ phát triển.
+   * @param {Array<{ name: string, purpose: string }>} items - Danh sách mục.
+   * @returns {string} Chuỗi HTML danh sách `.about-item-row`.
+   */
+  function renderAboutItemRows(items) {
+    return (items || []).map(item => `
+      <div class="about-item-row">
+        <div class="about-item-name">
+          <span class="dot" aria-hidden="true"></span>${escapeHtml(item.name)}
+        </div>
+        <p class="about-item-purpose">${escapeHtml(item.purpose)}</p>
+      </div>
+    `).join('');
+  }
+
+  /**
    * Render 2 cột Minh bạch nguồn dữ liệu và Công nghệ phát triển.
    * @param {Object} trans - Dữ liệu transparencyAndTech.
    */
@@ -359,15 +456,12 @@
     const srcBox = document.getElementById('aboutDataSourcesCol');
     if (srcBox && trans.dataSources) {
       const ds = trans.dataSources;
-      const sourcesListHtml = (ds.sources || []).map(s => `
-        <div class="about-item-row">
-          <div class="about-item-name"><span class="dot" aria-hidden="true"></span>${escapeHtml(s.name)}</div>
-          <p class="about-item-purpose">${escapeHtml(s.purpose)}</p>
-        </div>
-      `).join('');
+      const sourcesListHtml = renderAboutItemRows(ds.sources);
 
       srcBox.innerHTML = `
-        <h3 class="about-col-title">${ICONS.database} <span>${escapeHtml(ds.title || 'Nguồn dữ liệu')}</span></h3>
+        <h3 class="about-col-title">
+          ${ICONS.database} <span>${escapeHtml(ds.title || 'Nguồn dữ liệu')}</span>
+        </h3>
         <div class="about-items-list">
           ${sourcesListHtml}
         </div>
@@ -383,15 +477,12 @@
     const techBox = document.getElementById('aboutTechStackCol');
     if (techBox && trans.techStack) {
       const ts = trans.techStack;
-      const techListHtml = (ts.items || []).map(t => `
-        <div class="about-item-row">
-          <div class="about-item-name"><span class="dot" aria-hidden="true"></span>${escapeHtml(t.name)}</div>
-          <p class="about-item-purpose">${escapeHtml(t.purpose)}</p>
-        </div>
-      `).join('');
+      const techListHtml = renderAboutItemRows(ts.items);
 
       techBox.innerHTML = `
-        <h3 class="about-col-title">${ICONS.code} <span>${escapeHtml(ts.title || 'Công nghệ phát triển')}</span></h3>
+        <h3 class="about-col-title">
+          ${ICONS.code} <span>${escapeHtml(ts.title || 'Công nghệ phát triển')}</span>
+        </h3>
         <div class="about-items-list">
           ${techListHtml}
         </div>
@@ -417,7 +508,9 @@
           <div class="about-advisor-info">
             <span class="about-advisor-tag">${escapeHtml(adv.role || 'Cố vấn chuyên môn')}</span>
             <h3 class="about-advisor-name">${escapeHtml(adv.name)}</h3>
-            <div class="about-advisor-dept">${escapeHtml(adv.unit)}${adv.organization ? ` — ${escapeHtml(adv.organization)}` : ''}</div>
+            <div class="about-advisor-dept">
+              ${escapeHtml(adv.unit)}${adv.organization ? ` — ${escapeHtml(adv.organization)}` : ''}
+            </div>
           </div>
         </div>
       `;
@@ -636,6 +729,25 @@
   }
 
   /**
+   * Gắn kiểm tra hợp lệ từng ô nhập và xử lý gửi biểu mẫu đề xuất hội nghị.
+   * @param {HTMLFormElement} form - Biểu mẫu đề xuất.
+   * @param {HTMLElement|null} successBox - Hộp thông báo thành công.
+   * @param {HTMLElement|null} closeSuccessBtn - Nút đóng trên hộp thông báo.
+   */
+  function bindProposalFormEvents(form, successBox, closeSuccessBtn) {
+    ['propName', 'propUrl', 'propEmail'].forEach(id => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.addEventListener('blur', () => validateProposalField(id));
+      el.addEventListener('input', () => {
+        if (el.classList.contains('invalid')) validateProposalField(id);
+      });
+    });
+
+    form.addEventListener('submit', e => handleProposalSubmit(e, form, successBox, closeSuccessBtn));
+  }
+
+  /**
    * Khởi tạo Modal Đề xuất Hội nghị mới với Focus Trap, Escape, validate Regex và lưu LocalStorage.
    */
   function setupProposalModal() {
@@ -692,16 +804,7 @@
       trapModalFocus(e, backdrop, dialog);
     });
 
-    ['propName', 'propUrl', 'propEmail'].forEach(id => {
-      const el = document.getElementById(id);
-      if (!el) return;
-      el.addEventListener('blur', () => validateProposalField(id));
-      el.addEventListener('input', () => {
-        if (el.classList.contains('invalid')) validateProposalField(id);
-      });
-    });
-
-    form.addEventListener('submit', e => handleProposalSubmit(e, form, successBox, closeSuccessBtn));
+    bindProposalFormEvents(form, successBox, closeSuccessBtn);
   }
 
   // Khởi chạy trang Giới thiệu khi DOM đã sẵn sàng

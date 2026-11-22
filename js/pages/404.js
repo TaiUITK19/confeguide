@@ -4,7 +4,7 @@
  * Phụ thuộc: js/core/layout.js (window.ConfGuideUtils)
  * Chức năng:
  * - Phân tích ngữ cảnh lỗi (đường dẫn sai, liên kết hỏng, mã hội nghị sai hoặc thiếu ?id=).
- * - Gợi ý sửa lỗi gõ nhầm đường dẫn tới 11 trang hợp lệ của ConfGuide bằng Damerau-Levenshtein & alias.
+ * - Gợi ý sửa lỗi gõ nhầm đường dẫn tới 9 trang hợp lệ của ConfGuide bằng Damerau-Levenshtein & alias.
  * - Tải dữ liệu hội nghị thực (fetch + fallback file:///) để gợi ý hội nghị gần khớp và 3 hội nghị tiêu biểu.
  * - Hỗ trợ tìm kiếm nhanh, quay lại an toàn và mở modal báo cáo liên kết hỏng.
  */
@@ -20,16 +20,26 @@
   /** Danh mục trang thật của ConfGuide phục vụ phát hiện gõ nhầm đường dẫn */
   const KNOWN_ROUTE_CATALOG = [
     { href: 'index.html', label: 'Trang chủ ConfGuide', aliases: ['home', 'trang-chu', 'trangchu', 'index', 'main'] },
-    { href: 'search.html', label: 'Tra cứu hội nghị', aliases: ['search', 'tra-cuu', 'tracuu', 'tim-kiem', 'filter', 'conferences'] },
-    { href: 'detail.html', label: 'Chi tiết hội nghị', aliases: ['detail', 'details', 'chi-tiet', 'chitiet', 'conference'] },
-    { href: 'tracker.html', label: 'Theo dõi hội nghị', aliases: ['tracker', 'theo-doi', 'theodoi', 'saved', 'bookmark'] },
+    {
+      href: 'search.html',
+      label: 'Tra cứu hội nghị',
+      aliases: ['search', 'tra-cuu', 'tracuu', 'tim-kiem', 'filter', 'conferences']
+    },
+    {
+      href: 'detail.html',
+      label: 'Chi tiết hội nghị',
+      aliases: ['detail', 'details', 'chi-tiet', 'chitiet', 'conference']
+    },
+    {
+      href: 'tracker.html',
+      label: 'Theo dõi hội nghị',
+      aliases: ['tracker', 'theo-doi', 'theodoi', 'saved', 'bookmark']
+    },
     { href: 'profile.html', label: 'Hồ sơ cá nhân', aliases: ['profile', 'ho-so', 'hoso', 'account', 'tai-khoan'] },
     { href: 'about.html', label: 'Về chúng tôi', aliases: ['about', 've-chung-toi', 'gioi-thieu', 'info'] },
     { href: 'contact.html', label: 'Liên hệ & Đóng góp', aliases: ['contact', 'lien-he', 'lienhe', 'feedback'] },
     { href: 'login.html', label: 'Đăng nhập', aliases: ['login', 'signin', 'dang-nhap', 'dangnhap'] },
-    { href: 'register.html', label: 'Đăng ký tài khoản', aliases: ['register', 'signup', 'dang-ky', 'dangky'] },
-    { href: 'terms.html', label: 'Điều khoản sử dụng', aliases: ['terms', 'dieu-khoan', 'dieukhoan'] },
-    { href: 'privacy.html', label: 'Chính sách bảo mật', aliases: ['privacy', 'bao-mat', 'baomat', 'policy'] }
+    { href: 'register.html', label: 'Đăng ký tài khoản', aliases: ['register', 'signup', 'dang-ky', 'dangky'] }
   ];
 
   /* ================= 2. HÀM TIỆN ÍCH CHUẨN HÓA & SO KHỚP MỜ ================= */
@@ -138,8 +148,10 @@
       if (titleEl) titleEl.textContent = 'Không tìm thấy hội nghị bạn đang tìm';
       if (descEl) {
         descEl.textContent = ctx.confId
-          ? `Không có hội nghị nào khớp với mã "${ctx.confId}" trong danh mục ConfGuide. Hãy kiểm tra gợi ý bên dưới hoặc quay lại trang Tra cứu.`
-          : 'Đường dẫn chi tiết chưa có mã hội nghị (?id=...). Vui lòng chọn một hội nghị cụ thể từ trang Tra cứu.';
+          ? `Không có hội nghị nào khớp với mã "${ctx.confId}" trong danh mục ConfGuide. `
+            + 'Hãy kiểm tra gợi ý bên dưới hoặc quay lại trang Tra cứu.'
+          : 'Đường dẫn chi tiết chưa có mã hội nghị (?id=...). '
+            + 'Vui lòng chọn một hội nghị cụ thể từ trang Tra cứu.';
       }
     } else if (ctx.reason === 'broken-link') {
       if (pillEl) pillEl.textContent = '404 • Liên kết không tồn tại';
@@ -201,7 +213,9 @@
    * @returns {Array<Object>} Danh sách hội nghị gợi ý.
    */
   function findMatchingConferences(conferences, ctx, utils) {
-    const querySeed = ctx.confId || String(ctx.badTarget || '').split('?')[0].split('/').filter(Boolean).pop() || '';
+    const fallbackSeg = String(ctx.badTarget || '')
+      .split('?')[0].split('/').filter(Boolean).pop();
+    const querySeed = ctx.confId || fallbackSeg || '';
     const normSeed = normalizeCompareText(querySeed.replace(/\.html?$/i, ''));
     if (!normSeed || normSeed === '404' || normSeed.length < 2) return [];
 
@@ -254,7 +268,8 @@
       const cid = utils.getConferenceId ? utils.getConferenceId(c) : '';
       if (!cid) return;
       linksHtml.push(
-        `<a class="nf-suggestion__link" href="detail.html?id=${encodeURIComponent(cid)}">Hội nghị ${esc(c.name)} &rarr;</a>`
+        `<a class="nf-suggestion__link" href="detail.html?id=${encodeURIComponent(cid)}">`
+          + `Hội nghị ${esc(c.name)} &rarr;</a>`
       );
     });
 
@@ -285,7 +300,10 @@
     try {
       const data = typeof utils.fetchJsonCached === 'function'
         ? await utils.fetchJsonCached(CONFERENCES_DATA_URL)
-        : await fetch(CONFERENCES_DATA_URL).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); });
+        : await fetch(CONFERENCES_DATA_URL).then(res => {
+          if (!res.ok) throw new Error(res.status);
+          return res.json();
+        });
       if (Array.isArray(data) && data.length > 0) {
         return data.map(normalize).filter(Boolean);
       }
@@ -293,6 +311,76 @@
       // Dự phòng cục bộ khi chạy qua giao thức file:/// hoặc lỗi mạng
     }
     return fallback.map(normalize).filter(Boolean);
+  }
+
+  /**
+   * Lấy trọng số sắp xếp của Rank CORE để ưu tiên hội nghị hạng cao hơn.
+   * @param {Object} conf Dữ liệu hội nghị đã chuẩn hóa.
+   * @param {Object} utils ConfGuideUtils.
+   * @returns {number} Trọng số (nhỏ hơn đứng trước).
+   */
+  function getFeaturedRankWeight(conf, utils) {
+    const raw = typeof utils.extractConferenceRank === 'function'
+      ? utils.extractConferenceRank(conf.rank).toUpperCase()
+      : '';
+    return Object.prototype.hasOwnProperty.call(RANK_ORDER, raw) ? RANK_ORDER[raw] : 99;
+  }
+
+  /**
+   * Tạo HTML cho một thẻ hội nghị tiêu biểu trên trang 404.
+   * @param {Object} conf Dữ liệu hội nghị.
+   * @param {Object} utils ConfGuideUtils.
+   * @returns {string} Chuỗi HTML thẻ hội nghị.
+   */
+  function buildFeaturedCardHtml(conf, utils) {
+    const esc = utils.escapeHtml || (val => String(val ?? ''));
+    const confId = utils.getConferenceId ? utils.getConferenceId(conf) : '';
+    const rawRank = typeof utils.extractConferenceRank === 'function'
+      ? utils.extractConferenceRank(conf.rank).trim().toUpperCase()
+      : '';
+    const hasRank = Boolean(rawRank && !/^UNRANKED$/i.test(rawRank));
+    const rankLabel = hasRank
+      ? (/^(A\*|A|B|C)$/.test(rawRank) ? `Rank ${rawRank}` : rawRank)
+      : 'Chưa xếp hạng';
+    const rankModCls = hasRank ? '' : ' nf-conf-card__rank--unranked';
+    const fullName = String(conf.fullName || conf.full_name || '').trim();
+    const locationText = String(conf.location || '').trim() || 'Chưa cập nhật địa điểm';
+    const eventDateText = typeof utils.formatConferenceEventDate === 'function'
+      ? utils.formatConferenceEventDate(conf)
+      : 'Chưa cập nhật';
+    const feeText = typeof utils.formatConferenceFee === 'function'
+      ? utils.formatConferenceFee(conf)
+      : 'Chưa cập nhật';
+    const fullNameHtml = fullName && fullName !== conf.name
+      ? `<p class="nf-conf-card__fullname">${esc(fullName)}</p>`
+      : '';
+
+    return `
+      <article class="nf-conf-card card-surface">
+        <div>
+          <div class="nf-conf-card__head">
+            <h3 class="nf-conf-card__name">${esc(conf.name)}</h3>
+            <span class="nf-conf-card__rank${rankModCls}">${esc(rankLabel)}</span>
+          </div>
+          ${fullNameHtml}
+        </div>
+        <div class="nf-conf-card__meta">
+          <div class="nf-conf-card__meta-row">
+            <span>Địa điểm: ${esc(locationText)}</span>
+          </div>
+          <div class="nf-conf-card__meta-row">
+            <span>Thời gian: ${esc(eventDateText)}</span>
+          </div>
+          <div class="nf-conf-card__meta-row">
+            <span>Lệ phí: ${esc(feeText)}</span>
+          </div>
+        </div>
+        <a class="btn btn-secondary nf-conf-card__link"
+          href="detail.html?id=${encodeURIComponent(confId)}">
+          <span>Xem chi tiết &rarr;</span>
+        </a>
+      </article>
+    `;
   }
 
   /**
@@ -305,7 +393,6 @@
     const grid = document.querySelector('.js-nf-featured-grid');
     if (!section || !grid || !Array.isArray(conferences) || conferences.length === 0) return;
 
-    const esc = utils.escapeHtml || (val => String(val ?? ''));
     const ranked = conferences.slice().sort((a, b) => {
       const dlA = typeof utils.getNextDeadline === 'function' ? utils.getNextDeadline(a) : null;
       const dlB = typeof utils.getNextDeadline === 'function' ? utils.getNextDeadline(b) : null;
@@ -313,61 +400,58 @@
       const openB = dlB && !dlB.isPassed ? 0 : 1;
       if (openA !== openB) return openA - openB;
 
-      const rawRankA = typeof utils.extractConferenceRank === 'function' ? utils.extractConferenceRank(a.rank).toUpperCase() : '';
-      const rawRankB = typeof utils.extractConferenceRank === 'function' ? utils.extractConferenceRank(b.rank).toUpperCase() : '';
-      const wA = Object.prototype.hasOwnProperty.call(RANK_ORDER, rawRankA) ? RANK_ORDER[rawRankA] : 99;
-      const wB = Object.prototype.hasOwnProperty.call(RANK_ORDER, rawRankB) ? RANK_ORDER[rawRankB] : 99;
-      if (wA !== wB) return wA - wB;
+      const weightDiff = getFeaturedRankWeight(a, utils) - getFeaturedRankWeight(b, utils);
+      if (weightDiff !== 0) return weightDiff;
 
       return String(a.name || '').localeCompare(String(b.name || ''), 'vi', { sensitivity: 'base' });
     }).slice(0, 3);
 
-    grid.innerHTML = ranked.map(conf => {
-      const confId = utils.getConferenceId ? utils.getConferenceId(conf) : '';
-      const rawRank = typeof utils.extractConferenceRank === 'function' ? utils.extractConferenceRank(conf.rank).trim().toUpperCase() : '';
-      const hasRank = Boolean(rawRank && !/^UNRANKED$/i.test(rawRank));
-      const rankLabel = hasRank ? (/^(A\*|A|B|C)$/.test(rawRank) ? `Rank ${rawRank}` : rawRank) : 'Chưa xếp hạng';
-      const rankModCls = hasRank ? '' : ' nf-conf-card__rank--unranked';
-      const fullName = String(conf.fullName || conf.full_name || '').trim();
-      const locationText = String(conf.location || '').trim() || 'Chưa cập nhật địa điểm';
-      const eventDateText = typeof utils.formatConferenceEventDate === 'function'
-        ? utils.formatConferenceEventDate(conf)
-        : 'Chưa cập nhật';
-      const feeText = typeof utils.formatConferenceFee === 'function'
-        ? utils.formatConferenceFee(conf)
-        : 'Chưa cập nhật';
-
-      return `
-        <article class="nf-conf-card card-surface">
-          <div>
-            <div class="nf-conf-card__head">
-              <h3 class="nf-conf-card__name">${esc(conf.name)}</h3>
-              <span class="nf-conf-card__rank${rankModCls}">${esc(rankLabel)}</span>
-            </div>
-            ${fullName && fullName !== conf.name ? `<p class="nf-conf-card__fullname">${esc(fullName)}</p>` : ''}
-          </div>
-          <div class="nf-conf-card__meta">
-            <div class="nf-conf-card__meta-row">
-              <span>Địa điểm: ${esc(locationText)}</span>
-            </div>
-            <div class="nf-conf-card__meta-row">
-              <span>Thời gian: ${esc(eventDateText)}</span>
-            </div>
-            <div class="nf-conf-card__meta-row">
-              <span>Lệ phí: ${esc(feeText)}</span>
-            </div>
-          </div>
-          <a class="btn btn-secondary nf-conf-card__link" href="detail.html?id=${encodeURIComponent(confId)}">
-            <span>Xem chi tiết &rarr;</span>
-          </a>
-        </article>
-      `;
-    }).join('');
-
+    grid.innerHTML = ranked.map(conf => buildFeaturedCardHtml(conf, utils)).join('');
     section.hidden = false;
   }
 
   /* ================= 5. GẮN SỰ KIỆN TƯƠNG TÁC TRÊN TRANG 404 ================= */
+
+  /**
+   * Gắn sự kiện kiểm tra rỗng và điều hướng cho form tìm kiếm nhanh trên trang 404.
+   * @param {{ confId: string }} ctx Ngữ cảnh lỗi 404.
+   */
+  function bindQuickSearchForm(ctx) {
+    const searchForm = document.querySelector('.js-nf-search-form');
+    const searchInput = document.querySelector('.js-nf-search-input');
+    const searchError = document.querySelector('.js-nf-search-error');
+    if (!searchForm || !searchInput) return;
+
+    if (ctx.confId && !searchInput.value) searchInput.value = ctx.confId;
+    searchInput.addEventListener('input', () => {
+      if (searchError) {
+        searchError.textContent = '';
+        searchError.hidden = true;
+      }
+      searchInput.removeAttribute('aria-invalid');
+    });
+
+    searchForm.addEventListener('submit', e => {
+      e.preventDefault();
+      const q = searchInput.value.trim();
+      if (!q) {
+        if (searchError) {
+          searchError.textContent = 'Vui lòng nhập từ khóa tên hội nghị hoặc lĩnh vực muốn tìm.';
+          searchError.hidden = false;
+        }
+        searchInput.setAttribute('aria-invalid', 'true');
+        searchInput.focus();
+        return;
+      }
+      const targetUrl = `search.html?q=${encodeURIComponent(q)}`;
+      const pt = window.ConfGuidePageTransition;
+      if (pt && typeof pt.navigate === 'function') {
+        pt.navigate(targetUrl, { searchFocus: true });
+      } else {
+        window.location.href = targetUrl;
+      }
+    });
+  }
 
   /**
    * Gắn sự kiện form tìm kiếm nhanh, nút quay lại và nút báo cáo liên kết hỏng.
@@ -375,40 +459,7 @@
    * @param {Object} utils ConfGuideUtils.
    */
   function bindNotFoundInteractions(ctx, utils) {
-    const searchForm = document.querySelector('.js-nf-search-form');
-    const searchInput = document.querySelector('.js-nf-search-input');
-    const searchError = document.querySelector('.js-nf-search-error');
-
-    if (searchForm && searchInput) {
-      if (ctx.confId && !searchInput.value) searchInput.value = ctx.confId;
-      searchInput.addEventListener('input', () => {
-        if (searchError) {
-          searchError.textContent = '';
-          searchError.hidden = true;
-        }
-        searchInput.removeAttribute('aria-invalid');
-      });
-
-      searchForm.addEventListener('submit', e => {
-        e.preventDefault();
-        const q = searchInput.value.trim();
-        if (!q) {
-          if (searchError) {
-            searchError.textContent = 'Vui lòng nhập từ khóa tên hội nghị hoặc lĩnh vực muốn tìm.';
-            searchError.hidden = false;
-          }
-          searchInput.setAttribute('aria-invalid', 'true');
-          searchInput.focus();
-          return;
-        }
-        const targetUrl = `search.html?q=${encodeURIComponent(q)}`;
-        if (window.ConfGuidePageTransition && typeof window.ConfGuidePageTransition.navigate === 'function') {
-          window.ConfGuidePageTransition.navigate(targetUrl, { searchFocus: true });
-        } else {
-          window.location.href = targetUrl;
-        }
-      });
-    }
+    bindQuickSearchForm(ctx);
 
     const backBtn = document.querySelector('.js-nf-back-btn');
     if (backBtn) {

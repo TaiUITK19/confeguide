@@ -1,7 +1,8 @@
 /**
  * ConfGuide — Kịch bản Trang chủ (js/pages/index.js)
  * Trang sử dụng: index.html
- * Phụ thuộc: js/core/page-transition.js, js/core/layout.js (ConfGuideUtils), js/components/search-core.js, js/components/compare.js
+ * Phụ thuộc: js/core/page-transition.js, js/core/layout.js (ConfGuideUtils),
+ * js/components/search-core.js, js/components/compare.js
  * Chức năng: Quản lý Hero 2 cột cân đối (cột trái tìm kiếm nhanh; cột phải Hero Slider 3 slide:
  * Slide 1 cá nhân hóa theo trạng thái đăng nhập và lĩnh vực quan tâm, Slide 2 hội nghị nổi bật,
  * Slide 3 sắp hết hạn UTC+7), modal Cá nhân hóa dạng bảng biểu, nạp dữ liệu conference_data.json
@@ -124,9 +125,12 @@
    */
   function getNormalizedRank(conf) {
     const utils = getUtils();
+    const fallbackRank = conf && conf.rank && typeof conf.rank === 'object'
+      ? conf.rank.core
+      : conf && conf.rank;
     const rawText = utils && typeof utils.extractConferenceRank === 'function'
       ? utils.extractConferenceRank(conf && conf.rank)
-      : (conf && conf.rank && typeof conf.rank === 'object' ? String(conf.rank.core || '') : String((conf && conf.rank) || ''));
+      : String(fallbackRank || '');
     const rawRank = rawText.trim().toUpperCase();
     return VALID_RANK_VALUES.has(rawRank) ? rawRank : '';
   }
@@ -297,6 +301,23 @@
   }
 
   /**
+   * Tạo huy hiệu phân hạng CORE dùng chung cho thẻ hội nghị trên Hero Slider.
+   * @param {Object} conf - Đối tượng hội nghị.
+   * @param {Function} esc - Hàm thoát ký tự HTML.
+   * @returns {string} Chuỗi HTML `.hero-slide-card__rank`.
+   */
+  function buildHeroSlideRankBadgeHtml(conf, esc) {
+    const rank = getNormalizedRank(conf);
+    if (!rank) {
+      return '<span class="hero-slide-card__rank hero-slide-card__rank--other">Chưa xếp hạng</span>';
+    }
+    let rankModifier = ' hero-slide-card__rank--other';
+    if (rank === 'A*') rankModifier = '';
+    else if (rank === 'A') rankModifier = ' hero-slide-card__rank--a';
+    return `<span class="hero-slide-card__rank${rankModifier}">Rank ${esc(rank)}</span>`;
+  }
+
+  /**
    * Tạo HTML cho 1 thẻ hội nghị nổi bật trong Slide 2.
    * @param {Object} conf Đối tượng hội nghị.
    * @returns {string} Chuỗi HTML của thẻ hội nghị.
@@ -307,14 +328,10 @@
     const confId = resolveConferenceId(conf);
 
     const fullName = String(conf.fullName || conf.full_name || '').trim();
-    const showFullName = fullName && fullName !== conf.name;
-    const rank = getNormalizedRank(conf);
-    let rankModifier = ' hero-slide-card__rank--other';
-    if (rank === 'A*') rankModifier = '';
-    else if (rank === 'A') rankModifier = ' hero-slide-card__rank--a';
-    const rankBadgeHtml = rank
-      ? `<span class="hero-slide-card__rank${rankModifier}">Rank ${esc(rank)}</span>`
-      : '<span class="hero-slide-card__rank hero-slide-card__rank--other">Chưa xếp hạng</span>';
+    const fullNameHtml = fullName && fullName !== conf.name
+      ? `<p class="hero-slide-card__fullname" title="${esc(fullName)}">${esc(fullName)}</p>`
+      : '';
+    const rankBadgeHtml = buildHeroSlideRankBadgeHtml(conf, esc);
 
     const locationText = String(conf.location || '').trim() || 'Chưa cập nhật địa điểm';
     const eventDateText = utils && typeof utils.formatConferenceEventDate === 'function'
@@ -327,25 +344,28 @@
           <h3 class="hero-slide-card__title">${esc(conf.name)}</h3>
           ${rankBadgeHtml}
         </div>
-        ${showFullName ? `<p class="hero-slide-card__fullname" title="${esc(fullName)}">${esc(fullName)}</p>` : ''}
+        ${fullNameHtml}
         <div class="hero-slide-card__footer">
           <div class="hero-slide-card__meta">
             <div class="hero-slide-card__meta-item">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2" aria-hidden="true">
                 <path d="M12 2a8 8 0 0 0-8 8c0 5.25 8 12 8 12s8-6.75 8-12a8 8 0 0 0-8-8z"/>
                 <circle cx="12" cy="10" r="3"/>
               </svg>
               <span class="hero-slide-card__meta-text" title="${esc(locationText)}">${esc(locationText)}</span>
             </div>
             <div class="hero-slide-card__meta-item">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2" aria-hidden="true">
                 <rect x="3" y="4" width="18" height="18" rx="2"/>
                 <path d="M16 2v4M8 2v4M3 10h18"/>
               </svg>
               <span class="hero-slide-card__meta-text" title="${esc(eventDateText)}">${esc(eventDateText)}</span>
             </div>
           </div>
-          <a href="detail.html?id=${encodeURIComponent(confId)}" class="btn btn-primary hero-slide-card__link">Xem chi tiết &rarr;</a>
+          <a href="detail.html?id=${encodeURIComponent(confId)}"
+            class="btn btn-primary hero-slide-card__link">Xem chi tiết &rarr;</a>
         </div>
       </article>
     `;
@@ -455,7 +475,10 @@
     if (items.length === 0) {
       gridEl.innerHTML = `
         <div class="hero-slider__empty">
-          <p>Hiện chưa có mốc hạn nộp bài nào ở tương lai. Hãy tra cứu toàn bộ danh sách hội nghị để xem lịch trình các kỳ sắp mở.</p>
+          <p>
+            Hiện chưa có mốc hạn nộp bài nào ở tương lai.
+            Hãy tra cứu toàn bộ danh sách hội nghị để xem lịch trình các kỳ sắp mở.
+          </p>
           <a href="search.html" class="btn btn-primary hero-slide-card__link">Tra cứu hội nghị ngay &rarr;</a>
         </div>
       `;
@@ -466,27 +489,36 @@
       <article class="hero-slide-card">
         <div class="hero-slide-card__top">
           <h3 class="hero-slide-card__title">${esc(item.name)}</h3>
-          <span class="hero-slide-card__countdown ${esc(item.urgencyClass)}">${esc(item.countdownText)}</span>
+          <span class="hero-slide-card__countdown ${esc(item.urgencyClass)}">
+            ${esc(item.countdownText)}
+          </span>
         </div>
-        <p class="hero-slide-card__fullname" title="${esc(item.milestoneName)}">Mốc: ${esc(item.milestoneName)}</p>
+        <p class="hero-slide-card__fullname" title="${esc(item.milestoneName)}">
+          Mốc: ${esc(item.milestoneName)}
+        </p>
         <div class="hero-slide-card__footer">
           <div class="hero-slide-card__meta">
             <div class="hero-slide-card__meta-item">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2" aria-hidden="true">
                 <circle cx="12" cy="12" r="9"/>
                 <polyline points="12 7 12 12 15 15"/>
               </svg>
-              <time class="hero-slide-card__meta-text" datetime="${esc(item.datetimeAttr)}" title="${esc(item.fullDateTitle)}">${esc(item.dateLabel)}</time>
+              <time class="hero-slide-card__meta-text" datetime="${esc(item.datetimeAttr)}"
+                title="${esc(item.fullDateTitle)}">${esc(item.dateLabel)}</time>
             </div>
             <div class="hero-slide-card__meta-item">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2" aria-hidden="true">
                 <path d="M12 2a8 8 0 0 0-8 8c0 5.25 8 12 8 12s8-6.75 8-12a8 8 0 0 0-8-8z"/>
                 <circle cx="12" cy="10" r="3"/>
               </svg>
-              <span class="hero-slide-card__meta-text" title="${esc(item.locationText)}">${esc(item.locationText)}</span>
+              <span class="hero-slide-card__meta-text"
+                title="${esc(item.locationText)}">${esc(item.locationText)}</span>
             </div>
           </div>
-          <a href="${esc(item.detailUrl)}" class="btn btn-primary hero-slide-card__link">Xem chi tiết &rarr;</a>
+          <a href="${esc(item.detailUrl)}"
+            class="btn btn-primary hero-slide-card__link">Xem chi tiết &rarr;</a>
         </div>
       </article>
     `).join('');
@@ -567,21 +599,78 @@
   }
 
   /**
-   * Tạo chuỗi URL sang trang Tra cứu (search.html) giữ nguyên bộ lọc lĩnh vực đang chọn.
-   * @param {Array<string>} topicKeys - Mảng khóa lĩnh vực chuẩn.
-   * @returns {string} Đường dẫn tương đối hợp lệ cho trang Tra cứu.
+   * Chuẩn hóa thông tin hạn nộp kế tiếp (mốc, ngày UTC+7, trạng thái gấp) cho thẻ Slide 1.
+   * @param {Object} conf - Đối tượng hội nghị.
+   * @param {Object|null} utils - Đối tượng ConfGuideUtils.
+   * @returns {{ deadlineMod: string, deadlineLabel: string, deadlineTitle: string }}
    */
-  function buildTopicSearchUrl(topicKeys) {
-    const clean = Array.isArray(topicKeys) ? topicKeys.filter(Boolean) : [];
-    if (clean.length === 0) return 'search.html';
-    const params = new URLSearchParams();
-    params.set('topic', clean.join(','));
-    return `search.html?${params.toString()}`;
+  function resolveSlide1CardDeadline(conf, utils) {
+    const nextDl = utils && typeof utils.getNextDeadline === 'function' ? utils.getNextDeadline(conf) : null;
+    if (!nextDl || !nextDl.date) {
+      return {
+        deadlineMod: 'hero-slide-card__countdown--closed',
+        deadlineLabel: 'Chưa công bố hạn nộp',
+        deadlineTitle: 'Chưa có thông tin hạn nộp bài'
+      };
+    }
+
+    const formattedShort = utils && typeof utils.formatDateVi === 'function'
+      ? utils.formatDateVi(nextDl.vnDate || nextDl.date)
+      : nextDl.date;
+    const deadlineTitle = utils && typeof utils.formatDeadlineVi === 'function'
+      ? utils.formatDeadlineVi(nextDl.date, { includeAoEOrigin: true })
+      : formattedShort;
+
+    if (nextDl.isPassed) {
+      return {
+        deadlineMod: 'hero-slide-card__countdown--closed',
+        deadlineLabel: `${nextDl.shortName}: Đã qua (${formattedShort})`,
+        deadlineTitle
+      };
+    }
+
+    const isUrgent = Number.isFinite(nextDl.daysLeft) && nextDl.daysLeft <= HOME_URGENT_DAYS;
+    const daysNum = Math.max(0, Number(nextDl.daysLeft) || 0);
+    return {
+      deadlineMod: isUrgent ? 'hero-slide-card__countdown--urgent' : 'hero-slide-card__countdown--normal',
+      deadlineLabel: `${nextDl.shortName}: ${formattedShort} · Còn ${daysNum} ngày`,
+      deadlineTitle
+    };
+  }
+
+  /**
+   * Tạo mã HTML khối tag lĩnh vực (hiển thị tối đa 2 nhãn + `+N` nếu còn thêm) cho thẻ Slide 1.
+   * @param {Object} conf - Đối tượng hội nghị.
+   * @param {Function} esc - Hàm thoát ký tự HTML.
+   * @param {Object|null} utils - Đối tượng ConfGuideUtils.
+   * @returns {string} Chuỗi HTML `.hero-rec-card__topics` hoặc chuỗi rỗng.
+   */
+  function buildSlide1TopicsHtml(conf, esc, utils) {
+    const rawTopicLabels = utils && typeof utils.extractTopicLabels === 'function'
+      ? utils.extractTopicLabels(conf)
+      : (Array.isArray(conf.fields) ? conf.fields : []);
+    if (rawTopicLabels.length === 0) return '';
+
+    const visibleTopics = rawTopicLabels.slice(0, 2);
+    const overflowCount = Math.max(0, rawTopicLabels.length - visibleTopics.length);
+    const hiddenText = rawTopicLabels.slice(2).join(', ');
+    const moreBadgeHtml = overflowCount > 0
+      ? `<span class="hero-rec-card__topic hero-rec-card__topic--more" `
+        + `title="${esc(hiddenText)}">+${overflowCount}</span>`
+      : '';
+
+    return `
+      <div class="hero-rec-card__topics" aria-label="Lĩnh vực của hội nghị">
+        ${visibleTopics.map(lbl => `<span class="hero-rec-card__topic">${esc(lbl)}</span>`).join('')}
+        ${moreBadgeHtml}
+      </div>
+    `;
   }
 
   /**
    * Tạo mã HTML một thẻ hội nghị khuyến nghị hiển thị trong Slide 1 (Trạng thái C).
-   * Hiển thị nguyên văn các nhãn lĩnh vực trong dữ liệu, bậc CORE, hạn nộp + trạng thái, nút Xem chi tiết và nút Lưu.
+   * Hiển thị nguyên văn các nhãn lĩnh vực trong dữ liệu, bậc CORE, hạn nộp + trạng thái,
+   * nút Xem chi tiết và nút Lưu.
    * @param {Object} conf - Đối tượng hội nghị chuẩn hóa.
    * @param {Array<string>} savedIds - Danh sách ID hội nghị đã lưu của tài khoản hiện tại.
    * @param {Object|null} utils - Đối tượng tiện ích ConfGuideUtils.
@@ -594,65 +683,27 @@
     const fullName = String(conf.fullName || conf.full_name || confName).trim();
     const isSaved = Boolean(confId && savedIds.includes(confId));
 
-    const rank = getNormalizedRank(conf);
-    let rankModifier = ' hero-slide-card__rank--other';
-    if (rank === 'A*') rankModifier = '';
-    else if (rank === 'A') rankModifier = ' hero-slide-card__rank--a';
-    const rankBadgeHtml = rank
-      ? `<span class="hero-slide-card__rank${rankModifier}">Rank ${esc(rank)}</span>`
-      : '<span class="hero-slide-card__rank hero-slide-card__rank--other">Chưa xếp hạng</span>';
-
-    const rawTopicLabels = utils && typeof utils.extractTopicLabels === 'function'
-      ? utils.extractTopicLabels(conf)
-      : (Array.isArray(conf.fields) ? conf.fields : []);
-    const visibleTopics = rawTopicLabels.slice(0, 2);
-    const overflowCount = Math.max(0, rawTopicLabels.length - visibleTopics.length);
-    const hiddenText = rawTopicLabels.slice(2).join(', ');
-    const topicsHtml = rawTopicLabels.length > 0
-      ? `
-        <div class="hero-rec-card__topics" aria-label="Lĩnh vực của hội nghị">
-          ${visibleTopics.map(lbl => `<span class="hero-rec-card__topic">${esc(lbl)}</span>`).join('')}
-          ${overflowCount > 0 ? `<span class="hero-rec-card__topic hero-rec-card__topic--more" title="${esc(hiddenText)}">+${overflowCount}</span>` : ''}
-        </div>
-      `
-      : '';
-
-    const nextDl = utils && typeof utils.getNextDeadline === 'function' ? utils.getNextDeadline(conf) : null;
-    let deadlineMod = 'hero-slide-card__countdown--closed';
-    let deadlineLabel = 'Chưa công bố hạn nộp';
-    let deadlineTitle = 'Chưa có thông tin hạn nộp bài';
-    if (nextDl && nextDl.date) {
-      const formattedShort = utils && typeof utils.formatDateVi === 'function'
-        ? utils.formatDateVi(nextDl.vnDate || nextDl.date)
-        : nextDl.date;
-      deadlineTitle = utils && typeof utils.formatDeadlineVi === 'function'
-        ? utils.formatDeadlineVi(nextDl.date, { includeAoEOrigin: true })
-        : formattedShort;
-      if (!nextDl.isPassed) {
-        const isUrgent = Number.isFinite(nextDl.daysLeft) && nextDl.daysLeft <= HOME_URGENT_DAYS;
-        deadlineMod = isUrgent ? 'hero-slide-card__countdown--urgent' : 'hero-slide-card__countdown--normal';
-        const daysNum = Math.max(0, Number(nextDl.daysLeft) || 0);
-        deadlineLabel = `${nextDl.shortName}: ${formattedShort} · Còn ${daysNum} ngày`;
-      } else {
-        deadlineLabel = `${nextDl.shortName}: Đã qua (${formattedShort})`;
-      }
-    }
-
+    const rankBadgeHtml = buildHeroSlideRankBadgeHtml(conf, esc);
+    const topicsHtml = buildSlide1TopicsHtml(conf, esc, utils);
+    const { deadlineMod, deadlineLabel, deadlineTitle } = resolveSlide1CardDeadline(conf, utils);
     const saveBtnHtml = renderSaveButtonHtml(confId, confName, isSaved);
 
     return `
       <article class="hero-slide-card hero-rec-card" data-id="${esc(confId)}">
         <div class="hero-rec-card__head">
           <div class="hero-rec-card__title-wrap">
-            <h3 class="hero-slide-card__title hero-rec-card__title" title="${esc(fullName)}">${esc(confName)}</h3>
+            <h3 class="hero-slide-card__title hero-rec-card__title"
+              title="${esc(fullName)}">${esc(confName)}</h3>
             ${rankBadgeHtml}
           </div>
           ${saveBtnHtml}
         </div>
         ${topicsHtml}
         <div class="hero-rec-card__footer">
-          <span class="hero-slide-card__countdown ${deadlineMod}" title="${esc(deadlineTitle)}">${esc(deadlineLabel)}</span>
-          <a href="detail.html?id=${encodeURIComponent(confId)}" class="btn btn-primary hero-slide-card__link hero-rec-card__detail">
+          <span class="hero-slide-card__countdown ${deadlineMod}"
+            title="${esc(deadlineTitle)}">${esc(deadlineLabel)}</span>
+          <a href="detail.html?id=${encodeURIComponent(confId)}"
+            class="btn btn-primary hero-slide-card__link hero-rec-card__detail">
             Xem chi tiết
           </a>
         </div>
@@ -674,17 +725,83 @@
   }
 
   /**
-   * Render nội dung Slide 1 của Hero Slider theo 3 trạng thái thực:
-   * A (Chưa đăng nhập), B (Đã đăng nhập, chưa chọn lĩnh vực hoặc không có hội nghị khớp),
-   * C (Đã đăng nhập và có lĩnh vực + danh sách khuyến nghị tối đa 2 thẻ).
+   * Dựng HTML cho Slide 1 khi đã đăng nhập và có lĩnh vực quan tâm (Trạng thái C hoặc rỗng).
+   * @param {string} introBlockHtml - Phần tiêu đề & mô tả chung của Slide 1.
+   * @param {Array<string>} selectedKeys - Danh sách khóa lĩnh vực đã chọn.
+   * @param {Object|null} utils - Đối tượng tiện ích ConfGuideUtils.
+   * @returns {string} Chuỗi HTML nội dung Slide 1.
    */
-  function renderHeroSlide1() {
-    const slide1El = document.querySelector('.js-hero-slide1');
-    const contentEl = document.querySelector('.js-slide1-content');
-    if (!slide1El || !contentEl) return;
+  function buildHeroSlide1RecommendedHtml(introBlockHtml, selectedKeys, utils) {
+    const rankedMatches = rankRecommendedConferencesByTopics(allConferences, selectedKeys);
+    if (rankedMatches.length === 0) {
+      return `
+        ${introBlockHtml}
+        <div class="hero-slider__cta-box hero-slider__cta-box--centered">
+          <p class="hero-slider__cta-text">Chưa có hội nghị phù hợp với lĩnh vực đã chọn</p>
+        </div>
+      `;
+    }
 
-    const utils = getUtils();
-    const esc = utils && utils.escapeHtml ? utils.escapeHtml : val => String(val ?? '');
+    const savedIds = getSavedConferenceIds();
+    const topRecs = rankedMatches.slice(0, HERO_RECOMMENDATION_LIMIT);
+    const cardsHtml = topRecs
+      .map(conf => renderSlide1RecommendationCardHtml(conf, savedIds, utils))
+      .join('');
+
+    return `
+      <div class="hero-slider__slide-head">
+        <h2 class="hero-slider__slide-title">Gợi ý dành cho bạn</h2>
+      </div>
+      <div class="hero-slider__rec-list">
+        ${cardsHtml}
+      </div>
+    `;
+  }
+
+  /**
+   * Dựng HTML cho Slide 1 ở trạng thái chờ hoặc chưa chọn lĩnh vực (Trạng thái B).
+   * @param {string} introBlockHtml - Phần tiêu đề & mô tả chung của Slide 1.
+   * @param {boolean} isNoTopics - True nếu người dùng đã đăng nhập nhưng chưa chọn lĩnh vực.
+   * @returns {string} Chuỗi HTML nội dung Slide 1.
+   */
+  function buildHeroSlide1PromptHtml(introBlockHtml, isNoTopics) {
+    if (isNoTopics) {
+      return `
+        ${introBlockHtml}
+        <div class="hero-slider__cta-box hero-slider__cta-box--centered">
+          <div class="hero-slider__cta-actions">
+            <button type="button" class="btn btn-primary hero-slider__cta-btn js-hero-choose-topics">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+              <span>Thêm lĩnh vực</span>
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    return `
+      <div class="hero-slider__slide-head">
+        <h2 class="hero-slider__slide-title">Gợi ý dành cho bạn</h2>
+        <span class="hero-slider__slide-badge">Đang đồng bộ</span>
+      </div>
+      <div class="hero-slider__loading" role="status" aria-live="polite">
+        <span class="hero-slider__spinner" aria-hidden="true"></span>
+        <span>Đang tìm hội nghị phù hợp với lĩnh vực của bạn...</span>
+      </div>
+    `;
+  }
+
+  /**
+   * Tạo mã HTML cho Slide 1 tương ứng 3 trạng thái:
+   * A (chưa đăng nhập), B (chưa chọn lĩnh vực / đang tải), C (gợi ý hội nghị phù hợp).
+   * @param {Object|null} utils - Đối tượng tiện ích ConfGuideUtils.
+   * @returns {string} Chuỗi HTML bên trong `.js-slide1-content`.
+   */
+  function buildHeroSlide1Html(utils) {
     const isAuthenticated = Boolean(utils && typeof utils.isUserAuthenticated === 'function'
       ? utils.isUserAuthenticated()
       : readStorageSafe('confguide_current_user', null));
@@ -695,24 +812,25 @@
         <span class="hero-slider__slide-badge">Cá nhân hóa</span>
       </div>
       <p class="hero-slider__intro-desc">
-        Tra cứu nhanh chóng, đánh giá uy tín và theo dõi thời hạn nộp bài theo giờ Việt Nam (UTC+7) cho các hội nghị khoa học Công nghệ thông tin tại Việt Nam.
+        Tra cứu nhanh chóng, đánh giá uy tín và theo dõi thời hạn nộp bài theo giờ Việt Nam (UTC+7)
+        cho các hội nghị khoa học Công nghệ thông tin tại Việt Nam.
       </p>
     `;
 
     // Trạng thái A: Chưa đăng nhập
     if (!isAuthenticated) {
-      contentEl.innerHTML = `
+      return `
         ${introBlockHtml}
         <div class="hero-slider__cta-box">
           <p class="hero-slider__cta-text">Đăng nhập để nhận gợi ý hội nghị theo lĩnh vực của bạn</p>
           <div class="hero-slider__cta-actions">
-            <a href="login.html?redirect=index.html" class="btn btn-primary hero-slider__cta-btn js-slide1-login">Đăng nhập</a>
-            <a href="register.html" class="btn btn-secondary hero-slider__cta-btn js-slide1-register">Đăng ký</a>
+            <a href="login.html?redirect=index.html"
+              class="btn btn-primary hero-slider__cta-btn js-slide1-login">Đăng nhập</a>
+            <a href="register.html"
+              class="btn btn-secondary hero-slider__cta-btn js-slide1-register">Đăng ký</a>
           </div>
         </div>
       `;
-      syncSlideAccessibility(slide1El, sliderState.currentIndex === 0);
-      return;
     }
 
     const selectedKeys = utils && typeof utils.getUserResearchTopicKeys === 'function'
@@ -722,106 +840,20 @@
       ? utils.getUserResearchTopicLabels()
       : [];
 
-    // Trạng thái B (chưa có lĩnh vực nào được chọn: đặt nút Thêm lĩnh vực vào giữa ô)
-    if (selectedLabels.length === 0) {
-      contentEl.innerHTML = `
-        ${introBlockHtml}
-        <div class="hero-slider__cta-box hero-slider__cta-box--centered">
-          <div class="hero-slider__cta-actions">
-            <button type="button" class="btn btn-primary hero-slider__cta-btn js-hero-choose-topics">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <line x1="12" y1="5" x2="12" y2="19"></line>
-                <line x1="5" y1="12" x2="19" y2="12"></line>
-              </svg>
-              <span>Thêm lĩnh vực</span>
-            </button>
-          </div>
-        </div>
-      `;
-      syncSlideAccessibility(slide1El, sliderState.currentIndex === 0);
-      return;
-    }
+    if (selectedLabels.length === 0) return buildHeroSlide1PromptHtml(introBlockHtml, true);
+    if (!isDataLoaded) return buildHeroSlide1PromptHtml(introBlockHtml, false);
+    return buildHeroSlide1RecommendedHtml(introBlockHtml, selectedKeys, utils);
+  }
 
-    // Đang nạp JSON hội nghị lần đầu
-    if (!isDataLoaded) {
-      contentEl.innerHTML = `
-        <div class="hero-slider__slide-head">
-          <h2 class="hero-slider__slide-title">Gợi ý dành cho bạn</h2>
-          <span class="hero-slider__slide-badge">Đang đồng bộ</span>
-        </div>
-        <div class="hero-slider__loading" role="status" aria-live="polite">
-          <span class="hero-slider__spinner" aria-hidden="true"></span>
-          <span>Đang tìm hội nghị phù hợp với lĩnh vực của bạn...</span>
-        </div>
-      `;
-      syncSlideAccessibility(slide1El, sliderState.currentIndex === 0);
-      return;
-    }
+  /**
+   * Render nội dung Slide 1 của Hero Slider và đồng bộ khả năng truy cập bàn phím cho slide hiện hành.
+   */
+  function renderHeroSlide1() {
+    const slide1El = document.querySelector('.js-hero-slide1');
+    const contentEl = document.querySelector('.js-slide1-content');
+    if (!slide1El || !contentEl) return;
 
-    const rankedMatches = rankRecommendedConferencesByTopics(allConferences, selectedKeys);
-
-    // Trường hợp đã chọn lĩnh vực nhưng không có hội nghị nào trùng khớp
-    if (rankedMatches.length === 0) {
-      const chipsSummaryHtml = selectedLabels
-        .slice(0, 4)
-        .map(lbl => `<span class="hero-slider__topic-pill">${esc(lbl)}</span>`)
-        .join('');
-      const extraCount = Math.max(0, selectedLabels.length - 4);
-      contentEl.innerHTML = `
-        ${introBlockHtml}
-        <div class="hero-slider__selected-topics" aria-label="Lĩnh vực đang chọn">
-          ${chipsSummaryHtml}
-          ${extraCount > 0 ? `<span class="hero-slider__topic-pill hero-slider__topic-pill--more">+${extraCount}</span>` : ''}
-        </div>
-        <div class="hero-slider__cta-box">
-          <p class="hero-slider__cta-text">Chưa có hội nghị phù hợp với lĩnh vực đã chọn</p>
-          <div class="hero-slider__cta-actions">
-            <button type="button" class="btn btn-primary hero-slider__cta-btn js-hero-choose-topics">
-              Đổi lĩnh vực
-            </button>
-          </div>
-        </div>
-      `;
-      syncSlideAccessibility(slide1El, sliderState.currentIndex === 0);
-      return;
-    }
-
-    // Trạng thái C: Đã đăng nhập + có lĩnh vực + có hội nghị phù hợp
-    const visibleSelected = selectedLabels.slice(0, 4);
-    const extraSelectedCount = Math.max(0, selectedLabels.length - visibleSelected.length);
-    const hiddenLabelsTitle = selectedLabels.slice(4).join(', ');
-    const chipsHtml = visibleSelected
-      .map(lbl => `<span class="hero-slider__topic-pill">${esc(lbl)}</span>`)
-      .join('')
-      + (extraSelectedCount > 0
-        ? `<span class="hero-slider__topic-pill hero-slider__topic-pill--more" title="${esc(hiddenLabelsTitle)}">+${extraSelectedCount}</span>`
-        : '');
-
-    const savedIds = getSavedConferenceIds();
-    const topRecs = rankedMatches.slice(0, HERO_RECOMMENDATION_LIMIT);
-    const cardsHtml = topRecs.map(conf => renderSlide1RecommendationCardHtml(conf, savedIds, utils)).join('');
-    const searchUrl = buildTopicSearchUrl(selectedKeys);
-
-    contentEl.innerHTML = `
-      <div class="hero-slider__slide-head hero-slider__slide-head--rec">
-        <h2 class="hero-slider__slide-title">Gợi ý dành cho bạn</h2>
-        <span class="hero-slider__slide-badge">${rankedMatches.length} phù hợp</span>
-        <div class="hero-slider__selected-topics" aria-label="Các lĩnh vực bạn đang chọn">
-          ${chipsHtml}
-        </div>
-      </div>
-      <div class="hero-slider__rec-list">
-        ${cardsHtml}
-      </div>
-      <div class="hero-slider__rec-actions">
-        <a href="${esc(searchUrl)}" class="hero-slider__rec-viewall js-slide1-viewall">
-          Xem tất cả hội nghị phù hợp &rarr;
-        </a>
-        <button type="button" class="btn btn-secondary hero-slider__rec-change js-hero-choose-topics">
-          Đổi lĩnh vực
-        </button>
-      </div>
-    `;
+    contentEl.innerHTML = buildHeroSlide1Html(getUtils());
     syncSlideAccessibility(slide1El, sliderState.currentIndex === 0);
   }
 
@@ -1200,7 +1232,8 @@
         title="${esc(titleText)}"
       >
         <svg class="conf-save-btn__icon" viewBox="0 0 24 24" aria-hidden="true">
-          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02
+            12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
         </svg>
       </button>
     `;
@@ -1280,7 +1313,8 @@
 
     window.addEventListener('pageshow', refreshAllDynamicViews);
     window.addEventListener('storage', event => {
-      if (!event.key || event.key === getSavedStorageKey() || event.key === 'confguide_current_user' || event.key === 'confguide_users') {
+      const watchKeys = [getSavedStorageKey(), 'confguide_current_user', 'confguide_users'];
+      if (!event.key || watchKeys.includes(event.key)) {
         refreshAllDynamicViews();
       }
     });
@@ -1316,7 +1350,9 @@
   function setLoadingState(isLoading) {
     const grid = document.getElementById('conferenceGrid');
     if (!grid || !isLoading) return;
-    grid.innerHTML = '<div class="loading-state-box" role="status" aria-live="polite">Đang tải danh sách hội nghị...</div>';
+    grid.innerHTML =
+      '<div class="loading-state-box" role="status" aria-live="polite">'
+      + 'Đang tải danh sách hội nghị...</div>';
   }
 
   /**
@@ -1334,7 +1370,10 @@
     try {
       const data = utils && typeof utils.fetchJsonCached === 'function'
         ? await utils.fetchJsonCached('data/conference_data.json')
-        : await fetch('data/conference_data.json').then(r => { if (!r.ok) throw new Error(r.status); return r.json(); });
+        : await fetch('data/conference_data.json').then(res => {
+          if (!res.ok) throw new Error(res.status);
+          return res.json();
+        });
       allConferences = Array.isArray(data) && data.length > 0
         ? data.map(normalize).filter(Boolean)
         : fallback;
@@ -1366,72 +1405,14 @@
   }
 
   /**
-   * Đánh giá thông tin xếp hạng theo mục đích sử dụng trang web (chỉ dùng cho lưới hội nghị tiêu biểu).
-   * @param {Object} conf - Đối tượng hội nghị chuẩn hóa.
-   * @param {Object|null} utils - Tham chiếu `ConfGuideUtils`.
-   * @param {string} todayIso - Ngày hiện tại dạng YYYY-MM-DD (UTC+7).
-   * @returns {Object} Chỉ số xếp hạng theo mục đích.
-   */
-  function evaluateConferencePurposeMatch(conf, utils, todayIso) {
-    const nextDl = utils && typeof utils.getNextDeadline === 'function'
-      ? utils.getNextDeadline(conf)
-      : null;
-    const hasOpenCfp = Boolean(nextDl && !nextDl.isPassed);
-    const startIso = normalizeDateIsoLocal(conf && conf.startDate);
-    const isUpcomingEvent = Boolean(startIso && todayIso && startIso >= todayIso);
-    const feeBounds = utils && typeof utils.getFeeSortBoundsUsd === 'function'
-      ? utils.getFeeSortBoundsUsd(conf)
-      : null;
-
-    return {
-      hasOpenCfp,
-      daysLeft: nextDl ? nextDl.daysLeft : Number.MAX_SAFE_INTEGER,
-      isUpcomingEvent,
-      startIso,
-      rankWeight: getConferenceRankWeight(conf),
-      feeBounds
-    };
-  }
-
-  /**
-   * So sánh 2 hội nghị theo mục đích sử dụng trang web mà người dùng đã chọn.
-   * @param {Object} a - Bản ghi kèm thông tin đánh giá `evalInfo`.
-   * @param {Object} b - Bản ghi kèm thông tin đánh giá `evalInfo`.
-   * @param {string} purpose - Khóa mục đích sử dụng.
-   * @returns {number} Giá trị so sánh âm/dương/0.
-   */
-  function compareByUserPurpose(a, b, purpose) {
-    const evalA = a.evalInfo;
-    const evalB = b.evalInfo;
-    if (purpose === 'submit-paper') {
-      if (evalA.hasOpenCfp !== evalB.hasOpenCfp) return evalA.hasOpenCfp ? -1 : 1;
-      if (evalA.hasOpenCfp && evalA.daysLeft !== evalB.daysLeft) return evalA.daysLeft - evalB.daysLeft;
-    } else if (purpose === 'track-deadlines') {
-      if (evalA.isUpcomingEvent !== evalB.isUpcomingEvent) return evalA.isUpcomingEvent ? -1 : 1;
-      if (evalA.startIso && evalB.startIso && evalA.startIso !== evalB.startIso) {
-        return evalA.startIso.localeCompare(evalB.startIso);
-      }
-      if (Boolean(evalA.startIso) !== Boolean(evalB.startIso)) return evalA.startIso ? -1 : 1;
-    } else if (purpose === 'explore-rank') {
-      if (evalA.rankWeight !== evalB.rankWeight) return evalA.rankWeight - evalB.rankWeight;
-    } else if (purpose === 'budget-friendly') {
-      if (Boolean(evalA.feeBounds) !== Boolean(evalB.feeBounds)) return evalA.feeBounds ? -1 : 1;
-      if (evalA.feeBounds && evalB.feeBounds) {
-        const diff = evalA.feeBounds.minUsd - evalB.feeBounds.minUsd;
-        if (Math.abs(diff) > 1e-6) return diff;
-      }
-    }
-    return 0;
-  }
-
-  /**
-   * Tạo mã HTML một thẻ hội nghị nổi bật trên lưới Trang chủ.
+   * Chuẩn bị dữ liệu hiển thị (hạn nộp, lệ phí, mô tả, avatar, rank, nút Lưu/So sánh)
+   * cho một thẻ hội nghị nổi bật trên lưới Trang chủ.
    * @param {Object} item - Đối tượng hội nghị chuẩn hóa.
    * @param {Array<string>} savedIds - Mảng ID hội nghị đã lưu.
    * @param {Object|null} utils - Đối tượng tiện ích ConfGuideUtils.
-   * @returns {string} Chuỗi HTML `<article class="conf-card card-surface">`.
+   * @returns {Object} Tập thuộc tính đã định dạng phục vụ ghép HTML thẻ hội nghị.
    */
-  function buildFeaturedConferenceCardHtml(item, savedIds, utils) {
+  function resolveFeaturedCardMeta(item, savedIds, utils) {
     const esc = utils && utils.escapeHtml ? utils.escapeHtml : val => String(val ?? '');
     const nextDl = utils && utils.getNextDeadline ? utils.getNextDeadline(item) : null;
     let deadlineBadgeText = 'Chưa công bố';
@@ -1460,30 +1441,51 @@
       : 'Chưa cập nhật';
     const feeItemMod = feeText === 'Chưa cập nhật' ? ' conf-meta-item--muted' : ' conf-meta-item--fee';
     const descText = String(item.summarization || item.fullName || item.full_name || '').trim();
-    const descHtml = descText
-      ? `<p class="conf-desc">${esc(descText)}</p>`
-      : '<p class="conf-desc">Chưa cập nhật mô tả</p>';
-    const saveBtnHtml = renderSaveButtonHtml(confId, confName, isSaved);
-    const compareBtnHtml = window.ConfGuideCompare ? window.ConfGuideCompare.renderToggleButton(item) : '';
-    const avatarHtml = utils && utils.renderConferenceAvatar
-      ? utils.renderConferenceAvatar(item)
-      : `<div class="conf-badge-logo" aria-hidden="true">${esc((item.name || 'CG').slice(0, 4).toUpperCase())}</div>`;
+    const fallbackBadge = `<div class="conf-badge-logo" aria-hidden="true">`
+      + `${esc((item.name || 'CG').slice(0, 4).toUpperCase())}</div>`;
     const rank = getNormalizedRank(item);
-    const rankBadgeText = rank ? `Rank ${rank}` : 'Chưa xếp hạng';
-    const rankModCls = rank ? '' : ' conf-rank--unranked';
+
+    return {
+      confId,
+      deadlineBadgeText,
+      deadlineStatusMod,
+      dateRange,
+      feeText,
+      feeItemMod,
+      descHtml: descText
+        ? `<p class="conf-desc">${esc(descText)}</p>`
+        : '<p class="conf-desc">Chưa cập nhật mô tả</p>',
+      saveBtnHtml: renderSaveButtonHtml(confId, confName, isSaved),
+      compareBtnHtml: window.ConfGuideCompare ? window.ConfGuideCompare.renderToggleButton(item) : '',
+      avatarHtml: utils && utils.renderConferenceAvatar ? utils.renderConferenceAvatar(item) : fallbackBadge,
+      rankBadgeText: rank ? `Rank ${rank}` : 'Chưa xếp hạng',
+      rankModCls: rank ? '' : ' conf-rank--unranked'
+    };
+  }
+
+  /**
+   * Tạo mã HTML một thẻ hội nghị nổi bật trên lưới Trang chủ.
+   * @param {Object} item - Đối tượng hội nghị chuẩn hóa.
+   * @param {Array<string>} savedIds - Mảng ID hội nghị đã lưu.
+   * @param {Object|null} utils - Đối tượng tiện ích ConfGuideUtils.
+   * @returns {string} Chuỗi HTML `<article class="conf-card card-surface">`.
+   */
+  function buildFeaturedConferenceCardHtml(item, savedIds, utils) {
+    const esc = utils && utils.escapeHtml ? utils.escapeHtml : val => String(val ?? '');
+    const meta = resolveFeaturedCardMeta(item, savedIds, utils);
 
     return `
-      <article class="conf-card card-surface" data-id="${esc(confId)}">
+      <article class="conf-card card-surface" data-id="${esc(meta.confId)}">
         <div>
           <div class="conf-top">
-            ${avatarHtml}
+            ${meta.avatarHtml}
             <div class="conf-title-wrap">
               <h3>${esc(item.name)}</h3>
-              <span class="conf-rank${rankModCls}">${esc(rankBadgeText)}</span>
+              <span class="conf-rank${meta.rankModCls}">${esc(meta.rankBadgeText)}</span>
             </div>
           </div>
 
-          ${descHtml}
+          ${meta.descHtml}
 
           <div class="conf-meta">
             <div class="conf-meta-item">
@@ -1500,26 +1502,26 @@
                 <rect x="3" y="4" width="18" height="18" rx="2"/>
                 <path d="M16 2v4M8 2v4M3 10h18"/>
               </svg>
-              <span>${esc(dateRange)}</span>
+              <span>${esc(meta.dateRange)}</span>
             </div>
-            <div class="conf-meta-item${feeItemMod}">
+            <div class="conf-meta-item${meta.feeItemMod}">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
               </svg>
-              <span>Lệ phí: ${esc(feeText)}</span>
+              <span>Lệ phí: ${esc(meta.feeText)}</span>
             </div>
           </div>
         </div>
 
         <div class="conf-footer">
-          <div class="conf-deadline-badge conf-deadline-badge--${deadlineStatusMod}">
-            <strong>${esc(deadlineBadgeText)}</strong>
+          <div class="conf-deadline-badge conf-deadline-badge--${meta.deadlineStatusMod}">
+            <strong>${esc(meta.deadlineBadgeText)}</strong>
           </div>
           <div class="conf-card-actions">
-            ${saveBtnHtml}
-            ${compareBtnHtml}
-            <a href="detail.html?id=${encodeURIComponent(confId)}" class="btn-detail">
+            ${meta.saveBtnHtml}
+            ${meta.compareBtnHtml}
+            <a href="detail.html?id=${encodeURIComponent(meta.confId)}" class="btn-detail">
               Xem chi tiết &rarr;
             </a>
           </div>
@@ -1529,7 +1531,7 @@
   }
 
   /**
-   * Hiển thị tối đa 6 hội nghị tiêu biểu lên lưới trang chủ (ưu tiên theo mục đích tìm kiếm nếu có; không hiển thị trùng khuyến nghị lĩnh vực của Slide 1).
+   * Hiển thị tối đa 6 hội nghị tiêu biểu lên lưới trang chủ theo phân hạng và năm tổ chức.
    */
   function renderFeaturedConferences() {
     const grid = document.getElementById('conferenceGrid');
@@ -1551,41 +1553,19 @@
       `;
     }
 
-    const prefs = utils && typeof utils.getUserPreferences === 'function'
-      ? utils.getUserPreferences()
-      : { purpose: '' };
-    const activePurpose = typeof prefs.purpose === 'string' ? prefs.purpose : '';
-    const purposes = utils && Array.isArray(utils.USAGE_PURPOSES) ? utils.USAGE_PURPOSES : [];
-    const activePurposeObj = activePurpose ? purposes.find(item => item.key === activePurpose) : null;
-    const todayIso = getTodayVnIso();
-
-    const decorated = allConferences.map(conf => ({
-      conf,
-      evalInfo: activePurpose
-        ? evaluateConferencePurposeMatch(conf, utils, todayIso)
-        : { rankWeight: getConferenceRankWeight(conf) }
-    }));
-
-    decorated.sort((a, b) => {
-      if (activePurpose) {
-        const purposeDiff = compareByUserPurpose(a, b, activePurpose);
-        if (purposeDiff !== 0) return purposeDiff;
-      }
-      const rankDiff = a.evalInfo.rankWeight - b.evalInfo.rankWeight;
+    const sortedItems = [...allConferences].sort((a, b) => {
+      const rankDiff = getConferenceRankWeight(a) - getConferenceRankWeight(b);
       if (rankDiff !== 0) return rankDiff;
-      const yearA = parseInt(a.conf.year || '2026', 10);
-      const yearB = parseInt(b.conf.year || '2026', 10);
+      const yearA = parseInt(a.year || '2026', 10);
+      const yearB = parseInt(b.year || '2026', 10);
       return yearB !== yearA
         ? yearB - yearA
-        : String(a.conf.name || '').localeCompare(String(b.conf.name || ''), 'vi', { sensitivity: 'base' });
+        : String(a.name || '').localeCompare(String(b.name || ''), 'vi', { sensitivity: 'base' });
     });
 
-    const displayItems = decorated.slice(0, FEATURED_HOME_LIMIT);
+    const displayItems = sortedItems.slice(0, FEATURED_HOME_LIMIT);
     if (resultsStatus) {
-      const purposeSuffix = activePurposeObj
-        ? ` (ưu tiên: ${utils.escapeHtml ? utils.escapeHtml(activePurposeObj.shortLabel || activePurposeObj.label) : (activePurposeObj.shortLabel || activePurposeObj.label)})`
-        : '';
-      resultsStatus.innerHTML = `Hiển thị <strong>${displayItems.length}</strong> hội nghị tiêu biểu${purposeSuffix}`;
+      resultsStatus.innerHTML = `Hiển thị <strong>${displayItems.length}</strong> hội nghị tiêu biểu`;
     }
 
     if (displayItems.length === 0) {
@@ -1597,7 +1577,7 @@
     if (emptyState) emptyState.hidden = true;
     const savedIds = getSavedConferenceIds();
     grid.innerHTML = displayItems
-      .map(entry => buildFeaturedConferenceCardHtml(entry.conf, savedIds, utils))
+      .map(conf => buildFeaturedConferenceCardHtml(conf, savedIds, utils))
       .join('');
   }
 

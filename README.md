@@ -23,7 +23,7 @@
 - [10. Luồng hoạt động của các chức năng chính](#10-luồng-hoạt-động-của-các-chức-năng-chính)
 - [11. Kiểm thử và chất lượng](#11-kiểm-thử-và-chất-lượng)
 - [12. Cài đặt và chạy](#12-cài-đặt-và-chạy)
-- [13. Công cụ thu thập dữ liệu](#13-công-cụ-thu-thập-dữ-liệu)
+- [13. Quản lý dữ liệu](#13-quản-lý-dữ-liệu)
 - [14. Quy trình làm việc nhóm](#14-quy-trình-làm-việc-nhóm)
 - [15. Lời cảm ơn và nguồn dữ liệu](#15-lời-cảm-ơn-và-nguồn-dữ-liệu)
 - [16. Định hướng phát triển](#16-định-hướng-phát-triển)
@@ -94,12 +94,12 @@ Tất cả các tính năng dưới đây đã được kiểm chứng trực ti
 - **Trang chủ & Cổng tìm kiếm ([`index.html`](index.html), [`js/pages/index.js`](js/pages/index.js)):**
   - Ô tìm kiếm nhanh chuyển hướng sang `search.html?q=...` kèm hiệu ứng biến hình thanh tìm kiếm (shared-element View Transition).
   - Hero Slider 3 slide (*Khuyến nghị cá nhân hóa theo trạng thái đăng nhập và lĩnh vực nghiên cứu của tài khoản*, *Hội nghị nổi bật*, *Sắp hết hạn UTC+7*) hỗ trợ tự động chạy, tạm dừng khi hover/focus hoặc vừa cập nhật lĩnh vực, điều hướng bằng bàn phím, nút chấm và thao tác vuốt trên màn hình cảm ứng.
-  - Ở Slide 1 sau khi đăng nhập: hiển thị nút **Thêm lĩnh vực** (hoặc **Đổi lĩnh vực** khi đã có lĩnh vực) mở bảng biểu chọn lĩnh vực nghiên cứu trực tiếp (`topicsOnly: true`, không hỏi mục đích tìm kiếm) và đồng bộ vào trường `fieldsOfInterest` của tài khoản. Riêng tài khoản vừa đăng ký mới ở lần đăng nhập đầu tiên sẽ được tự động mở bảng cá nhân hóa đầy đủ gồm cả *1. Mục đích tìm kiếm* và *2. Lĩnh vực nghiên cứu bạn quan tâm*.
+  - Ở Slide 1 sau khi đăng nhập: khi chưa chọn lĩnh vực sẽ hiển thị nút **Thêm lĩnh vực** mở bảng chọn lĩnh vực dùng chung (`#globalPreferencesSurveyModal`); khi đã có lĩnh vực quan tâm, Slide 1 hiển thị tiêu đề **Gợi ý dành cho bạn** cùng tối đa 2 thẻ hội nghị phù hợp gọn sạch. Tài khoản vừa đăng ký mới ở lần đăng nhập đầu tiên cũng dùng chung bảng **Chọn lĩnh vực nghiên cứu** này (nút *Bỏ qua* + nút *Lưu thay đổi*).
   - Danh sách hội nghị sắp diễn ra kèm nút Lưu và nút chọn So sánh.
 - **Tra cứu nâng cao & Lọc đa chiều ([`search.html`](search.html), [`js/components/search-core.js`](js/components/search-core.js), [`js/pages/search.js`](js/pages/search.js)):**
   - Tìm kiếm tức thì, gợi ý combobox và gợi ý sửa chính tả bằng khoảng cách **Damerau-Levenshtein**.
-  - **6 nhóm bộ lọc accordion**: **Phân hạng (`rank`: `A*`, `A`, `B`, `C`, *Chưa xếp hạng*)**, **Thời gian diễn ra (`eventFrom`–`eventTo` trên 1 dòng & *Đang diễn ra*)**, **Hạn nộp bài (`cfp`: tất cả / đang mở / sắp hết hạn `<= 14 ngày` / đã đóng / chưa rõ + khoảng ngày `from`/`to`)**, **Hình thức tổ chức (`mode`: *Trực tiếp*, *Trực tuyến*, *Kết hợp* — mọi tiêu chí đều tích chọn được kể cả khi có 0 kết quả; bản ghi chưa cập nhật hình thức không bị gộp vào *Kết hợp*)**, **Địa điểm diễn ra (`city`: *Tất cả địa điểm*, *Hà Nội*, *TP. Hồ Chí Minh*, *Tỉnh / thành khác*)** và **Lĩnh vực nghiên cứu (`topic`: 3 lĩnh vực nổi bật *Học máy*, *Trí tuệ nhân tạo*, *Dữ liệu lớn* + 1 tiêu chí *Khác* gồm các lĩnh vực còn lại, vẫn giữ tương thích liên kết URL `?topic=<slug>`)**. Giao diện không hiển thị số đếm sau tiêu chí lọc và giữ vùng kết quả gọn nhẹ.
-  - Sắp xếp **10** kiểu, phân trang, thanh chip bộ lọc đang bật, ngăn kéo bộ lọc trên di động (`#filtersSidebar`) và đồng bộ 2 chiều với URL Query Parameters.
+  - **6 nhóm bộ lọc accordion**: **Hạn nộp bài (`cfp`: tất cả / đang mở / sắp hết hạn `<= 14 ngày` / đã đóng / chưa rõ + khoảng ngày `from`/`to`)**, **Lĩnh vực nghiên cứu (`topic`: các nhóm lĩnh vực gộp kèm nút *Xem thêm* / *Thu gọn* hiện 5 nhóm đầu và ánh xạ `?topic=<slug>` từ trang chủ/cá nhân hóa về đúng nhóm)**, **Địa điểm diễn ra (`city`: *Tất cả địa điểm*, *Hà Nội*, *TP. Hồ Chí Minh*, *Tỉnh / thành khác*)**, **Thời gian diễn ra (`when`: *Mọi thời gian*, *Đang diễn ra*, *Trong 1/3/6 tháng tới*, *Chưa có ngày diễn ra*)**, **Hình thức tổ chức (`mode`: *Trực tiếp*, *Trực tuyến*, *Kết hợp*, *Chưa rõ hình thức* — mọi tiêu chí đều tích chọn được)** và **Phân hạng (`rank`: `A*`, `A`, `B`, `C`, *Chưa xếp hạng*)**. Desktop mở sẵn 4 nhóm đầu, thu gọn *Hình thức* & *Phân hạng* và ẩn chân nút *Áp dụng bộ lọc* vì lọc tức thì.
+  - Sắp xếp **10** kiểu, phân trang, trạng thái 0 kết quả tối giản kèm gợi ý chính tả (`#emptyState`), ngăn kéo bộ lọc trên di động (`#filtersSidebar`) và đồng bộ 2 chiều với URL Query Parameters.
 - **Chi tiết hội nghị ([`detail.html`](detail.html), [`js/pages/detail.js`](js/pages/detail.js)):**
   - Nạp theo `?id=<slug>`, hiển thị tổng quan (**Giới thiệu**), **Thông tin học thuật** gồm **3 nội dung** (`Xếp hạng`, `Lĩnh vực nghiên cứu`, `Xác minh lần cuối`), đồng hồ đếm ngược thời gian thực tới mốc kế tiếp, và timeline toàn bộ các mốc thời hạn từ dữ liệu gốc quy đổi `AoE → UTC+7`.
   - Xuất lịch sang **Google Calendar** hoặc tải tệp **`.ics`** (từng mốc riêng lẻ hoặc toàn bộ các mốc) và danh sách hội nghị liên quan.
@@ -109,7 +109,7 @@ Tất cả các tính năng dưới đây đã được kiểm chứng trực ti
 - **Hồ sơ cá nhân & Lịch hạn nộp bài ([`profile.html`](profile.html), [`js/pages/profile.js`](js/pages/profile.js), [`js/components/calendar.js`](js/components/calendar.js)):**
   - Bảo vệ bằng Auth Guard ([`js/core/layout.js`](js/core/layout.js)), cho phép cập nhật thông tin học thuật, chọn/chỉnh sửa lĩnh vực nghiên cứu qua bảng biểu dùng chung (`topicsOnly: true`, không hiển thị mục đích), cắt vuông & nén ảnh đại diện `200×200px` JPEG bằng Canvas 2D.
   - Component lịch tháng hiển thị đồng thời hạn nộp bài (`UTC+7`), ngày diễn ra hội nghị đã lưu và mốc Tracker cá nhân, kèm panel chi tiết theo ngày và 5 mốc sắp tới.
-- **Xác thực, Các trang thông tin & Báo lỗi 404 ([`login.html`](login.html), [`register.html`](register.html), [`about.html`](about.html), [`contact.html`](contact.html), [`terms.html`](terms.html), [`privacy.html`](privacy.html), [`404.html`](404.html)):**
+- **Xác thực, Các trang thông tin & Báo lỗi 404 ([`login.html`](login.html), [`register.html`](register.html), [`about.html`](about.html), [`contact.html`](contact.html), [`404.html`](404.html)):**
   - Đăng nhập/đăng ký sử dụng hàm băm SHA-256 (Web Crypto API), 20 tài khoản seed từ [`data/users.json`](data/users.json) (và mảng `SEED_USERS` dự phòng), dùng ảnh nền cục bộ [`images/ben-cang-nha-rong.jpg`](images/ben-cang-nha-rong.jpg), gắn `needsOnboarding: true` cho tài khoản mới đăng ký và hỗ trợ `?redirect=<url>` an toàn chống open-redirect.
   - Trang [`404.html`](404.html) tự động neo `<base>` trên URL nhiều cấp, phân tích ngữ cảnh lỗi đường dẫn hoặc `?id=` sai, gợi ý sửa chính tả bằng **Damerau-Levenshtein** và hiển thị hội nghị thực tế từ JSON.
   - Trang Giới thiệu đọc nội dung từ [`data/about.json`](data/about.json) kèm modal Đề xuất hội nghị mới (`confguide_proposals`). Header/Footer dùng chung tích hợp modal Cài đặt & Quyền riêng tư, Trợ giúp FAQ, Báo cáo sự cố (`confguide_reports`) và form góp ý chân trang (`confguide_feedback`, debounce `10s`).
@@ -149,9 +149,8 @@ flowchart TD
     FOOTER --> PROFILE
     FOOTER --> ABOUT
     FOOTER --> CONTACT["contact.html (Liên hệ)"]
-    FOOTER --> TERMS["terms.html (Điều khoản)"]
-    FOOTER --> PRIVACY["privacy.html (Chính sách bảo mật)"]
-    ERR["URL sai / Thiếu ?id="] -.-> NOTFOUND["404.html (Khôi phục điều hướng)"]
+    FOOTER -. "Điều khoản, Chính sách & Kết nối" .-> NOTFOUND["404.html (Khôi phục điều hướng)"]
+    ERR["URL sai / Thiếu ?id="] -.-> NOTFOUND
     NOTFOUND --> INDEX
     NOTFOUND --> SEARCH
 ```
@@ -168,9 +167,9 @@ flowchart TD
 
 ## 8. Cấu trúc thư mục và quy ước đặt tên
 
-### Cây thư mục thực tế (47 tệp)
+### Cây thư mục thực tế (44 tệp)
 
-Cấu trúc này khớp 100% với repository hiện tại (`12` trang HTML, `12` tệp CSS, `13` tệp JS, `4` tệp `data/`, `2` hình ảnh trong `images/` và `4` tệp cấu hình/tài liệu ở gốc):
+Cấu trúc này khớp 100% với repository hiện tại (`10` trang HTML, `12` tệp CSS, `13` tệp JS, `3` tệp `data/`, `2` hình ảnh trong `images/` và `4` tệp cấu hình/tài liệu ở gốc):
 
 ```text
 confeguide/
@@ -183,8 +182,6 @@ confeguide/
 ├── contact.html                # Trang liên hệ & đóng góp thông tin
 ├── login.html                  # Trang đăng nhập tài khoản
 ├── register.html               # Trang đăng ký tài khoản mới
-├── terms.html                  # Trang điều khoản sử dụng
-├── privacy.html                # Trang chính sách bảo mật
 ├── 404.html                    # Trang báo lỗi 404 & khôi phục đường dẫn
 ├── css/
 │   ├── base/
@@ -222,12 +219,11 @@ confeguide/
 ├── data/
 │   ├── about.json              # Dữ liệu trang Giới thiệu
 │   ├── conference_data.json    # Dữ liệu 30 hội nghị khoa học CNTT tại Việt Nam
-│   ├── scrape-conferences.py   # Script Python độc lập hỗ trợ cào/trích xuất dữ liệu hội nghị
 │   └── users.json              # Dữ liệu 20 tài khoản mẫu
 ├── images/
 │   ├── ben-cang-nha-rong.jpg   # Ảnh nền Bến cảng Nhà Rồng cục bộ cho trang Đăng nhập / Đăng ký
 │   └── logo.svg                # Logo SVG dùng chung cho header, footer & favicon
-├── .editorconfig               # Đồng bộ UTF-8, LF, indent 2 spaces (4 cho *.py)
+├── .editorconfig               # Đồng bộ UTF-8, LF, indent 2 spaces
 ├── .gitignore                  # Bỏ qua .env, __pycache__, node_modules, file IDE/OS
 ├── AGENT.md                    # Quy ước kỹ thuật & hướng dẫn chi tiết cho AI Agents
 └── README.md                   # Tài liệu tổng quan & phụ lục kỹ thuật dự án
@@ -235,9 +231,9 @@ confeguide/
 
 ### Quy ước đặt tên & Nguyên tắc tổ chức (rút từ [Phụ lục A](#phụ-lục-a-bảng-ánh-xạ-tái-cấu-trúc))
 - **Tên tệp & thư mục:** Chữ thường 100%, `kebab-case`, ASCII không dấu, không khoảng trắng, dùng danh từ tiếng Anh rõ nghĩa (tệp dữ liệu dùng danh từ số nhiều: `users.json`; riêng tệp hội nghị dùng ngoại lệ `conference_data.json` theo xác nhận của chủ dự án).
-- **Bộ ba theo trang:** `<trang>.html` ↔ `css/pages/<trang>.css` ↔ `js/pages/<trang>.js` (cặp `login.html` và `register.html` dùng chung `auth.css`/`auth.js`; 3 trang tĩnh `contact.html`, `terms.html`, `privacy.html` dùng `base.css`/`layout.js`, không tạo file rỗng).
+- **Bộ ba theo trang:** `<trang>.html` ↔ `css/pages/<trang>.css` ↔ `js/pages/<trang>.js` (cặp `login.html` và `register.html` dùng chung `auth.css`/`auth.js`; trang tĩnh `contact.html` dùng `base.css`/`layout.js`, không tạo file rỗng).
 - **Phân tầng 3 lớp:** `css/base/` → `css/components/` → `css/pages/` (bảo toàn thứ tự `<link>` cascade) và `js/core/` → `js/components/` → `js/pages/`. Thư mục `images/` gồm 2 tệp đặt phẳng ([`images/logo.svg`](images/logo.svg), [`images/ben-cang-nha-rong.jpg`](images/ben-cang-nha-rong.jpg)).
-- **HTML ở gốc & Bất biến `data/`:** 12 trang HTML đặt phẳng tại thư mục gốc để triển khai trực tiếp lên GitHub Pages không cần chỉnh đường dẫn gốc; các tệp dữ liệu `data/` giữ nguyên cấu trúc khóa tương thích với logic JS. Xem lịch sử ánh xạ cũ → mới tại [Phụ lục A](#phụ-lục-a-bảng-ánh-xạ-tái-cấu-trúc).
+- **HTML ở gốc & Bất biến `data/`:** 10 trang HTML đặt phẳng tại thư mục gốc để triển khai trực tiếp lên GitHub Pages không cần chỉnh đường dẫn gốc; các tệp dữ liệu `data/` giữ nguyên cấu trúc khóa tương thích với logic JS. Xem lịch sử ánh xạ cũ → mới tại [Phụ lục A](#phụ-lục-a-bảng-ánh-xạ-tái-cấu-trúc).
 
 ---
 
@@ -256,12 +252,12 @@ Dự án tuân thủ nghiêm ngặt bộ quy chuẩn kỹ thuật trong [`AGENT.
 
 Mọi trang HTML đều dùng chung bộ nền tảng ở `<head>`: `css/base/base.css`, `css/base/transition.css`, `js/core/page-transition.js` và `js/core/layout.js` (`defer blocking="render"`), kèm đoạn script anti-FOUC ngắn đầu `<body>` để áp dụng Dark Mode trước khi vẽ khung hình đầu tiên.
 
-### 1. Nhóm trang HTML (`12` tệp đặt ở thư mục gốc)
+### 1. Nhóm trang HTML (`10` tệp đặt ở thư mục gốc)
 
 | Tệp HTML | Số dòng | Stylesheet đi kèm *(ngoài nền chung)* | Script đi kèm *(ngoài lõi chung)* | Vai trò chức năng chính |
 |---|---:|---|---|---|
 | [`index.html`](index.html) | 282 | `css/pages/index.css`, `css/components/compare.css` | `js/components/search-core.js`, `js/components/compare.js`, `js/pages/index.js` | Trang chủ: giới thiệu, tìm kiếm nhanh, slider 3 slide, hội nghị tiêu biểu |
-| [`search.html`](search.html) | 371 | `css/pages/search.css`, `css/components/compare.css` | `js/components/compare.js`, `js/components/search-core.js`, `js/pages/search.js` | Trang Tra cứu: 6 nhóm lọc accordion, đồng bộ URL, gợi ý chính tả, phân trang |
+| [`search.html`](search.html) | 369 | `css/pages/search.css`, `css/components/compare.css` | `js/components/compare.js`, `js/components/search-core.js`, `js/pages/search.js` | Trang Tra cứu: 6 nhóm lọc accordion (mở 4 đầu, thu gọn Hình thức & Phân hạng), đồng bộ URL, gợi ý chính tả, phân trang |
 | [`detail.html`](detail.html) | 333 | `css/pages/detail.css`, `css/components/compare.css` | `js/components/compare.js`, `js/pages/detail.js` | Trang Chi tiết (`?id=`): timeline mốc gốc UTC+7, đếm ngược, Giới thiệu, Thông tin học thuật (3 mục), xuất `.ics` |
 | [`tracker.html`](tracker.html) | 87 | `css/pages/tracker.css`, `css/components/compare.css` | `js/components/compare.js`, `js/pages/tracker.js` | Theo dõi hội nghị đã lưu, hiển thị mốc hạn nộp gần nhất & xóa nhanh |
 | [`profile.html`](profile.html) | 290 | `css/pages/profile.css`, `css/components/compare.css`, `css/components/calendar.css` | `js/components/compare.js`, `js/components/calendar.js`, `js/pages/profile.js` | Hồ sơ cá nhân (Auth Guard): chỉnh sửa hồ sơ/lĩnh vực/avatar, lịch mốc cá nhân |
@@ -269,20 +265,18 @@ Mọi trang HTML đều dùng chung bộ nền tảng ở `<head>`: `css/base/ba
 | [`contact.html`](contact.html) | 107 | *(chỉ dùng `base.css` + `transition.css`)* | *(dùng `initContactForm` trong `layout.js`)* | Biểu mẫu liên hệ, đóng góp hội nghị và thông tin văn phòng đồ án |
 | [`login.html`](login.html) | 106 | `css/pages/auth.css` | `js/pages/auth.js` | Biểu mẫu đăng nhập kiểm tra mật khẩu SHA-256 & ghi nhớ phiên |
 | [`register.html`](register.html) | 132 | `css/pages/auth.css` | `js/pages/auth.js` | Biểu mẫu đăng ký tài khoản, checklist độ mạnh mật khẩu & gắn cờ onboarding |
-| [`terms.html`](terms.html) | 92 | *(chỉ dùng `base.css` + `transition.css`)* | *(chỉ dùng lõi chung)* | Điều khoản và điều kiện sử dụng nền tảng ConfGuide |
-| [`privacy.html`](privacy.html) | 99 | *(chỉ dùng `base.css` + `transition.css`)* | *(chỉ dùng lõi chung)* | Chính sách bảo mật dữ liệu LocalStorage và quyền người dùng |
 | [`404.html`](404.html) | 207 | `css/pages/404.css` | `js/pages/404.js` | Trang báo lỗi 404: gợi ý sửa đường dẫn sai, tìm kiếm nhanh & hội nghị gợi ý |
 
 ### 2. Nhóm Stylesheet CSS (`12` tệp — 3 tầng `base / components / pages`)
 
 | Tệp CSS | Số dòng | Tầng | Nhiệm vụ chính |
 |---|---:|---|---|
-| [`css/base/base.css`](css/base/base.css) | 2,593 | `base` | Tokens OKLCH 2 lớp (Light/Dark 60:30:10 + `@supports` fallback), reset, Header/Footer, modal (Cài đặt, Khảo sát cá nhân hóa / Chọn lĩnh vực), policy, contact |
+| [`css/base/base.css`](css/base/base.css) | 2,417 | `base` | Tokens OKLCH 2 lớp (Light/Dark 60:30:10 + `@supports` fallback), reset, Header/Footer, modal (Cài đặt, Chọn lĩnh vực nghiên cứu dùng chung), contact |
 | [`css/base/transition.css`](css/base/transition.css) | 354 | `base` | Chuyển trang Phương án B (`@view-transition`, keyframes GPU `translate3d`, `is-leaving`/`is-entering`, `reduced-motion`) |
-| [`css/components/compare.css`](css/components/compare.css) | 885 | `components` | Nút chọn so sánh, thanh nổi `.compare-bar`, modal `<dialog>` & bảng 2 chiều sticky cột trái |
+| [`css/components/compare.css`](css/components/compare.css) | 869 | `components` | Nút chọn so sánh, thanh nổi `.compare-bar`, modal `<dialog>` & bảng 2 chiều sticky cột trái |
 | [`css/components/calendar.css`](css/components/calendar.css) | 892 | `components` | Lưới lịch 7 cột `T2–CN`, ký hiệu sự kiện phân biệt hình dạng (mobile dots), panel chi tiết ngày |
-| [`css/pages/index.css`](css/pages/index.css) | 1,345 | `pages` | `@view-transition` search-morph, Hero 2 cột, Slider 3 thẻ nổi bật, `.search-box`, thẻ tính năng & hội nghị |
-| [`css/pages/search.css`](css/pages/search.css) | 2,390 | `pages` | `@view-transition` search-morph, Hero tìm kiếm + combobox, sidebar accordion, khoảng ngày 1 dòng, drawer mobile, thẻ kết quả, skeleton |
+| [`css/pages/index.css`](css/pages/index.css) | 1,269 | `pages` | `@view-transition` search-morph, Hero 2 cột, Slider 3 thẻ nổi bật, `.search-box`, thẻ tính năng & hội nghị |
+| [`css/pages/search.css`](css/pages/search.css) | 2,083 | `pages` | `@view-transition` search-morph, Hero tìm kiếm + combobox, sidebar accordion, danh sách lĩnh vực có cuộn/thu gọn, ẩn chân nút Desktop, drawer mobile, thẻ kết quả, skeleton |
 | [`css/pages/detail.css`](css/pages/detail.css) | 1,615 | `pages` | Header hội nghị, timeline mốc hạn, thông tin học thuật `<dl>`, Giới thiệu, liên kết ngoài, sidebar sticky |
 | [`css/pages/tracker.css`](css/pages/tracker.css) | 486 | `pages` | Hero theo dõi, thanh thống kê, bảng danh sách hạn chót & huy hiệu khẩn cấp/hết hạn |
 | [`css/pages/profile.css`](css/pages/profile.css) | 797 | `pages` | Thẻ hồ sơ hero 2 tầng, chip & nút chọn lĩnh vực, lưới thống kê, editor ảnh đại diện modal |
@@ -294,19 +288,19 @@ Mọi trang HTML đều dùng chung bộ nền tảng ở `<head>`: `css/base/ba
 
 | Tệp JS | Số dòng | Tên hàm chính / API xuất ra | Vai trò trong kiến trúc |
 |---|---:|---|---|
-| [`js/core/layout.js`](js/core/layout.js) | 3,609 | `ConfGuideUtils`, `renderHeader`, `renderFooter`, `openPreferencesSurveyModal`, `maybeTriggerNewUserOnboarding`, `convertDeadlineToVn` | Lõi toàn site: cache JSON theo Promise, quy đổi AoE → UTC+7, phiên đăng nhập, Auth Guard, onboarding lần đầu tài khoản mới, bảng chọn lĩnh vực & form liên hệ |
+| [`js/core/layout.js`](js/core/layout.js) | 3,470 | `ConfGuideUtils`, `renderHeader`, `renderFooter`, `openPreferencesSurveyModal`, `maybeTriggerNewUserOnboarding`, `convertDeadlineToVn` | Lõi toàn site: cache JSON theo Promise, quy đổi AoE → UTC+7, phiên đăng nhập, Auth Guard, modal chọn lĩnh vực nghiên cứu dùng chung & onboarding lần đầu, form liên hệ |
 | [`js/core/page-transition.js`](js/core/page-transition.js) | 703 | `ConfGuidePageTransition`, `injectSpeculationRules`, `navigateWithWaapiExit`, `handlePageReveal` | Điều phối chuyển trang (View Transitions + WAAPI), Speculation Rules, khôi phục `bfcache` & focus thanh tìm kiếm |
-| [`js/components/search-core.js`](js/components/search-core.js) | 1,058 | `ConfGuideSearchCore` (`buildIndex`, `scoreConference`, `normalizeModeKey`, `matchesTopicValue`, `matchesFilters`, `computeFacetCounts`, `getRelaxSuggestions`, `highlightMatches`) | Bộ máy tìm kiếm thuần hàm: chuẩn hóa tiếng Việt, khớp mờ Damerau-Levenshtein, chuẩn hóa hình thức & lọc lĩnh vực nổi bật/`Khác` |
-| [`js/components/compare.js`](js/components/compare.js) | 1,134 | `ConfGuideCompare` (`toggleConference`, `buildComparisonGroups`, `renderDialogTable`, `openDialog`) | Thành phần đối chiếu tối đa 3 hội nghị cạnh nhau qua `sessionStorage` & `<dialog>` chuẩn A11y |
+| [`js/components/search-core.js`](js/components/search-core.js) | 1,132 | `ConfGuideSearchCore` (`buildIndex`, `scoreConference`, `normalizeModeKey`, `matchesTopicValue`, `matchesMonthGroup`, `matchesFilters`, `computeFacetCounts`, `getRelaxSuggestions`, `highlightMatches`) | Bộ máy tìm kiếm thuần hàm: chuẩn hóa tiếng Việt, khớp mờ Damerau-Levenshtein, lọc mốc thời gian (`ongoing`/`next1`/`next3`/`next6`/`unknown`), chuẩn hóa hình thức & lĩnh vực |
+| [`js/components/compare.js`](js/components/compare.js) | 1,129 | `ConfGuideCompare` (`toggleConference`, `buildComparisonGroups`, `renderDialogTable`, `openDialog`) | Thành phần đối chiếu tối đa 3 hội nghị cạnh nhau qua `sessionStorage` & `<dialog>` chuẩn A11y |
 | [`js/components/calendar.js`](js/components/calendar.js) | 1,209 | `ConfGuideProfileCalendar` (`collectCalendarEvents`, `renderCalendarShell`, `renderSelectedDayPanel`, `handleCalendarKeydown`) | Tổng hợp deadline + sự kiện + Tracker vào lịch tháng 7 cột kèm điều hướng phím |
-| [`js/pages/index.js`](js/pages/index.js) | 1,656 | `initIndexPage`, `renderHeroSlide1`, `renderFeaturedConferences`, `bindSliderNavigationEvents`, `goToSlide` | Điều khiển slider hero 3 slide (mở bảng chọn lĩnh vực `topicsOnly: true` ở Slide 1), tìm kiếm nhanh & lưới hội nghị tiêu biểu |
-| [`js/pages/search.js`](js/pages/search.js) | 2,866 | `Proxy filterState`, `readUrlIntoFilterState`, `buildFilterCatalogs`, `executePipeline`, `renderConferenceListUI`, `updateSidebarOptionRows` | Tầng điều phối UI trang Tra cứu: microtask batching, 6 nhóm lọc luôn tích chọn được & không hiện số đếm, đồng bộ URL 2 chiều, `DocumentFragment` |
+| [`js/pages/index.js`](js/pages/index.js) | 1,524 | `initIndexPage`, `renderHeroSlide1`, `renderFeaturedConferences`, `bindSliderNavigationEvents`, `goToSlide` | Điều khiển slider hero 3 slide (Slide 1 hiển thị nút *Thêm lĩnh vực* khi trống và danh sách thẻ gọn khi đã chọn lĩnh vực), tìm kiếm nhanh & lưới hội nghị tiêu biểu |
+| [`js/pages/search.js`](js/pages/search.js) | 2,533 | `Proxy filterState`, `readUrlIntoFilterState`, `buildFilterCatalogs`, `extractTopicGroups`, `syncTopicOverflowToggle`, `executePipeline`, `renderConferenceListUI` | Tầng điều phối UI trang Tra cứu: microtask batching, 6 nhóm lọc accordion (nhóm lĩnh vực + *Xem thêm*, mốc *Thời gian diễn ra*, 4 hình thức), ánh xạ `?topic=` đơn, đồng bộ URL 2 chiều, `DocumentFragment` |
 | [`js/pages/detail.js`](js/pages/detail.js) | 1,006 | `initDetailPage`, `renderHeader`, `renderTimeline`, `renderOverview`, `formatAcademicRankValue`, `renderAcademicInfo`, `renderActiveNextDeadline` | Nạp chi tiết 1 hội nghị, timeline đầy đủ mốc, Thông tin học thuật 3 mục, đếm ngược dọn timer trên `pagehide`, xuất `.ics` & Google Calendar |
 | [`js/pages/tracker.js`](js/pages/tracker.js) | 316 | `initTracker`, `render`, `buildTrackerRowHtml`, `handleTrackerTableClick` | Đọc `confguide_saved_<userId>`, tính hạn nộp gần nhất & cập nhật bảng bằng event delegation |
 | [`js/pages/profile.js`](js/pages/profile.js) | 1,090 | `renderUserProfile`, `initEditProfileModal`, `processAndSaveAvatar`, `initCalendarSection` | Chọn lĩnh vực qua bảng dùng chung (`topicsOnly: true`), cập nhật hồ sơ, nén ảnh `<canvas>` 200×200px & khởi tạo Lịch |
 | [`js/pages/about.js`](js/pages/about.js) | 713 | `initAboutPage`, `renderHero`, `renderTransparencyAndTech`, `setupProposalModal` | Nạp `data/about.json` & vận hành modal đề xuất hội nghị với validation + focus trap |
 | [`js/pages/auth.js`](js/pages/auth.js) | 781 | `initializeAuthPage`, `initLoginForm`, `initRegisterForm`, `handleRegisterSubmit`, `hashPassword` | Quản lý `SEED_USERS`/`data/users.json`, băm SHA-256, gắn cờ `needsOnboarding` khi đăng ký & xử lý đăng nhập/đăng ký |
-| [`js/pages/404.js`](js/pages/404.js) | 462 | `KNOWN_ROUTE_CATALOG`, `suggestBestRoute`, `loadAndSuggestConferences` | Gợi ý sửa route sai trên `404.html` bằng Damerau-Levenshtein và hiển thị hội nghị gợi ý |
+| [`js/pages/404.js`](js/pages/404.js) | 460 | `KNOWN_ROUTE_CATALOG`, `suggestBestRoute`, `loadAndSuggestConferences` | Gợi ý sửa route sai trên `404.html` bằng Damerau-Levenshtein và hiển thị hội nghị gợi ý |
 
 ---
 
@@ -314,7 +308,7 @@ Mọi trang HTML đều dùng chung bộ nền tảng ở `<head>`: `css/base/ba
 
 1. **Tìm kiếm nhanh → Tra cứu nâng cao & Đồng bộ URL (`index.js` → `search.js` + `search-core.js`):**
    - Người dùng nhập từ khóa tại `#searchForm` trên `index.html` → gọi `ConfGuidePageTransition.navigate('search.html?q=...')` kèm cờ `STORAGE_SEARCH_FOCUS_KEY`.
-   - Sang `search.html`, `readUrlIntoFilterState()` đọc URL params (`q`, `rank`, `eventFrom`, `eventTo`, `ongoing`, `cfp`, `from`, `to`, `mode`, `city`, `topic`, `sort`, `page`) nạp vào `Proxy filterState`; mọi thay đổi tự động gom vào 1 `queueMicrotask` để lọc/sắp xếp, cập nhật DOM theo batch qua `<template>` + `DocumentFragment` và đồng bộ ngược lại URL bằng `history.replaceState` (debounce `300ms`). Mọi tiêu chí lọc đều cho phép tích chọn bình thường và dẫn tới khối gợi ý nới lỏng `#emptyState` nếu tập kết quả bằng `0`.
+   - Sang `search.html`, `readUrlIntoFilterState()` đọc URL params (`q`, `rank`, `when`, `ongoing`, `cfp`, `from`, `to`, `mode`, `city`, `topic`, `sort`, `page`) nạp vào `Proxy filterState`; ánh xạ các slug lĩnh vực đơn từ trang chủ/cá nhân hóa (`singleTopicToGroupKey`) về đúng nhóm lĩnh vực, gom thay đổi vào 1 `queueMicrotask` để lọc/sắp xếp, cập nhật DOM theo batch qua `<template>` + `DocumentFragment` và đồng bộ ngược lại URL bằng `history.replaceState` (debounce `300ms`). Mọi tiêu chí lọc đều cho phép tích chọn bình thường và hiển thị trạng thái rỗng kèm gợi ý chính tả (`#emptyState`) nếu tập kết quả bằng `0`.
 2. **Chi tiết hội nghị, Lưu theo dõi & Xuất lịch (`detail.js` ↔ `tracker.js`):**
    - `detail.html?id=<slug>` tra cứu bản ghi từ `fetchJsonCached('data/conference_data.json')`, tính toàn bộ các mốc hạn nộp từ dữ liệu gốc (AoE → `UTC+7`), hiển thị phần **Giới thiệu** và **Thông tin học thuật** (`Xếp hạng`, `Lĩnh vực nghiên cứu`, `Xác minh lần cuối`), chạy đồng hồ đếm ngược (dọn timer qua `pagehide` và khôi phục khi `pageshow`), hỗ trợ tải `.ics` hoặc mở Google Calendar.
    - Nút Lưu ghi danh sách ID vào `confguide_saved_<userId>` (hoặc `confguide_saved_guest`) trong `LocalStorage`; `tracker.html` đọc khóa này qua `ConfGuideUtils.getSavedStorageKey(true)` để hiển thị bảng theo dõi và xóa bằng event delegation trên `#conferenceBody`.
@@ -322,7 +316,7 @@ Mọi trang HTML đều dùng chung bộ nền tảng ở `<head>`: `css/base/ba
    - Người dùng bật nút So sánh trên thẻ ở `index.html`, `search.html`, `detail.html`, `tracker.html` (và module hỗ trợ trên `profile.html`). Danh sách tối đa 3 ID được lưu trong `SessionStorage` (`confguide_compare_ids`), đồng bộ liên tục với thanh nổi dưới đáy và render bảng đối chiếu chi tiết trong modal khi bấm mở (hỗ trợ đóng bằng `Escape` và nút xóa từng cột).
 4. **Xác thực, Onboarding lần đầu, Hồ sơ cá nhân & Lịch (`auth.js`, `layout.js`, `index.js`, `profile.js`, `calendar.js`):**
    - `auth.js` nạp `data/users.json` (kèm fallback `SEED_USERS`), băm mật khẩu bằng Web Crypto `SHA-256` để đăng nhập/đăng ký; tài khoản mới đăng ký được gắn `needsOnboarding: true` trong `confguide_users` và sao chép vào `confguide_current_user` ở lần đăng nhập đầu tiên.
-   - Ở lần sử dụng đầu sau đăng ký, `layout.js` (`maybeTriggerNewUserOnboarding`) tự động bật `#globalPreferencesSurveyModal` đầy đủ gồm *1. Mục đích tìm kiếm* và *2. Lĩnh vực nghiên cứu bạn quan tâm* một lần duy nhất; khi chỉnh sửa trực tiếp ở Slider Trang chủ (`index.js`) hay Trang cá nhân (`profile.js`), modal chỉ mở bảng chọn lĩnh vực (`topicsOnly: true`).
+   - Ở lần sử dụng đầu sau đăng ký, `layout.js` (`maybeTriggerNewUserOnboarding`) tự động bật chính bảng dùng chung **Chọn lĩnh vực nghiên cứu** (`#globalPreferencesSurveyModal`, nút *Bỏ qua* / *Lưu thay đổi*, không còn câu hỏi mục đích sử dụng) một lần duy nhất; khi chỉnh sửa trực tiếp ở Slider Trang chủ (`index.js`), Cài đặt (`layout.js`) hay Trang cá nhân (`profile.js`), modal dùng cùng bảng này với nút *Hủy* / *Lưu thay đổi*.
    - Khi mở `profile.html`, Auth Guard trong `layout.js` kiểm tra phiên (chuyển sang `login.html?redirect=profile.html` nếu chưa đăng nhập). Sau khi vào trang, `profile.js` tải thông tin hồ sơ, xử lý modal chỉnh sửa/nén avatar `200×200px`, đồng thời cấp dữ liệu đã lưu + Tracker cho `calendar.js` dựng lưới lịch 7 cột `T2–CN`.
 5. **Trang báo lỗi 404 & Hiệu ứng chuyển trang (`404.js`, `page-transition.js`, `transition.css`):**
    - Sau chẩn đoán lỗi nav bị mờ khi chuyển trang (do `backdrop-filter: blur(14px)` trên `.site-header` mất ngữ cảnh nền phía sau khi bị Chrome đóng gói thành bitmap tĩnh `::view-transition-new(site-nav)` — sai lệch tới **`73,986 px` (`80.28%`)** ở Light Mode và **`74,200 px` (`80.51%`)** ở Dark Mode khi cuộn trang), hệ thống sử dụng **Phương án B (2 nhánh có chọn lọc)**:
@@ -372,7 +366,7 @@ Mọi trang HTML đều dùng chung bộ nền tảng ở `<head>`: `css/base/ba
 | **Tổng dòng comment giải thích + JSDoc (JS / CSS / HTML)** | `1,842 / 301 / 102` | **`2,481 / 324 / 152`** | **Tăng độ rõ ràng đồng bộ** |
 | **Quy tắc CSS gộp 1 dòng (`multiPropLines`) / dòng CSS `>120`** | `160` / `46` | **`0`** / **`1`** *(URL ngoài)* | **Sạch định dạng 100%** |
 | **Bất biến hiển thị CDP (`computedStyle` / viewport overflow)** | `0` lỗi | **`0` khác biệt / `0` tràn** | **60/66 PNG trùng pixel tuyệt đối** *(6 ảnh `detail` chỉ đổi vùng đồng hồ live)* |
-| **Dữ liệu `data/*` (SHA-256 4 tệp)** | Nguyên gốc | **Khớp 100% từng byte** | **0 byte thay đổi** |
+| **Dữ liệu `data/*` (SHA-256 4 tệp)** *(thời điểm đo lịch sử trước khi gỡ script thu thập bản đầu)* | Nguyên gốc | **Khớp 100% từng byte** | **0 byte thay đổi** |
 | **Lighthouse Accessibility / Best Practices / SEO (11/11 trang)** | `100 / 100 / 100` | **`100 / 100 / 100`** | Giữ nguyên điểm tuyệt đối trên cả Desktop & Mobile |
 
 Chi tiết từng tệp trước/sau và kết quả Lighthouse từng trang xem tại [Phụ lục E](#phụ-lục-e-báo-cáo-clean-code-và-tái-cấu-trúc-mã-nguồn).
@@ -405,22 +399,12 @@ cd confeguide
 
 ---
 
-## 13. Công cụ thu thập dữ liệu
+## 13. Quản lý dữ liệu
 
-Repository có sẵn script Python độc lập [`data/scrape-conferences.py`](data/scrape-conferences.py) để hỗ trợ thu thập/trích xuất bán tự động dữ liệu hội nghị vào file JSON (không phải backend của website).
-
-- **Cơ chế hoạt động:** Đọc danh sách URL hội nghị từ JSON đầu vào, tải HTML (có cache trong phiên `html_cache`), gọi Gemini (`gemini-3.5-flash-lite`) qua OpenAI-compatible client (`https://generativelanguage.googleapis.com/v1beta/openai/`) kèm ràng buộc Pydantic schema (`ExtractedConferenceInfo`, `ExtractedDeadlineData`) để tách 2 pha:
-  1. Từ `website_url`: trích `full_name`, `summarization`, `location`, `date_happen`.
-  2. Từ `deadline_url` (fallback sang `website_url` nếu thiếu): trích mảng `deadlines` (`name`, `date` định dạng `YYYY-MM-DD`).
-  - Áp dụng giới hạn tốc độ `RATE_LIMIT_SECONDS = 15` giữa các yêu cầu.
-- **Định dạng vào / ra theo mã nguồn hiện tại:**
-  - `INPUT_FILE = "data/conference_data.json"`, `OUTPUT_FILE = os.path.join("data", "conference_data.json")` *(đều trỏ thống nhất tới tệp dữ liệu chính `data/conference_data.json`)*.
-- **Cài đặt phụ thuộc & Cách chạy:**
-  ```bash
-  pip install pydantic python-dotenv openai requests
-  python data/scrape-conferences.py
-  ```
-- **Bảo mật khóa API:** Script nạp biến môi trường qua `load_dotenv()`. Khai báo khóa API (ví dụ `OPENAI_API_KEY`) trong tệp `.env` cục bộ hoặc biến môi trường hệ điều hành, **tuyệt đối không ghi trực tiếp vào mã nguồn hay README**. Xác nhận `.env` đã được khai báo bỏ qua trong [`.gitignore`](.gitignore#L8).
+- Dữ liệu tĩnh của website nằm trong **3 tệp** `data/*.json` ([`data/about.json`](data/about.json), [`data/conference_data.json`](data/conference_data.json), [`data/users.json`](data/users.json)); mọi cập nhật dữ liệu được thực hiện bằng cách chỉnh sửa trực tiếp các tệp JSON theo đúng schema mô tả trong [`AGENT.md`](AGENT.md).
+- Nguồn dữ liệu học thuật tham khảo xem tại [Mục 15](#15-lời-cảm-ơn-và-nguồn-dữ-liệu).
+- Website chạy trực tiếp trên trình duyệt từ các tệp JSON tĩnh, không có bước build hay script nào cần chạy để vận hành website.
+- Script thu thập bản đầu đã được gỡ khỏi repository và vẫn có thể xem lại trong lịch sử Git.
 
 ---
 
@@ -523,12 +507,12 @@ Trong các phiên bản nâng cấp tiếp theo sau giai đoạn MVP môn học 
 | `js/about.js` | `js/pages/about.js` | Gom điểm khởi chạy trang Giới thiệu vào `js/pages/` |
 | `js/auth.js` | `js/pages/auth.js` | Module chung xử lý xác thực cho `login.html` và `register.html` |
 
-#### A.2.4. Nhóm Data (4 tệp — giữ nguyên 100% nội dung từng byte)
+#### A.2.4. Nhóm Data (4 tệp — giữ nguyên 100% nội dung từng byte) *(đã cập nhật theo mã nguồn hiện tại: tệp `data/scrape-conferences.py` đã được gỡ khỏi repository)*
 
 | Đường dẫn cũ | Đường dẫn mới | Lý do |
 |---|---|---|
 | `data/conference_data.json` | `data/conference_data.json` | Giữ/cập nhật thống nhất dùng tên `data/conference_data.json` theo ngoại lệ do chủ dự án xác nhận |
-| `data/main.py` | `data/scrape-conferences.py` | Đổi từ tên chung `main.py` sang `kebab-case` mô tả đúng chức năng script thu thập dữ liệu hội nghị độc lập |
+| `data/main.py` | `data/scrape-conferences.py` *(đã cập nhật theo mã nguồn hiện tại: tệp này đã được gỡ khỏi repository)* | Đổi từ tên chung `main.py` sang `kebab-case` mô tả đúng chức năng script thu thập dữ liệu hội nghị độc lập |
 | `data/users.json` | `data/users.json` | Đã đúng chuẩn chữ thường, danh từ số nhiều |
 | `data/about.json` | `data/about.json` | Đã đúng chuẩn chữ thường, khớp nội dung trang `about.html` |
 
@@ -557,7 +541,7 @@ Trong các phiên bản nâng cấp tiếp theo sau giai đoạn MVP môn học 
 
 ### A.4. Ghi chú & Ràng buộc Ngoại lệ
 
-- **Đường dẫn bên trong `data/scrape-conferences.py` (tên cũ `data/main.py`):** Dòng 120–124 trong tệp Python này khai báo `INPUT_FILE = "data/conference_data.json"` và `OUTPUT_FILE = os.path.join("data", "conference_data.json")`, trỏ thống nhất tới tệp dữ liệu chính.
+- **Đường dẫn bên trong `data/scrape-conferences.py` (tên cũ `data/main.py`):** *(đã cập nhật theo mã nguồn hiện tại: tệp này đã được gỡ khỏi repository)* Dòng 120–124 trong tệp Python này khai báo `INPUT_FILE = "data/conference_data.json"` và `OUTPUT_FILE = os.path.join("data", "conference_data.json")`, trỏ thống nhất tới tệp dữ liệu chính.
 - **Tham chiếu `logs.html` trong `js/core/layout.js`:** Dòng `currentPage === 'tracker.html' || currentPage === 'logs.html'` (dòng 1382) vẫn tồn tại trong JS nhằm giữ nguyên logic cũ; không có tệp `logs.html` nào tồn tại trong repository.
 - **Nhóm CSS phụ trong `css/pages/auth.css`:** Class `.auth-header` trong `css/pages/auth.css` là selector dự phòng/cũ vì header thực tế trên trang Auth do `js/core/layout.js` render thành `.site-header`; giữ nguyên theo nguyên tắc không xóa class CSS hiện có.
 
@@ -638,7 +622,7 @@ Trong các phiên bản nâng cấp tiếp theo sau giai đoạn MVP môn học 
 |---|---|---|
 | `data/about.json` | 7,973 B | `580b99aa8e7b2142f0d51e15d91996153571af7a4496b7f752a9137c6aec39d4` |
 | `data/conference_data.json` *(bản cũ 41 hội nghị trước cập nhật)* | 65,129 B | `7525871562c0d49c4f0e78b5a5c15932ceae46a29b659e9910ab1fccf524f935` |
-| `data/scrape-conferences.py` | 14,234 B | `db728e42be96c74f4eafebfa18f1b0bc58b6ca97ed1d830ca5167d9d3fd30c96` |
+| `data/scrape-conferences.py` *(đã cập nhật theo mã nguồn hiện tại: tệp này đã được gỡ khỏi repository)* | 14,234 B | `db728e42be96c74f4eafebfa18f1b0bc58b6ca97ed1d830ca5167d9d3fd30c96` |
 | `data/users.json` | 5,418 B | `1ad847d87b57a8f2cbc0237627392ff80728ad2cb86cf25fc77ab48a57359125` |
 
 </details>
@@ -667,7 +651,7 @@ Trong các phiên bản nâng cấp tiếp theo sau giai đoạn MVP môn học 
 | **Lệnh `var` trong JS** | `0` | `0` | Sạch `ES6+` |
 | **Lệnh `console.*` trong JS** | `2` (`console.info` ở `about.js`, `console.warn` ở `auth.js`) | **`0`** | **Loại bỏ 2/2** |
 | **Heading Accessibility `tracker.html`** | `A11y = 98` (`jump_1_to_3`) | **`A11y = 100`** (`0` lỗi heading ở 11/11 trang) | **+2 điểm A11y** |
-| **Dữ liệu `data/` (4 tệp)** | Nguyên gốc | **Khớp 100% SHA-256** | **0 byte thay đổi** |
+| **Dữ liệu `data/` (4 tệp)** *(đã cập nhật theo mã nguồn hiện tại: `data/scrape-conferences.py` đã được gỡ khỏi repository)* | Nguyên gốc | **Khớp 100% SHA-256** | **0 byte thay đổi** |
 
 > Ghi chú kỹ thuật về thống kê baseline: Trong `optimize-baseline.md`, tổng JS từng ghi chú `527,048 B` trong tiêu đề nhưng tổng thực tế của 12 dòng trong bảng là `549,308 B` (do working tree Git có tệp dùng CRLF, tệp dùng LF). Bảng trên đối chiếu bằng chuẩn Git blob `LF` để phản ánh chính xác kích thước mã thực tế (`-1,663 B` CSS, `+1,565 B` JS, tổng ròng `-98 B`).
 
@@ -888,7 +872,7 @@ Kiểm thử bằng Chrome DevTools Protocol `Animation.setPlaybackRate(0.02)` k
 | `terms.html` | `97/100/100/100` → `96/100/100/100` | `2194ms / 0 / 0ms` | `100/100/100/100` → **`100/100/100/100`** | `470ms / 0 / 0ms` |
 | `privacy.html` | `97/100/100/100` → `96/100/100/100` | `2202ms / 0 / 0ms` | `100/100/100/100` → **`100/100/100/100`** | `474ms / 0 / 0ms` |
 
-> Lưu ý kiểm định: (1) Các endpoint W3C trực tuyến (`validator.w3.org/nu/`, `jigsaw.w3.org`) gặp lỗi chứng chỉ TLS/Cloudflare trong môi trường CLI (`URLError: CERTIFICATE_VERIFY_FAILED`), được kiểm chứng thay thế bằng `StrictHTMLChecker` (`0` lỗi trên `11/11` HTML) và Chrome CSSOM (`11/11` CSS nạp hợp lệ); (2) Toàn bộ 4 tệp trong `data/` tại thời điểm chốt baseline giữ nguyên **100% SHA-256** (`about.json`, `conference_data.json`, `scrape-conferences.py`, `users.json`).
+> Lưu ý kiểm định: (1) Các endpoint W3C trực tuyến (`validator.w3.org/nu/`, `jigsaw.w3.org`) gặp lỗi chứng chỉ TLS/Cloudflare trong môi trường CLI (`URLError: CERTIFICATE_VERIFY_FAILED`), được kiểm chứng thay thế bằng `StrictHTMLChecker` (`0` lỗi trên `11/11` HTML) và Chrome CSSOM (`11/11` CSS nạp hợp lệ); (2) Toàn bộ 4 tệp trong `data/` tại thời điểm chốt baseline giữ nguyên **100% SHA-256** (`about.json`, `conference_data.json`, `scrape-conferences.py` *(đã cập nhật theo mã nguồn hiện tại: tệp này đã được gỡ khỏi repository)*, `users.json`).
 
 ### E.4. Danh sách Điểm nghi ngờ giữ nguyên an toàn (Suspect List)
 
@@ -897,6 +881,6 @@ Các thành phần sau không được xóa để bảo đảm nguyên tắc kh�
 2. `css/pages/profile.css` (`.saved-*`, `.tracker-preview-*`, `#savedConferencesList`, `#trackerPreviewContainer`) & hàm tương ứng trong `js/pages/profile.js`: được giữ lại kèm kiểm tra `if (!container) return;` an toàn cho bố cục danh sách đã lưu cũ.
 3. `js/pages/search.js` (`DUPLICATE_RAW_NAMES`, `ENABLED_FILTER_GROUPS.mode/publisher`): cờ tắt sẵn để mở rộng bộ lọc hình thức / nhà xuất bản về sau mà không đổi cấu trúc `filterState`.
 4. `js/pages/index.js` (`initTabs`, `currentTab`) & `css/pages/index.css` (`.filter-tabs`, `.tab-btn`): hook tab lọc hội nghị cũ trên trang chủ, giữ nguyên tương thích.
-5. `js/core/layout.js` (`logs.html` trong kiểm tra active link; `#contactFullName` đối ứng với `#fullName` trong `contact.html`) và `data/scrape-conferences.py` (`INPUT_FILE = "data/conference_data.json"`, `OUTPUT_FILE = os.path.join("data", "conference_data.json")`).
+5. `js/core/layout.js` (`logs.html` trong kiểm tra active link; `#contactFullName` đối ứng với `#fullName` trong `contact.html`) và `data/scrape-conferences.py` *(đã cập nhật theo mã nguồn hiện tại: tệp này đã được gỡ khỏi repository)* (`INPUT_FILE = "data/conference_data.json"`, `OUTPUT_FILE = os.path.join("data", "conference_data.json")`).
 
 </details>
