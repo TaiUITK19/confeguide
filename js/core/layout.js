@@ -1568,6 +1568,22 @@
   }
 
   /**
+   * Tạo tham số `?redirect=` an toàn cho nút Đăng nhập khi chuyển từ trang hiện tại.
+   * @param {string} currentPage - Tên trang hiện tại.
+   * @returns {string} Chuỗi query `?redirect=...` hoặc chuỗi rỗng.
+   */
+  function buildLoginRedirectParam(currentPage) {
+    const isLoginPage = currentPage === 'login.html';
+    const isRegisterPage = currentPage === 'register.html';
+    const isNotFoundPage = currentPage === '404.html'
+      || Boolean(document.body && document.body.dataset && document.body.dataset.page === '404');
+    const shouldAppendRedirect = Boolean(
+      currentPage && currentPage !== 'index.html' && !isLoginPage && !isRegisterPage && !isNotFoundPage
+    );
+    return shouldAppendRedirect ? `?redirect=${encodeURIComponent(currentPage)}` : '';
+  }
+
+  /**
    * Tạo HTML khối tài khoản (Menu Avatar hoặc nút Đăng nhập/Đăng ký) trên Header.
    * @param {string} currentPage - Tên trang hiện tại.
    * @param {Object|null} user - Người dùng đang đăng nhập.
@@ -1578,12 +1594,7 @@
 
     const isLoginPage = currentPage === 'login.html';
     const isRegisterPage = currentPage === 'register.html';
-    const isNotFoundPage = currentPage === '404.html'
-      || Boolean(document.body && document.body.dataset && document.body.dataset.page === '404');
-    const shouldAppendRedirect = Boolean(
-      currentPage && currentPage !== 'index.html' && !isLoginPage && !isRegisterPage && !isNotFoundPage
-    );
-    const redirectParam = shouldAppendRedirect ? `?redirect=${encodeURIComponent(currentPage)}` : '';
+    const redirectParam = buildLoginRedirectParam(currentPage);
 
     return `
       <div class="auth-buttons-group">
@@ -1995,13 +2006,13 @@
                 </div>
                 <div class="modal-form-grid-2">
                   <div class="modal-form-group">
-                    <label for="globalNewPass">Mật khẩu mới (tối thiểu 6 ký tự)</label>
-                    <input type="password" id="globalNewPass" class="modal-input" required minlength="6">
+                    <label for="globalNewPass">Mật khẩu mới (tối thiểu 8 ký tự, gồm chữ hoa, thường, số)</label>
+                    <input type="password" id="globalNewPass" class="modal-input" required minlength="8">
                     <p class="field-error js-field-error" id="globalNewPassError" aria-live="polite"></p>
                   </div>
                   <div class="modal-form-group">
                     <label for="globalConfirmPass">Xác nhận mật khẩu mới</label>
-                    <input type="password" id="globalConfirmPass" class="modal-input" required minlength="6">
+                    <input type="password" id="globalConfirmPass" class="modal-input" required minlength="8">
                     <p class="field-error js-field-error" id="globalConfirmPassError" aria-live="polite"></p>
                   </div>
                 </div>
@@ -2498,9 +2509,11 @@
    * @param {boolean} isTracker - Trang Theo dõi hội nghị.
    * @param {boolean} isAbout - Trang Về chúng tôi.
    * @param {Object|null} user - Người dùng hiện tại.
+   * @param {string} currentPage - Tên trang hiện tại.
    * @returns {string} Chuỗi HTML `.mobile-nav-drawer`.
    */
-  function buildMobileDrawerHtml(isHome, isSearch, isTracker, isAbout, user) {
+  function buildMobileDrawerHtml(isHome, isSearch, isTracker, isAbout, user, currentPage) {
+    const redirectParam = buildLoginRedirectParam(currentPage);
     const userLinksHtml = user ? `
       <div class="mobile-menu-divider" role="separator"></div>
       <a href="profile.html" class="nav-link">Trang cá nhân</a>
@@ -2512,7 +2525,13 @@
         class="nav-link mobile-menu-btn">Báo cáo sự cố</button>
       <button type="button" id="mobileLogoutBtn"
         class="nav-link mobile-menu-btn mobile-menu-btn--danger">Đăng xuất</button>
-    ` : '';
+    ` : `
+      <div class="mobile-menu-divider mobile-auth-divider" role="separator"></div>
+      <div class="mobile-auth-actions">
+        <a href="login.html${redirectParam}" class="btn-header-login">Đăng nhập</a>
+        <a href="register.html" class="btn-header-register">Đăng ký</a>
+      </div>
+    `;
 
     return `
       <div class="mobile-nav-drawer" id="mobileNavDrawer">
@@ -2559,7 +2578,9 @@
         ${hamburgerSvg}
       </button>
     `;
-    const mobileDrawerHtml = isAuthPage ? '' : buildMobileDrawerHtml(isHome, isSearch, isTracker, isAbout, user);
+    const mobileDrawerHtml = isAuthPage
+      ? ''
+      : buildMobileDrawerHtml(isHome, isSearch, isTracker, isAbout, user, currentPage);
 
     headerContainer.innerHTML = `
       <header class="site-header">
@@ -2743,8 +2764,14 @@
       if (curErr) curErr.textContent = 'Vui lòng nhập mật khẩu hiện tại.';
       hasError = true;
     }
-    if (newPass.length < 6) {
-      if (newErr) newErr.textContent = 'Mật khẩu mới phải có ít nhất 6 ký tự.';
+    const isStrongNewPass = newPass.length >= 8
+      && /[A-Z]/.test(newPass)
+      && /[a-z]/.test(newPass)
+      && /[0-9]/.test(newPass);
+    if (!isStrongNewPass) {
+      if (newErr) {
+        newErr.textContent = 'Mật khẩu mới cần tối thiểu 8 ký tự, gồm chữ hoa, chữ thường và chữ số.';
+      }
       hasError = true;
     }
     if (conPass !== newPass) {
@@ -3303,7 +3330,7 @@
    */
   function handleContactFormSubmit(e, els) {
     e.preventDefault();
-    const { form, msg, nameInput, emailInput, messageInput, nameErr, emailErr, messageErr } = els;
+    const { form, msg, nameInput, emailInput, topicInput, messageInput, nameErr, emailErr, messageErr } = els;
     msg.className = 'contact-form__msg';
     msg.textContent = '';
 
@@ -3338,6 +3365,7 @@
       id: `ct-${Date.now()}`,
       fullName: nameInput ? nameInput.value.trim() : '',
       email: emailInput ? emailInput.value.trim() : '',
+      topic: topicInput ? topicInput.value : '',
       message: messageInput ? messageInput.value.trim() : '',
       createdAt: new Date().toISOString()
     });
@@ -3360,44 +3388,31 @@
     const els = {
       form,
       msg,
-      nameInput: document.getElementById('contactFullName'),
-      emailInput: document.getElementById('contactEmail'),
-      messageInput: document.getElementById('contactMessage'),
+      nameInput: document.getElementById('contactFullName') || document.getElementById('fullName'),
+      emailInput: document.getElementById('contactEmail') || document.getElementById('email'),
+      topicInput: document.getElementById('contactTopic') || document.getElementById('topic'),
+      messageInput: document.getElementById('contactMessage') || document.getElementById('message'),
       nameErr: document.getElementById('contactFullNameError'),
       emailErr: document.getElementById('contactEmailError'),
       messageErr: document.getElementById('contactMessageError')
     };
 
-    if (els.nameInput) {
-      els.nameInput.addEventListener('blur', () => {
-        validateContactField(
-          els.nameInput,
-          els.nameErr,
-          v => v.length >= 2,
-          'Họ tên cần có ít nhất 2 ký tự.'
-        );
+    const contactFieldValidators = [
+      [els.nameInput, els.nameErr, v => v.length >= 2, 'Họ tên cần có ít nhất 2 ký tự.'],
+      [els.emailInput, els.emailErr, v => EMAIL_REGEX.test(v), 'Vui lòng nhập địa chỉ email hợp lệ.'],
+      [els.messageInput, els.messageErr, v => v.length >= 10, 'Nội dung cần tối thiểu 10 ký tự.']
+    ];
+    contactFieldValidators.forEach(([inputEl, errEl, checkFn, messageText]) => {
+      if (!inputEl) return;
+      inputEl.addEventListener('blur', () => validateContactField(inputEl, errEl, checkFn, messageText));
+      inputEl.addEventListener('input', () => {
+        if (errEl && errEl.textContent) validateContactField(inputEl, errEl, checkFn, messageText);
+        if (msg.classList.contains('contact-form__msg--error')) {
+          msg.className = 'contact-form__msg';
+          msg.textContent = '';
+        }
       });
-    }
-    if (els.emailInput) {
-      els.emailInput.addEventListener('blur', () => {
-        validateContactField(
-          els.emailInput,
-          els.emailErr,
-          v => EMAIL_REGEX.test(v),
-          'Vui lòng nhập địa chỉ email hợp lệ.'
-        );
-      });
-    }
-    if (els.messageInput) {
-      els.messageInput.addEventListener('blur', () => {
-        validateContactField(
-          els.messageInput,
-          els.messageErr,
-          v => v.length >= 10,
-          'Nội dung cần tối thiểu 10 ký tự.'
-        );
-      });
-    }
+    });
 
     form.addEventListener('submit', e => handleContactFormSubmit(e, els));
   }

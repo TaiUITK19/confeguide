@@ -151,7 +151,7 @@
   "community": {
     "title": "Mã nguồn & Đóng góp cộng đồng",
     "callToAction": "ConfGuide là một dự án học thuật mở. Chúng tôi luôn trân trọng mọi đóng góp về mã nguồn, đề xuất cải tiến trải nghiệm và thông tin các hội nghị khoa học mới từ cộng đồng nghiên cứu.",
-    "githubRepoUrl": "#",
+    "githubRepoUrl": "https://github.com/TaiUITK19/confeguide",
     "githubLabel": "GitHub Repository",
     "proposeLabel": "Đề xuất hội nghị mới"
   }

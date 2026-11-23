@@ -1332,6 +1332,51 @@ body.dark .footer-col-title {
   }
 }
 
+/* Màn hình điện thoại hẹp (375px–430px): chuyển Đăng nhập/Đăng ký vào menu di động để tránh tràn ngang */
+.mobile-auth-divider,
+.mobile-auth-actions {
+  display: none;
+}
+
+@media (max-width: 560px) {
+  body:not(.auth-page) .header-actions .auth-buttons-group {
+    display: none;
+  }
+  .mobile-auth-divider {
+    display: block;
+  }
+  .mobile-auth-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    padding-top: 4px;
+  }
+  .mobile-auth-actions .btn-header-login,
+  .mobile-auth-actions .btn-header-register {
+    width: 100%;
+  }
+  body.auth-page .brand {
+    gap: 8px;
+  }
+  body.auth-page .brand-icon-box {
+    width: 34px;
+    height: 34px;
+  }
+  body.auth-page .brand-copy strong {
+    font-size: 17px;
+  }
+  body.auth-page .theme-toggle-btn {
+    width: 36px;
+    height: 36px;
+  }
+  body.auth-page .btn-header-login,
+  body.auth-page .btn-header-register {
+    height: 36px;
+    padding: 0 10px;
+    font-size: 12.5px;
+  }
+}
+
 /* ================= 10. MODAL TOÀN CỤC & TIỆN ÍCH DÙNG CHUNG ================= */
 .btn {
   display: inline-flex;
