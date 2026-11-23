@@ -1,15 +1,14 @@
 <!DOCTYPE html>
 <!--
   ConfGuide — Trang Báo lỗi 404 Not Found (404.html)
-  Xử lý đường dẫn không tồn tại, liên kết hỏng và mã hội nghị không hợp lệ,
-  cung cấp gợi ý khôi phục thông minh, tìm kiếm nhanh và hội nghị thực tế từ JSON.
+  Hiển thị thông báo trang không tồn tại và nút điều hướng quay lại trang chủ.
 -->
 <html lang="vi">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>404 — Không tìm thấy trang | ConfGuide</title>
-  <meta name="description" content="Trang bạn tìm kiếm không tồn tại hoặc đường dẫn đã thay đổi. Quay lại ConfGuide để tra cứu và theo dõi hội nghị khoa học CNTT tại Việt Nam.">
+  <meta name="description" content="Trang bạn đang tìm kiếm không tồn tại. Quay lại trang chủ ConfGuide để tra cứu và theo dõi hội nghị khoa học CNTT tại Việt Nam.">
   <meta name="robots" content="noindex, follow">
 
   <!-- Tự động neo đường dẫn gốc khi 404.html được server trả về ở URL lồng nhiều cấp (VD: /thu-muc/loi) -->
@@ -34,7 +33,6 @@
   <link rel="stylesheet" href="css/base/transition.css">
   <script src="js/core/page-transition.js"></script>
   <script src="js/core/layout.js" defer blocking="render"></script>
-  <script src="js/pages/404.js" defer></script>
 </head>
 <body data-page="404">
   <!-- Áp dụng nhanh Dark Mode trước khi sơn giao diện để tránh nhấp nháy sáng/tối (anti-FOUC) -->
@@ -43,160 +41,16 @@
   <!-- Thanh điều hướng dùng chung được render bởi js/core/layout.js -->
   <div id="site-header"></div>
 
+  <!-- Nội dung chính báo lỗi 404 căn giữa màn hình -->
   <main id="mainContent" class="not-found-page">
-    <!-- Khu vực Hero báo lỗi 404 và công cụ khôi phục điều hướng -->
     <section class="nf-hero" aria-labelledby="nfHeading">
-      <div class="container">
-        <div class="nf-hero__card card-surface">
-          <div class="nf-hero__code-wrap" aria-hidden="true">
-            <span class="nf-hero__code">404</span>
-            <span class="nf-hero__icon-badge">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="11" cy="11" r="8"></circle>
-                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                <line x1="8" y1="11" x2="14" y2="11"></line>
-              </svg>
-            </span>
-          </div>
-
-          <span class="nf-hero__pill js-nf-pill">404 • Không tìm thấy nội dung</span>
-          <h1 id="nfHeading" class="nf-hero__title js-nf-title">Rất tiếc, trang bạn tìm kiếm không tồn tại</h1>
-          <p class="nf-hero__desc js-nf-desc">
-            Đường dẫn có thể đã bị gõ nhầm, tài nguyên đã được chuyển sang địa chỉ khác hoặc hội nghị bạn tìm không còn trong danh mục.
-          </p>
-
-          <p class="nf-hero__path-wrap js-nf-path-wrap" hidden>
-            <span class="nf-hero__path-label">Đường dẫn gặp lỗi:</span>
-            <code class="nf-hero__path js-nf-path"></code>
-          </p>
-
-          <!-- Gợi ý khôi phục thông minh (hiển thị khi phát hiện trang hoặc hội nghị gần khớp) -->
-          <div class="nf-suggestion js-nf-suggestion" role="region" aria-label="Gợi ý sửa lỗi đường dẫn" hidden></div>
-
-          <!-- Thanh tìm kiếm nhanh hội nghị -->
-          <form class="nf-search-form js-nf-search-form" id="nfSearchForm" role="search" novalidate>
-            <label for="nfSearchInput" class="sr-only">Tìm kiếm hội nghị khoa học trên ConfGuide</label>
-            <div class="nf-search-form__row">
-              <div class="nf-search-form__input-wrap">
-                <svg class="nf-search-form__icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                  <circle cx="11" cy="11" r="8"></circle>
-                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                </svg>
-                <input
-                  id="nfSearchInput"
-                  class="nf-search-form__input js-nf-search-input"
-                  type="search"
-                  placeholder="Tìm tên hội nghị (VD: SOICT, AI...)"
-                  autocomplete="off"
-                  aria-describedby="nfSearchError"
-                >
-              </div>
-              <button type="submit" class="btn btn-primary nf-search-form__submit">Tìm hội nghị</button>
-            </div>
-            <p id="nfSearchError" class="field-error nf-search-form__error js-nf-search-error" role="alert" hidden></p>
-          </form>
-
-          <!-- Cụm nút điều hướng chính & báo cáo lỗi -->
-          <div class="nf-actions">
-            <a href="index.html" class="btn btn-primary nf-actions__btn">
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-                <polyline points="9 22 9 12 15 12 15 22"></polyline>
-              </svg>
-              <span>Về Trang chủ</span>
-            </a>
-            <a href="search.html" class="btn btn-secondary nf-actions__btn">
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <circle cx="11" cy="11" r="8"></circle>
-                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-              </svg>
-              <span>Mở trang Tra cứu</span>
-            </a>
-            <button type="button" class="btn btn-secondary nf-actions__btn js-nf-back-btn">
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <line x1="19" y1="12" x2="5" y2="12"></line>
-                <polyline points="12 19 5 12 12 5"></polyline>
-              </svg>
-              <span>Quay lại trang trước</span>
-            </button>
-          </div>
-
-          <div class="nf-hero__report-row">
-            <button type="button" class="nf-report-link js-nf-report-btn">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path>
-                <line x1="4" y1="22" x2="4" y2="15"></line>
-              </svg>
-              <span>Báo cáo liên kết bị hỏng cho quản trị viên</span>
-            </button>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Lối tắt nhanh tới các chuyên mục chính của ConfGuide -->
-    <section class="nf-directory" aria-labelledby="nfRoutesTitle">
-      <div class="container">
-        <div class="nf-section-head">
-          <h2 id="nfRoutesTitle" class="nf-section-head__title">Khám phá nhanh các trang chính</h2>
-          <p class="nf-section-head__sub">Chọn đúng khu vực bạn cần trên hệ thống ConfGuide</p>
-        </div>
-
-        <div class="nf-directory__grid">
-          <a href="search.html" class="nf-route-card card-surface">
-            <span class="nf-route-card__icon" aria-hidden="true">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
-              </svg>
-            </span>
-            <h3 class="nf-route-card__title">Tra cứu &amp; Lọc nâng cao</h3>
-            <p class="nf-route-card__desc">Lọc hội nghị theo Rank CORE, tháng diễn ra, hạn nộp UTC+7, địa điểm và lĩnh vực.</p>
-          </a>
-
-          <a href="tracker.html" class="nf-route-card card-surface">
-            <span class="nf-route-card__icon" aria-hidden="true">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
-              </svg>
-            </span>
-            <h3 class="nf-route-card__title">Theo dõi hội nghị</h3>
-            <p class="nf-route-card__desc">Quản lý danh sách hội nghị đã lưu và đếm ngược hạn nộp bài cá nhân.</p>
-          </a>
-
-          <a href="about.html" class="nf-route-card card-surface">
-            <span class="nf-route-card__icon" aria-hidden="true">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10"></circle>
-                <line x1="12" y1="16" x2="12" y2="12"></line>
-                <line x1="12" y1="8" x2="12.01" y2="8"></line>
-              </svg>
-            </span>
-            <h3 class="nf-route-card__title">Về chúng tôi</h3>
-            <p class="nf-route-card__desc">Tìm hiểu sứ mệnh đồ án ConfGuide, chuẩn múi giờ UTC+7 và đề xuất hội nghị mới.</p>
-          </a>
-
-          <a href="contact.html" class="nf-route-card card-surface">
-            <span class="nf-route-card__icon" aria-hidden="true">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
-                <polyline points="22,6 12,13 2,6"></polyline>
-              </svg>
-            </span>
-            <h3 class="nf-route-card__title">Liên hệ &amp; Đóng góp</h3>
-            <p class="nf-route-card__desc">Báo cáo sai sót dữ liệu hoặc gửi đóng góp bổ sung hội nghị khoa học tại Việt Nam.</p>
-          </a>
-        </div>
-      </div>
-    </section>
-
-    <!-- Gợi ý hội nghị thực tế từ data/conference_data.json (ẩn nếu chưa có dữ liệu) -->
-    <section class="nf-featured js-nf-featured-section" aria-labelledby="nfFeaturedTitle" hidden>
-      <div class="container">
-        <div class="nf-section-head">
-          <h2 id="nfFeaturedTitle" class="nf-section-head__title">Hội nghị khoa học gợi ý</h2>
-          <p class="nf-section-head__sub">Các hội nghị CNTT có dữ liệu xác thực trên hệ thống ConfGuide</p>
-        </div>
-        <div class="nf-featured__grid js-nf-featured-grid"></div>
+      <div class="container nf-hero__inner">
+        <h1 id="nfHeading" class="nf-hero__code">404</h1>
+        <p class="nf-hero__message">Trang bạn đang tìm kiếm không tồn tại.</p>
+        <a href="index.html" class="btn btn-primary nf-hero__btn">
+          <span aria-hidden="true">&larr;</span>
+          <span>Quay lại trang chủ</span>
+        </a>
       </div>
     </section>
   </main>

@@ -111,7 +111,7 @@ Tất cả các tính năng dưới đây đã được kiểm chứng trực ti
   - Component lịch tháng hiển thị đồng thời hạn nộp bài (`UTC+7`), ngày diễn ra hội nghị đã lưu và mốc Tracker cá nhân, kèm panel chi tiết theo ngày và 5 mốc sắp tới.
 - **Xác thực, Các trang thông tin & Báo lỗi 404 ([`login.html`](login.html), [`register.html`](register.html), [`about.html`](about.html), [`contact.html`](contact.html), [`404.html`](404.html)):**
   - Đăng nhập/đăng ký sử dụng hàm băm SHA-256 (Web Crypto API), 20 tài khoản seed từ [`data/users.json`](data/users.json) (và mảng `SEED_USERS` dự phòng), dùng ảnh nền cục bộ [`images/ben-cang-nha-rong.jpg`](images/ben-cang-nha-rong.jpg), gắn `needsOnboarding: true` cho tài khoản mới đăng ký và hỗ trợ `?redirect=<url>` an toàn chống open-redirect.
-  - Trang [`404.html`](404.html) tự động neo `<base>` trên URL nhiều cấp, phân tích ngữ cảnh lỗi đường dẫn hoặc `?id=` sai, gợi ý sửa chính tả bằng **Damerau-Levenshtein** và hiển thị hội nghị thực tế từ JSON.
+  - Trang [`404.html`](404.html) tự động neo `<base>` trên URL nhiều cấp, hiển thị thông báo 404 tối giản căn giữa và nút quay lại trang chủ (`index.html`).
   - Trang Giới thiệu đọc nội dung từ [`data/about.json`](data/about.json) kèm modal Đề xuất hội nghị mới (`confguide_proposals`). Header/Footer dùng chung tích hợp modal Cài đặt & Quyền riêng tư, Trợ giúp FAQ, Báo cáo sự cố (`confguide_reports`) và form góp ý chân trang (`confguide_feedback`, debounce `10s`).
 - **Hệ thống màu sắc & Chuyển trang ([`css/base/base.css`](css/base/base.css), [`css/base/transition.css`](css/base/transition.css), [`js/core/page-transition.js`](js/core/page-transition.js)):**
   - Hệ Design Tokens **OKLCH** 2 tầng theo tỷ lệ **60:30:10** (kèm fallback `@supports` cho trình duyệt cũ), hiệu ứng kính mờ (`backdrop-filter`) trên thanh điều hướng nổi, Light/Dark Mode đồng bộ qua `confguide_theme` có script chống FOUC ở đầu `<body>`.
@@ -149,10 +149,9 @@ flowchart TD
     FOOTER --> PROFILE
     FOOTER --> ABOUT
     FOOTER --> CONTACT["contact.html (Liên hệ)"]
-    FOOTER -. "Điều khoản, Chính sách & Kết nối" .-> NOTFOUND["404.html (Khôi phục điều hướng)"]
+    FOOTER -. "Điều khoản, Chính sách & Kết nối" .-> NOTFOUND["404.html (Trang báo lỗi 404)"]
     ERR["URL sai / Thiếu ?id="] -.-> NOTFOUND
     NOTFOUND --> INDEX
-    NOTFOUND --> SEARCH
 ```
 
 ---
@@ -167,9 +166,9 @@ flowchart TD
 
 ## 8. Cấu trúc thư mục và quy ước đặt tên
 
-### Cây thư mục thực tế (44 tệp)
+### Cây thư mục thực tế (43 tệp)
 
-Cấu trúc này khớp 100% với repository hiện tại (`10` trang HTML, `12` tệp CSS, `13` tệp JS, `3` tệp `data/`, `2` hình ảnh trong `images/` và `4` tệp cấu hình/tài liệu ở gốc):
+Cấu trúc này khớp 100% với repository hiện tại (`10` trang HTML, `12` tệp CSS, `12` tệp JS, `3` tệp `data/`, `2` hình ảnh trong `images/` và `4` tệp cấu hình/tài liệu ở gốc):
 
 ```text
 confeguide/
@@ -182,7 +181,7 @@ confeguide/
 ├── contact.html                # Trang liên hệ & đóng góp thông tin
 ├── login.html                  # Trang đăng nhập tài khoản
 ├── register.html               # Trang đăng ký tài khoản mới
-├── 404.html                    # Trang báo lỗi 404 & khôi phục đường dẫn
+├── 404.html                    # Trang báo lỗi 404 tối giản
 ├── css/
 │   ├── base/
 │   │   ├── base.css            # Design tokens OKLCH 60:30:10, Dark Mode, header, footer, modal, toast
@@ -191,7 +190,7 @@ confeguide/
 │   │   ├── calendar.css        # Lưới lịch mốc hạn cá nhân (UTC+7) trên profile.html
 │   │   └── compare.css         # Thanh nổi dưới đáy và modal bảng so sánh tối đa 3 hội nghị
 │   └── pages/
-│       ├── 404.css             # Styles riêng cho 404.html
+│       ├── 404.css             # Styles tối giản cho 404.html
 │       ├── about.css           # Styles riêng cho about.html
 │       ├── auth.css            # Styles dùng chung cho login.html & register.html
 │       ├── detail.css          # Styles riêng cho detail.html
@@ -208,7 +207,6 @@ confeguide/
 │   │   ├── compare.js          # Logic so sánh tối đa 3 hội nghị qua SessionStorage
 │   │   └── search-core.js      # Lõi chuẩn hóa văn bản, khớp mờ Damerau-Levenshtein, lọc mode/topic & tính điểm
 │   └── pages/
-│       ├── 404.js              # Logic trang 404.html (gợi ý sửa route & hội nghị liên quan)
 │       ├── about.js            # Logic trang about.html & modal đề xuất hội nghị
 │       ├── auth.js             # Logic xác thực SHA-256, 20 tài khoản seed & cờ needsOnboarding
 │       ├── detail.js           # Logic trang detail.html (timeline, Thông tin học thuật, countdown, .ics)
@@ -265,7 +263,7 @@ Mọi trang HTML đều dùng chung bộ nền tảng ở `<head>`: `css/base/ba
 | [`contact.html`](contact.html) | 107 | *(chỉ dùng `base.css` + `transition.css`)* | *(dùng `initContactForm` trong `layout.js`)* | Biểu mẫu liên hệ, đóng góp hội nghị và thông tin văn phòng đồ án |
 | [`login.html`](login.html) | 106 | `css/pages/auth.css` | `js/pages/auth.js` | Biểu mẫu đăng nhập kiểm tra mật khẩu SHA-256 & ghi nhớ phiên |
 | [`register.html`](register.html) | 132 | `css/pages/auth.css` | `js/pages/auth.js` | Biểu mẫu đăng ký tài khoản, checklist độ mạnh mật khẩu & gắn cờ onboarding |
-| [`404.html`](404.html) | 207 | `css/pages/404.css` | `js/pages/404.js` | Trang báo lỗi 404: gợi ý sửa đường dẫn sai, tìm kiếm nhanh & hội nghị gợi ý |
+| [`404.html`](404.html) | 61 | `css/pages/404.css` | *(dùng chung `layout.js` + `page-transition.js`)* | Trang báo lỗi 404 tối giản: căn giữa nội dung và nút quay lại trang chủ |
 
 ### 2. Nhóm Stylesheet CSS (`12` tệp — 3 tầng `base / components / pages`)
 
@@ -282,9 +280,9 @@ Mọi trang HTML đều dùng chung bộ nền tảng ở `<head>`: `css/base/ba
 | [`css/pages/profile.css`](css/pages/profile.css) | 797 | `pages` | Thẻ hồ sơ hero 2 tầng, chip & nút chọn lĩnh vực, lưới thống kê, editor ảnh đại diện modal |
 | [`css/pages/about.css`](css/pages/about.css) | 970 | `pages` | 6 phần nội dung trang Giới thiệu, thẻ cố vấn/thành viên, lộ trình 2 giai đoạn & modal đề xuất |
 | [`css/pages/auth.css`](css/pages/auth.css) | 743 | `pages` | Ảnh nền cục bộ `images/ben-cang-nha-rong.jpg` + lớp phủ `--auth-overlay`, bố cục 2 cột đăng nhập/đăng ký, checklist mật khẩu |
-| [`css/pages/404.css`](css/pages/404.css) | 472 | `pages` | Bố cục hero khôi phục route 404, ô tìm kiếm nhanh & lưới thẻ gợi ý |
+| [`css/pages/404.css`](css/pages/404.css) | 70 | `pages` | Bố cục tối giản căn giữa trang 404 trên nền `--bg-hero`, hỗ trợ Light & Dark Mode |
 
-### 3. Nhóm Module JavaScript (`13` tệp — 3 tầng `core / components / pages`)
+### 3. Nhóm Module JavaScript (`12` tệp — 3 tầng `core / components / pages`)
 
 | Tệp JS | Số dòng | Tên hàm chính / API xuất ra | Vai trò trong kiến trúc |
 |---|---:|---|---|
@@ -300,7 +298,6 @@ Mọi trang HTML đều dùng chung bộ nền tảng ở `<head>`: `css/base/ba
 | [`js/pages/profile.js`](js/pages/profile.js) | 1,090 | `renderUserProfile`, `initEditProfileModal`, `processAndSaveAvatar`, `initCalendarSection` | Chọn lĩnh vực qua bảng dùng chung (`topicsOnly: true`), cập nhật hồ sơ, nén ảnh `<canvas>` 200×200px & khởi tạo Lịch |
 | [`js/pages/about.js`](js/pages/about.js) | 713 | `initAboutPage`, `renderHero`, `renderTransparencyAndTech`, `setupProposalModal` | Nạp `data/about.json` & vận hành modal đề xuất hội nghị với validation + focus trap |
 | [`js/pages/auth.js`](js/pages/auth.js) | 781 | `initializeAuthPage`, `initLoginForm`, `initRegisterForm`, `handleRegisterSubmit`, `hashPassword` | Quản lý `SEED_USERS`/`data/users.json`, băm SHA-256, gắn cờ `needsOnboarding` khi đăng ký & xử lý đăng nhập/đăng ký |
-| [`js/pages/404.js`](js/pages/404.js) | 460 | `KNOWN_ROUTE_CATALOG`, `suggestBestRoute`, `loadAndSuggestConferences` | Gợi ý sửa route sai trên `404.html` bằng Damerau-Levenshtein và hiển thị hội nghị gợi ý |
 
 ---
 
@@ -318,7 +315,8 @@ Mọi trang HTML đều dùng chung bộ nền tảng ở `<head>`: `css/base/ba
    - `auth.js` nạp `data/users.json` (kèm fallback `SEED_USERS`), băm mật khẩu bằng Web Crypto `SHA-256` để đăng nhập/đăng ký; tài khoản mới đăng ký được gắn `needsOnboarding: true` trong `confguide_users` và sao chép vào `confguide_current_user` ở lần đăng nhập đầu tiên.
    - Ở lần sử dụng đầu sau đăng ký, `layout.js` (`maybeTriggerNewUserOnboarding`) tự động bật chính bảng dùng chung **Chọn lĩnh vực nghiên cứu** (`#globalPreferencesSurveyModal`, nút *Bỏ qua* / *Lưu thay đổi*, không còn câu hỏi mục đích sử dụng) một lần duy nhất; khi chỉnh sửa trực tiếp ở Slider Trang chủ (`index.js`), Cài đặt (`layout.js`) hay Trang cá nhân (`profile.js`), modal dùng cùng bảng này với nút *Hủy* / *Lưu thay đổi*.
    - Khi mở `profile.html`, Auth Guard trong `layout.js` kiểm tra phiên (chuyển sang `login.html?redirect=profile.html` nếu chưa đăng nhập). Sau khi vào trang, `profile.js` tải thông tin hồ sơ, xử lý modal chỉnh sửa/nén avatar `200×200px`, đồng thời cấp dữ liệu đã lưu + Tracker cho `calendar.js` dựng lưới lịch 7 cột `T2–CN`.
-5. **Trang báo lỗi 404 & Hiệu ứng chuyển trang (`404.js`, `page-transition.js`, `transition.css`):**
+5. **Trang báo lỗi 404 & Hiệu ứng chuyển trang (`404.html`, `page-transition.js`, `transition.css`):**
+   - `404.html` giữ bố cục tối giản bằng HTML5/CSS3 thuần (căn giữa mã `404`, thông báo và nút quay lại `index.html`) cùng `<base>` tự neo đường dẫn khi gặp URL lồng nhiều cấp, đồng bộ Header/Footer/Dark Mode qua `layout.js`.
    - Sau chẩn đoán lỗi nav bị mờ khi chuyển trang (do `backdrop-filter: blur(14px)` trên `.site-header` mất ngữ cảnh nền phía sau khi bị Chrome đóng gói thành bitmap tĩnh `::view-transition-new(site-nav)` — sai lệch tới **`73,986 px` (`80.28%`)** ở Light Mode và **`74,200 px` (`80.51%`)** ở Dark Mode khi cuộn trang), hệ thống sử dụng **Phương án B (2 nhánh có chọn lọc)**:
      - **Nhánh 1 (Native `@view-transition` `search-morph`):** Chỉ bật ở `index.css` và `search.css` cho cặp `index.html ↔ search.html` để giữ hiệu ứng morph `.search-box`; khóa cứng `site-nav` (`display: none` ở `old(site-nav)`, `isolation: auto`, `animation: none`, nền dự phòng `:root`/`body.dark`), bỏ tách lớp `site-footer` và chỉ dọn class sau `event.viewTransition.finished` (bắt `AbortError`).
      - **Nhánh 2 (WAAPI Exit + CSS Keyframes Enter):** Áp dụng cho mọi cặp điều hướng còn lại, trình duyệt chưa hỗ trợ MPA View Transitions (như Firefox) và giao thức `file:///`. `.site-header` giữ nguyên trong DOM sống với `backdrop-filter` thật; chỉ `<main>` chạy thoát ngắn **`130ms`** ease-in bằng Web Animations API (kèm safety cap `240ms`) và vào **`270ms`** bằng CSS `@keyframes`.
