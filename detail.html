@@ -24,7 +24,7 @@
   <script>try { if (localStorage.getItem('confguide_theme') === 'dark') document.body.classList.add('dark'); } catch (e) {}</script>
 
   <!-- Kho biểu tượng SVG Sprite dùng chung cho cả HTML và JavaScript trên trang Chi tiết -->
-  <svg class="svg-sprite" aria-hidden="true" focusable="false">
+  <svg class="svg-sprite" aria-hidden="true">
     <symbol id="icon-arrow-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
       <line x1="19" y1="12" x2="5" y2="12"></line>
       <polyline points="12 19 5 12 12 5"></polyline>
@@ -107,7 +107,7 @@
       <nav class="conf-nav" aria-label="Điều hướng trang chi tiết">
         <button class="conf-nav__back-btn js-back-btn" id="backBtn" type="button">
           <svg class="conf-nav__icon" width="18" height="18" aria-hidden="true">
-            <use href="#icon-arrow-left"></use>
+            <use xlink:href="#icon-arrow-left"></use>
           </svg>
           <span class="js-back-btn-label">Quay lại danh sách</span>
         </button>
@@ -123,7 +123,7 @@
       <section class="conf-state conf-state--error js-error-state" id="detailErrorState" aria-labelledby="errorStateTitle" hidden>
         <div class="conf-state__icon-box" aria-hidden="true">
           <svg width="36" height="36">
-            <use href="#icon-alert"></use>
+            <use xlink:href="#icon-alert"></use>
           </svg>
         </div>
         <h2 class="conf-state__title" id="errorStateTitle">Không tìm thấy hội nghị</h2>
@@ -134,7 +134,7 @@
           <a class="conf-btn conf-btn--primary" href="search.html">
             <span>Về danh sách hội nghị</span>
             <svg width="16" height="16" aria-hidden="true">
-              <use href="#icon-arrow-right"></use>
+              <use xlink:href="#icon-arrow-right"></use>
             </svg>
           </a>
         </div>
@@ -158,20 +158,20 @@
                 <span class="conf-header__sep" aria-hidden="true">·</span>
                 <p class="conf-header__fullname js-conf-fullname" id="detailFullName"></p>
               </div>
-              <div class="conf-header__tags js-conf-tags" id="detailTags" aria-label="Lĩnh vực nghiên cứu"></div>
+              <div class="conf-header__tags js-conf-tags" id="detailTags" role="group" aria-label="Lĩnh vực nghiên cứu"></div>
             </div>
 
             <div class="conf-header__actions">
               <button class="conf-btn conf-btn--bookmark js-save-btn" id="saveBtn" type="button" aria-pressed="false">
                 <svg class="conf-btn__star-icon js-save-icon" width="18" height="18" aria-hidden="true">
-                  <use href="#icon-star"></use>
+                  <use xlink:href="#icon-star"></use>
                 </svg>
                 <span class="js-save-text" id="saveText">Lưu hội nghị</span>
               </button>
               <a class="conf-btn conf-btn--primary js-web-btn" id="webBtn" href="#" target="_blank" rel="noopener noreferrer">
                 <span>Website chính thức</span>
                 <svg width="16" height="16" aria-hidden="true">
-                  <use href="#icon-external"></use>
+                  <use xlink:href="#icon-external"></use>
                 </svg>
               </a>
             </div>
@@ -181,28 +181,28 @@
           <ul class="conf-header__quick-facts" aria-label="Thông tin tổ chức nhanh">
             <li class="conf-header__fact">
               <svg class="conf-header__fact-icon" width="17" height="17" aria-hidden="true">
-                <use href="#icon-calendar"></use>
+                <use xlink:href="#icon-calendar"></use>
               </svg>
               <span class="conf-header__fact-label">Thời gian:</span>
               <span class="conf-header__fact-value js-fact-date" id="detailDate">Chưa cập nhật</span>
             </li>
             <li class="conf-header__fact">
               <svg class="conf-header__fact-icon" width="17" height="17" aria-hidden="true">
-                <use href="#icon-location"></use>
+                <use xlink:href="#icon-location"></use>
               </svg>
               <span class="conf-header__fact-label">Địa điểm:</span>
               <span class="conf-header__fact-value js-fact-location" id="detailLocation">Chưa cập nhật</span>
             </li>
             <li class="conf-header__fact">
               <svg class="conf-header__fact-icon" width="17" height="17" aria-hidden="true">
-                <use href="#icon-mode"></use>
+                <use xlink:href="#icon-mode"></use>
               </svg>
               <span class="conf-header__fact-label">Hình thức:</span>
               <span class="conf-header__fact-value js-fact-format" id="detailFormat">Chưa cập nhật</span>
             </li>
             <li class="conf-header__fact">
               <svg class="conf-header__fact-icon" width="17" height="17" aria-hidden="true">
-                <use href="#icon-fee"></use>
+                <use xlink:href="#icon-fee"></use>
               </svg>
               <span class="conf-header__fact-label">Lệ phí:</span>
               <span class="conf-header__fact-value js-fact-fee" id="detailFee">Chưa cập nhật</span>
@@ -218,14 +218,14 @@
               <div class="conf-section__header deadline-timeline__header">
                 <h2 class="conf-section__title" id="timelineHeading">
                   <svg class="conf-section__icon" width="20" height="20" aria-hidden="true">
-                    <use href="#icon-clock"></use>
+                    <use xlink:href="#icon-clock"></use>
                   </svg>
                   <span>Mốc quan trọng (Call for Papers)</span>
                   <span class="deadline-timeline__count js-timeline-count" id="timelineCountBadge" hidden></span>
                 </h2>
                 <span class="deadline-timeline__tz-note">
                   <svg width="14" height="14" aria-hidden="true">
-                    <use href="#icon-globe"></use>
+                    <use xlink:href="#icon-globe"></use>
                   </svg>
                   <span>Quy đổi sang UTC+7 (giờ Việt Nam) từ 23:59 AoE</span>
                 </span>
@@ -238,7 +238,7 @@
             <section class="conf-section conf-overview" aria-labelledby="descHeading">
               <h2 class="conf-section__title" id="descHeading">
                 <svg class="conf-section__icon" width="20" height="20" aria-hidden="true">
-                  <use href="#icon-doc"></use>
+                  <use xlink:href="#icon-doc"></use>
                 </svg>
                 <span>Giới thiệu</span>
               </h2>
@@ -249,7 +249,7 @@
             <section class="conf-section academic-specs" aria-labelledby="academicSpecsHeading">
               <h2 class="conf-section__title" id="academicSpecsHeading">
                 <svg class="conf-section__icon" width="20" height="20" aria-hidden="true">
-                  <use href="#icon-info"></use>
+                  <use xlink:href="#icon-info"></use>
                 </svg>
                 <span>Thông tin học thuật</span>
               </h2>
@@ -277,7 +277,7 @@
               <div class="next-deadline-card__header">
                 <div class="next-deadline-card__icon" aria-hidden="true">
                   <svg width="22" height="22">
-                    <use href="#icon-clock"></use>
+                    <use xlink:href="#icon-clock"></use>
                   </svg>
                 </div>
                 <div class="next-deadline-card__heading">
@@ -299,7 +299,7 @@
               <div class="next-deadline-card__actions js-next-cal-group">
                 <button type="button" class="conf-btn conf-btn--outline js-cal-action" id="btnCalGoogle" data-cal-action="google-next">
                   <svg width="16" height="16" aria-hidden="true">
-                    <use href="#icon-calendar-plus"></use>
+                    <use xlink:href="#icon-calendar-plus"></use>
                   </svg>
                   <span>Thêm vào Google Calendar</span>
                 </button>
@@ -313,7 +313,7 @@
           <div class="conf-section__header">
             <h2 class="conf-section__title" id="relatedHeading">
               <svg class="conf-section__icon" width="20" height="20" aria-hidden="true">
-                <use href="#icon-share"></use>
+                <use xlink:href="#icon-share"></use>
               </svg>
               <span>Hội nghị liên quan</span>
             </h2>
