@@ -40,20 +40,20 @@
 
           <form id="contactForm" class="contact-form" novalidate>
             <div class="contact-field">
-              <label for="fullName" class="contact-field__label">Họ và tên *</label>
-              <input id="fullName" class="contact-field__control" type="text" required minlength="2" aria-describedby="contactFullNameError">
+              <label for="contactFullName" class="contact-field__label">Họ và tên *</label>
+              <input id="contactFullName" class="contact-field__control" type="text" required minlength="2" aria-describedby="contactFullNameError">
               <p class="field-error js-field-error" id="contactFullNameError" aria-live="polite"></p>
             </div>
 
             <div class="contact-field">
-              <label for="email" class="contact-field__label">Email học thuật / cá nhân *</label>
-              <input id="email" class="contact-field__control" type="email" required aria-describedby="contactEmailError">
+              <label for="contactEmail" class="contact-field__label">Email học thuật / cá nhân *</label>
+              <input id="contactEmail" class="contact-field__control" type="email" required aria-describedby="contactEmailError">
               <p class="field-error js-field-error" id="contactEmailError" aria-live="polite"></p>
             </div>
 
             <div class="contact-field">
-              <label for="topic" class="contact-field__label">Chủ đề liên hệ</label>
-              <select id="topic" class="contact-field__control">
+              <label for="contactTopic" class="contact-field__label">Chủ đề liên hệ</label>
+              <select id="contactTopic" class="contact-field__control">
                 <option value="suggest">Đề xuất thêm hội nghị khoa học mới</option>
                 <option value="bug">Báo cáo sai lệch thời hạn nộp bài (deadline)</option>
                 <option value="feature">Góp ý nâng cấp giao diện / tính năng</option>
@@ -62,8 +62,8 @@
             </div>
 
             <div class="contact-field">
-              <label for="message" class="contact-field__label">Nội dung tin nhắn *</label>
-              <textarea id="message" class="contact-field__control" rows="5" required minlength="10" aria-describedby="contactMessageError"></textarea>
+              <label for="contactMessage" class="contact-field__label">Nội dung tin nhắn *</label>
+              <textarea id="contactMessage" class="contact-field__control" rows="5" required minlength="10" aria-describedby="contactMessageError"></textarea>
               <p class="field-error js-field-error" id="contactMessageError" aria-live="polite"></p>
             </div>
 
@@ -83,10 +83,10 @@
               Khu phố 6, Phường Linh Trung, Thành phố Thủ Đức, TP. Hồ Chí Minh
             </p>
             <p class="contact-info-card__text">
-              <strong>Email:</strong> support@confguide.uit.edu.vn
+              <strong>Email:</strong> <a href="mailto:contact@confguide.vn">contact@confguide.vn</a>
             </p>
             <p class="contact-info-card__text contact-info-card__text--last">
-              <strong>Môn học:</strong> IE104 — Thiết kế Giao diện Người dùng
+              <strong>Môn học:</strong> IE104 – Internet và Công nghệ Web
             </p>
           </div>
 
