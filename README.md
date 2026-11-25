@@ -25,9 +25,6 @@ Dự án là ứng dụng web phía client thuần HTML5, CSS3, JavaScript ES6+:
 | Hạng mục | Liên kết |
 |---|---|
 | GitHub Repository | https://github.com/TaiUITK19/confeguide |
-| Demo (GitHub Pages) | `[CẦN ĐIỀN]` |
-| Quản lý công việc | `[CẦN ĐIỀN]` |
-| Video báo cáo & demo (YouTube Unlisted) | `[CẦN ĐIỀN]` |
 | Thiết kế WireFrame (Figma) | https://www.figma.com/design/a2ZLyVXPvP5sXTakX8wpsz/PH%C3%81C-TH%E1%BA%A2O-WEBSITE--WIREFRAME-?node-id=0-1&p=f&t=dSkuelfiHBfnbRG9-0 |
 | Thiết kế Mockup (Figma) | https://www.figma.com/design/xlKRpfoX2h1dAG6VTCYkUG/CHI-TI%E1%BA%BET-WEBSITE--MOCKUP-?node-id=0-1&p=f&t=bGOGpP2EWcuceVl5-0 |
 
