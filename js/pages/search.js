@@ -22,8 +22,7 @@
     mode: true,
     when: true,
     where: true,
-    what: true,
-    publisher: false
+    what: true
   };
 
   /** Ngưỡng ngày tính trạng thái "Sắp hết hạn" */
@@ -1345,30 +1344,11 @@
   /* ================= 10. KẾT XUẤT GIAO DIỆN THANH BÊN (SIDEBAR) ================= */
 
   /**
-   * Cập nhật nhãn số lượng lựa chọn đang bật theo từng nhóm và nút Xóa nhóm / Đặt lại.
+   * Cập nhật trạng thái nút Đặt lại toàn bộ bộ lọc.
    * @param {Object} state - Trạng thái bộ lọc.
    * @param {Object} groupCounts - Kết quả từ `getGroupActiveCounts(state)`.
    */
   function updateSidebarGroupCounters(state, groupCounts) {
-    document.querySelectorAll('.js-group-selected-count').forEach(badge => {
-      const count = groupCounts[badge.getAttribute('data-group-count') || ''] || 0;
-      badge.textContent = count > 0 ? `(${count})` : '';
-      if (count > 0) badge.removeAttribute('hidden');
-      else badge.setAttribute('hidden', '');
-    });
-
-    document.querySelectorAll('.js-clear-group').forEach(btn => {
-      const count = groupCounts[btn.getAttribute('data-clear-group') || ''] || 0;
-      if (count > 0) btn.removeAttribute('hidden');
-      else btn.setAttribute('hidden', '');
-    });
-
-    document.querySelectorAll('.js-panel-filter-count').forEach(badge => {
-      badge.textContent = String(groupCounts.total);
-      if (groupCounts.total > 0) badge.removeAttribute('hidden');
-      else badge.setAttribute('hidden', '');
-    });
-
     const hasAnyActive = groupCounts.total > 0 || Boolean(state.q);
     document.querySelectorAll('.js-filter-reset').forEach(btn => {
       btn.disabled = !hasAnyActive;
@@ -1442,21 +1422,7 @@
   function syncSidebarInputsFromState(state) {
     syncSearchInputFromState(state);
 
-    document.querySelectorAll('.js-filter-rank').forEach(el => {
-      const rVal = el instanceof HTMLInputElement
-        ? (el.value || '')
-        : (el.getAttribute('data-rank') || '');
-      const isSelected = Array.isArray(state.ranks) && state.ranks.includes(rVal);
-      if (el instanceof HTMLInputElement) {
-        el.checked = isSelected;
-      } else {
-        el.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
-        el.classList.toggle('is-selected', isSelected);
-      }
-      const row = el.closest('.js-option-row');
-      if (row) row.classList.toggle('is-selected', isSelected);
-    });
-
+    syncFilterCheckboxes('.js-filter-rank', cb => Array.isArray(state.ranks) && state.ranks.includes(cb.value));
     syncFilterCheckboxes('.js-filter-cfp', cb => (cb.value === 'all' ? state.cfp === 'all' : state.cfp === cb.value));
     syncFilterCheckboxes('.js-filter-time', cb => cb.value === (state.month || 'all'));
     syncFilterCheckboxes('.js-filter-mode', cb => Array.isArray(state.modes) && state.modes.includes(cb.value));
@@ -1546,39 +1512,6 @@
       const shouldOpen = idx < openLimit || hasActive;
       setAccordionOpen(acc, shouldOpen);
     });
-  }
-
-  /**
-   * Xóa toàn bộ lựa chọn của một nhóm bộ lọc (tương thích cả chế độ bản nháp di động).
-   * @param {string} groupKey
-   */
-  function clearFilterGroup(groupKey) {
-    const targetState = (isFilterDrawerOpen && draftFilterState) ? draftFilterState : filterState;
-    if (groupKey === 'rank') {
-      targetState.ranks = [];
-    } else if (groupKey === 'month' || groupKey === 'when') {
-      targetState.month = '';
-      if (groupKey === 'when') {
-        targetState.dateFrom = '';
-        targetState.dateTo = '';
-      }
-    } else if (groupKey === 'cfp') {
-      targetState.cfp = 'all';
-      targetState.dateFrom = '';
-      targetState.dateTo = '';
-    } else if (groupKey === 'mode') {
-      targetState.modes = [];
-    } else if (groupKey === 'where') {
-      targetState.city = 'all';
-    } else if (groupKey === 'what') {
-      targetState.topics = [];
-    }
-    targetState.page = 1;
-    syncSidebarInputsFromState(targetState);
-    if (isFilterDrawerOpen) {
-      updateSidebarUI(targetState);
-      updateDraftButtonCount();
-    }
   }
 
   /* ================= 11. ĐẶT LẠI BỘ LỌC ================= */
@@ -2327,9 +2260,6 @@
       if (accGroup) setAccordionOpen(accGroup, !accGroup.classList.contains('open'));
       return;
     }
-
-    const clearBtn = target.closest('.js-clear-group');
-    if (clearBtn) { clearFilterGroup(clearBtn.getAttribute('data-clear-group') || ''); return; }
 
     if (target.closest('.js-toggle-more-topics')) {
       isTopicsExpanded = !isTopicsExpanded;

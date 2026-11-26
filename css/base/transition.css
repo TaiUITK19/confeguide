@@ -318,13 +318,10 @@ html.is-leaving main {
 /* Giảm tải GPU trong lúc chuyển: buộc tạm dừng animation lặp vô hạn bất kể độ ưu tiên selector */
 html:active-view-transition .hero-slider__track,
 html:active-view-transition .next-deadline-card__ticker,
-html:active-view-transition .loading-spinner,
 html.is-leaving .hero-slider__track,
 html.is-leaving .next-deadline-card__ticker,
-html.is-leaving .loading-spinner,
 html.is-entering .hero-slider__track,
-html.is-entering .next-deadline-card__ticker,
-html.is-entering .loading-spinner {
+html.is-entering .next-deadline-card__ticker {
   animation-play-state: paused !important;
 }
 

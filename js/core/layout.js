@@ -1060,122 +1060,6 @@
   }
 
   /**
-   * Làm sạch chuỗi văn bản theo chuẩn iCalendar (.ics).
-   * @param {string} value Văn bản thô.
-   * @returns {string} Chuỗi đã escape đúng chuẩn RFC 5545.
-   */
-  function escapeIcsText(value) {
-    return String(value || '')
-      .replace(/\\/g, '\\\\')
-      .replace(/;/g, '\\;')
-      .replace(/,/g, '\\,')
-      .replace(/\r?\n/g, '\\n');
-  }
-
-  /**
-   * Tạo các dòng VEVENT chuẩn RFC 5545 kèm 2 nhắc nhở (trước 7 ngày và 1 ngày) cho một sự kiện.
-   * @param {Object} ev - Dữ liệu sự kiện `{ title, description, location, date }`.
-   * @param {number} index - Chỉ số thứ tự để sinh UID không trùng.
-   * @param {string} stamp - Dấu thời gian DTSTAMP chuẩn UTC.
-   * @returns {Array<string>} Danh sách dòng văn bản của một VEVENT hoặc mảng rỗng nếu thiếu ngày.
-   */
-  function buildIcsEventLines(ev, index, stamp) {
-    const converted = convertDeadlineToVn(ev && ev.date, { isDeadline: true });
-    const iso = converted ? converted.vnIsoDate : normalizeDateIso(ev && ev.date);
-    if (!iso) return [];
-
-    const startCompact = iso.replace(/-/g, '');
-    let dtStartLine = '';
-    let dtEndLine = '';
-
-    if (converted && converted.converted && converted.vnTimeVi) {
-      const timeCompact = `${converted.vnTimeVi.replace(/:/g, '')}00`;
-      dtStartLine = `DTSTART;TZID=${VN_TIMEZONE_ID}:${startCompact}T${timeCompact}`;
-      dtEndLine = `DTEND;TZID=${VN_TIMEZONE_ID}:${startCompact}T${timeCompact}`;
-    } else {
-      const endCompact = new Date(Date.parse(`${iso}T00:00:00Z`) + 86400000)
-        .toISOString().slice(0, 10).replace(/-/g, '');
-      dtStartLine = `DTSTART;VALUE=DATE:${startCompact}`;
-      dtEndLine = `DTEND;VALUE=DATE:${endCompact}`;
-    }
-
-    return [
-      'BEGIN:VEVENT',
-      `UID:${stamp}-${index}-${Math.random().toString(36).slice(2, 8)}@confguide.vn`,
-      `DTSTAMP:${stamp}`,
-      dtStartLine,
-      dtEndLine,
-      `SUMMARY:${escapeIcsText(ev.title || 'ConfGuide Deadline')}`,
-      `DESCRIPTION:${escapeIcsText(ev.description || '')}`,
-      `LOCATION:${escapeIcsText(ev.location || '')}`,
-      'BEGIN:VALARM',
-      'ACTION:DISPLAY',
-      'DESCRIPTION:Nhắc nhở hạn nộp bài ConfGuide (trước 7 ngày)',
-      'TRIGGER:-P7D',
-      'END:VALARM',
-      'BEGIN:VALARM',
-      'ACTION:DISPLAY',
-      'DESCRIPTION:Nhắc nhở hạn nộp bài ConfGuide (trước 1 ngày)',
-      'TRIGGER:-P1D',
-      'END:VALARM',
-      'END:VEVENT'
-    ];
-  }
-
-  /**
-   * Sinh nội dung tệp iCalendar (.ics) chứa danh sách các mốc sự kiện kèm nhắc nhở
-   * theo giờ Việt Nam (UTC+7 / Asia/Ho_Chi_Minh).
-   * @param {Array<Object>} events Danh sách sự kiện { title, description, location, date }.
-   * @returns {string} Chuỗi nội dung file .ics.
-   */
-  function createIcsContent(events) {
-    const stamp = new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z');
-    const lines = [
-      'BEGIN:VCALENDAR',
-      'VERSION:2.0',
-      'PRODID:-//ConfGuide//Academic Conference Deadlines//VI',
-      'CALSCALE:GREGORIAN',
-      'METHOD:PUBLISH',
-      'BEGIN:VTIMEZONE',
-      `TZID:${VN_TIMEZONE_ID}`,
-      `X-LIC-LOCATION:${VN_TIMEZONE_ID}`,
-      'BEGIN:STANDARD',
-      'TZOFFSETFROM:+0700',
-      'TZOFFSETTO:+0700',
-      'TZNAME:+07',
-      'DTSTART:19700101T000000',
-      'END:STANDARD',
-      'END:VTIMEZONE'
-    ];
-
-    (events || []).forEach((ev, index) => {
-      const eventLines = buildIcsEventLines(ev, index, stamp);
-      if (eventLines.length > 0) lines.push(...eventLines);
-    });
-
-    lines.push('END:VCALENDAR');
-    return lines.join('\r\n');
-  }
-
-  /**
-   * Kích hoạt tải xuống file .ics trên trình duyệt mà không mở trang mới.
-   * @param {string} filename Tên tệp tin tải về.
-   * @param {string} content Nội dung định dạng .ics.
-   */
-  function downloadIcsFile(filename, content) {
-    const safeName = String(filename || 'confguide-deadlines.ics').replace(/[^a-zA-Z0-9._-]/g, '-');
-    const blob = new Blob([content || ''], { type: 'text/calendar;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = safeName;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
-  }
-
-  /**
    * Hiển thị thông báo nổi (Toast) không chặn giao diện, thay thế window.alert().
    * @param {string} message Nội dung thông báo cho người dùng.
    * @param {'info'|'success'|'error'} [type='info'] Mức độ thông báo.
@@ -1358,16 +1242,6 @@
     if (!key) return false;
     const clean = Array.isArray(ids) ? ids.map(id => String(id).trim()).filter(Boolean) : [];
     return writeStorage(key, clean);
-  }
-
-  /**
-   * Kiểm tra một hội nghị có đang được người dùng hiện tại theo dõi hay không.
-   * @param {string} confId Mã hội nghị.
-   * @returns {boolean} True nếu đã đăng nhập và hội nghị nằm trong danh sách theo dõi.
-   */
-  function isConferenceSaved(confId) {
-    if (!confId || !isUserAuthenticated()) return false;
-    return getSavedConferenceIds(false).includes(String(confId));
   }
 
   /**
@@ -1965,21 +1839,6 @@
   }
 
   /**
-   * Tạo URL điều hướng tới trang Tra cứu (search.html) gắn sẵn lĩnh vực nghiên cứu.
-   * @param {Object} [prefs] - Tùy chọn người dùng (mặc định đọc từ getUserPreferences()).
-   * @returns {string} Đường dẫn tương đối tới search.html kèm tham số truy vấn.
-   */
-  function buildPersonalizedSearchUrl(prefs) {
-    const state = prefs && typeof prefs === 'object' ? prefs : getUserPreferences();
-    const params = new URLSearchParams();
-    if (Array.isArray(state.topics) && state.topics.length > 0) {
-      params.set('topic', state.topics.join(','));
-    }
-    const qs = params.toString();
-    return qs ? `search.html?${qs}` : 'search.html';
-  }
-
-  /**
    * Tạo HTML cho modal Cài đặt & Quyền riêng tư (đổi mật khẩu + tùy chọn hiển thị).
    * @returns {string} Chuỗi HTML `#globalSettingsModal`.
    */
@@ -2289,26 +2148,6 @@
         : modal.querySelector('input, select, textarea, button.layout-modal-close-btn');
       if (focusTarget) focusTarget.focus();
     });
-  }
-
-  /**
-   * Mở hộp thoại Báo cáo sự cố toàn cục kèm dữ liệu điền sẵn (tùy chọn).
-   * @param {{
-   *   category?: string, confName?: string, title?: string, description?: string
-   * }} [preset={}] Dữ liệu điền sẵn.
-   */
-  function openReportModal(preset = {}) {
-    const categoryEl = document.getElementById('globalReportCategory');
-    const confEl = document.getElementById('globalReportConf');
-    const titleEl = document.getElementById('globalReportTitle');
-    const descEl = document.getElementById('globalReportDesc');
-
-    if (categoryEl && preset.category) categoryEl.value = preset.category;
-    if (confEl && typeof preset.confName === 'string') confEl.value = preset.confName;
-    if (titleEl && typeof preset.title === 'string') titleEl.value = preset.title;
-    if (descEl && typeof preset.description === 'string') descEl.value = preset.description;
-
-    openLayoutModal('globalReportModal');
   }
 
   /** Trạng thái nháp trong modal bảng chọn lĩnh vực nghiên cứu dùng chung */
@@ -3388,10 +3227,10 @@
     const els = {
       form,
       msg,
-      nameInput: document.getElementById('contactFullName') || document.getElementById('fullName'),
-      emailInput: document.getElementById('contactEmail') || document.getElementById('email'),
-      topicInput: document.getElementById('contactTopic') || document.getElementById('topic'),
-      messageInput: document.getElementById('contactMessage') || document.getElementById('message'),
+      nameInput: document.getElementById('contactFullName'),
+      emailInput: document.getElementById('contactEmail'),
+      topicInput: document.getElementById('contactTopic'),
+      messageInput: document.getElementById('contactMessage'),
       nameErr: document.getElementById('contactFullNameError'),
       emailErr: document.getElementById('contactEmailError'),
       messageErr: document.getElementById('contactMessageError')
@@ -3550,7 +3389,6 @@
     getSavedStorageKey: getSavedStorageKey,
     getSavedConferenceIds: getSavedConferenceIds,
     setSavedConferenceIds: setSavedConferenceIds,
-    isConferenceSaved: isConferenceSaved,
     promptLoginForTracking: promptLoginForTracking,
     toggleSavedConference: toggleSavedConference,
     slugify: slugify,
@@ -3576,11 +3414,8 @@
     getFeeSortBoundsUsd: getFeeSortBoundsUsd,
     formatConferenceEventDate: formatConferenceEventDate,
     getGoogleCalendarUrl: getGoogleCalendarUrl,
-    createIcsContent: createIcsContent,
-    downloadIcsFile: downloadIcsFile,
     showToast: showToast,
     showConfirmModal: showConfirmModal,
-    openReportModal: openReportModal,
     PREFERENCE_TOPICS: PREFERENCE_TOPICS,
     parseTopicKeysFromText: parseTopicKeysFromText,
     parseTopicDisplayLabelsFromText: parseTopicDisplayLabelsFromText,
@@ -3589,7 +3424,6 @@
     setUserResearchTopicKeys: setUserResearchTopicKeys,
     getUserPreferences: getUserPreferences,
     saveUserPreferences: saveUserPreferences,
-    buildPersonalizedSearchUrl: buildPersonalizedSearchUrl,
     openPreferencesSurveyModal: openPreferencesSurveyModal
   };
 })();

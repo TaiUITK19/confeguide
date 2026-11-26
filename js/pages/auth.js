@@ -719,7 +719,7 @@
     initRegisterForm();
   }
 
-  /* ================= 6. CHUYỂN TRANG MỀM, THEME & KHỞI CHẠY ================= */
+  /* ================= 6. CHUYỂN TRANG MỀM & KHỞI CHẠY ================= */
 
   /**
    * Chuyển đổi mềm không tải lại toàn trang giữa login.html và register.html qua History API.
@@ -731,9 +731,6 @@
   async function navigateAuthPage(target, { replace = false } = {}) {
     const url = new URL(target, window.location.href);
     if (url.origin !== window.location.origin || !/\/(?:login|register)\.html$/.test(url.pathname)) return;
-    const activeLink = document.querySelector('.auth-nav-link.active');
-    const activePath = activeLink ? new URL(activeLink.href, window.location.href).pathname : '';
-    if (url.pathname === activePath && !url.search && !url.hash) return;
 
     const response = await fetch(url.href);
     if (!response.ok) throw new Error('Không tải được trang tài khoản.');
@@ -745,42 +742,9 @@
 
     currentCard.replaceWith(document.importNode(nextCard, true));
     document.title = nextDocument.title;
-    document.querySelectorAll('.auth-nav-link').forEach(link => {
-      const active = new URL(link.href, window.location.href).pathname === url.pathname;
-      link.classList.toggle('active', active);
-      if (active) link.setAttribute('aria-current', 'page');
-      else link.removeAttribute('aria-current');
-    });
     if (replace) history.replaceState({ authPage: true }, '', url.href);
     else history.pushState({ authPage: true }, '', url.href);
     initializeAuthPage();
-  }
-
-  /**
-   * Khởi tạo bộ chuyển giao diện sáng/tối trên trang xác thực và đồng bộ trạng thái nút.
-   */
-  function initThemeToggle() {
-    const themeToggle = document.getElementById('themeToggle');
-    if (!themeToggle) return;
-
-    const syncThemeButton = () => {
-      themeToggle.setAttribute('aria-pressed', String(document.body.classList.contains('dark')));
-    };
-
-    if (
-      readTextStorage(localStorage, 'darkMode') === 'true' ||
-      readTextStorage(localStorage, 'confguide_theme') === 'dark'
-    ) {
-      document.body.classList.add('dark');
-    }
-    syncThemeButton();
-
-    themeToggle.addEventListener('click', () => {
-      const isDark = document.body.classList.toggle('dark');
-      writeTextStorage(localStorage, 'darkMode', String(isDark));
-      writeTextStorage(localStorage, 'confguide_theme', isDark ? 'dark' : 'light');
-      syncThemeButton();
-    });
   }
 
   /**
@@ -788,11 +752,10 @@
    */
   function bootstrapAuth() {
     initializeAuthPage();
-    initThemeToggle();
 
     document.addEventListener('click', event => {
       const link = event.target.closest('a[href]');
-      if (!link || !link.matches('.auth-nav-link, .register-prompt a')) return;
+      if (!link || !link.matches('.register-prompt a')) return;
       const url = new URL(link.href, window.location.href);
       if (!/\/(?:login|register)\.html$/.test(url.pathname)) return;
       event.preventDefault();
@@ -804,8 +767,6 @@
     window.addEventListener('popstate', () => {
       if (/\/(?:login|register)\.html$/.test(window.location.pathname)) {
         navigateAuthPage(window.location.href, { replace: true }).catch(() => {
-          const activeLink = document.querySelector('.auth-nav-link.active');
-          if (activeLink) history.replaceState({ authPage: true }, '', activeLink.href);
           const message = document.querySelector('#formMessage, #registerMessage');
           if (message) {
             message.className = 'form-message form-message--error';

@@ -42,7 +42,6 @@
 
   let allConferences = [];
   let isDataLoaded = false;
-  let currentTab = 'all';
 
   /** Trạng thái điều khiển của Hero Slider */
   const sliderState = {
@@ -82,23 +81,6 @@
       return raw === null ? fallback : JSON.parse(raw);
     } catch {
       return fallback;
-    }
-  }
-
-  /**
-   * Ghi JSON vào localStorage an toàn (tái sử dụng ConfGuideUtils.writeStorage).
-   * @param {string} key - Khóa lưu trữ.
-   * @param {*} value - Giá trị cần lưu.
-   * @returns {boolean} True nếu ghi thành công.
-   */
-  function writeStorageSafe(key, value) {
-    const utils = getUtils();
-    if (utils && typeof utils.writeStorage === 'function') return utils.writeStorage(key, value);
-    try {
-      window.localStorage.setItem(key, JSON.stringify(value));
-      return true;
-    } catch {
-      return false;
     }
   }
 
@@ -1165,21 +1147,6 @@
   }
 
   /**
-   * Ghi danh sách ID hội nghị đã lưu (chỉ khi đã đăng nhập).
-   * @param {Array<string>} ids Mảng ID hội nghị cần lưu.
-   * @returns {boolean} True nếu lưu thành công.
-   */
-  function setSavedConferenceIds(ids) {
-    const utils = getUtils();
-    if (utils && typeof utils.setSavedConferenceIds === 'function') {
-      return utils.setSavedConferenceIds(ids, false);
-    }
-    const key = getSavedStorageKey();
-    if (!key) return false;
-    return writeStorageSafe(key, Array.isArray(ids) ? ids : []);
-  }
-
-  /**
    * Phát thông báo phản hồi khi lưu / bỏ lưu hội nghị qua toast dùng chung hoặc vùng aria-live.
    * @param {string} message Nội dung thông báo.
    * @param {'success'|'info'|'error'} [type='info'] Mức độ thông báo.
@@ -1536,7 +1503,6 @@
   function renderFeaturedConferences() {
     const grid = document.getElementById('conferenceGrid');
     const emptyState = document.getElementById('emptyState');
-    const resultsStatus = document.getElementById('resultsCount');
     const btnViewAll = document.getElementById('btnViewAll');
     const utils = getUtils();
 
@@ -1564,9 +1530,6 @@
     });
 
     const displayItems = sortedItems.slice(0, FEATURED_HOME_LIMIT);
-    if (resultsStatus) {
-      resultsStatus.innerHTML = `Hiển thị <strong>${displayItems.length}</strong> hội nghị tiêu biểu`;
-    }
 
     if (displayItems.length === 0) {
       grid.innerHTML = '';
@@ -1603,21 +1566,6 @@
     });
   }
 
-  /**
-   * Gắn sự kiện chuyển tab lọc khu vực nếu có trên DOM.
-   */
-  function initTabs() {
-    const tabButtons = document.querySelectorAll('.filter-tabs .tab-btn');
-    tabButtons.forEach(btn => {
-      btn.addEventListener('click', function () {
-        tabButtons.forEach(b => b.classList.remove('active'));
-        this.classList.add('active');
-        currentTab = this.getAttribute('data-filter') || 'all';
-        renderFeaturedConferences();
-      });
-    });
-  }
-
   /* ================= 6. KHỞI TẠO TRANG CHỦ ================= */
 
   /**
@@ -1628,7 +1576,6 @@
     initHeroSliderEvents();
     initSaveConferences();
     initPersonalizationSync();
-    initTabs();
     loadData();
   }
 
