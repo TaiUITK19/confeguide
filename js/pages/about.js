@@ -109,11 +109,11 @@
         role: 'Cố vấn chuyên môn'
       },
       members: [
-        { name: 'Nguyễn Tài', role: 'Thành viên phát triển', mssv: '24521566' },
-        { name: 'Lê Hữu Thắng', role: 'Thành viên phát triển', mssv: '24521566' },
+        { name: 'Nguyễn Tài', role: 'Thành viên phát triển', mssv: '24521549' },
+        { name: 'Lê Hữu Thắng', role: 'Thành viên phát triển', mssv: '24521602' },
         { name: 'Dương Nhất Tâm', role: 'Thành viên phát triển', mssv: '24521566' },
-        { name: 'Nguyễn Chí Nhân', role: 'Thành viên phát triển', mssv: '24521566' },
-        { name: 'Nguyễn Nhã Quân', role: 'Thành viên phát triển', mssv: '24521566' }
+        { name: 'Nguyễn Chí Nhân', role: 'Thành viên phát triển', mssv: '24521232' },
+        { name: 'Nguyễn Nhã Quân', role: 'Thành viên phát triển', mssv: '24521445' }
       ]
     },
     roadmap: {

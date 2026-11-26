@@ -35,7 +35,7 @@ body.dark {
   }
 }
 
-/* ================= 2. KHUNG TRANG & HEADER ĐĂNG NHẬP ================= */
+/* ================= 2. KHUNG TRANG XÁC THỰC ================= */
 .auth-page {
   min-height: 100vh;
   display: flex;
@@ -49,58 +49,6 @@ body.dark {
   background-attachment: fixed;
   overflow-y: scroll;
   scrollbar-gutter: stable;
-}
-
-.auth-header {
-  flex: 0 0 76px;
-  background: var(--glass-header-bg);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--border);
-}
-
-.auth-header-inner {
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.auth-header .brand {
-  min-width: 0;
-}
-
-.auth-nav {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.auth-nav-link {
-  padding: 10px 15px;
-  color: var(--text-muted);
-  text-decoration: none;
-  font-size: 14px;
-  font-weight: 600;
-  border-radius: 8px;
-}
-
-.auth-nav-link:hover {
-  color: var(--primary);
-  background: var(--primary-soft);
-}
-
-.auth-nav-link.active,
-.auth-nav .signup-link.active {
-  color: var(--on-primary);
-  background: var(--primary);
-  box-shadow: 0 4px 10px var(--primary-shadow);
-}
-
-.auth-nav-link.active:hover,
-.auth-nav .signup-link.active:hover {
-  color: var(--on-primary);
-  background: var(--primary-hover);
 }
 
 /* ================= 3. BỐ CỤC CHÍNH & CỘT GIỚI THIỆU ================= */
@@ -209,13 +157,6 @@ body.dark {
   font-size: 26px;
   line-height: 1.25;
   letter-spacing: -.5px;
-}
-
-.login-heading p {
-  margin: 0;
-  color: var(--text-muted);
-  font-size: 13px;
-  line-height: 1.65;
 }
 
 .form-field {
@@ -498,19 +439,6 @@ body.dark {
   font-size: 11px;
 }
 
-.requirements-title {
-  font-weight: 600;
-}
-
-.password-requirements ul {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 4px 10px;
-  margin: 5px 0 0;
-  padding: 0;
-  list-style: none;
-}
-
 .password-requirements li {
   display: flex;
   align-items: center;
@@ -529,10 +457,6 @@ body.dark {
 
 .password-requirements li.passed span {
   color: var(--status-open-text);
-}
-
-.terms-field {
-  margin: 4px 0 8px;
 }
 
 .terms-option {
@@ -557,10 +481,6 @@ body.dark {
   color: var(--primary);
   text-decoration: underline;
   text-underline-offset: 2px;
-}
-
-.terms-field .field-error {
-  margin-left: 23px;
 }
 
 .register-card .register-prompt {
@@ -599,41 +519,6 @@ body.dark {
 }
 
 @media (max-width: 680px) {
-  .auth-header {
-    flex-basis: 66px;
-  }
-
-  .auth-header .container {
-    width: calc(100% - 28px);
-  }
-
-  .auth-header .brand img {
-    width: 40px;
-    height: 40px;
-  }
-
-  .auth-header .brand-copy strong {
-    font-size: 19px;
-  }
-
-  .auth-header .brand-copy small {
-    display: block;
-    font-size: 8px;
-  }
-
-  .auth-nav {
-    gap: 4px;
-  }
-
-  .auth-nav-link {
-    padding: 8px 9px;
-    font-size: 12px;
-  }
-
-  .auth-nav .theme-toggle {
-    display: none;
-  }
-
   .auth-main {
     padding: 34px 14px 40px;
     align-items: flex-start;
@@ -705,23 +590,6 @@ body.dark {
 }
 
 @media (max-width: 380px) {
-  .auth-header .brand {
-    gap: 6px;
-  }
-
-  .auth-header .brand-copy small {
-    display: none;
-  }
-
-  .auth-nav {
-    gap: 1px;
-  }
-
-  .auth-nav-link {
-    padding: 8px 7px;
-    font-size: 11px;
-  }
-
   .login-card {
     padding-right: 18px;
     padding-left: 18px;

@@ -2040,11 +2040,6 @@ body.modal-open {
   box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--focus-ring);
 }
 
-.contact-field__control--textarea {
-  resize: vertical;
-  min-height: 120px;
-}
-
 .contact-form__submit {
   width: 100%;
 }
