@@ -9,7 +9,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Chi tiết hội nghị - ConfGuide</title>
-  <meta name="description" content="Thông tin chi tiết hội nghị khoa học Công nghệ thông tin diễn ra tại Việt Nam (bao gồm cả hội nghị quốc tế tổ chức tại Việt Nam), tiến trình hạn nộp bài theo múi giờ UTC+7 (giờ Việt Nam) và thông tin tổ chức trên ConfGuide.">
+  <meta name="description" content="Khám phá thông tin chi tiết hội nghị khoa học Công nghệ thông tin trong nước và quốc tế, tiến trình hạn nộp bài quy đổi về giờ Việt Nam (UTC+7) và thông tin học thuật trên ConfGuide.">
 
   <link rel="icon" type="image/svg+xml" href="images/logo.svg">
   <link rel="stylesheet" href="css/base/base.css">
@@ -28,10 +28,6 @@
     <symbol id="icon-arrow-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
       <line x1="19" y1="12" x2="5" y2="12"></line>
       <polyline points="12 19 5 12 12 5"></polyline>
-    </symbol>
-    <symbol id="icon-arrow-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-      <line x1="5" y1="12" x2="19" y2="12"></line>
-      <polyline points="12 5 19 12 12 19"></polyline>
     </symbol>
     <symbol id="icon-calendar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <rect x="3" y="4" width="18" height="18" rx="2"></rect>
@@ -88,11 +84,6 @@
       <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
       <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
     </symbol>
-    <symbol id="icon-alert" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <circle cx="12" cy="12" r="10"></circle>
-      <line x1="12" y1="8" x2="12" y2="12"></line>
-      <line x1="12" y1="16" x2="12.01" y2="16"></line>
-    </symbol>
     <symbol id="icon-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
       <polyline points="20 6 9 17 4 12"></polyline>
     </symbol>
@@ -119,28 +110,7 @@
       </div>
       <div class="conf-fetch-notice js-fetch-notice" id="detailFetchNotice" role="status" aria-live="polite" hidden></div>
 
-      <!-- Trạng thái lỗi khi thiếu ?id hoặc không tìm thấy hội nghị -->
-      <section class="conf-state conf-state--error js-error-state" id="detailErrorState" aria-labelledby="errorStateTitle" hidden>
-        <div class="conf-state__icon-box" aria-hidden="true">
-          <svg width="36" height="36">
-            <use xlink:href="#icon-alert"></use>
-          </svg>
-        </div>
-        <h2 class="conf-state__title" id="errorStateTitle">Không tìm thấy hội nghị</h2>
-        <p class="conf-state__desc js-error-desc">
-          Mã hội nghị trên đường dẫn không tồn tại hoặc chưa được cung cấp. Vui lòng quay lại trang tra cứu để chọn hội nghị cần xem.
-        </p>
-        <div class="conf-state__actions">
-          <a class="conf-btn conf-btn--primary" href="search.html">
-            <span>Về danh sách hội nghị</span>
-            <svg width="16" height="16" aria-hidden="true">
-              <use xlink:href="#icon-arrow-right"></use>
-            </svg>
-          </a>
-        </div>
-      </section>
-
-      <!-- ================= VIEW 1: CHI TIẾT HỘI NGHỊ ================= -->
+      <!-- ================= NỘI DUNG CHI TIẾT HỘI NGHỊ ================= -->
       <div class="conf-detail__view js-view-detail" id="viewDetail" hidden>
         <!-- Khối Header tóm tắt hội nghị + Hành động chính + 4 thông tin nhanh (chỉ hiển thị 1 lần) -->
         <header class="conf-header">

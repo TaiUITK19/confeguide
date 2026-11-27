@@ -116,31 +116,17 @@
   }
 
   /**
-   * Chuyển đổi trạng thái hiển thị chính của trang (đang tải, lỗi không tìm thấy, hoặc nội dung).
-   * @param {'loading'|'error'|'content'} state Trạng thái cần hiển thị.
-   * @param {string} [errorMessage] Thông điệp chi tiết khi ở trạng thái lỗi.
+   * Chuyển đổi trạng thái hiển thị chính của trang (đang tải hoặc nội dung).
+   * @param {'loading'|'content'} state Trạng thái cần hiển thị.
    */
-  function setPageState(state, errorMessage) {
+  function setPageState(state) {
     const root = document.querySelector('.js-detail-root');
     if (!root) return;
 
     const loadingEl = root.querySelector('.js-loading-state');
-    const errorEl = root.querySelector('.js-error-state');
-    const errorDescEl = root.querySelector('.js-error-desc');
     const viewDetailEl = root.querySelector('.js-view-detail');
 
     if (loadingEl) loadingEl.hidden = state !== 'loading';
-    if (errorEl) errorEl.hidden = state !== 'error';
-
-    if (state === 'error') {
-      stopCountdownTimer();
-      if (errorDescEl && errorMessage) {
-        errorDescEl.textContent = errorMessage;
-      }
-      if (viewDetailEl) viewDetailEl.hidden = true;
-      document.title = 'Không tìm thấy hội nghị - ConfGuide';
-      return;
-    }
 
     if (state === 'content') {
       if (viewDetailEl) viewDetailEl.hidden = false;

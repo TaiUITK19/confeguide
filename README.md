@@ -2,7 +2,7 @@
 
 > *Find the Right Place for Your Research*
 
-**ConfGuide** là website tra cứu, đánh giá và theo dõi các hội nghị khoa học Công nghệ thông tin diễn ra tại Việt Nam (bao gồm cả hội nghị quốc tế tổ chức tại Việt Nam). Đây là đồ án môn **Internet và Công nghệ Web (IE104)** tại Trường Đại học Công nghệ Thông tin – ĐHQG TP.HCM (UIT).
+**ConfGuide** là nền tảng tra cứu, khuyến nghị và theo dõi hạn nộp bài của các hội nghị khoa học Công nghệ thông tin, trong nước lẫn quốc tế. Đây là đồ án môn **Internet và Công nghệ Web (IE104)** tại Trường Đại học Công nghệ Thông tin – ĐHQG TP.HCM (UIT).
 
 Dự án là ứng dụng web phía client thuần HTML5, CSS3, JavaScript ES6+: không backend, không framework, không công cụ build. Dữ liệu hội nghị và tài khoản mẫu lưu trong các tệp JSON tĩnh, được cập nhật định kỳ mỗi tuần.
 
@@ -32,15 +32,15 @@ Dự án là ứng dụng web phía client thuần HTML5, CSS3, JavaScript ES6+:
 
 Người nghiên cứu tại Việt Nam thường gặp ba khó khăn khi tìm nơi công bố công trình:
 
-- **Thông tin phân tán:** Call for Papers nằm rải rác trên nhiều website và diễn đàn.
+- **Thông tin phân tán:** Call for Papers của các hội nghị trong nước và quốc tế nằm rải rác trên nhiều website, diễn đàn khác nhau.
 - **Khó đối chiếu phân hạng:** CORE (`A*`, `A`, `B`, `C`) và Scopus chưa được tổng hợp thống nhất.
-- **Lệch múi giờ hạn nộp:** Hạn nộp thường theo AoE (`UTC-12`), dễ nhầm khi quy sang giờ Việt Nam (`UTC+7`).
+- **Lệch múi giờ hạn nộp:** Hạn nộp thường theo AoE (`UTC-12`) hoặc múi giờ địa phương, dễ nhầm khi quy sang giờ Việt Nam (`UTC+7`).
 
-ConfGuide gom các thông tin trên vào một nơi, hướng tới sinh viên, học viên cao học, nghiên cứu sinh, giảng viên và các nhóm nghiên cứu CNTT.
+ConfGuide tập hợp thông tin các hội nghị khoa học CNTT trong nước lẫn quốc tế vào một nơi, hướng tới sinh viên, học viên cao học, nghiên cứu sinh, giảng viên và các nhóm nghiên cứu CNTT.
 
 ## Tính năng chính
 
-- **Tìm kiếm & lọc nâng cao:** Tìm tức thì, gợi ý sửa chính tả (Damerau-Levenshtein), 6 nhóm bộ lọc (hạn nộp, lĩnh vực, địa điểm, thời gian, hình thức, phân hạng), 10 kiểu sắp xếp, phân trang và đồng bộ bộ lọc với URL.
+- **Tìm kiếm & lọc nâng cao:** Tìm tức thì, gợi ý sửa chính tả (Damerau-Levenshtein), 7 nhóm bộ lọc (hạn nộp, lĩnh vực, phạm vi Việt Nam / Quốc tế, địa điểm, thời gian, hình thức, phân hạng), 10 kiểu sắp xếp, phân trang và đồng bộ bộ lọc với URL.
 - **Chi tiết hội nghị:** Timeline các mốc thời hạn tự động quy đổi `AoE → UTC+7`, đồng hồ đếm ngược, thông tin học thuật, xuất lịch sang Google Calendar hoặc tệp `.ics`.
 - **Theo dõi & so sánh:** Lưu hội nghị theo tài khoản, xem hạn nộp gần nhất; so sánh cạnh nhau tối đa 3 hội nghị.
 - **Hồ sơ cá nhân & lịch:** Chọn lĩnh vực nghiên cứu, cập nhật ảnh đại diện, lịch tháng hiển thị hạn nộp và ngày diễn ra hội nghị đã lưu.

@@ -87,9 +87,8 @@
     academicTitle: 'Nghiên cứu sinh / Giảng viên',
     affiliation: 'Đại học Quốc gia TP.HCM',
     fieldsOfInterest: 'Trí tuệ nhân tạo, Thị giác máy tính, Xử lý ngôn ngữ tự nhiên, Khoa học dữ liệu',
-    bio: 'Quan tâm đến các hội nghị khoa học Công nghệ thông tin diễn ra tại Việt Nam '
-      + '(gồm cả hội nghị quốc tế tổ chức tại Việt Nam) trong các lĩnh vực trí tuệ nhân tạo, '
-      + 'khoa học dữ liệu và kỹ thuật phần mềm.',
+    bio: 'Quan tâm đến các hội nghị khoa học Công nghệ thông tin trong nước và quốc tế '
+      + 'thuộc các lĩnh vực trí tuệ nhân tạo, khoa học dữ liệu và kỹ thuật phần mềm.',
     scholarUrl: 'https://scholar.google.com'
   };
 
@@ -162,14 +161,36 @@
    * @param {number} size - Kích thước rộng/cao cố định (px) để tránh CLS.
    * @param {string} initial - Ký tự đầu dự phòng khi chưa có ảnh.
    */
+  /** Danh sách lĩnh vực nháp đang giữ khi mở modal Chỉnh sửa hồ sơ */
+  let draftEditDomains = null;
+
+  /**
+   * Render ảnh đại diện hoặc chữ cái đầu vào khung hiển thị chỉ định (có fallback nếu URL ảnh Google bị lỗi).
+   * @param {string} elementId - ID phần tử khung chứa ảnh đại diện.
+   * @param {string|undefined} avatarUrl - URL dữ liệu ảnh đại diện nếu có.
+   * @param {string} altText - Văn bản thay thế cho thẻ `<img>`.
+   * @param {string} imgClass - Class CSS cho thẻ `<img>`.
+   * @param {number} size - Kích thước rộng/cao cố định (px) để tránh CLS.
+   * @param {string} initial - Ký tự đầu dự phòng khi chưa có ảnh.
+   */
   function renderAvatarSlot(elementId, avatarUrl, altText, imgClass, size, initial) {
     const slotEl = document.getElementById(elementId);
     if (!slotEl) return;
 
-    if (avatarUrl && typeof avatarUrl === 'string') {
+    if (avatarUrl && typeof avatarUrl === 'string' && avatarUrl.trim()) {
       slotEl.innerHTML =
-        `<img src="${escapeHtml(avatarUrl)}" alt="${escapeHtml(altText)}" `
-        + `width="${size}" height="${size}" class="${imgClass}">`;
+        `<img src="${escapeHtml(avatarUrl.trim())}" alt="${escapeHtml(altText)}" `
+        + `width="${size}" height="${size}" class="${imgClass}" referrerpolicy="no-referrer">`;
+      const imgEl = slotEl.querySelector('img');
+      if (imgEl) {
+        const revert = () => {
+          slotEl.textContent = initial;
+        };
+        imgEl.addEventListener('error', revert, { once: true });
+        if (imgEl.complete && imgEl.naturalWidth === 0) {
+          revert();
+        }
+      }
     } else {
       slotEl.textContent = initial;
     }
@@ -202,18 +223,88 @@
 
   /**
    * Kết xuất danh sách nhãn lĩnh vực nghiên cứu vào phần tử container chỉ định.
+   * Khi `allowQuickRemove = true` (trên thẻ hồ sơ chính), mỗi lĩnh vực gắn thêm mức ưu tiên, nguồn và nút `×` xóa nhanh.
    * @param {HTMLElement|null} containerEl - Phần tử chứa các pill lĩnh vực.
-   * @param {string} fieldsText - Chuỗi lĩnh vực ngăn cách bằng dấu phẩy.
+   * @param {string|Array<Object>} fieldsSource - Chuỗi lĩnh vực ngăn cách bằng dấu phẩy hoặc mảng lĩnh vực chi tiết.
+   * @param {boolean} [allowQuickRemove=false] - Cho phép hiển thị nút xóa nhanh từng lĩnh vực.
    */
-  function renderFieldsChips(containerEl, fieldsText) {
+  function renderFieldsChips(containerEl, fieldsSource, allowQuickRemove = false) {
     if (!containerEl) return;
-    const rawText = typeof fieldsText === 'string' ? fieldsText : '';
-    const fieldList = typeof utils.parseTopicDisplayLabelsFromText === 'function'
-      ? utils.parseTopicDisplayLabelsFromText(rawText)
-      : (rawText ? rawText.split(',').map(f => f.trim()).filter(Boolean) : []);
-    containerEl.innerHTML = fieldList.length > 0
-      ? fieldList.map(f => `<span class="profile-field-pill">${escapeHtml(f)}</span>`).join('')
-      : '<span class="profile-field-pill profile-field-pill--empty">Chưa chọn lĩnh vực nghiên cứu</span>';
+
+    let items = [];
+    if (Array.isArray(fieldsSource)) {
+      items = fieldsSource;
+    } else if (allowQuickRemove && typeof utils.getUserResearchDomains === 'function') {
+      items = utils.getUserResearchDomains();
+    } else {
+      const rawText = typeof fieldsSource === 'string' ? fieldsSource : '';
+      const labels = typeof utils.parseTopicDisplayLabelsFromText === 'function'
+        ? utils.parseTopicDisplayLabelsFromText(rawText)
+        : (rawText ? rawText.split(',').map(f => f.trim()).filter(Boolean) : []);
+      items = labels.map((label, idx) => {
+        const matchedKeys = typeof utils.parseTopicKeysFromText === 'function'
+          ? utils.parseTopicKeysFromText(label)
+          : [];
+        return {
+          id: '',
+          key: matchedKeys[0] || '',
+          label,
+          priority: 'normal',
+          source: 'manual',
+          idx
+        };
+      });
+    }
+
+    if (items.length === 0) {
+      containerEl.innerHTML =
+        '<span class="profile-field-pill profile-field-pill--empty">Chưa chọn lĩnh vực nghiên cứu</span>';
+      return;
+    }
+
+    containerEl.innerHTML = items.map(item => {
+      const label = item.label || '';
+      const isPrimary = item.priority === 'primary';
+      const sourceNote = item.source === 'serpapi'
+        ? 'SerpApi (Scholar)'
+        : (item.source === 'scholar'
+          ? 'Google Scholar'
+          : (item.source === 'orcid'
+            ? 'ORCID'
+            : (item.source === 'semantic_scholar'
+              ? 'Semantic Scholar'
+              : (item.source === 'confguide_saved'
+                ? 'Hội nghị quan tâm'
+                : (item.source === 'openalex'
+                  ? (item.confidence ? `OpenAlex ${item.confidence}%` : 'OpenAlex')
+                  : (item.source === 'custom' ? 'Tùy chỉnh' : ''))))));
+      const priorityBadge = isPrimary
+        ? '<span class="profile-field-pill__priority">Ưu tiên</span>'
+        : '';
+      const sourceSpan = sourceNote
+        ? `<span class="profile-field-pill__source">&middot; ${escapeHtml(sourceNote)}</span>`
+        : '';
+      const titleParts = [];
+      if (item.openAlexTopicName) titleParts.push(`OpenAlex: ${item.openAlexTopicName}`);
+      if (item.key) titleParts.push(`Nhóm: ${item.key}`);
+      const titleAttr = titleParts.length > 0 ? ` title="${escapeHtml(titleParts.join(' | '))}"` : '';
+
+      const canRemove = allowQuickRemove && (item.id || item.key);
+      if (canRemove) {
+        return `
+          <span class="profile-field-pill profile-field-pill--removable${isPrimary ? ' profile-field-pill--primary' : ''}"${titleAttr}>
+            ${priorityBadge}
+            <span>${escapeHtml(label)}</span>
+            ${sourceSpan}
+            <button type="button" class="profile-field-pill__remove js-remove-profile-topic"
+              data-domain-id="${escapeHtml(item.id || '')}"
+              data-topic-key="${escapeHtml(item.key || '')}"
+              aria-label="Xóa lĩnh vực ${escapeHtml(label)}">&times;</button>
+          </span>
+        `;
+      }
+      return `<span class="profile-field-pill${isPrimary ? ' profile-field-pill--primary' : ''}"${titleAttr}>${priorityBadge}<span>${escapeHtml(label)}</span></span>`;
+    }).join('');
   }
 
   /**
@@ -277,8 +368,21 @@
       scholarLink.classList.toggle('is-hidden', !hasValidScholar);
     }
 
-    renderFieldsChips(document.getElementById('profileFieldsChips'), fieldsRaw);
-    renderFieldsChips(document.getElementById('editProfileFieldsChips'), fieldsRaw);
+    const statusEl = document.getElementById('statUserStatus');
+    if (statusEl) {
+      statusEl.textContent = currentUser.authProvider === 'google' ? 'Đã xác thực Google' : 'Đã xác thực';
+    }
+
+    draftEditDomains = typeof utils.getUserResearchDomains === 'function'
+      ? utils.getUserResearchDomains()
+      : null;
+
+    renderFieldsChips(document.getElementById('profileFieldsChips'), fieldsRaw, true);
+    renderFieldsChips(
+      document.getElementById('editProfileFieldsChips'),
+      Array.isArray(draftEditDomains) && draftEditDomains.length > 0 ? draftEditDomains : fieldsRaw,
+      false
+    );
 
     populateEditProfileFields({
       editFullName: fullName,
@@ -381,6 +485,17 @@
     const readTrimmed = id => document.getElementById(id)?.value.trim() || '';
     const fullName = fullNameInput ? fullNameInput.value.trim() : currentUser.fullName;
     const email = emailInput ? emailInput.value.trim() : currentUser.email;
+    const fieldsInputVal = readTrimmed('editFields');
+
+    let nextDomains = Array.isArray(draftEditDomains) ? draftEditDomains : null;
+    if (!nextDomains && typeof utils.parseTopicKeysFromText === 'function') {
+      nextDomains = utils.parseTopicKeysFromText(fieldsInputVal).map((key, idx) =>
+        typeof utils.normalizeManagedDomainItem === 'function'
+          ? utils.normalizeManagedDomainItem({ key, source: 'manual' }, idx)
+          : { id: `dom_${key}_${idx}`, key, label: key, priority: 'normal', source: 'manual' }
+      ).filter(Boolean);
+    }
+
     const patch = {
       fullName,
       name: fullName,
@@ -388,17 +503,26 @@
       academicTitle: readTrimmed('editTitle'),
       affiliation: readTrimmed('editAffiliation'),
       scholarUrl: scholarInput ? scholarInput.value.trim() : '',
-      fieldsOfInterest: readTrimmed('editFields'),
+      fieldsOfInterest: fieldsInputVal,
       bio: readTrimmed('editBio')
     };
+    if (Array.isArray(nextDomains)) {
+      patch.researchDomains = nextDomains;
+    }
 
     syncCurrentUserRecord(user => ({ ...user, ...patch }));
+    if (Array.isArray(nextDomains) && typeof utils.setUserResearchDomains === 'function') {
+      utils.setUserResearchDomains(nextDomains, { silent: true });
+    }
+    if (typeof utils.saveUserPreferences === 'function') {
+      utils.saveUserPreferences({ onboardingCompleted: true });
+    }
     closeModal();
-    showPageAlert('Đã cập nhật thông tin hồ sơ nghiên cứu thành công!', 'success');
+    showPageAlert('Đã cập nhật thông tin hồ sơ nghiên cứu và đồng bộ lĩnh vực khuyến nghị!', 'success');
   }
 
   /**
-   * Gắn nút mở hộp thoại chọn lĩnh vực quan tâm bên trong modal Chỉnh sửa hồ sơ.
+   * Gắn nút mở hộp thoại quản lý lĩnh vực quan tâm bên trong modal Chỉnh sửa hồ sơ.
    */
   function bindEditModalTopicsPicker() {
     const editChooseTopicsBtn = document.getElementById('editModalChooseTopicsBtn');
@@ -412,14 +536,15 @@
         ? utils.parseTopicKeysFromText(currentText)
         : [];
       utils.openPreferencesSurveyModal({
-        topicsOnly: true,
         preserveOpenModals: true,
+        initialDomains: Array.isArray(draftEditDomains) ? draftEditDomains : undefined,
         initialTopicKeys,
         returnFocusEl: editChooseTopicsBtn,
-        onConfirm: ({ labels }) => {
+        onConfirm: ({ domains, labels }) => {
+          draftEditDomains = Array.isArray(domains) ? domains : [];
           const nextText = Array.isArray(labels) ? labels.join(', ') : '';
           if (fieldsInput) fieldsInput.value = nextText;
-          renderFieldsChips(document.getElementById('editProfileFieldsChips'), nextText);
+          renderFieldsChips(document.getElementById('editProfileFieldsChips'), draftEditDomains, false);
         }
       });
     });
@@ -763,9 +888,8 @@
         </svg>
         <h3 class="empty-state-title">Chưa có hội nghị nào được lưu</h3>
         <p class="empty-state-desc">
-          Khám phá danh sách hội nghị khoa học Công nghệ thông tin diễn ra tại Việt Nam
-          (bao gồm cả hội nghị quốc tế tổ chức tại Việt Nam), bấm biểu tượng lưu để
-          theo dõi thời gian nộp bài tại đây.
+          Khám phá các hội nghị khoa học Công nghệ thông tin trong nước và quốc tế,
+          nhấn biểu tượng lưu để theo dõi hạn nộp bài tại đây.
         </p>
         <a href="search.html" class="btn btn-primary btn--compact-md">
           <span>Khám phá danh mục hội nghị &rarr;</span>
@@ -1065,9 +1189,33 @@
       profileChooseBtn.addEventListener('click', () => {
         if (typeof utils.openPreferencesSurveyModal === 'function') {
           utils.openPreferencesSurveyModal({
-            topicsOnly: true,
             returnFocusEl: profileChooseBtn
           });
+        }
+      });
+    }
+
+    const profileChipsEl = document.getElementById('profileFieldsChips');
+    if (profileChipsEl) {
+      profileChipsEl.addEventListener('click', event => {
+        if (!(event.target instanceof Element)) return;
+        const removeBtn = event.target.closest('.js-remove-profile-topic');
+        if (!removeBtn) return;
+        const domainId = removeBtn.getAttribute('data-domain-id') || '';
+        const targetKey = removeBtn.getAttribute('data-topic-key') || '';
+        if (domainId && typeof utils.removeUserResearchDomain === 'function') {
+          utils.removeUserResearchDomain(domainId);
+          if (typeof utils.saveUserPreferences === 'function') {
+            utils.saveUserPreferences({ onboardingCompleted: true });
+          }
+          showPageAlert('Đã xóa lĩnh vực khỏi danh sách nghiên cứu quan tâm.', 'success', 2500);
+          return;
+        }
+        if (!targetKey || typeof utils.getUserResearchTopicKeys !== 'function') return;
+        const nextKeys = utils.getUserResearchTopicKeys().filter(k => k !== targetKey);
+        if (typeof utils.saveUserPreferences === 'function') {
+          utils.saveUserPreferences({ topics: nextKeys, onboardingCompleted: true });
+          showPageAlert('Đã cập nhật danh sách lĩnh vực nghiên cứu quan tâm.', 'success', 2500);
         }
       });
     }

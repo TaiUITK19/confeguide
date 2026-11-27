@@ -1,0 +1,16 @@
+{
+  "name": "confguide-backend",
+  "version": "1.0.0",
+  "description": "Backend nhỏ (Node.js + Express) hỗ trợ đăng nhập Google, tra cứu Google Scholar công khai, ánh xạ và lưu lĩnh vực nghiên cứu cho ConfGuide.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "cheerio": "^1.0.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "google-auth-library": "^9.15.1"
+  }
+}
