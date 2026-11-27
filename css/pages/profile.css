@@ -844,7 +844,7 @@
   }
 }
 
-/* --- Thẻ lĩnh vực chi tiết (Ưu tiên, Tùy chỉnh, Nguồn OpenAlex) --- */
+/* --- Thẻ lĩnh vực chi tiết (Ưu tiên, Tùy chỉnh, Nguồn học thuật) --- */
 .profile-field-pill--primary {
   border-color: var(--status-open-border);
   background: var(--status-open-bg);

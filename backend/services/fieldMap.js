@@ -1,6 +1,6 @@
 /**
  * Dịch vụ ánh xạ lĩnh vực nghiên cứu (backend/services/fieldMap.js)
- * Đối chiếu danh sách research interests từ Google Scholar (hoặc topics/field từ OpenAlex)
+ * Đối chiếu danh sách research interests, tiểu sử hoặc bài báo từ Google Scholar / ORCID / Semantic Scholar
  * với 25 lĩnh vực chuẩn trong hệ thống ConfGuide (lấy từ PREFERENCE_TOPICS trong js/core/layout.js).
  */
 
@@ -107,7 +107,8 @@ const FIELD_SYNONYMS = {
     'software engineering', 'se', 'software testing', 'fault localization',
     'program analysis', 'devops', 'microservice', 'microservices', 'code generation',
     'source code analysis', 'bug prediction', 'agile software',
-    'requirements engineering', 'software architecture', 'refactoring', 'software maintenance'
+    'requirements engineering', 'software architecture', 'refactoring', 'software maintenance',
+    'web development', 'web programming', 'web engineering', 'full stack', 'frontend', 'backend'
   ],
   'xu-ly-ngon-ngu-tu-nhien': [
     'xu ly ngon ngu tu nhien', 'natural language processing', 'nlp',
@@ -199,28 +200,6 @@ const FIELD_SYNONYMS = {
 };
 
 /**
- * Bảng dự phòng cho Subfield/Field chuẩn của OpenAlex khi tên topic chi tiết chưa khớp từ đồng nghĩa.
- */
-const OPENALEX_SUBFIELD_SYNONYMS = {
-  'artificial intelligence': ['tri-tue-nhan-tao', 'hoc-may'],
-  'computer vision and pattern recognition': ['thi-giac-may-tinh'],
-  'computer networks and communications': ['mang-may-tinh', 'truyen-thong'],
-  software: ['cong-nghe-phan-mem'],
-  'information systems': ['he-thong-thong-tin'],
-  'information systems and management': ['he-thong-thong-tin', 'chuyen-doi-so'],
-  'management information systems': ['he-thong-thong-tin'],
-  'signal processing': ['xu-ly-tin-hieu'],
-  'hardware and architecture': ['dien-tu'],
-  'electrical and electronic engineering': ['dien-tu', 'vien-thong'],
-  'human-computer interaction': ['tuong-tac-nguoi-may'],
-  'control and systems engineering': ['dieu-khien', 'tu-dong-hoa'],
-  'computer graphics and computer-aided design': ['da-phuong-tien'],
-  'computer science applications': ['cntt-tong-hop'],
-  'computational theory and mathematics': ['tri-tue-nhan-tao'],
-  'e-learning': ['cong-nghe-giao-duc']
-};
-
-/**
  * Chuẩn hóa chuỗi về chữ thường ASCII không dấu để so khớp ổn định.
  * @param {*} raw - Chuỗi đầu vào.
  * @returns {string} Chuỗi chuẩn hóa.
@@ -270,6 +249,10 @@ const COMPILED_SYNONYM_PATTERNS = Object.entries(FIELD_SYNONYMS).map(([fieldKey,
   const uniqueNormTerms = [...new Set(terms.map(normalizeText).filter(Boolean))];
   const patterns = uniqueNormTerms.map(normTerm => {
     const escaped = normTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    // Tránh khớp nhầm "hoc may" nằm bên trong cụm "khoa hoc may tinh"
+    if (normTerm === 'hoc may') {
+      return { normTerm, regex: /(?<!\bkhoa\s)\bhoc may(?!\s+tinh)\b/ };
+    }
     // Từ viết tắt <= 3 ký tự tránh khớp số nhiều dễ nhầm; cụm dài hơn cho phép dạng số nhiều s/es
     const regex = normTerm.length <= 3
       ? new RegExp(`\\b${escaped}\\b`)
@@ -303,9 +286,9 @@ function resolveSystemField(keyOrLabel) {
 }
 
 /**
- * Đối chiếu một interest đơn lẻ (chuỗi từ Scholar hoặc object topic từ OpenAlex)
+ * Đối chiếu một interest đơn lẻ (từ Google Scholar, ORCID, Semantic Scholar hoặc mô tả tự nhập)
  * sang danh sách các khóa lĩnh vực chuẩn trong hệ thống.
- * @param {string|{ displayName?: string, name?: string, subfield?: string, field?: string }} item
+ * @param {string|{ displayName?: string, name?: string }} item
  * @returns {{ originalText: string, hits: Array<{ key: string, matchedVia: string }> }}
  */
 function matchSingleInterest(item) {
@@ -332,7 +315,7 @@ function matchSingleInterest(item) {
     }
   }
 
-  // 2. Nếu chưa khớp trọn chuỗi, tách theo dấu nối (, / & ;) hoặc quét cụm từ đồng nghĩa trong chuỗi
+  // 2. Nếu chưa khớp trọn chuỗi, quét cụm từ đồng nghĩa trong chuỗi
   if (hits.length === 0 && normText) {
     const padded = ` ${normText} `;
     for (const { fieldKey, patterns } of COMPILED_SYNONYM_PATTERNS) {
@@ -345,29 +328,13 @@ function matchSingleInterest(item) {
     }
   }
 
-  // 3. Nếu là dữ liệu từ OpenAlex có thêm subfield / field, kiểm tra bổ sung
-  if (hits.length === 0 && isObj) {
-    const normSubfield = normalizeText(item.subfield);
-    const normField = normalizeText(item.field);
-
-    if (normSubfield && Object.prototype.hasOwnProperty.call(OPENALEX_SUBFIELD_SYNONYMS, normSubfield)) {
-      for (const key of OPENALEX_SUBFIELD_SYNONYMS[normSubfield]) {
-        addHit(key, item.subfield);
-      }
-    } else if (normField && EXACT_SYNONYM_INDEX.has(normField)) {
-      for (const key of EXACT_SYNONYM_INDEX.get(normField)) {
-        addHit(key, item.field);
-      }
-    }
-  }
-
   return { originalText, hits };
 }
 
 /**
- * Đối chiếu danh sách research interests (từ Google Scholar hoặc OpenAlex) với
+ * Đối chiếu danh sách research interests hoặc từ khóa học thuật với
  * 25 lĩnh vực có sẵn trong hệ thống ConfGuide.
- * @param {Array<string|Object>} interests - Danh sách interests hoặc OpenAlex topics.
+ * @param {Array<string|Object>} interests - Danh sách interests hoặc từ khóa.
  * @returns {{
  *   matched: Array<{ key: string, label: string, matchedInterests: Array<string>, matchedTerms: Array<string> }>,
  *   unmatched: Array<string>

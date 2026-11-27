@@ -2,7 +2,7 @@
  * Điểm khởi chạy Backend ConfGuide (backend/server.js)
  * Node.js + Express:
  * - Xác thực Google ID Token (POST /auth/google)
- * - Tra cứu hồ sơ Google Scholar công khai + dự phòng OpenAlex (GET /api/scholar/*)
+ * - Tra cứu hồ sơ học thuật công khai: SerpApi Google Scholar / ORCID / Semantic Scholar (GET /api/scholar/*)
  * - Đọc / lưu danh sách lĩnh vực đã xác nhận theo email vào backend/data/fields.json (GET/PUT /api/fields)
  */
 

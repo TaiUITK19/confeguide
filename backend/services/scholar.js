@@ -1,10 +1,10 @@
 /**
- * Dịch vụ tra cứu hồ sơ nghiên cứu 3 tầng cho ConfGuide (backend/services/scholar.js)
- * Thứ tự dự phòng:
+ * Dịch vụ tra cứu hồ sơ nghiên cứu đa tầng cho ConfGuide (backend/services/scholar.js)
+ * Thứ tự tự động:
  * 1) SerpApi Google Scholar (`SERPAPI_API_KEY`): tìm ứng viên theo tên & lấy hồ sơ theo `scholarId`,
  *    cache 24 giờ theo tên và `scholarId`, đếm lượt gọi trong tháng và tự dừng trước ngưỡng 250 lượt.
- * 2) Dự phòng OpenAlex API (`OPENALEX_API_KEY`) khi SerpApi lỗi, hết quota hoặc không có hồ sơ.
- * 3) Dự phòng ORCID Public API (không cần key) khi người dùng cung cấp ORCID iD.
+ * 2) Dự phòng ORCID Public API (không cần key): tự tìm theo Tên / Email / ORCID iD, đọc từ khóa, tiểu sử và bài báo.
+ * 3) Dự phòng Semantic Scholar Graph API (không cần key): tìm theo tên tác giả, đọc tiêu đề bài báo và chuyên ngành.
  * (Giữ nguyên selector CSS Google Scholar gom gọn tại một chỗ để tham chiếu/kiểm tra khi cần.)
  */
 
@@ -38,7 +38,6 @@ const SCHOLAR_SELECTORS = {
 
 const SERPAPI_BASE_URL = 'https://serpapi.com/search.json';
 const SCHOLAR_BASE_URL = 'https://scholar.google.com/citations';
-const OPENALEX_BASE_URL = 'https://api.openalex.org';
 const ORCID_PUBLIC_BASE_URL = 'https://pub.orcid.org/v3.0';
 const SEMANTIC_SCHOLAR_BASE_URL = 'https://api.semanticscholar.org/graph/v1';
 
@@ -98,7 +97,7 @@ class ScholarBlockedError extends Error {
 
 /**
  * Đọc và làm sạch khóa API từ biến môi trường (tự đọc lại backend/.env cục bộ nếu vừa cập nhật).
- * @param {string} envName - Tên biến môi trường (`SERPAPI_API_KEY`, `OPENALEX_API_KEY`).
+ * @param {string} envName - Tên biến môi trường (`SERPAPI_API_KEY`, `SEMANTIC_SCHOLAR_API_KEY`).
  * @returns {string} Giá trị key sạch hoặc chuỗi rỗng.
  */
 function readEnvKey(envName) {
@@ -313,6 +312,20 @@ function extractScholarIdFromHref(href) {
     const match = String(href).match(/[?&]user=([a-zA-Z0-9_-]+)/);
     return match && SCHOLAR_ID_REGEX.test(match[1]) ? match[1] : '';
   }
+}
+
+/**
+ * Tách `scholarId` nếu người dùng dán URL Google Scholar (`scholar.google.com/citations?user=...`).
+ * @param {*} rawInput - Chuỗi nhập hoặc URL Google Scholar.
+ * @returns {string} Mã `scholarId` hợp lệ hoặc chuỗi rỗng.
+ */
+function extractScholarIdFromInput(rawInput) {
+  const clean = String(rawInput || '').trim();
+  if (!clean) return '';
+  if (/scholar\.google\.com/i.test(clean) || /[?&]user=/.test(clean)) {
+    return extractScholarIdFromHref(clean);
+  }
+  return '';
 }
 
 function parseVerifiedEmailDomain(rawEmailText) {
@@ -593,8 +606,13 @@ async function getProfileViaSerpApi(rawScholarId) {
   return profile;
 }
 
-/* ================= 6. PHƯƠNG ÁN 2A: OPENALEX API (OPENALEX_API_KEY) ================= */
+/* ================= 6. TIỆN ÍCH CHUẨN HÓA CHUỖI TIẾNG VIỆT ================= */
 
+/**
+ * Loại bỏ dấu tiếng Việt để hỗ trợ tìm kiếm không dấu trên các nguồn học thuật quốc tế.
+ * @param {string} text - Chuỗi đầu vào.
+ * @returns {string} Chuỗi không dấu đã làm sạch khoảng trắng.
+ */
 function stripVietnameseDiacritics(text) {
   return String(text || '')
     .replace(/[đĐ]/g, ch => (ch === 'Đ' ? 'D' : 'd'))
@@ -602,139 +620,6 @@ function stripVietnameseDiacritics(text) {
     .replace(/[\u0300-\u036f]/g, '')
     .replace(/\s+/g, ' ')
     .trim();
-}
-
-function extractShortOpenAlexId(rawId) {
-  const str = String(rawId || '').trim();
-  if (!str) return '';
-  const parts = str.split('/');
-  return parts[parts.length - 1] || str;
-}
-
-function normalizeOpenAlexAuthor(rawAuthor) {
-  if (!rawAuthor || !rawAuthor.id) return null;
-  const openAlexId = extractShortOpenAlexId(rawAuthor.id);
-
-  let affiliation = '';
-  if (Array.isArray(rawAuthor.last_known_institutions) && rawAuthor.last_known_institutions[0]) {
-    affiliation = String(rawAuthor.last_known_institutions[0].display_name || '').trim();
-  } else if (rawAuthor.last_known_institution && rawAuthor.last_known_institution.display_name) {
-    affiliation = String(rawAuthor.last_known_institution.display_name || '').trim();
-  }
-
-  const rawTopics = Array.isArray(rawAuthor.topics) ? rawAuthor.topics : [];
-  const openAlexTopics = [];
-  const interests = [];
-  const seenInterests = new Set();
-
-  for (const t of rawTopics.slice(0, 12)) {
-    if (!t || !t.display_name) continue;
-    const displayName = String(t.display_name).trim();
-    const subfield = t.subfield && t.subfield.display_name ? String(t.subfield.display_name).trim() : '';
-    const field = t.field && t.field.display_name ? String(t.field.display_name).trim() : '';
-
-    openAlexTopics.push({ displayName, subfield, field });
-
-    if (!seenInterests.has(displayName.toLowerCase())) {
-      seenInterests.add(displayName.toLowerCase());
-      interests.push(displayName);
-    }
-  }
-
-  return {
-    scholarId: openAlexId,
-    openAlexId,
-    name: String(rawAuthor.display_name || '').trim() || 'Chưa rõ tên',
-    affiliation,
-    emailDomain: '',
-    interests,
-    openAlexTopics,
-    worksCount: Number(rawAuthor.works_count || 0),
-    citedByCount: Number(rawAuthor.cited_by_count || 0),
-    source: 'openalex'
-  };
-}
-
-async function fetchOpenAlexJson(pathWithQuery, apiKey) {
-  const sep = pathWithQuery.includes('?') ? '&' : '?';
-  const url = `${OPENALEX_BASE_URL}${pathWithQuery}${sep}api_key=${encodeURIComponent(apiKey)}`;
-
-  const response = await fetch(url, {
-    method: 'GET',
-    headers: { Accept: 'application/json' },
-    signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS)
-  });
-
-  if (response.status === 404) return null;
-  if (!response.ok) {
-    throw new Error(`OpenAlex trả về mã HTTP ${response.status}.`);
-  }
-  return response.json();
-}
-
-async function searchOpenAlexFallback(rawName) {
-  const apiKey = readEnvKey('OPENALEX_API_KEY');
-  if (!apiKey) return null;
-
-  const cleanName = String(rawName || '').replace(/\s+/g, ' ').trim();
-  if (!cleanName) return [];
-
-  const cacheKey = `openalex:candidates:${cleanName.toLowerCase()}`;
-  const cached = getCachedValue(cacheKey);
-  if (cached) return cached;
-
-  const selectFields = 'id,display_name,works_count,cited_by_count,last_known_institutions,topics';
-  let data = await fetchOpenAlexJson(
-    `/authors?search=${encodeURIComponent(cleanName)}&per-page=${MAX_CANDIDATES}&select=${selectFields}`,
-    apiKey
-  );
-  let results = data && Array.isArray(data.results) ? data.results : [];
-
-  const asciiName = stripVietnameseDiacritics(cleanName);
-  if (results.length === 0 && asciiName && asciiName.toLowerCase() !== cleanName.toLowerCase()) {
-    data = await fetchOpenAlexJson(
-      `/authors?search=${encodeURIComponent(asciiName)}&per-page=${MAX_CANDIDATES}&select=${selectFields}`,
-      apiKey
-    );
-    results = data && Array.isArray(data.results) ? data.results : [];
-  }
-
-  const normalized = results.map(normalizeOpenAlexAuthor).filter(Boolean).slice(0, MAX_CANDIDATES);
-  setCachedValue(cacheKey, normalized);
-  return normalized;
-}
-
-async function getOpenAlexProfileFallback(openAlexId) {
-  const apiKey = readEnvKey('OPENALEX_API_KEY');
-  if (!apiKey) return null;
-
-  const cleanId = extractShortOpenAlexId(openAlexId);
-  if (!/^A\d+$/i.test(cleanId)) return null;
-
-  const cacheKey = `openalex:profile:${cleanId}`;
-  const cached = getCachedValue(cacheKey);
-  if (cached) return cached;
-
-  const data = await fetchOpenAlexJson(`/authors/${encodeURIComponent(cleanId)}`, apiKey);
-  const profile = normalizeOpenAlexAuthor(data);
-  if (!profile) return null;
-
-  // Lấy thêm tối đa 10 tiêu đề công trình tiêu biểu của tác giả nếu có sẵn API key để bổ sung trích xuất lĩnh vực
-  try {
-    const worksData = await fetchOpenAlexJson(
-      `/works?filter=author.id:${encodeURIComponent(cleanId)}&per-page=10&sort=cited_by_count:desc&select=title`,
-      apiKey
-    );
-    const workList = worksData && Array.isArray(worksData.results) ? worksData.results : [];
-    profile.paperTitles = workList
-      .map(w => String((w && w.title) || '').replace(/\s+/g, ' ').trim())
-      .filter(Boolean);
-  } catch {
-    profile.paperTitles = [];
-  }
-
-  setCachedValue(cacheKey, profile);
-  return profile;
 }
 
 /* ================= 7. PHƯƠNG ÁN 2B: ORCID PUBLIC API (KHÔNG CẦN KEY — TÌM TÊN/EMAIL, ĐỌC TIỂU SỬ & BÀI BÁO) ================= */
@@ -956,7 +841,7 @@ async function searchOrcidByNameAndEmail(rawName, rawEmail = '') {
 
 /**
  * Tìm tác giả trên Semantic Scholar Graph API (không cần API key, tùy chọn SEMANTIC_SCHOLAR_API_KEY)
- * để trích xuất bài báo tác giả đã công bố khi SerpApi, OpenAlex và ORCID đều không có kết quả.
+ * để trích xuất bài báo tác giả đã công bố khi SerpApi và ORCID chưa có kết quả.
  * @param {string} rawName - Tên tác giả.
  * @returns {Promise<Array<Object>>} Tối đa 5 ứng viên hoặc mảng rỗng nếu bị giới hạn 429/không thấy.
  */
@@ -1058,11 +943,10 @@ async function searchSemanticScholarFallback(rawName) {
 /**
  * Tìm ứng viên tự động sau khi đăng nhập Google theo thứ tự:
  * 1) SerpApi Google Scholar (`SERPAPI_API_KEY`, cache 24h, dừng trước 250 lượt/tháng)
- * 2) OpenAlex API (`OPENALEX_API_KEY`)
- * 3) ORCID Public API tự tìm theo Tên & Email (không cần key — đọc tiểu sử, keywords & bài báo)
- * 4) Semantic Scholar Graph API (không cần key — đọc tiêu đề bài báo & chuyên ngành)
- * 5) Nếu vẫn không có hồ sơ công khai -> trả `source: 'manual'` để dùng hội nghị đã lưu / dán từ khóa / chọn tay.
- * @param {string} name - Tên tác giả hoặc ORCID iD.
+ * 2) ORCID Public API tự tìm theo Tên & Email hoặc ORCID iD (không cần key — đọc tiểu sử, keywords & bài báo)
+ * 3) Semantic Scholar Graph API (không cần key — đọc tiêu đề bài báo & chuyên ngành)
+ * 4) Nếu vẫn không có hồ sơ công khai -> trả `source: 'manual'` để người dùng quét mô tả hồ sơ / chọn tay.
+ * @param {string} name - Tên tác giả, link Google Scholar hoặc ORCID iD.
  * @param {{ orcid?: string, email?: string, allowFallback?: boolean }} [options={}]
  * @returns {Promise<{ source: string, scholarBlocked: boolean, candidates: Array<Object>, serpapiUsage: Object, trace: Array<Object>, fallbackReason: string, message: string }>}
  */
@@ -1071,6 +955,7 @@ async function findCandidates(name, options = {}) {
   const cleanName = String(name || '').replace(/\s+/g, ' ').trim();
   const cleanEmail = String(options.email || '').trim().toLowerCase();
   const explicitOrcid = normalizeOrcidId(options.orcid || cleanName);
+  const explicitScholarId = extractScholarIdFromInput(cleanName);
   const trace = [];
   let serpapiUsage = await loadSerpApiUsage();
 
@@ -1101,7 +986,47 @@ async function findCandidates(name, options = {}) {
       serpapiUsage,
       trace,
       fallbackReason: 'orcid-not-found',
-      message: `Không tìm thấy thông tin trên ORCID cho mã ${explicitOrcid}. Bạn có thể dán tiểu sử/từ khóa hoặc chọn thủ công.`
+      message: `Không tìm thấy thông tin trên ORCID cho mã ${explicitOrcid}. Bạn có thể dán mô tả hồ sơ hoặc chọn thủ công.`
+    };
+  }
+
+  // Nếu người dùng nhập link hồ sơ Google Scholar trực tiếp (?user=...)
+  if (explicitScholarId) {
+    const serpKeyDirect = readEnvKey('SERPAPI_API_KEY');
+    if (serpKeyDirect) {
+      try {
+        const directProfile = await getProfileViaSerpApi(explicitScholarId);
+        serpapiUsage = await loadSerpApiUsage();
+        if (directProfile) {
+          trace.push({ step: 'serpapi', status: 'ok', count: 1 });
+          return {
+            source: 'serpapi',
+            scholarBlocked: false,
+            candidates: [directProfile],
+            serpapiUsage,
+            trace,
+            fallbackReason: '',
+            message: ''
+          };
+        }
+      } catch (err) {
+        serpapiUsage = await loadSerpApiUsage();
+        const errCode = (err && err.code) || 'SERPAPI_ERROR';
+        trace.push({ step: 'serpapi', status: 'error', code: errCode, message: err.message });
+      }
+    } else {
+      trace.push({ step: 'serpapi', status: 'skipped', reason: 'MISSING_SERPAPI_KEY' });
+    }
+    return {
+      source: 'manual',
+      scholarBlocked: !serpKeyDirect,
+      candidates: [],
+      serpapiUsage,
+      trace,
+      fallbackReason: !serpKeyDirect ? 'serpapi-not-configured' : 'scholar-link-not-resolved',
+      message: !serpKeyDirect
+        ? 'Máy chủ chưa cấu hình SERPAPI_API_KEY và Google Scholar chặn cào trực tiếp (CAPTCHA/429). Bạn có thể dán nhanh mô tả/chuyên ngành từ hồ sơ để AI tự chọn lĩnh vực.'
+        : `Không đọc được hồ sơ Google Scholar cho mã ${explicitScholarId}. Bạn có thể dán nhanh mô tả/chuyên ngành để AI tự chọn lĩnh vực.`
     };
   }
 
@@ -1151,32 +1076,7 @@ async function findCandidates(name, options = {}) {
     };
   }
 
-  // Tầng 2A: OpenAlex (OPENALEX_API_KEY)
-  const oaKey = readEnvKey('OPENALEX_API_KEY');
-  if (!oaKey) {
-    trace.push({ step: 'openalex', status: 'skipped', reason: 'MISSING_OPENALEX_KEY' });
-  } else {
-    try {
-      const oaCandidates = await searchOpenAlexFallback(cleanName);
-      if (Array.isArray(oaCandidates) && oaCandidates.length > 0) {
-        trace.push({ step: 'openalex', status: 'ok', count: oaCandidates.length });
-        return {
-          source: 'openalex',
-          scholarBlocked: serpFailedReason === 'serpapi-quota',
-          candidates: oaCandidates,
-          serpapiUsage,
-          trace,
-          fallbackReason: serpFailedReason,
-          message: ''
-        };
-      }
-      trace.push({ step: 'openalex', status: 'empty', count: 0 });
-    } catch (err) {
-      trace.push({ step: 'openalex', status: 'error', code: err.code || 'OPENALEX_ERROR', message: err.message });
-    }
-  }
-
-  // Tầng 2B: ORCID Public API — tự tìm bằng ORCID iD hoặc tự động tìm theo Tên & Email (không cần API key)
+  // Tầng 2: ORCID Public API — tự tìm bằng Tên & Email hoặc ORCID iD (không cần API key)
   if (explicitOrcid) {
     try {
       const orcidProfile = await getOrcidProfile(explicitOrcid);
@@ -1217,7 +1117,7 @@ async function findCandidates(name, options = {}) {
     }
   }
 
-  // Tầng 2C: Semantic Scholar Graph API (không cần API key, đọc tiêu đề bài báo & lĩnh vực)
+  // Tầng 3: Semantic Scholar Graph API (không cần API key, đọc tiêu đề bài báo & lĩnh vực)
   try {
     const s2Candidates = await searchSemanticScholarFallback(cleanName);
     if (Array.isArray(s2Candidates) && s2Candidates.length > 0) {
@@ -1237,12 +1137,12 @@ async function findCandidates(name, options = {}) {
     trace.push({ step: 'semantic_scholar', status: 'error', code: err.code || 'S2_ERROR', message: err.message });
   }
 
-  // Tầng 3: Tài khoản chưa có hồ sơ công khai trên cả SerpApi / OpenAlex / ORCID / Semantic Scholar
-  let reasonMessage = `Chưa tìm thấy hồ sơ tác giả công khai nào khớp với "${cleanName || cleanEmail}" trên Google Scholar, OpenAlex, ORCID hoặc Semantic Scholar.`;
+  // Tầng 4: Tài khoản chưa có hồ sơ công khai trên SerpApi / ORCID / Semantic Scholar
+  let reasonMessage = `Chưa tìm thấy hồ sơ tác giả công khai nào khớp với "${cleanName || cleanEmail}" trên Google Scholar, ORCID hoặc Semantic Scholar.`;
   if (serpFailedReason === 'serpapi-quota') {
-    reasonMessage = `SerpApi đã chạm ngưỡng an toàn (${serpapiUsage.count}/${serpapiUsage.limit} lượt tháng ${serpapiUsage.month}) và không tìm thấy hồ sơ trên OpenAlex / ORCID / Semantic Scholar.`;
-  } else if (!serpKey && !oaKey) {
-    reasonMessage = `Đã tự động dò trên ORCID và Semantic Scholar theo tên "${cleanName || cleanEmail}" nhưng tài khoản này chưa có bài báo hay tiểu sử công khai nào (và máy chủ chưa cấu hình SERPAPI_API_KEY / OPENALEX_API_KEY).`;
+    reasonMessage = `SerpApi đã chạm ngưỡng an toàn (${serpapiUsage.count}/${serpapiUsage.limit} lượt tháng ${serpapiUsage.month}) và không tìm thấy hồ sơ trên ORCID / Semantic Scholar.`;
+  } else if (!serpKey) {
+    reasonMessage = `Đã tự động dò trên ORCID và Semantic Scholar theo "${cleanName || cleanEmail}" nhưng chưa có hồ sơ công khai khớp (máy chủ chưa cấu hình SERPAPI_API_KEY để quét trực tiếp Google Scholar).`;
   }
 
   return {
@@ -1257,14 +1157,16 @@ async function findCandidates(name, options = {}) {
 }
 
 /**
- * Lấy chi tiết hồ sơ theo ID (tự nhận diện OpenAlex `A...`, ORCID `0000-...`, hoặc Google Scholar `scholarId`).
- * @param {string} id - Mã định danh ứng viên.
+ * Lấy chi tiết hồ sơ theo ID (hỗ trợ ORCID `0000-...`, Google Scholar `scholarId` hoặc link Scholar).
+ * @param {string} id - Mã định danh ứng viên hoặc link Google Scholar.
  * @param {{ allowFallback?: boolean }} [options={}]
- * @returns {Promise<Object>} Hồ sơ chuẩn hóa kèm `source` (`serpapi` | `openalex` | `orcid`).
+ * @returns {Promise<Object>} Hồ sơ chuẩn hóa kèm `source` (`serpapi` | `orcid`).
  */
 async function findProfileById(id, options = {}) {
   const allowFallback = options.allowFallback !== false;
-  const cleanId = String(id || '').trim();
+  const rawInput = String(id || '').trim();
+  const parsedScholar = extractScholarIdFromInput(rawInput);
+  const cleanId = parsedScholar || rawInput;
 
   // Nếu là ORCID iD -> gọi ORCID Public API (không cần key)
   const orcid = normalizeOrcidId(cleanId);
@@ -1273,16 +1175,6 @@ async function findProfileById(id, options = {}) {
     if (orcidProfile) return orcidProfile;
     const notFound = new Error(`Không tìm thấy hồ sơ ORCID công khai (${orcid}).`);
     notFound.code = 'ORCID_NOT_FOUND';
-    notFound.statusCode = 404;
-    throw notFound;
-  }
-
-  // Nếu là OpenAlex ID (A...) -> gọi OpenAlex fallback
-  if (/^A\d{5,}$/i.test(cleanId) && allowFallback) {
-    const oaProfile = await getOpenAlexProfileFallback(cleanId);
-    if (oaProfile) return oaProfile;
-    const notFound = new Error(`Không tìm thấy hồ sơ OpenAlex (${cleanId}).`);
-    notFound.code = 'OPENALEX_NOT_FOUND';
     notFound.statusCode = 404;
     throw notFound;
   }
@@ -1304,6 +1196,7 @@ module.exports = {
   ScholarBlockedError,
   isScholarBlockedResponse,
   extractScholarIdFromHref,
+  extractScholarIdFromInput,
   parseVerifiedEmailDomain,
   parseCandidatesHtml,
   parseProfileHtml,
@@ -1311,8 +1204,6 @@ module.exports = {
   loadSerpApiUsage,
   searchCandidatesViaSerpApi,
   getProfileViaSerpApi,
-  searchOpenAlexFallback,
-  getOpenAlexProfileFallback,
   getOrcidProfile,
   searchOrcidByNameAndEmail,
   searchSemanticScholarFallback,

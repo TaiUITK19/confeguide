@@ -681,7 +681,7 @@ body.dark {
   box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--focus-ring);
 }
 
-/* --- Quy trình 3 bước Đăng nhập Google & OpenAlex --- */
+/* --- Hộp thoại Đăng nhập Google --- */
 .google-auth-modal__box {
   max-width: 660px;
 }

@@ -146,7 +146,6 @@ function normalizeFieldEntry(rawItem, idx = 0) {
   const rawSource = String(rawItem.source || '').trim().toLowerCase();
   const allowedSources = new Set([
     'serpapi',
-    'openalex',
     'orcid',
     'semantic_scholar',
     'confguide_saved',
@@ -162,7 +161,7 @@ function normalizeFieldEntry(rawItem, idx = 0) {
     label,
     priority,
     source,
-    originalInterest: String(rawItem.originalInterest || rawItem.openAlexTopicName || '').trim(),
+    originalInterest: String(rawItem.originalInterest || '').trim(),
     updatedAt: typeof rawItem.updatedAt === 'string' && rawItem.updatedAt
       ? rawItem.updatedAt
       : new Date().toISOString()

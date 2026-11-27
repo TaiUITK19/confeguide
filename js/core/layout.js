@@ -1593,6 +1593,10 @@
     cv: 'thi-giac-may-tinh',
     software: 'cong-nghe-phan-mem',
     'software-engineering': 'cong-nghe-phan-mem',
+    'web-development': 'cong-nghe-phan-mem',
+    'web-programming': 'cong-nghe-phan-mem',
+    'khoa-hoc-may-tinh': 'cntt-tong-hop',
+    'computer-science': 'cntt-tong-hop',
     nlp: 'xu-ly-ngon-ngu-tu-nhien',
     'natural-language-processing': 'xu-ly-ngon-ngu-tu-nhien',
     robotics: 'robot',
@@ -1643,7 +1647,8 @@
     ],
     'cong-nghe-phan-mem': [
       'software engineering', 'cong nghe phan mem', 'ky thuat phan mem', 'software testing',
-      'fault localization', 'program analysis', 'devops', 'microservice', 'kiem thu phan mem'
+      'fault localization', 'program analysis', 'devops', 'microservice', 'kiem thu phan mem',
+      'web development', 'web programming'
     ],
     'xu-ly-ngon-ngu-tu-nhien': [
       'natural language processing', 'xu ly ngon ngu tu nhien', 'large language model', 'llm',
@@ -1666,7 +1671,8 @@
       'signal processing', 'xu ly tin hieu', 'biomedical signal', 'dsp', 'radar signal'
     ],
     'cntt-tong-hop': [
-      'information technology', 'information and communication technology', 'cntt tong hop'
+      'information technology', 'information and communication technology', 'cntt tong hop',
+      'khoa hoc may tinh', 'computer science'
     ],
     'robot': [
       'robotics', 'autonomous robot', 'mobile robot', 'robot manipulator', 'nguoi may'
@@ -1714,7 +1720,7 @@
   }
 
   /**
-   * Phân tích hồ sơ người dùng (thông tin Google, Google Scholar, ORCID, OpenAlex) bằng phương pháp
+   * Phân tích hồ sơ người dùng (thông tin Google, Google Scholar, ORCID, Semantic Scholar) bằng phương pháp
    * chấm điểm từ vựng & cụm n-gram có trọng số (NLP/AI phía Client) để nhận diện lĩnh vực quan tâm
    * và tính độ tin cậy (`0..98%`).
    * @param {Object|null} userRecord - Bản ghi người dùng chứa `academicProfile`, `bio`, `academicTitle`.
@@ -1804,7 +1810,8 @@
         let termBestWeight = 0;
         let termKind = '';
         weightedSegments.forEach(seg => {
-          if (termRegex.test(seg.text) && seg.weight > termBestWeight) {
+          const segText = normTerm === 'hoc may' ? seg.text.replace(/\bkhoa hoc may tinh\b/g, ' ') : seg.text;
+          if (termRegex.test(segText) && seg.weight > termBestWeight) {
             termBestWeight = seg.weight;
             termKind = seg.kind;
           }
@@ -1991,8 +1998,8 @@
    * @param {number} [idx=0] - Chỉ số dự phòng tạo ID.
    * @returns {{
    *   id: string, key: string, label: string, priority: 'primary'|'normal',
-   *   source: 'openalex'|'manual'|'custom', confidence: number|null,
-   *   openAlexTopicName: string, updatedAt: string
+   *   source: 'serpapi'|'scholar'|'orcid'|'semantic_scholar'|'confguide_saved'|'manual'|'custom',
+   *   confidence: number|null, originalInterest: string, updatedAt: string
    * }|null} Bản ghi chuẩn hóa hoặc null nếu khóa không hợp lệ.
    */
   function normalizeManagedDomainItem(rawDomain, idx = 0) {
@@ -2011,7 +2018,7 @@
         priority: 'normal',
         source: isCustom ? 'custom' : 'manual',
         confidence: null,
-        openAlexTopicName: '',
+        originalInterest: '',
         updatedAt: ''
       };
     }
@@ -2031,7 +2038,6 @@
     const recognizedSources = new Set([
       'serpapi',
       'scholar',
-      'openalex',
       'orcid',
       'semantic_scholar',
       'confguide_saved',
@@ -2044,12 +2050,12 @@
     const confNum = Number(rawDomain.confidence);
     const confidence = Number.isFinite(confNum) && confNum > 0 ? Math.min(100, Math.round(confNum)) : null;
 
-    const rawOaTopic = rawDomain.openAlexTopicName || rawDomain.originalInterest;
-    let cleanOaTopic = (rawOaTopic && typeof rawOaTopic === 'object')
-      ? String(rawOaTopic.name || rawOaTopic.displayName || '').trim()
-      : String(rawOaTopic || '').trim();
-    if (cleanOaTopic === '[object Object]') {
-      cleanOaTopic = '';
+    const rawOrigInterest = rawDomain.originalInterest;
+    let cleanOrigInterest = (rawOrigInterest && typeof rawOrigInterest === 'object')
+      ? String(rawOrigInterest.name || rawOrigInterest.displayName || '').trim()
+      : String(rawOrigInterest || '').trim();
+    if (cleanOrigInterest === '[object Object]') {
+      cleanOrigInterest = '';
     }
 
     return {
@@ -2059,8 +2065,7 @@
       priority,
       source,
       confidence,
-      openAlexTopicName: cleanOaTopic,
-      originalInterest: cleanOaTopic,
+      originalInterest: cleanOrigInterest,
       updatedAt: typeof rawDomain.updatedAt === 'string' ? rawDomain.updatedAt : ''
     };
   }
@@ -2349,7 +2354,7 @@
         priority: 'normal',
         source: 'manual',
         confidence: null,
-        openAlexTopicName: ''
+        originalInterest: ''
       }));
 
     return setUserResearchDomains([...keptDomains, ...addedDomains], options);
@@ -2654,53 +2659,88 @@
     `;
   }
 
-  let domainServicesPromise = null;
-
   /**
-   * Nạp động các service OpenAlex và DomainMapper khi mở tìm kiếm tác giả trên trang bất kỳ.
-   * @returns {Promise<boolean>} True nếu cả hai service đã sẵn sàng.
+   * Tạo HTML cho modal tự động cào hồ sơ Google Scholar / ORCID / mô tả cá nhân ngay trên Trang chủ.
+   * @returns {string} Chuỗi HTML `#googleCrawlModal`.
    */
-  function ensureDomainServices() {
-    if (window.ConfGuideOpenAlex && window.ConfGuideDomainMapper) {
-      return Promise.resolve(true);
-    }
-    if (domainServicesPromise) return domainServicesPromise;
+  function buildGoogleCrawlModalHtml() {
+    return `
+      <div class="layout-modal" id="googleCrawlModal" role="dialog"
+        aria-modal="true" aria-labelledby="googleCrawlModalTitle" hidden>
+        <div class="layout-modal-backdrop"></div>
+        <div class="layout-modal-box layout-modal-box--wide">
+          <div class="layout-modal-header">
+            <h3 class="layout-modal-title" id="googleCrawlModalTitle">Tự động quét hồ sơ &amp; Chọn lĩnh vực nghiên cứu</h3>
+            <button type="button" class="layout-modal-close-btn" aria-label="Đóng">&times;</button>
+          </div>
+          <div class="layout-modal-body">
+            <div class="crawl-identity-bar" id="googleCrawlIdentityBar"></div>
 
-    const loadScriptOnce = src => new Promise(resolve => {
-      const existing = document.querySelector(`script[src="${src}"]`);
-      if (existing) {
-        if (window.ConfGuideOpenAlex && src.includes('openalex')) {
-          resolve(true);
-          return;
-        }
-        if (window.ConfGuideDomainMapper && src.includes('domain-mapper')) {
-          resolve(true);
-          return;
-        }
-        existing.addEventListener('load', () => resolve(true), { once: true });
-        existing.addEventListener('error', () => resolve(false), { once: true });
-        return;
-      }
-      const script = document.createElement('script');
-      script.src = src;
-      script.async = true;
-      script.addEventListener('load', () => resolve(true), { once: true });
-      script.addEventListener('error', () => resolve(false), { once: true });
-      document.head.appendChild(script);
-    });
+            <div class="crawl-status-box is-loading" id="googleCrawlStatusBox" role="status" aria-live="polite">
+              <span class="crawl-status-box__spinner" aria-hidden="true"></span>
+              <span>Đang chuẩn bị quét hồ sơ công khai...</span>
+            </div>
 
-    domainServicesPromise = Promise.all([
-      window.ConfGuideOpenAlex ? true : loadScriptOnce('js/services/openalex.js'),
-      window.ConfGuideDomainMapper ? true : loadScriptOnce('js/services/domain-mapper.js')
-    ])
-      .then(() => Boolean(window.ConfGuideOpenAlex && window.ConfGuideDomainMapper))
-      .catch(() => false);
+            <div class="crawl-candidates-list" id="googleCrawlCandidatesBox" hidden></div>
 
-    return domainServicesPromise;
+            <div class="crawl-assist-box" id="googleCrawlAssistBox">
+              <div class="crawl-assist-box__row">
+                <div class="crawl-assist-box__head">
+                  <label for="googleCrawlQueryInput">Quét theo tên tác giả, link Google Scholar hoặc ORCID iD</label>
+                  <a id="googleCrawlScholarLink" class="crawl-assist-box__link"
+                    href="https://scholar.google.com/citations?hl=en" target="_blank" rel="noopener noreferrer">
+                    Mở Google Scholar &#8599;
+                  </a>
+                </div>
+                <div class="crawl-assist-box__controls">
+                  <input type="text" id="googleCrawlQueryInput" class="modal-input"
+                    placeholder="Tên tác giả, link scholar.google.com/citations?user=... hoặc 0000-0002-...">
+                  <button type="button" class="btn btn-secondary btn--compact-sm" id="googleCrawlStripBtn"
+                    title="Loại bỏ dấu tiếng Việt">Bỏ dấu</button>
+                  <button type="button" class="btn btn-primary btn--compact-sm" id="googleCrawlSearchBtn">Quét hồ sơ</button>
+                </div>
+              </div>
+
+              <div class="crawl-assist-box__row">
+                <label for="googleCrawlDescInput">
+                  Hoặc dán nhanh mô tả từ hồ sơ / chuyên ngành / từ khóa (VD: khoa học máy tính, Machine Learning, Web Development...)
+                </label>
+                <div class="crawl-assist-box__desc-row">
+                  <textarea id="googleCrawlDescInput" class="modal-input crawl-assist-box__textarea" rows="2"
+                    placeholder="VD: Sinh viên khoa học máy tính, quan tâm Machine Learning, Data Science, Computer Vision, Web Development..."></textarea>
+                  <button type="button" class="btn btn-secondary btn--compact-sm" id="googleCrawlAnalyzeDescBtn">
+                    Phân tích mô tả
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="crawl-matched-box" id="googleCrawlMatchedBox">
+              <p class="crawl-matched-box__title" id="googleCrawlMatchedTitle">Lĩnh vực AI trích xuất &amp; đề xuất</p>
+              <div class="crawl-matched-list" id="googleCrawlMatchedList"></div>
+              <p class="crawl-empty-note" id="googleCrawlUnmatchedNote" hidden></p>
+            </div>
+          </div>
+          <div class="pref-modal-actions">
+            <button type="button" class="btn btn-secondary layout-modal-cancel-btn" id="googleCrawlSkipBtn">
+              Bỏ qua (Dùng nút + sau)
+            </button>
+            <div class="pref-modal-actions__right">
+              <button type="button" class="btn btn-secondary" id="googleCrawlManualBtn">
+                Chọn 25 nhóm thủ công
+              </button>
+              <button type="button" class="btn btn-primary" id="googleCrawlSaveBtn" disabled>
+                Xác nhận &amp; Lưu lĩnh vực
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
   }
 
   /**
-   * Tạo HTML cho modal quản lý lĩnh vực nghiên cứu toàn cục (Thêm / Xóa / Sửa, đồng bộ OpenAlex
+   * Tạo HTML cho modal quản lý lĩnh vực nghiên cứu toàn cục (Thêm / Xóa / Sửa, quét hồ sơ tự động
    * và bảng 25 lĩnh vực chuẩn dùng chung cho onboarding, Cài đặt, Trang chủ và Hồ sơ cá nhân).
    * @returns {string} Chuỗi HTML `#globalPreferencesSurveyModal`.
    */
@@ -2728,19 +2768,19 @@
           </div>
           <div class="layout-modal-body">
             <p class="modal-block-desc pref-survey-intro" id="prefSurveyIntro">
-              Thêm, sửa tên/nhóm, đánh dấu ưu tiên, xóa hoặc đồng bộ lại từ OpenAlex rồi nhấn Lưu thay đổi.
+              Thêm, sửa tên/nhóm, đánh dấu ưu tiên, xóa hoặc quét tự động từ hồ sơ rồi nhấn Lưu thay đổi.
             </p>
 
             <div class="pref-recognition js-pref-recognition" id="prefRecognitionBox" hidden></div>
 
-            <!-- Khối quản lý danh sách lĩnh vực (Thêm / Xóa / Sửa & đồng bộ OpenAlex) -->
+            <!-- Khối quản lý danh sách lĩnh vực (Thêm / Xóa / Sửa & quét hồ sơ) -->
             <div class="modal-section-block pref-managed-section" id="prefManagedSection">
               <div class="pref-survey-section-head">
                 <h4 class="modal-block-title" id="prefManagedHeading">Danh sách lĩnh vực đang quản lý</h4>
                 <div class="pref-survey-section-meta">
-                  <button type="button" class="btn btn-secondary btn--compact-sm pref-openalex-toggle-btn"
-                    id="prefToggleOpenAlexBtn" aria-expanded="false" aria-controls="prefOpenAlexPanel">
-                    Tìm từ OpenAlex
+                  <button type="button" class="btn btn-secondary btn--compact-sm pref-crawl-launch-btn"
+                    id="prefLaunchCrawlModalBtn">
+                    Tự động quét hồ sơ (AI)
                   </button>
                   <button type="button" class="btn btn-secondary btn--compact-sm pref-reanalyze-btn js-pref-reanalyze"
                     id="prefReanalyzeBtn" hidden>
@@ -2748,34 +2788,6 @@
                   </button>
                   <span class="pref-count-badge" id="prefTopicCountBadge">Đã chọn: 0 lĩnh vực</span>
                 </div>
-              </div>
-
-              <!-- Bảng tìm kiếm hồ sơ tác giả OpenAlex thu gọn -->
-              <div class="pref-openalex-panel" id="prefOpenAlexPanel" hidden>
-                <div class="pref-openalex-panel__head">
-                  <strong>Đồng bộ chủ đề từ OpenAlex</strong>
-                  <span>Nhập tên tác giả (ưu tiên không dấu để tăng tỷ lệ khớp) và/hoặc ORCID</span>
-                </div>
-                <div class="pref-openalex-panel__controls">
-                  <div class="pref-openalex-panel__field">
-                    <label for="prefOpenAlexNameInput">Tên tác giả</label>
-                    <div class="pref-openalex-panel__name-wrap">
-                      <input type="text" id="prefOpenAlexNameInput" class="modal-input"
-                        placeholder="VD: Nguyen Minh Khoa">
-                      <button type="button" class="btn btn-secondary btn--compact-sm" id="prefOpenAlexNoAccentBtn"
-                        title="Loại bỏ dấu tiếng Việt">Bỏ dấu</button>
-                    </div>
-                  </div>
-                  <div class="pref-openalex-panel__field">
-                    <label for="prefOpenAlexOrcidInput">ORCID (tùy chọn)</label>
-                    <input type="text" id="prefOpenAlexOrcidInput" class="modal-input"
-                      placeholder="0000-0002-xxxx-xxxx">
-                  </div>
-                  <button type="button" class="btn btn-primary btn--compact-sm pref-openalex-search-btn"
-                    id="prefOpenAlexSearchBtn">Tìm tác giả</button>
-                </div>
-                <p class="pref-openalex-status" id="prefOpenAlexStatus" aria-live="polite"></p>
-                <div class="pref-openalex-authors" id="prefOpenAlexAuthors"></div>
               </div>
 
               <!-- Thanh thêm nhanh lĩnh vực mới / tùy chỉnh -->
@@ -2840,7 +2852,7 @@
   }
 
   /**
-   * Tạo HTML cho các modal toàn cục: Cài đặt, Trợ giúp, Báo cáo sự cố và Khảo sát sở thích.
+   * Tạo HTML cho các modal toàn cục: Cài đặt, Trợ giúp, Báo cáo sự cố, Khảo sát sở thích và Quét hồ sơ AI.
    * @returns {string} Chuỗi HTML chứa cấu trúc các modal dùng chung.
    */
   function renderGlobalModalsHtml() {
@@ -2848,6 +2860,7 @@
       buildSettingsModalHtml(),
       buildHelpModalHtml(),
       buildReportModalHtml(),
+      buildGoogleCrawlModalHtml(),
       buildPreferencesSurveyModalHtml()
     ].join('');
   }
@@ -2882,8 +2895,6 @@
   const surveyDraftState = {
     domains: [],
     editingDomainId: null,
-    openAlexPanelOpen: false,
-    openAlexAuthors: [],
     isOnboarding: false,
     preserveOpenModals: false,
     recognitionResult: null,
@@ -2910,9 +2921,9 @@
   }
 
   /**
-   * Kết xuất khối thông báo kết quả nhận diện lĩnh vực (từ OpenAlex hoặc hồ sơ học thuật).
+   * Kết xuất khối thông báo kết quả nhận diện lĩnh vực từ hồ sơ học thuật.
    * @param {HTMLElement|null} boxEl - Phần tử `#prefRecognitionBox`.
-   * @param {Object|null} rec - Kết quả từ `ConfGuideDomainMapper` hoặc `analyzeUserAcademicDomains`.
+   * @param {Object|null} rec - Kết quả nhận diện lĩnh vực.
    */
   function renderRecognitionBannerUi(boxEl, rec) {
     if (!boxEl) return;
@@ -2925,7 +2936,7 @@
 
     const sourcesLabel = Array.isArray(rec.sourcesUsed) && rec.sourcesUsed.length > 0
       ? rec.sourcesUsed.map(escapeHtml).join(' • ')
-      : 'OpenAlex';
+      : 'Hồ sơ học thuật';
 
     if (rec.recognized && Array.isArray(rec.recommendedTopics) && rec.recommendedTopics.length > 0) {
       const chipsHtml = rec.recommendedTopics.map(item => {
@@ -2967,9 +2978,9 @@
     if (rec.fallbackReason === 'no-external-permission') {
       reasonText = 'Bạn đã chọn không đồng bộ dữ liệu học thuật từ bên ngoài.';
     } else if (rec.fallbackReason === 'author-not-found' || rec.fallbackReason === 'no-author') {
-      reasonText = 'Không tìm thấy tác giả khớp trên OpenAlex hoặc chưa chọn hồ sơ tác giả.';
+      reasonText = 'Không tìm thấy hồ sơ tác giả công khai phù hợp hoặc chưa chọn tác giả.';
     } else if (rec.fallbackReason === 'no-matching-it-topics' || rec.fallbackReason === 'no-academic-match') {
-      reasonText = 'Các chủ đề OpenAlex của tác giả chưa khớp với 25 danh mục CNTT của hệ thống.';
+      reasonText = 'Các chủ đề của hồ sơ chưa khớp trực tiếp với 25 danh mục CNTT của hệ thống.';
     } else if (rec.fallbackReason === 'low-confidence') {
       reasonText = `Độ tin cậy nhận diện hiện đạt ${rec.overallConfidence}%, chưa đạt ngưỡng tối thiểu ${rec.threshold}%.`;
     }
@@ -2995,7 +3006,7 @@
     if (!Array.isArray(surveyDraftState.domains) || surveyDraftState.domains.length === 0) {
       return `
         <p class="pref-managed-empty">
-          Chưa có lĩnh vực nào. Hãy nhập thêm lĩnh vực mới ở trên, tìm từ OpenAlex hoặc tích chọn nhanh trong bảng 25 danh mục bên dưới.
+          Chưa có lĩnh vực nào. Hãy nhập thêm lĩnh vực mới ở trên, bấm "Tự động quét hồ sơ (AI)" hoặc tích chọn nhanh trong bảng 25 danh mục bên dưới.
         </p>
       `;
     }
@@ -3043,8 +3054,6 @@
         sourceLabel = 'Semantic Scholar';
       } else if (item.source === 'confguide_saved') {
         sourceLabel = 'Hội nghị đã lưu';
-      } else if (item.source === 'openalex') {
-        sourceLabel = item.confidence ? `OpenAlex · ${item.confidence}%` : 'OpenAlex';
       } else if (item.source === 'custom') {
         sourceLabel = 'Tùy chỉnh';
       }
@@ -3064,7 +3073,7 @@
               <span class="pref-domain-item__meta">
                 ${showCanonNote ? `Nhóm: ${escapeHtml(canonLabel)} · ` : ''}
                 <span class="pref-domain-source">${escapeHtml(sourceLabel)}</span>
-                ${item.openAlexTopicName ? ` · Gốc: ${escapeHtml(item.openAlexTopicName)}` : ''}
+                ${item.originalInterest ? ` · Gốc: ${escapeHtml(item.originalInterest)}` : ''}
               </span>
             </div>
           </div>
@@ -3074,40 +3083,6 @@
             <button type="button" class="btn btn-secondary btn--compact-sm pref-domain-delete-btn js-pref-domain-delete"
               aria-label="Xóa lĩnh vực ${escapeHtml(item.label)}">Xóa</button>
           </div>
-        </div>
-      `;
-    }).join('');
-  }
-
-  /**
-   * Kết xuất danh sách hồ sơ tác giả ứng viên trả về từ OpenAlex trong panel đồng bộ.
-   * @param {Array<Object>} authors - Mảng tác giả đã chuẩn hóa từ `ConfGuideOpenAlex`.
-   * @returns {string} Chuỗi HTML thẻ tác giả.
-   */
-  function renderOpenAlexAuthorsHtml(authors) {
-    if (!Array.isArray(authors) || authors.length === 0) return '';
-    return authors.map((author, idx) => {
-      const topicNames = Array.isArray(author.topics)
-        ? author.topics.slice(0, 4).map(t => t.displayName).filter(Boolean)
-        : [];
-      return `
-        <div class="pref-openalex-card" data-openalex-idx="${idx}">
-          <div class="pref-openalex-card__info">
-            <strong class="pref-openalex-card__name">${escapeHtml(author.displayName)}</strong>
-            <span class="pref-openalex-card__meta">
-              ${escapeHtml(author.primaryAffiliation || 'Chưa rõ đơn vị công tác')}
-              · ${Number(author.worksCount || 0).toLocaleString('vi-VN')} công trình
-              · ${Number(author.citedByCount || 0).toLocaleString('vi-VN')} trích dẫn
-              ${author.orcid ? ` · ORCID: ${escapeHtml(author.orcid)}` : ''}
-            </span>
-            ${topicNames.length > 0
-              ? `<span class="pref-openalex-card__topics">Chủ đề: ${escapeHtml(topicNames.join(', '))}</span>`
-              : '<span class="pref-openalex-card__topics">Chưa có danh sách topics trên OpenAlex</span>'}
-          </div>
-          <button type="button" class="btn btn-primary btn--compact-sm js-pref-openalex-select"
-            data-openalex-idx="${idx}">
-            Áp dụng hồ sơ
-          </button>
         </div>
       `;
     }).join('');
@@ -3134,9 +3109,6 @@
     const cancelBtn = document.getElementById('prefSurveyCancelBtn');
     const saveBtn = document.getElementById('prefSurveySaveBtn');
     const reanalyzeBtn = document.getElementById('prefReanalyzeBtn');
-    const toggleOpenAlexBtn = document.getElementById('prefToggleOpenAlexBtn');
-    const openAlexPanel = document.getElementById('prefOpenAlexPanel');
-    const openAlexAuthorsEl = document.getElementById('prefOpenAlexAuthors');
     const managedListEl = document.getElementById('prefManagedDomainsList');
 
     if (titleEl) {
@@ -3150,8 +3122,8 @@
           'Kiểm tra các lĩnh vực được ánh xạ từ hồ sơ học thuật, có thể thêm, sửa hoặc xóa trước khi xác nhận.';
       } else {
         introEl.textContent = isOnboarding
-          ? 'Chào mừng bạn đến với ConfGuide! Hãy thêm, chọn hoặc đồng bộ lĩnh vực nghiên cứu rồi nhấn Lưu thay đổi.'
-          : 'Thêm, sửa tên/nhóm, đánh dấu ưu tiên, xóa hoặc đồng bộ lại từ OpenAlex rồi nhấn Lưu thay đổi.';
+          ? 'Chào mừng bạn đến với ConfGuide! Hãy thêm, chọn hoặc quét tự động từ hồ sơ rồi nhấn Lưu thay đổi.'
+          : 'Thêm, sửa tên/nhóm, đánh dấu ưu tiên, xóa hoặc quét tự động từ hồ sơ rồi nhấn Lưu thay đổi.';
       }
     }
     if (cancelBtn) {
@@ -3167,19 +3139,6 @@
       } else {
         reanalyzeBtn.setAttribute('hidden', '');
       }
-    }
-    if (toggleOpenAlexBtn) {
-      toggleOpenAlexBtn.setAttribute('aria-expanded', String(Boolean(surveyDraftState.openAlexPanelOpen)));
-    }
-    if (openAlexPanel) {
-      if (surveyDraftState.openAlexPanelOpen) {
-        openAlexPanel.removeAttribute('hidden');
-      } else {
-        openAlexPanel.setAttribute('hidden', '');
-      }
-    }
-    if (openAlexAuthorsEl) {
-      openAlexAuthorsEl.innerHTML = renderOpenAlexAuthorsHtml(surveyDraftState.openAlexAuthors);
     }
 
     renderRecognitionBannerUi(document.getElementById('prefRecognitionBox'), rec);
@@ -3224,7 +3183,6 @@
    *   initialDomains?: Array<Object>,
    *   initialTopicKeys?: Array<string>,
    *   recognitionResult?: Object|null,
-   *   openOpenAlexLookup?: boolean,
    *   onConfirm?: Function|null,
    *   returnFocusEl?: HTMLElement|null
    * }} [options={}] Tùy chọn hiển thị và callback khi nhấn Lưu thay đổi.
@@ -3244,13 +3202,13 @@
     } else if (recognitionResult && recognitionResult.recognized && Array.isArray(recognitionResult.recommendedTopics)) {
       initialDomains = recognitionResult.recommendedTopics
         .map((item, idx) => normalizeManagedDomainItem({
-          id: `dom_oa_${item.key}_${idx}`,
+          id: `dom_rec_${item.key}_${idx}`,
           key: item.key,
           label: item.label || PREF_TOPIC_LABEL_MAP[item.key] || item.key,
           priority: idx === 0 ? 'primary' : 'normal',
-          source: 'openalex',
+          source: 'manual',
           confidence: item.confidence,
-          openAlexTopicName: Array.isArray(item.matchedOpenAlexTopics) ? (item.matchedOpenAlexTopics[0] || '') : ''
+          originalInterest: Array.isArray(item.matchedTerms) ? (item.matchedTerms[0] || '') : ''
         }, idx))
         .filter(Boolean);
     } else if (!isOnboarding) {
@@ -3272,8 +3230,6 @@
 
     surveyDraftState.domains = initialDomains;
     surveyDraftState.editingDomainId = null;
-    surveyDraftState.openAlexPanelOpen = Boolean(safeOpts.openOpenAlexLookup);
-    surveyDraftState.openAlexAuthors = [];
     surveyDraftState.isOnboarding = isOnboarding;
     surveyDraftState.preserveOpenModals = Boolean(safeOpts.preserveOpenModals);
     surveyDraftState.recognitionResult = recognitionResult;
@@ -3284,24 +3240,13 @@
       modalEl.classList.toggle('layout-modal--nested', surveyDraftState.preserveOpenModals);
     }
 
-    const activeUser = getCurrentUser();
-    const oaNameEl = document.getElementById('prefOpenAlexNameInput');
-    const oaOrcidEl = document.getElementById('prefOpenAlexOrcidInput');
-    const oaStatusEl = document.getElementById('prefOpenAlexStatus');
     const customLabelEl = document.getElementById('prefCustomLabelInput');
     const customCatEl = document.getElementById('prefCustomCategorySelect');
     const customErrEl = document.getElementById('prefAddCustomError');
 
-    if (oaNameEl) oaNameEl.value = (activeUser && (activeUser.fullName || activeUser.name)) || '';
-    if (oaOrcidEl) oaOrcidEl.value = (activeUser && activeUser.orcid) || '';
-    if (oaStatusEl) oaStatusEl.textContent = '';
     if (customLabelEl) customLabelEl.value = '';
     if (customCatEl) customCatEl.value = '';
     if (customErrEl) customErrEl.textContent = '';
-
-    if (surveyDraftState.openAlexPanelOpen) {
-      ensureDomainServices();
-    }
 
     // Đóng nhanh các modal toàn cục khác nếu không mở chồng lên modal chỉnh sửa hồ sơ
     if (!surveyDraftState.preserveOpenModals) {
@@ -3334,8 +3279,9 @@
       surveyDraftState.onConfirm = null;
       surveyDraftState.preserveOpenModals = false;
       surveyDraftState.editingDomainId = null;
-      surveyDraftState.openAlexPanelOpen = false;
-      surveyDraftState.openAlexAuthors = [];
+    } else if (modalId === 'googleCrawlModal') {
+      crawlModalState.isOpen = false;
+      crawlModalState.loading = false;
     }
     if (document.querySelectorAll('.layout-modal.show').length === 0) {
       document.body.classList.remove('modal-open');
@@ -3676,6 +3622,7 @@
 
     initGlobalPasswordForm(user);
     initGlobalPreferences();
+    initGoogleCrawlModal();
     initPreferencesSurveyModal();
     initHelpAccordion();
     initGlobalReportForm(user);
@@ -3847,7 +3794,7 @@
               label: nextLabel,
               priority: nextPrio,
               source: nextLabel.toLowerCase() === canonLbl.toLowerCase()
-                ? ((item.source === 'serpapi' || item.source === 'openalex' || item.source === 'orcid' || item.source === 'semantic_scholar' || item.source === 'confguide_saved' || item.source === 'scholar') ? item.source : 'manual')
+                ? ((item.source === 'serpapi' || item.source === 'orcid' || item.source === 'semantic_scholar' || item.source === 'confguide_saved' || item.source === 'scholar') ? item.source : 'manual')
                 : 'custom',
               updatedAt: new Date().toISOString()
             }), idx) || item;
@@ -3914,122 +3861,730 @@
     );
   }
 
+  /** Trạng thái nội bộ cho modal tự động cào hồ sơ Google / Scholar / Mô tả trên Trang chủ */
+  const crawlModalState = {
+    isOpen: false,
+    isOnboarding: false,
+    loading: false,
+    query: '',
+    descriptionText: '',
+    candidates: [],
+    selectedCandidateIdx: -1,
+    matchedItems: [],
+    unmatchedTerms: [],
+    selectedKeys: new Set(),
+    source: 'manual',
+    statusTone: 'neutral',
+    statusMessage: '',
+    chosenAuthor: null
+  };
+
   /**
-   * Thực hiện truy vấn tác giả OpenAlex từ bảng tìm kiếm bên trong modal quản lý lĩnh vực.
-   * @returns {Promise<void>}
+   * Chuẩn hóa tên nguồn dữ liệu từ backend cào hồ sơ.
+   * @param {*} rawSource - Chuỗi nguồn thô.
+   * @returns {'serpapi'|'orcid'|'semantic_scholar'|'confguide_saved'|'scholar'|'manual'} Nguồn hợp lệ.
    */
-  async function handleModalOpenAlexSearch() {
-    const nameInput = document.getElementById('prefOpenAlexNameInput');
-    const orcidInput = document.getElementById('prefOpenAlexOrcidInput');
-    const statusEl = document.getElementById('prefOpenAlexStatus');
-    const searchBtn = document.getElementById('prefOpenAlexSearchBtn');
-    const name = nameInput ? nameInput.value.trim() : '';
-    const orcid = orcidInput ? orcidInput.value.trim() : '';
-
-    if (!name && !orcid) {
-      if (statusEl) {
-        statusEl.textContent = 'Vui lòng nhập tên tác giả hoặc mã ORCID để tìm trên OpenAlex.';
-      }
-      if (nameInput) nameInput.focus();
-      return;
+  function normalizeCrawlSourceName(rawSource) {
+    const low = String(rawSource || '').trim().toLowerCase();
+    if (
+      low === 'serpapi'
+      || low === 'orcid'
+      || low === 'semantic_scholar'
+      || low === 'confguide_saved'
+      || low === 'scholar'
+    ) {
+      return low;
     }
-
-    if (searchBtn) searchBtn.setAttribute('disabled', 'true');
-    if (statusEl) statusEl.textContent = 'Đang tìm hồ sơ tác giả trên OpenAlex...';
-
-    const ready = await ensureDomainServices();
-    if (!ready || !window.ConfGuideOpenAlex) {
-      if (searchBtn) searchBtn.removeAttribute('disabled');
-      if (statusEl) statusEl.textContent = 'Không thể tải mô-đun kết nối OpenAlex. Vui lòng thử lại.';
-      return;
-    }
-
-    const res = await window.ConfGuideOpenAlex.searchAuthors({ name, orcid, perPage: 6 });
-    if (searchBtn) searchBtn.removeAttribute('disabled');
-
-    if (!res.ok) {
-      surveyDraftState.openAlexAuthors = [];
-      if (statusEl) statusEl.textContent = res.message || 'Tra cứu OpenAlex thất bại.';
-      syncPreferencesSurveyModalUi();
-      return;
-    }
-
-    surveyDraftState.openAlexAuthors = Array.isArray(res.authors) ? res.authors : [];
-    if (surveyDraftState.openAlexAuthors.length === 0) {
-      if (statusEl) {
-        statusEl.textContent = 'Không tìm thấy hồ sơ khớp trên OpenAlex. Bạn có thể bỏ dấu tên hoặc thêm thủ công bên dưới.';
-      }
-    } else if (statusEl) {
-      statusEl.textContent = `Tìm thấy ${surveyDraftState.openAlexAuthors.length} hồ sơ tác giả phù hợp (${res.queryUsed || 'OpenAlex'}).`;
-    }
-    syncPreferencesSurveyModalUi();
+    return 'manual';
   }
 
   /**
-   * Áp dụng chủ đề từ một hồ sơ tác giả OpenAlex đã chọn vào danh sách lĩnh vực nháp.
-   * @param {Object} author - Hồ sơ tác giả đã chọn từ OpenAlex.
-   * @returns {Promise<void>}
+   * Định dạng nhãn nguồn thân thiện để hiển thị trong modal quét hồ sơ.
+   * @param {string} source - Mã nguồn đã chuẩn hóa.
+   * @returns {string} Nhãn nguồn.
    */
-  async function applyOpenAlexAuthorToDraft(author) {
-    if (!author) return;
-    const ready = await ensureDomainServices();
-    if (!ready || !window.ConfGuideDomainMapper) {
-      showToast('Không thể nạp bộ ánh xạ lĩnh vực OpenAlex.', 'info');
+  function formatCrawlSourceLabel(source) {
+    const norm = normalizeCrawlSourceName(source);
+    if (norm === 'serpapi' || norm === 'scholar') return 'Google Scholar (SerpApi)';
+    if (norm === 'orcid') return 'ORCID Public API';
+    if (norm === 'semantic_scholar') return 'Semantic Scholar';
+    if (norm === 'confguide_saved') return 'Hội nghị đã quan tâm';
+    return 'Phân tích mô tả hồ sơ (AI / fieldMap)';
+  }
+
+  /**
+   * Tạo URL tra cứu tác giả trên Google Scholar theo tên đang nhập.
+   * @param {string} query - Tên tác giả hoặc chuỗi truy vấn.
+   * @returns {string} URL Google Scholar.
+   */
+  function buildCrawlScholarSearchUrl(query) {
+    const clean = String(query || '').replace(/\s+/g, ' ').trim();
+    if (!clean || /^0000-/.test(clean)) {
+      return 'https://scholar.google.com/citations?hl=en';
+    }
+    if (/^https?:\/\/scholar\.google\.com/i.test(clean)) {
+      return clean;
+    }
+    return `https://scholar.google.com/citations?view_op=search_authors&mauthors=${encodeURIComponent(clean)}&hl=en`;
+  }
+
+  /**
+   * Đồng bộ giao diện `#googleCrawlModal` theo `crawlModalState`.
+   */
+  function syncGoogleCrawlModalUi() {
+    const modal = document.getElementById('googleCrawlModal');
+    if (!modal) return;
+
+    const activeUser = getCurrentUser();
+    const idBar = document.getElementById('googleCrawlIdentityBar');
+    if (idBar && activeUser) {
+      const displayName = activeUser.fullName || activeUser.name || 'Người dùng Google';
+      const avatarInitial = String(displayName).trim().charAt(0).toUpperCase() || 'G';
+      const hasPhoto = Boolean(activeUser.avatarUrl && /^https?:\/\//i.test(String(activeUser.avatarUrl)));
+      idBar.innerHTML = `
+        <div class="crawl-identity-bar__left">
+          <div class="crawl-identity-bar__avatar" aria-hidden="true">
+            ${hasPhoto
+              ? `<img src="${escapeHtml(activeUser.avatarUrl)}" alt="${escapeHtml(displayName)}" width="40" height="40" class="crawl-identity-bar__avatar-img js-crawl-avatar-img" referrerpolicy="no-referrer">`
+              : escapeHtml(avatarInitial)}
+          </div>
+          <div class="crawl-identity-bar__info">
+            <strong class="crawl-identity-bar__name">${escapeHtml(displayName)}</strong>
+            <span class="crawl-identity-bar__email">${escapeHtml(activeUser.email || '')}</span>
+          </div>
+        </div>
+        <span class="crawl-identity-bar__tag">${activeUser.authProvider === 'google' ? 'Google Gmail' : 'Tài khoản ConfGuide'}</span>
+      `;
+      const img = idBar.querySelector('.js-crawl-avatar-img');
+      if (img) {
+        img.addEventListener('error', () => {
+          const holder = img.parentElement;
+          if (holder) holder.textContent = avatarInitial;
+        }, { once: true });
+      }
+    }
+
+    const statusBox = document.getElementById('googleCrawlStatusBox');
+    if (statusBox) {
+      const toneClass = crawlModalState.loading
+        ? 'crawl-status-box is-loading'
+        : (crawlModalState.statusTone === 'success'
+          ? 'crawl-status-box is-success'
+          : (crawlModalState.statusTone === 'fallback' ? 'crawl-status-box is-fallback' : 'crawl-status-box'));
+      statusBox.className = toneClass;
+      statusBox.innerHTML = crawlModalState.loading
+        ? `<span class="crawl-status-box__spinner" aria-hidden="true"></span><span>${escapeHtml(crawlModalState.statusMessage)}</span>`
+        : `<span>${escapeHtml(crawlModalState.statusMessage || 'Sẵn sàng quét dữ liệu hồ sơ.')}</span>`;
+    }
+
+    const candidatesBox = document.getElementById('googleCrawlCandidatesBox');
+    if (candidatesBox) {
+      if (crawlModalState.candidates.length > 0) {
+        candidatesBox.removeAttribute('hidden');
+        candidatesBox.innerHTML = crawlModalState.candidates.map((cand, idx) => {
+          const isSelected = idx === crawlModalState.selectedCandidateIdx;
+          const interests = Array.isArray(cand.interests) ? cand.interests : [];
+          const papers = Array.isArray(cand.paperTitles) ? cand.paperTitles : [];
+          const matchedLabels = cand.mapped && Array.isArray(cand.mapped.matched)
+            ? cand.mapped.matched.map(m => m.label).filter(Boolean)
+            : [];
+          const metaParts = [cand.affiliation || 'Chưa rõ đơn vị công tác'];
+          if (cand.orcid) metaParts.push(`ORCID: ${cand.orcid}`);
+          metaParts.push(`Nguồn: ${formatCrawlSourceLabel(cand.source)}`);
+
+          return `
+            <div class="crawl-candidate-card${isSelected ? ' is-selected' : ''}">
+              <div class="crawl-candidate-card__info">
+                <strong class="crawl-candidate-card__name">${escapeHtml(cand.name)}</strong>
+                <span class="crawl-candidate-card__meta">${escapeHtml(metaParts.join(' · '))}</span>
+                ${interests.length > 0
+                  ? `<span class="crawl-candidate-card__topics">Lĩnh vực công khai: ${escapeHtml(interests.slice(0, 5).join(', '))}</span>`
+                  : ''}
+                ${cand.biography
+                  ? `<span class="crawl-candidate-card__topics">Tiểu sử: ${escapeHtml(cand.biography)}</span>`
+                  : ''}
+                ${papers.length > 0
+                  ? `<span class="crawl-candidate-card__topics">Bài báo: ${escapeHtml(papers.slice(0, 2).join(' | '))}</span>`
+                  : ''}
+                ${matchedLabels.length > 0
+                  ? `<span class="crawl-candidate-card__mapped">Ánh xạ ConfGuide: ${escapeHtml(matchedLabels.join(', '))}</span>`
+                  : ''}
+              </div>
+              <button type="button" class="btn btn-primary btn--compact-sm js-crawl-pick-candidate" data-cand-idx="${idx}">
+                ${isSelected ? 'Đang chọn' : 'Áp dụng hồ sơ'}
+              </button>
+            </div>
+          `;
+        }).join('');
+      } else {
+        candidatesBox.setAttribute('hidden', '');
+        candidatesBox.innerHTML = '';
+      }
+    }
+
+    const matchedTitleEl = document.getElementById('googleCrawlMatchedTitle');
+    const matchedListEl = document.getElementById('googleCrawlMatchedList');
+    const unmatchedNoteEl = document.getElementById('googleCrawlUnmatchedNote');
+    const saveBtn = document.getElementById('googleCrawlSaveBtn');
+    const searchBtn = document.getElementById('googleCrawlSearchBtn');
+    const analyzeBtn = document.getElementById('googleCrawlAnalyzeDescBtn');
+    const scholarLinkEl = document.getElementById('googleCrawlScholarLink');
+
+    if (scholarLinkEl) {
+      scholarLinkEl.setAttribute('href', buildCrawlScholarSearchUrl(crawlModalState.query));
+    }
+
+    if (searchBtn) {
+      if (crawlModalState.loading) searchBtn.setAttribute('disabled', 'true');
+      else searchBtn.removeAttribute('disabled');
+    }
+    if (analyzeBtn) {
+      if (crawlModalState.loading) analyzeBtn.setAttribute('disabled', 'true');
+      else analyzeBtn.removeAttribute('disabled');
+    }
+
+    if (matchedListEl) {
+      if (crawlModalState.matchedItems.length > 0) {
+        if (matchedTitleEl) {
+          matchedTitleEl.textContent = `Lĩnh vực AI đề xuất (${formatCrawlSourceLabel(crawlModalState.source)})`;
+        }
+        matchedListEl.innerHTML = crawlModalState.matchedItems.map((item, idx) => {
+          const checked = crawlModalState.selectedKeys.has(item.key);
+          const origHint = Array.isArray(item.matchedInterests) && item.matchedInterests[0]
+            ? item.matchedInterests[0]
+            : (Array.isArray(item.matchedTerms) ? item.matchedTerms[0] : '');
+          return `
+            <label class="crawl-matched-chip${checked ? ' is-selected' : ''}">
+              <input type="checkbox" class="js-crawl-match-check" value="${escapeHtml(item.key)}"${checked ? ' checked' : ''}>
+              <span>${escapeHtml(item.label || PREF_TOPIC_LABEL_MAP[item.key] || item.key)}</span>
+              ${idx === 0 && checked ? '<span class="profile-field-pill__priority">Ưu tiên</span>' : ''}
+              ${origHint ? `<span class="crawl-matched-chip__via">(${escapeHtml(origHint)})</span>` : ''}
+            </label>
+          `;
+        }).join('');
+      } else {
+        if (matchedTitleEl) {
+          matchedTitleEl.textContent = 'Lĩnh vực AI trích xuất & đề xuất';
+        }
+        matchedListEl.innerHTML = `
+          <p class="crawl-empty-note">
+            ${crawlModalState.loading
+              ? 'Đang chờ kết quả quét...'
+              : 'Chưa có dữ liệu lĩnh vực nào được trích xuất tự động. Bạn có thể dán mô tả hồ sơ (VD: "khoa học máy tính, Machine Learning, Web Development") ở trên hoặc nhấn "Bỏ qua (Dùng nút + sau)" để Trang chủ & Hồ sơ hiển thị nút + như bình thường.'}
+          </p>
+        `;
+      }
+    }
+
+    if (unmatchedNoteEl) {
+      if (crawlModalState.unmatchedTerms.length > 0) {
+        unmatchedNoteEl.textContent =
+          `Từ khóa chưa khớp trực tiếp 25 nhóm chuẩn (${crawlModalState.unmatchedTerms.join(', ')}) — bạn có thể thêm tùy chỉnh trong "Chọn 25 nhóm thủ công".`;
+        unmatchedNoteEl.removeAttribute('hidden');
+      } else {
+        unmatchedNoteEl.textContent = '';
+        unmatchedNoteEl.setAttribute('hidden', 'true');
+      }
+    }
+
+    const selectedCount = crawlModalState.selectedKeys.size;
+    if (saveBtn) {
+      if (selectedCount > 0 && !crawlModalState.loading) {
+        saveBtn.removeAttribute('disabled');
+        saveBtn.textContent = `Xác nhận & Lưu (${selectedCount} lĩnh vực)`;
+      } else {
+        saveBtn.setAttribute('disabled', 'true');
+        saveBtn.textContent = 'Xác nhận & Lưu lĩnh vực';
+      }
+    }
+  }
+
+  /**
+   * Áp dụng một ứng viên từ backend (`SerpApi` / `ORCID` / `Semantic Scholar`) vào danh sách đề xuất.
+   * @param {number} idx - Chỉ số ứng viên trong `crawlModalState.candidates`.
+   * @param {boolean} [autoFetchProfile=true] - Có tải chi tiết hồ sơ nếu chưa có `mapped.matched` hay không.
+   */
+  async function applyCrawlCandidateToDraft(idx, autoFetchProfile = true) {
+    const candidate = Number.isInteger(idx) ? crawlModalState.candidates[idx] : null;
+    if (!candidate) return;
+
+    crawlModalState.selectedCandidateIdx = idx;
+    crawlModalState.chosenAuthor = candidate;
+    let activeCand = candidate;
+
+    const targetId = candidate.orcid || candidate.scholarId || '';
+    const hasInitialMatches = candidate.mapped && Array.isArray(candidate.mapped.matched) && candidate.mapped.matched.length > 0;
+    if (autoFetchProfile && targetId && !hasInitialMatches && isHttpOriginContext()) {
+      crawlModalState.loading = true;
+      crawlModalState.statusTone = 'loading';
+      crawlModalState.statusMessage = `Đang đọc chi tiết hồ sơ ${candidate.name}...`;
+      syncGoogleCrawlModalUi();
+
+      const controller = typeof AbortController === 'function' ? new AbortController() : null;
+      const timeoutId = controller ? window.setTimeout(() => controller.abort(), 10000) : null;
+      try {
+        const res = await fetch(`${getBackendApiBase()}/api/scholar/profile?id=${encodeURIComponent(targetId)}`, {
+          headers: { Accept: 'application/json' },
+          signal: controller ? controller.signal : undefined
+        });
+        if (res.ok) {
+          const detail = await res.json();
+          activeCand = Object.assign({}, candidate, detail);
+          crawlModalState.candidates[idx] = activeCand;
+          crawlModalState.chosenAuthor = activeCand;
+        }
+      } catch {
+        // Giữ nguyên dữ liệu ứng viên ban đầu nếu lỗi mạng
+      } finally {
+        if (timeoutId !== null) window.clearTimeout(timeoutId);
+        crawlModalState.loading = false;
+      }
+    }
+
+    const mapped = activeCand.mapped && typeof activeCand.mapped === 'object' ? activeCand.mapped : {};
+    const matched = Array.isArray(mapped.matched) ? mapped.matched : [];
+    const unmatched = Array.isArray(mapped.unmatched) ? mapped.unmatched : [];
+    const candSource = normalizeCrawlSourceName(activeCand.source);
+
+    crawlModalState.source = candSource;
+    crawlModalState.matchedItems = matched;
+    crawlModalState.unmatchedTerms = unmatched;
+    crawlModalState.selectedKeys = new Set(matched.map(m => m.key).filter(k => VALID_PREF_TOPIC_KEYS.has(k)));
+
+    if (matched.length > 0) {
+      crawlModalState.statusTone = 'success';
+      crawlModalState.statusMessage =
+        `Đã tự động cào ${matched.length} lĩnh vực từ ${formatCrawlSourceLabel(candSource)} (${activeCand.name}). Kiểm tra rồi bấm Xác nhận & Lưu.`;
+    } else {
+      crawlModalState.statusTone = 'fallback';
+      crawlModalState.statusMessage =
+        `Đã tìm thấy hồ sơ ${activeCand.name} (${formatCrawlSourceLabel(candSource)}) nhưng chưa có từ khóa khớp 25 nhóm CNTT. Bạn có thể dán mô tả ngắn bên dưới hoặc chọn thủ công.`;
+    }
+    syncGoogleCrawlModalUi();
+  }
+
+  /**
+   * Tự động gọi backend `/api/scholar/candidates` để quét hồ sơ theo tên Google, link Scholar hoặc ORCID.
+   * @param {{ query?: string, email?: string }} [params={}] - Tham số quét.
+   */
+  async function runGoogleProfileAutoCrawl(params = {}) {
+    const activeUser = getCurrentUser();
+    const rawQuery = String(params.query !== undefined ? params.query : crawlModalState.query || '').trim();
+    const email = String(params.email !== undefined ? params.email : ((activeUser && activeUser.email) || '')).trim();
+    crawlModalState.query = rawQuery;
+
+    if (!isHttpOriginContext()) {
+      crawlModalState.loading = false;
+      crawlModalState.candidates = [];
+      crawlModalState.statusTone = 'fallback';
+      crawlModalState.statusMessage =
+        'Đang mở ở chế độ ngoại tuyến (file:///). Bạn có thể dán nhanh mô tả hồ sơ (VD: khoa học máy tính, Học máy...) bên dưới hoặc bỏ qua để dùng nút +.';
+      syncGoogleCrawlModalUi();
       return;
     }
 
-    const rec = window.ConfGuideDomainMapper.mapOpenAlexAuthorToDomains(author, {
-      threshold: DOMAIN_CONFIDENCE_THRESHOLD
-    });
-    surveyDraftState.recognitionResult = rec;
-
-    if (rec.recognized && Array.isArray(rec.recommendedTopics) && rec.recommendedTopics.length > 0) {
-      const existingByKey = new Map();
-      surveyDraftState.domains.forEach(item => {
-        if (!existingByKey.has(item.key)) existingByKey.set(item.key, item);
-      });
-      const hasPrimary = surveyDraftState.domains.some(item => item.priority === 'primary');
-
-      rec.recommendedTopics.forEach((topic, idx) => {
-        if (!VALID_PREF_TOPIC_KEYS.has(topic.key)) return;
-        const firstOaTopic = Array.isArray(topic.matchedOpenAlexTopics) ? topic.matchedOpenAlexTopics[0] : '';
-        const topicName = (firstOaTopic && typeof firstOaTopic === 'object')
-          ? String(firstOaTopic.name || firstOaTopic.displayName || '').trim()
-          : String(firstOaTopic || '').trim();
-        if (existingByKey.has(topic.key)) {
-          const prev = existingByKey.get(topic.key);
-          if (prev.source !== 'custom') {
-            prev.confidence = topic.confidence;
-            prev.openAlexTopicName = prev.openAlexTopicName || topicName;
-            prev.source = 'openalex';
-          }
-          return;
-        }
-        const added = normalizeManagedDomainItem({
-          id: `dom_oa_${topic.key}_${Date.now()}_${idx}`,
-          key: topic.key,
-          label: topic.label || PREF_TOPIC_LABEL_MAP[topic.key] || topic.key,
-          priority: (!hasPrimary && idx === 0) ? 'primary' : 'normal',
-          source: 'openalex',
-          confidence: topic.confidence,
-          openAlexTopicName: topicName
-        }, surveyDraftState.domains.length + idx);
-        if (added) surveyDraftState.domains.push(added);
-      });
-
-      surveyDraftState.openAlexPanelOpen = false;
-      showToast(
-        `Đã ánh xạ ${rec.recommendedTopics.length} lĩnh vực từ hồ sơ ${author.displayName} (tin cậy ${rec.overallConfidence}%).`,
-        'success'
-      );
-    } else {
-      showToast(
-        `Hồ sơ ${author.displayName} có độ tin cậy thấp hoặc chưa khớp ngành CNTT — hãy chọn thủ công bên dưới.`,
-        'info'
-      );
+    if (rawQuery.length < 2 && !email) {
+      crawlModalState.loading = false;
+      crawlModalState.statusTone = 'fallback';
+      crawlModalState.statusMessage = 'Nhập tên tác giả, link Google Scholar, ORCID hoặc mô tả hồ sơ bên dưới để AI trích xuất lĩnh vực.';
+      syncGoogleCrawlModalUi();
+      return;
     }
 
-    syncPreferencesSurveyModalUi();
+    crawlModalState.loading = true;
+    crawlModalState.statusTone = 'loading';
+    crawlModalState.statusMessage = 'Đang tự động quét hồ sơ nghiên cứu từ Google Scholar, ORCID và Semantic Scholar...';
+    crawlModalState.candidates = [];
+    crawlModalState.selectedCandidateIdx = -1;
+    syncGoogleCrawlModalUi();
+
+    const controller = typeof AbortController === 'function' ? new AbortController() : null;
+    const timeoutId = controller ? window.setTimeout(() => controller.abort(), 14000) : null;
+
+    try {
+      const qs = new URLSearchParams();
+      if (rawQuery) qs.set('name', rawQuery);
+      if (email) qs.set('email', email);
+      const res = await fetch(`${getBackendApiBase()}/api/scholar/candidates?${qs.toString()}`, {
+        headers: { Accept: 'application/json' },
+        signal: controller ? controller.signal : undefined
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!crawlModalState.isOpen) return;
+
+      crawlModalState.loading = false;
+      const candidates = Array.isArray(data.candidates) ? data.candidates.slice(0, 5) : [];
+      crawlModalState.candidates = candidates;
+
+      if (candidates.length > 0) {
+        const bestIdx = candidates.findIndex(c => c.mapped && Array.isArray(c.mapped.matched) && c.mapped.matched.length > 0);
+        if (bestIdx >= 0) {
+          await applyCrawlCandidateToDraft(bestIdx, false);
+          return;
+        }
+        await applyCrawlCandidateToDraft(0, false);
+        return;
+      }
+
+      crawlModalState.statusTone = 'fallback';
+      crawlModalState.statusMessage =
+        data.message
+        || `Chưa tự động lấy được hồ sơ công khai khớp "${rawQuery || email}". Hãy thử sửa tên tác giả (bỏ dấu), dán link Google Scholar / ORCID hoặc nhập mô tả hồ sơ bên dưới.`;
+      syncGoogleCrawlModalUi();
+    } catch {
+      if (!crawlModalState.isOpen) return;
+      crawlModalState.loading = false;
+      crawlModalState.candidates = [];
+      crawlModalState.statusTone = 'fallback';
+      crawlModalState.statusMessage =
+        'Không kết nối được backend quét tự động lúc này. Bạn vẫn có thể dán mô tả hồ sơ (VD: khoa học máy tính, Machine Learning...) ở ô dưới hoặc bỏ qua để dùng nút +.';
+      syncGoogleCrawlModalUi();
+    } finally {
+      if (timeoutId !== null) window.clearTimeout(timeoutId);
+    }
+  }
+
+  /**
+   * Phân tích đoạn mô tả hồ sơ cá nhân / chuyên ngành người dùng nhập qua `POST /api/scholar/map-keywords`
+   * (có dự phòng client nếu backend ngoại tuyến).
+   */
+  async function runGoogleCrawlDescAnalysis() {
+    const descEl = document.getElementById('googleCrawlDescInput');
+    const rawDesc = descEl ? descEl.value.trim() : '';
+    if (!rawDesc) {
+      crawlModalState.statusTone = 'fallback';
+      crawlModalState.statusMessage = 'Vui lòng nhập hoặc dán mô tả hồ sơ (VD: khoa học máy tính, Machine Learning, Web Development) trước khi phân tích.';
+      syncGoogleCrawlModalUi();
+      if (descEl) descEl.focus();
+      return;
+    }
+
+    crawlModalState.descriptionText = rawDesc;
+    crawlModalState.loading = true;
+    crawlModalState.statusTone = 'loading';
+    crawlModalState.statusMessage = 'Đang phân tích mô tả hồ sơ và ánh xạ vào danh mục ConfGuide...';
+    syncGoogleCrawlModalUi();
+
+    let matched = [];
+    let unmatched = [];
+
+    if (isHttpOriginContext()) {
+      const controller = typeof AbortController === 'function' ? new AbortController() : null;
+      const timeoutId = controller ? window.setTimeout(() => controller.abort(), 8000) : null;
+      try {
+        const res = await fetch(`${getBackendApiBase()}/api/scholar/map-keywords`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+          body: JSON.stringify({ keywords: rawDesc, description: rawDesc }),
+          signal: controller ? controller.signal : undefined
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.mapped) {
+            matched = Array.isArray(data.mapped.matched) ? data.mapped.matched : [];
+            unmatched = Array.isArray(data.mapped.unmatched) ? data.mapped.unmatched : [];
+          }
+        }
+      } catch {
+        matched = [];
+      } finally {
+        if (timeoutId !== null) window.clearTimeout(timeoutId);
+      }
+    }
+
+    // Dự phòng client nếu backend chưa khởi chạy hoặc trả về rỗng
+    if (matched.length === 0) {
+      const tokens = rawDesc.split(/[,;\n\r|]+/).map(s => s.trim()).filter(Boolean);
+      const clientMap = new Map();
+      const targets = tokens.length > 0 ? tokens : [rawDesc];
+      targets.forEach(tok => {
+        parseTopicKeysFromText(tok).forEach(k => {
+          if (!clientMap.has(k)) {
+            clientMap.set(k, {
+              key: k,
+              label: PREF_TOPIC_LABEL_MAP[k] || k,
+              matchedInterests: [tok]
+            });
+          }
+        });
+      });
+      if (clientMap.size === 0) {
+        const proseRes = analyzeUserAcademicDomains(
+          { bio: rawDesc },
+          { allowExternalAcademic: true, threshold: 45 }
+        );
+        if (Array.isArray(proseRes.recommendedTopics)) {
+          proseRes.recommendedTopics.forEach(t => {
+            if (!clientMap.has(t.key)) {
+              clientMap.set(t.key, {
+                key: t.key,
+                label: t.label || PREF_TOPIC_LABEL_MAP[t.key] || t.key,
+                matchedInterests: t.matchedTerms || [rawDesc]
+              });
+            }
+          });
+        }
+      }
+      matched = Array.from(clientMap.values());
+    }
+
+    crawlModalState.loading = false;
+    if (matched.length > 0) {
+      const mergedMap = new Map(crawlModalState.matchedItems.map(item => [item.key, item]));
+      matched.forEach(item => {
+        if (item && item.key && VALID_PREF_TOPIC_KEYS.has(item.key)) {
+          mergedMap.set(item.key, item);
+          crawlModalState.selectedKeys.add(item.key);
+        }
+      });
+      crawlModalState.matchedItems = Array.from(mergedMap.values());
+      crawlModalState.unmatchedTerms = unmatched;
+      crawlModalState.source = crawlModalState.chosenAuthor ? normalizeCrawlSourceName(crawlModalState.chosenAuthor.source) : 'manual';
+      crawlModalState.statusTone = 'success';
+      crawlModalState.statusMessage =
+        `Đã nhận diện được ${matched.length} lĩnh vực phù hợp từ mô tả hồ sơ. Kiểm tra bên dưới rồi bấm Xác nhận & Lưu.`;
+    } else {
+      crawlModalState.unmatchedTerms = unmatched.length > 0 ? unmatched : [rawDesc];
+      crawlModalState.statusTone = 'fallback';
+      crawlModalState.statusMessage =
+        'Chưa tìm thấy từ khóa chuyên ngành CNTT khớp trong mô tả trên. Bạn có thể bấm "Chọn 25 nhóm thủ công" hoặc bỏ qua để dùng nút +.';
+    }
+    syncGoogleCrawlModalUi();
+  }
+
+  /**
+   * Lưu các lĩnh vực đã xác nhận từ `#googleCrawlModal` vào hồ sơ & backend (`PUT /api/fields`),
+   * tự động cập nhật Trang chủ Slider và Trang cá nhân.
+   */
+  function confirmGoogleCrawlSave() {
+    const activeUser = getCurrentUser();
+    if (!activeUser) {
+      closeLayoutModal('googleCrawlModal');
+      return;
+    }
+
+    const selectedItems = crawlModalState.matchedItems.filter(item => crawlModalState.selectedKeys.has(item.key));
+    if (selectedItems.length === 0) {
+      showToast('Chưa có lĩnh vực nào được chọn để lưu.', 'info');
+      return;
+    }
+
+    const sourceTag = crawlModalState.chosenAuthor
+      ? normalizeCrawlSourceName(crawlModalState.chosenAuthor.source)
+      : 'manual';
+
+    const domainsToSave = selectedItems.map((item, idx) => normalizeManagedDomainItem({
+      id: `dom_crawl_${item.key}_${Date.now()}_${idx}`,
+      key: item.key,
+      label: item.label || PREF_TOPIC_LABEL_MAP[item.key] || item.key,
+      priority: idx === 0 ? 'primary' : 'normal',
+      source: sourceTag,
+      originalInterest: Array.isArray(item.matchedInterests) ? (item.matchedInterests[0] || '') : ''
+    }, idx)).filter(Boolean);
+
+    const chosen = crawlModalState.chosenAuthor;
+    const patchedUser = Object.assign({}, activeUser, {
+      fieldsSource: sourceTag,
+      scholarId: (chosen && chosen.scholarId) || activeUser.scholarId || '',
+      orcid: (chosen && chosen.orcid) || activeUser.orcid || '',
+      scholarUrl: (chosen && chosen.scholarUrl) || activeUser.scholarUrl || '',
+      affiliation: (activeUser.affiliation && activeUser.affiliation !== 'Nhà nghiên cứu độc lập')
+        ? activeUser.affiliation
+        : ((chosen && chosen.affiliation) || activeUser.affiliation || 'Nhà nghiên cứu độc lập'),
+      needsOnboarding: false,
+      pendingGoogleCrawl: false
+    });
+    writeStorage('confguide_current_user', patchedUser);
+
+    const users = readStorage('confguide_users', []);
+    if (Array.isArray(users)) {
+      const nextUsers = users.map(u => (isMatchingStoredAccount(u, patchedUser) ? Object.assign({}, u, {
+        fieldsSource: patchedUser.fieldsSource,
+        scholarId: patchedUser.scholarId,
+        orcid: patchedUser.orcid,
+        scholarUrl: patchedUser.scholarUrl,
+        affiliation: patchedUser.affiliation,
+        needsOnboarding: false,
+        pendingGoogleCrawl: false
+      }) : u));
+      writeStorage('confguide_users', nextUsers);
+    }
+
+    setUserResearchDomains(domainsToSave, { silent: true });
+    saveUserPreferences({
+      onboardingCompleted: true,
+      bannerDismissed: false
+    });
+    closeLayoutModal('googleCrawlModal');
+    showToast(`Đã lưu ${domainsToSave.length} lĩnh vực nghiên cứu và cập nhật Trang chủ / Hồ sơ.`, 'success');
+  }
+
+  /**
+   * Mở modal tự động quét hồ sơ Google / Scholar / Mô tả trên Trang chủ hoặc khi bấm từ Quản lý lĩnh vực.
+   * @param {{ isOnboarding?: boolean, returnFocusEl?: HTMLElement|null }} [options={}]
+   */
+  function openGoogleCrawlModal(options = {}) {
+    const safeOpts = (options && typeof options === 'object') ? options : {};
+    const activeUser = getCurrentUser();
+    if (!activeUser) {
+      promptLoginForTracking('cài đặt lĩnh vực nghiên cứu');
+      return;
+    }
+
+    const defaultQuery = (activeUser.fullName || activeUser.name || '').trim();
+    crawlModalState.isOpen = true;
+    crawlModalState.isOnboarding = Boolean(safeOpts.isOnboarding);
+    crawlModalState.loading = true;
+    crawlModalState.query = defaultQuery;
+    crawlModalState.descriptionText = '';
+    crawlModalState.candidates = [];
+    crawlModalState.selectedCandidateIdx = -1;
+    crawlModalState.matchedItems = [];
+    crawlModalState.unmatchedTerms = [];
+    crawlModalState.selectedKeys = new Set();
+    crawlModalState.source = 'manual';
+    crawlModalState.statusTone = 'loading';
+    crawlModalState.statusMessage = 'Đang tự động quét hồ sơ từ tài khoản Google của bạn...';
+    crawlModalState.chosenAuthor = null;
+
+    const queryEl = document.getElementById('googleCrawlQueryInput');
+    const descEl = document.getElementById('googleCrawlDescInput');
+    if (queryEl) queryEl.value = defaultQuery;
+    if (descEl) descEl.value = '';
+
+    document.querySelectorAll('.layout-modal.show').forEach(otherModal => {
+      if (otherModal.id !== 'googleCrawlModal') {
+        otherModal.classList.remove('show');
+        otherModal.setAttribute('hidden', 'true');
+      }
+    });
+
+    syncGoogleCrawlModalUi();
+    openLayoutModal(
+      'googleCrawlModal',
+      safeOpts.returnFocusEl instanceof HTMLElement ? safeOpts.returnFocusEl : null
+    );
+    runGoogleProfileAutoCrawl({ query: defaultQuery, email: activeUser.email || '' });
+  }
+
+  /**
+   * Gắn toàn bộ sự kiện tương tác cho `#googleCrawlModal`.
+   */
+  function initGoogleCrawlModal() {
+    const modal = document.getElementById('googleCrawlModal');
+    if (!modal) return;
+
+    const queryInput = document.getElementById('googleCrawlQueryInput');
+    const stripBtn = document.getElementById('googleCrawlStripBtn');
+    const searchBtn = document.getElementById('googleCrawlSearchBtn');
+    const descInput = document.getElementById('googleCrawlDescInput');
+    const analyzeBtn = document.getElementById('googleCrawlAnalyzeDescBtn');
+    const candidatesBox = document.getElementById('googleCrawlCandidatesBox');
+    const matchedList = document.getElementById('googleCrawlMatchedList');
+    const skipBtn = document.getElementById('googleCrawlSkipBtn');
+    const manualBtn = document.getElementById('googleCrawlManualBtn');
+    const saveBtn = document.getElementById('googleCrawlSaveBtn');
+
+    if (queryInput) {
+      queryInput.addEventListener('input', () => {
+        crawlModalState.query = queryInput.value.trim();
+        const scholarLink = document.getElementById('googleCrawlScholarLink');
+        if (scholarLink) {
+          scholarLink.setAttribute('href', buildCrawlScholarSearchUrl(crawlModalState.query));
+        }
+      });
+      queryInput.addEventListener('keydown', event => {
+        if (event.key === 'Enter') {
+          event.preventDefault();
+          runGoogleProfileAutoCrawl({ query: queryInput.value.trim() });
+        }
+      });
+    }
+
+    if (stripBtn && queryInput) {
+      stripBtn.addEventListener('click', () => {
+        queryInput.value = queryInput.value
+          .replace(/[đĐ]/g, ch => (ch === 'Đ' ? 'D' : 'd'))
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+          .replace(/\s+/g, ' ')
+          .trim();
+        crawlModalState.query = queryInput.value;
+        queryInput.focus();
+      });
+    }
+
+    if (searchBtn && queryInput) {
+      searchBtn.addEventListener('click', () => {
+        runGoogleProfileAutoCrawl({ query: queryInput.value.trim() });
+      });
+    }
+
+    if (analyzeBtn) {
+      analyzeBtn.addEventListener('click', runGoogleCrawlDescAnalysis);
+    }
+
+    if (descInput) {
+      descInput.addEventListener('keydown', event => {
+        if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) {
+          event.preventDefault();
+          runGoogleCrawlDescAnalysis();
+        }
+      });
+    }
+
+    if (candidatesBox) {
+      candidatesBox.addEventListener('click', event => {
+        if (!(event.target instanceof Element)) return;
+        const pickBtn = event.target.closest('.js-crawl-pick-candidate');
+        if (!pickBtn) return;
+        const idx = Number(pickBtn.getAttribute('data-cand-idx'));
+        if (Number.isInteger(idx)) applyCrawlCandidateToDraft(idx, true);
+      });
+    }
+
+    if (matchedList) {
+      matchedList.addEventListener('change', event => {
+        const input = event.target;
+        if (!(input instanceof HTMLInputElement) || !input.classList.contains('js-crawl-match-check')) return;
+        const k = input.value || '';
+        if (input.checked) crawlModalState.selectedKeys.add(k);
+        else crawlModalState.selectedKeys.delete(k);
+        syncGoogleCrawlModalUi();
+      });
+    }
+
+    if (skipBtn) {
+      skipBtn.addEventListener('click', () => {
+        saveUserPreferences({ onboardingCompleted: true, bannerDismissed: false });
+        closeLayoutModal('googleCrawlModal');
+      });
+    }
+
+    if (manualBtn) {
+      manualBtn.addEventListener('click', () => {
+        const draftDomains = crawlModalState.matchedItems
+          .filter(item => crawlModalState.selectedKeys.has(item.key))
+          .map((item, idx) => normalizeManagedDomainItem({
+            id: `dom_crawl_${item.key}_${Date.now()}_${idx}`,
+            key: item.key,
+            label: item.label || PREF_TOPIC_LABEL_MAP[item.key] || item.key,
+            priority: idx === 0 ? 'primary' : 'normal',
+            source: normalizeCrawlSourceName(crawlModalState.source),
+            originalInterest: Array.isArray(item.matchedInterests) ? (item.matchedInterests[0] || '') : ''
+          }, idx))
+          .filter(Boolean);
+        closeLayoutModal('googleCrawlModal');
+        openPreferencesSurveyModal({
+          isOnboarding: draftDomains.length === 0,
+          initialDomains: draftDomains
+        });
+      });
+    }
+
+    if (saveBtn) {
+      saveBtn.addEventListener('click', confirmGoogleCrawlSave);
+    }
   }
 
   /**
@@ -4093,7 +4648,7 @@
   }
 
   /**
-   * Gắn sự kiện tương tác cho modal quản lý lĩnh vực nghiên cứu dùng chung (Thêm / Xóa / Sửa & OpenAlex).
+   * Gắn sự kiện tương tác cho modal quản lý lĩnh vực nghiên cứu dùng chung (Thêm / Xóa / Sửa & Quét hồ sơ AI).
    */
   function initPreferencesSurveyModal() {
     const modal = document.getElementById('globalPreferencesSurveyModal');
@@ -4104,67 +4659,17 @@
     const saveBtn = document.getElementById('prefSurveySaveBtn');
     const recognitionBox = document.getElementById('prefRecognitionBox');
     const reanalyzeBtn = document.getElementById('prefReanalyzeBtn');
-    const toggleOpenAlexBtn = document.getElementById('prefToggleOpenAlexBtn');
-    const oaNameInput = document.getElementById('prefOpenAlexNameInput');
-    const oaNoAccentBtn = document.getElementById('prefOpenAlexNoAccentBtn');
-    const oaOrcidInput = document.getElementById('prefOpenAlexOrcidInput');
-    const oaSearchBtn = document.getElementById('prefOpenAlexSearchBtn');
-    const oaAuthorsEl = document.getElementById('prefOpenAlexAuthors');
+    const launchCrawlBtn = document.getElementById('prefLaunchCrawlModalBtn');
     const customLabelInput = document.getElementById('prefCustomLabelInput');
     const customCatSelect = document.getElementById('prefCustomCategorySelect');
     const customAddBtn = document.getElementById('prefAddCustomBtn');
     const customErrEl = document.getElementById('prefAddCustomError');
     const managedListEl = document.getElementById('prefManagedDomainsList');
 
-    if (toggleOpenAlexBtn) {
-      toggleOpenAlexBtn.addEventListener('click', () => {
-        surveyDraftState.openAlexPanelOpen = !surveyDraftState.openAlexPanelOpen;
-        if (surveyDraftState.openAlexPanelOpen) {
-          ensureDomainServices();
-        }
-        syncPreferencesSurveyModalUi();
-        if (surveyDraftState.openAlexPanelOpen && oaNameInput) {
-          oaNameInput.focus();
-        }
-      });
-    }
-
-    if (oaNoAccentBtn && oaNameInput) {
-      oaNoAccentBtn.addEventListener('click', async () => {
-        await ensureDomainServices();
-        if (window.ConfGuideOpenAlex && typeof window.ConfGuideOpenAlex.stripVietnameseDiacritics === 'function') {
-          oaNameInput.value = window.ConfGuideOpenAlex.stripVietnameseDiacritics(oaNameInput.value);
-        } else {
-          oaNameInput.value = oaNameInput.value
-            .normalize('NFD')
-            .replace(/[\u0300-\u036f]/g, '')
-            .replace(/[đĐ]/g, ch => (ch === 'Đ' ? 'D' : 'd'));
-        }
-        oaNameInput.focus();
-      });
-    }
-
-    if (oaSearchBtn) {
-      oaSearchBtn.addEventListener('click', handleModalOpenAlexSearch);
-    }
-
-    [oaNameInput, oaOrcidInput].forEach(inputEl => {
-      if (!inputEl) return;
-      inputEl.addEventListener('keydown', event => {
-        if (event.key !== 'Enter') return;
-        event.preventDefault();
-        handleModalOpenAlexSearch();
-      });
-    });
-
-    if (oaAuthorsEl) {
-      oaAuthorsEl.addEventListener('click', event => {
-        if (!(event.target instanceof Element)) return;
-        const pickBtn = event.target.closest('.js-pref-openalex-select');
-        if (!pickBtn) return;
-        const idx = Number(pickBtn.getAttribute('data-openalex-idx'));
-        const selected = Number.isInteger(idx) ? surveyDraftState.openAlexAuthors[idx] : null;
-        if (selected) applyOpenAlexAuthorToDraft(selected);
+    if (launchCrawlBtn) {
+      launchCrawlBtn.addEventListener('click', () => {
+        closeLayoutModal('globalPreferencesSurveyModal');
+        openGoogleCrawlModal({ returnFocusEl: launchCrawlBtn });
       });
     }
 
@@ -4255,7 +4760,7 @@
               label: nextLabel,
               priority: nextPrio,
               source: nextLabel.toLowerCase() === canonLbl.toLowerCase()
-                ? ((item.source === 'serpapi' || item.source === 'openalex' || item.source === 'orcid' || item.source === 'semantic_scholar' || item.source === 'confguide_saved' || item.source === 'scholar') ? item.source : 'manual')
+                ? ((item.source === 'serpapi' || item.source === 'orcid' || item.source === 'semantic_scholar' || item.source === 'confguide_saved' || item.source === 'scholar') ? item.source : 'manual')
                 : 'custom',
               updatedAt: new Date().toISOString()
             }), idx) || item;
@@ -4334,7 +4839,7 @@
               key: item.key,
               label: item.label || PREF_TOPIC_LABEL_MAP[item.key] || item.key,
               priority: idx === 0 ? 'primary' : 'normal',
-              source: 'openalex',
+              source: 'manual',
               confidence: item.confidence
             }, surveyDraftState.domains.length + idx);
             if (added) surveyDraftState.domains.push(added);
@@ -4816,10 +5321,13 @@
    */
   function consumeUserOnboardingFlag() {
     const activeUser = getCurrentUser();
-    if (!activeUser || (!activeUser.needsOnboarding && !activeUser.pendingGoogleRecognition)) return;
+    if (!activeUser || (!activeUser.needsOnboarding && !activeUser.pendingGoogleRecognition && !activeUser.pendingGoogleCrawl)) {
+      return;
+    }
 
     const updatedSession = Object.assign({}, activeUser, {
       needsOnboarding: false,
+      pendingGoogleCrawl: false,
       pendingGoogleRecognition: null
     });
     writeStorage('confguide_current_user', updatedSession);
@@ -4828,11 +5336,14 @@
     if (Array.isArray(users)) {
       let modified = false;
       const nextUsers = users.map(candidate => {
-        if (!isMatchingStoredAccount(candidate, updatedSession) || !candidate.needsOnboarding) {
+        if (!isMatchingStoredAccount(candidate, updatedSession) || (!candidate.needsOnboarding && !candidate.pendingGoogleCrawl)) {
           return candidate;
         }
         modified = true;
-        return Object.assign({}, candidate, { needsOnboarding: false });
+        return Object.assign({}, candidate, {
+          needsOnboarding: false,
+          pendingGoogleCrawl: false
+        });
       });
       if (modified) {
         writeStorage('confguide_users', nextUsers);
@@ -4841,8 +5352,8 @@
   }
 
   /**
-   * Tự động phân tích nhận diện lĩnh vực (khi đăng nhập qua Google lần đầu) hoặc mở bảng chọn lĩnh vực
-   * thủ công khi người dùng vừa đăng ký tài khoản mới và bắt đầu phiên sử dụng đầu tiên.
+   * Tự động mở modal cào hồ sơ Google (trên Trang chủ sau khi đăng nhập Google) hoặc bảng chọn lĩnh vực
+   * thủ công khi người dùng vừa đăng ký mới và chưa có lĩnh vực quan tâm.
    * @param {string} currentPage - Tên trang hiện tại.
    */
   function maybeTriggerNewUserOnboarding(currentPage) {
@@ -4855,29 +5366,31 @@
     }
 
     const activeUser = getCurrentUser();
-    const hasPendingGoogle = Boolean(activeUser && activeUser.pendingGoogleRecognition);
-    if (!activeUser || (activeUser.needsOnboarding !== true && !hasPendingGoogle)) return;
-    if (!document.getElementById('globalPreferencesSurveyModal')) return;
+    if (!activeUser) return;
+    const isGoogleCrawlPending = Boolean(
+      activeUser.authProvider === 'google'
+      && (activeUser.pendingGoogleCrawl === true || activeUser.needsOnboarding === true || activeUser.pendingGoogleRecognition)
+    );
+    const isRegularOnboarding = Boolean(activeUser.needsOnboarding === true && activeUser.authProvider !== 'google');
+    if (!isGoogleCrawlPending && !isRegularOnboarding) return;
 
-    const pendingMeta = activeUser.pendingGoogleRecognition;
-    let recognitionResult = null;
-    if (hasPendingGoogle || activeUser.authProvider === 'google') {
-      const allowExternal = pendingMeta && typeof pendingMeta === 'object'
-        ? pendingMeta.allowExternalAcademic !== false
-        : true;
-      recognitionResult = analyzeUserAcademicDomains(activeUser, {
-        allowExternalAcademic: allowExternal
-      });
+    const existingDomains = getUserResearchDomains();
+    if (existingDomains.length > 0) {
+      consumeUserOnboardingFlag();
+      return;
     }
 
     consumeUserOnboardingFlag();
     saveUserPreferences({ onboardingCompleted: false });
 
     const launchOnboardingModal = () => {
-      openPreferencesSurveyModal({
-        isOnboarding: true,
-        recognitionResult
-      });
+      if (isGoogleCrawlPending && document.getElementById('googleCrawlModal')) {
+        openGoogleCrawlModal({ isOnboarding: true });
+        return;
+      }
+      if (document.getElementById('globalPreferencesSurveyModal')) {
+        openPreferencesSurveyModal({ isOnboarding: true });
+      }
     };
 
     if (document.readyState === 'loading') {
@@ -5068,6 +5581,7 @@
     setUserResearchTopicKeys: setUserResearchTopicKeys,
     getUserPreferences: getUserPreferences,
     saveUserPreferences: saveUserPreferences,
-    openPreferencesSurveyModal: openPreferencesSurveyModal
+    openPreferencesSurveyModal: openPreferencesSurveyModal,
+    openGoogleCrawlModal: openGoogleCrawlModal
   };
 })();

@@ -275,9 +275,7 @@
               ? 'Semantic Scholar'
               : (item.source === 'confguide_saved'
                 ? 'Hội nghị quan tâm'
-                : (item.source === 'openalex'
-                  ? (item.confidence ? `OpenAlex ${item.confidence}%` : 'OpenAlex')
-                  : (item.source === 'custom' ? 'Tùy chỉnh' : ''))))));
+                : (item.source === 'custom' ? 'Tùy chỉnh' : '')))));
       const priorityBadge = isPrimary
         ? '<span class="profile-field-pill__priority">Ưu tiên</span>'
         : '';
@@ -285,7 +283,7 @@
         ? `<span class="profile-field-pill__source">&middot; ${escapeHtml(sourceNote)}</span>`
         : '';
       const titleParts = [];
-      if (item.openAlexTopicName) titleParts.push(`OpenAlex: ${item.openAlexTopicName}`);
+      if (item.originalInterest) titleParts.push(`Gốc: ${item.originalInterest}`);
       if (item.key) titleParts.push(`Nhóm: ${item.key}`);
       const titleAttr = titleParts.length > 0 ? ` title="${escapeHtml(titleParts.join(' | '))}"` : '';
 
@@ -376,6 +374,30 @@
     draftEditDomains = typeof utils.getUserResearchDomains === 'function'
       ? utils.getUserResearchDomains()
       : null;
+
+    const chooseBtn = document.getElementById('profileChooseTopicsBtn');
+    if (chooseBtn) {
+      const hasDomains = Array.isArray(draftEditDomains) && draftEditDomains.length > 0;
+      if (hasDomains) {
+        chooseBtn.className = 'btn btn-secondary btn--compact-sm profile-fields-add-btn js-profile-choose-topics';
+        chooseBtn.innerHTML = `
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 20h9"></path>
+            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+          </svg>
+          <span>Quản lý lĩnh vực (Thêm / Xóa / Sửa)</span>
+        `;
+      } else {
+        chooseBtn.className = 'btn btn-primary btn--compact-sm profile-fields-add-btn js-profile-choose-topics';
+        chooseBtn.innerHTML = `
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          <span>Thêm lĩnh vực</span>
+        `;
+      }
+    }
 
     renderFieldsChips(document.getElementById('profileFieldsChips'), fieldsRaw, true);
     renderFieldsChips(
