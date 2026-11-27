@@ -4,6 +4,7 @@
  * Phụ thuộc: Không bắt buộc (tự động tận dụng ConfGuideUtils.escapeHtml nếu có)
  * Chức năng: Cung cấp logic thuần túy (không truy cập DOM, URL hay Storage):
  * chuẩn hóa văn bản tiếng Việt, khoảng cách Damerau-Levenshtein, lập chỉ mục tìm kiếm,
+ * chuẩn hóa phạm vi (normalizeScopeKey) & địa điểm (normalizeCityKey),
  * tính điểm xếp hạng, phân đoạn từ khóa, đếm facet, gợi ý nới lỏng và yieldToMain.
  */
 
@@ -573,6 +574,63 @@
   }
 
   /**
+   * Chuẩn hóa khóa địa điểm diễn ra hội nghị về 3 nhóm (`'ha-noi'`, `'ho-chi-minh'`, `'other'`).
+   * Dùng chung cho cả bộ lọc Địa điểm và suy luận phạm vi Việt Nam khi thiếu `country`.
+   * @param {Object|string|null|undefined} confOrLocation - Đối tượng hội nghị hoặc chuỗi địa điểm thô.
+   * @returns {'ha-noi'|'ho-chi-minh'|'other'} Khóa địa điểm chuẩn hóa.
+   */
+  function normalizeCityKey(confOrLocation) {
+    const rawLocation = confOrLocation && typeof confOrLocation === 'object'
+      ? (confOrLocation.location || '')
+      : confOrLocation;
+    if (!rawLocation || String(rawLocation).trim() === '') return 'other';
+    const normalized = normalizeText(rawLocation).replace(/\s+/g, ' ').trim();
+    if (!normalized) return 'other';
+    if (/\b(ha noi|hanoi)\b/.test(normalized)) return 'ha-noi';
+    if (/\b(ho chi minh|hcm|saigon|sai gon)\b/.test(normalized)) return 'ho-chi-minh';
+    return 'other';
+  }
+
+  /**
+   * Chuẩn hóa khóa phạm vi tổ chức của hội nghị về `'vietnam'`, `'international'` hoặc `''`.
+   * Ưu tiên chuẩn hóa `country` (bỏ dấu, chữ thường): `'vietnam'` hoặc `'viet nam'` trả về `'vietnam'`,
+   * có giá trị khác trả về `'international'`. Nếu `country` rỗng, suy luận từ `location`
+   * (chứa `'vietnam'` / `'viet nam'` hoặc nhận diện Hà Nội / Hồ Chí Minh qua `normalizeCityKey`).
+   * Trả về `''` nếu vẫn không xác định được.
+   * @param {Object|null|undefined} conference - Đối tượng hội nghị cần xác định phạm vi.
+   * @returns {'vietnam'|'international'|''} Khóa phạm vi chuẩn hóa.
+   */
+  function normalizeScopeKey(conference) {
+    if (!conference || typeof conference !== 'object') return '';
+
+    const rawCountry = conference.country !== undefined && conference.country !== null
+      ? String(conference.country).trim()
+      : '';
+    const normCountry = normalizeText(rawCountry).replace(/\s+/g, ' ').trim();
+    if (normCountry) {
+      if (normCountry === 'vietnam' || normCountry === 'viet nam') {
+        return 'vietnam';
+      }
+      return 'international';
+    }
+
+    const rawLocation = conference.location !== undefined && conference.location !== null
+      ? String(conference.location).trim()
+      : '';
+    const normLocation = normalizeText(rawLocation).replace(/\s+/g, ' ').trim();
+    if (!normLocation) return '';
+
+    if (/\b(vietnam|viet nam)\b/.test(normLocation)) {
+      return 'vietnam';
+    }
+    const cityKey = normalizeCityKey(rawLocation);
+    if (cityKey === 'ha-noi' || cityKey === 'ho-chi-minh') {
+      return 'vietnam';
+    }
+    return '';
+  }
+
+  /**
    * Kiểm tra giá trị trạng thái CFP của hội nghị có khớp lựa chọn lọc hay không.
    * @param {string} confCfp - Trạng thái CFP của hội nghị.
    * @param {string} targetVal - Giá trị lọc đang chọn.
@@ -708,13 +766,26 @@
    * @returns {boolean} True nếu thỏa mãn.
    */
   function matchesCityGroup(conf, cityVal) {
-    const confCity = conf.cityKey || 'other';
+    const confCity = conf.cityKey || normalizeCityKey(conf);
     if (Array.isArray(cityVal)) {
       if (cityVal.length === 0 || cityVal.includes('all')) return true;
       return cityVal.includes(confCity);
     }
     if (!cityVal || cityVal === 'all') return true;
     return confCity === cityVal;
+  }
+
+  /**
+   * Kiểm tra hội nghị có thỏa mãn nhóm lọc Phạm vi (`'vietnam'`, `'international'`) hay không.
+   * Không lọc khi chưa chọn lựa chọn nào; bản ghi có `scopeKey === ''` chỉ hiển thị khi không chọn nhóm Phạm vi.
+   * @param {Object} conf - Đối tượng hội nghị.
+   * @param {Array<string>} scopesVal - Mảng khóa phạm vi đang chọn.
+   * @returns {boolean} True nếu thỏa mãn.
+   */
+  function matchesScopeGroup(conf, scopesVal) {
+    if (!Array.isArray(scopesVal) || scopesVal.length === 0) return true;
+    const confScopeKey = typeof conf.scopeKey === 'string' ? conf.scopeKey : normalizeScopeKey(conf);
+    return scopesVal.includes(confScopeKey);
   }
 
   /**
@@ -728,7 +799,16 @@
   function matchesFilters(
     conf,
     filterState,
-    enabledGroups = { rank: true, month: true, cfp: true, mode: true, when: true, where: true, what: true }
+    enabledGroups = {
+      rank: true,
+      month: true,
+      cfp: true,
+      mode: true,
+      when: true,
+      scope: true,
+      where: true,
+      what: true
+    }
   ) {
     if (!conf || !filterState) return false;
 
@@ -747,6 +827,7 @@
       const confModeKey = normalizeModeKey(conf);
       if (!filterState.modes.includes(confModeKey)) return false;
     }
+    if (enabledGroups.scope !== false && !matchesScopeGroup(conf, filterState.scopes)) return false;
     if (enabledGroups.where !== false && !matchesCityGroup(conf, filterState.city)) return false;
 
     if (enabledGroups.what !== false && Array.isArray(filterState.topics) && filterState.topics.length > 0) {
@@ -821,11 +902,21 @@
         matchesOption: conf => normalizeModeKey(conf) === optionValue
       };
     }
+    if (groupPrefix === 'scope') {
+      subState.scopes = [];
+      return {
+        subState,
+        matchesOption: conf => {
+          const confScopeKey = typeof conf.scopeKey === 'string' ? conf.scopeKey : normalizeScopeKey(conf);
+          return confScopeKey === optionValue;
+        }
+      };
+    }
     if (groupPrefix === 'city') {
       subState.city = 'all';
       return {
         subState,
-        matchesOption: conf => optionValue === 'all' || (conf.cityKey || 'other') === optionValue
+        matchesOption: conf => optionValue === 'all' || (conf.cityKey || normalizeCityKey(conf)) === optionValue
       };
     }
     if (groupPrefix === 'topic') {
@@ -975,6 +1066,12 @@
         groupKey: 'mode',
         label: 'bộ lọc Hình thức tổ chức',
         patch: { modes: [] }
+      },
+      {
+        active: Array.isArray(filterState.scopes) && filterState.scopes.length > 0,
+        groupKey: 'scope',
+        label: 'bộ lọc Phạm vi',
+        patch: { scopes: [] }
       },
       {
         active: hasArrayChoice(filterState.city, true),
@@ -1143,6 +1240,8 @@
     toTopicSlug,
     normalizeRankKey,
     normalizeModeKey,
+    normalizeCityKey,
+    normalizeScopeKey,
     normalizeTopicFields,
     expandTopicFilterValues,
     buildIndex,

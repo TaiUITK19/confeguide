@@ -1,6 +1,6 @@
 /* =========================================================
    ConfGuide — Search & Filter Stylesheet (css/pages/search.css)
-   Khung lọc hợp nhất CÒN – KHI – ĐÂU – GÌ | Thẻ kết quả BEM (.conference-card)
+   Khung lọc đa chiều 7 nhóm | Thẻ kết quả BEM (.conference-card)
    Sticky Sidebar Desktop & Drawer/Bottom-Sheet Mobile | Skeleton Loading
    Chuẩn WCAG 2.1 AA (:focus-within, vùng chạm >= 44px, prefers-reduced-motion)
    ========================================================= */
@@ -330,26 +330,6 @@ body.dark {
   white-space: nowrap;
 }
 
-.filter-title__badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 22px;
-  height: 22px;
-  padding: 0 7px;
-  border-radius: var(--radius-pill);
-  background: var(--filter-badge-bg);
-  color: var(--filter-badge-text);
-  font-size: 11.5px;
-  font-weight: 800;
-  font-variant-numeric: tabular-nums;
-  line-height: 1;
-}
-
-.filter-title__badge[hidden] {
-  display: none;
-}
-
 /* Nút "Đặt lại" dạng pill rõ nét: dịu nhẹ khi chưa lọc, nổi bật màu chủ đạo khi có bộ lọc đang bật */
 .btn-clear-all {
   font-size: 12.5px;
@@ -407,7 +387,7 @@ body.dark {
   outline-offset: 2px;
 }
 
-/* Phần thân chứa 6 nhóm lọc accordion */
+/* Phần thân chứa 7 nhóm lọc accordion */
 .filters__body {
   display: flex;
   flex-direction: column;
@@ -439,13 +419,6 @@ body.dark {
   font-weight: inherit;
   flex: 1;
   min-width: 0;
-}
-
-/* Hàng tiêu đề tách riêng nút mở/đóng accordion */
-.accordion-header-row {
-  display: flex;
-  align-items: center;
-  gap: 6px;
 }
 
 .accordion-head,
@@ -485,21 +458,6 @@ body.dark {
   outline-offset: 3px;
 }
 
-.accordion-head__main {
-  display: inline-flex;
-  align-items: center;
-  gap: 9px;
-  min-width: 0;
-}
-
-.accordion-head__icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--filter-accent-text);
-  flex-shrink: 0;
-}
-
 .accordion-head__title,
 .filter-group__title {
   font-size: 13px;
@@ -509,59 +467,6 @@ body.dark {
   color: var(--text);
   line-height: 1.35;
   transition: color 140ms ease;
-}
-
-.accordion-head__meta {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  flex-shrink: 0;
-}
-
-.filter-group__selected {
-  display: inline-flex;
-  align-items: center;
-  padding: 2px 8px;
-  border-radius: var(--radius-pill);
-  background: var(--primary-soft);
-  color: var(--filter-accent-text);
-  font-size: 11px;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-}
-
-.filter-group__selected[hidden] {
-  display: none;
-}
-
-.accordion-clear-btn {
-  flex-shrink: 0;
-  padding: 3px 8px;
-  border-radius: var(--radius-pill);
-  border: 1px solid var(--border-strong);
-  background: var(--surface-alt);
-  color: var(--filter-accent-text);
-  font-size: 11.5px;
-  font-weight: 600;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: background-color 140ms ease, color 140ms ease, border-color 140ms ease;
-}
-
-.accordion-clear-btn:hover {
-  background: var(--danger-hover-bg);
-  border-color: var(--red);
-  color: var(--red);
-}
-
-.accordion-clear-btn:focus-visible {
-  outline: 2px solid var(--primary);
-  outline-offset: 2px;
-}
-
-.accordion-clear-btn[hidden] {
-  display: none;
 }
 
 .accordion-head .chevron,
@@ -616,93 +521,6 @@ body.dark {
   scrollbar-color: var(--border-strong) transparent;
 }
 
-/* Lưới 2 cột gọn cho các nhóm ít lựa chọn (Hạn nộp, Địa điểm) */
-.filter-fieldset--grid-2 {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 4px;
-}
-
-.check-row--full {
-  grid-column: 1 / -1;
-}
-
-/* Hàng 4 nút chọn Phân hạng (Rank A*, A, B, C) */
-.rank-btn-grid {
-  border: none;
-  padding: 0;
-  margin: 0;
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 6px;
-  min-width: 0;
-}
-
-.rank-btn {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 1px;
-  min-height: 44px;
-  padding: 5px 4px;
-  border-radius: 8px;
-  border: 1px solid var(--border-strong);
-  background: var(--surface-alt);
-  color: var(--text);
-  cursor: pointer;
-  user-select: none;
-  transition:
-    background-color 140ms ease,
-    color 140ms ease,
-    border-color 140ms ease,
-    box-shadow 140ms ease,
-    opacity 140ms ease;
-}
-
-.rank-btn:hover:not(:disabled):not(.is-empty) {
-  border-color: var(--primary);
-  background: var(--filter-preset-hover-bg);
-  color: var(--filter-accent-text);
-}
-
-.rank-btn:focus-visible {
-  outline: 2px solid var(--primary);
-  outline-offset: 2px;
-}
-
-.rank-btn.is-selected {
-  background: var(--primary-soft);
-  border-color: var(--primary);
-  color: var(--filter-accent-text);
-  box-shadow: inset 0 0 0 1px var(--primary);
-}
-
-.rank-btn:disabled,
-.rank-btn.is-empty {
-  opacity: 0.45;
-  cursor: not-allowed;
-}
-
-.rank-btn__code {
-  font-size: 13.5px;
-  font-weight: 800;
-  line-height: 1.15;
-}
-
-.rank-btn__count {
-  font-size: 10.5px;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-  color: var(--text-muted);
-  line-height: 1.1;
-}
-
-.rank-btn.is-selected .rank-btn__count {
-  color: var(--filter-accent-text);
-  font-weight: 700;
-}
-
 /* Hàng lựa chọn Checkbox dạng danh sách 1 cột sạch kèm trạng thái vô hiệu hóa 0 bản ghi */
 .check-row,
 .filter-option {
@@ -717,21 +535,6 @@ body.dark {
   padding: 0;
   border-radius: 4px;
   transition: color 140ms ease, opacity 140ms ease;
-}
-
-.filter-fieldset--grid-2 .check-row {
-  gap: 0;
-  min-height: 22px;
-  padding: 0;
-  font-size: 14px;
-  border: none;
-  background: transparent;
-}
-
-.filter-fieldset--grid-2 .check-row.is-selected {
-  background: transparent;
-  border-color: transparent;
-  color: var(--text);
 }
 
 .check-row[hidden],
@@ -822,37 +625,6 @@ body.dark {
   box-shadow: 0 0 0 2px var(--surface);
 }
 
-/* Chấm trạng thái CÒN (phân biệt bằng cả màu và hình dạng theo WCAG 1.4.1) */
-.check-row__dot {
-  width: 9px;
-  height: 9px;
-  flex-shrink: 0;
-  display: inline-block;
-}
-
-.check-row__dot--open {
-  border-radius: 50%;
-  background: var(--cfp-open);
-}
-
-.check-row__dot--closing {
-  border-radius: 2px;
-  background: var(--cfp-closing);
-  transform: rotate(45deg);
-}
-
-.check-row__dot--closed {
-  border-radius: 50%;
-  background: transparent;
-  border: 2px solid var(--cfp-closed);
-}
-
-.check-row__dot--unknown {
-  border-radius: 50%;
-  background: transparent;
-  border: 2px dashed var(--cfp-unknown);
-}
-
 .check-row__label,
 .filter-option__text {
   flex: 0 1 auto;
@@ -869,11 +641,21 @@ body.dark {
   font-weight: 500;
 }
 
-/* Nhóm KHI: Tháng + Đang diễn ra + Chip chọn nhanh + Lưới 2 cột Từ/Đến */
-.when-compact-row {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+/* Bộ đếm số lượng kết quả trước (pre-count) hiển thị cạnh nhãn tùy chọn lọc */
+.check-row__count,
+.filter-option__count {
+  margin-left: 6px;
+  font-size: 13.5px;
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-muted);
+  line-height: 1.4;
+  flex-shrink: 0;
+}
+
+.check-row input:checked ~ .check-row__count,
+.filter-option input:checked ~ .filter-option__count {
+  color: var(--text-muted);
 }
 
 .filter-sub-label {
@@ -1068,22 +850,6 @@ body.dark {
   font-weight: 800;
 }
 
-.results-quality-note {
-  display: inline-flex;
-  align-items: center;
-  padding: 2px 10px;
-  border-radius: var(--radius-pill);
-  background: var(--surface-muted);
-  border: 1px solid var(--border);
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--text-muted);
-}
-
-.results-quality-note[hidden] {
-  display: none;
-}
-
 .results-head__controls {
   display: flex;
   align-items: center;
@@ -1105,12 +871,6 @@ body.dark {
   font-weight: 700;
   cursor: pointer;
   box-shadow: var(--shadow-sm);
-}
-
-.filters-mobile-trigger.has-active-filters {
-  background: var(--primary-soft);
-  color: var(--primary);
-  border-color: var(--primary);
 }
 
 .filters-mobile-trigger:focus-visible {
@@ -1360,16 +1120,6 @@ body.dark {
   -webkit-box-orient: vertical;
   overflow: hidden;
   word-break: break-word;
-}
-
-/* Tô sáng từ khóa khớp bằng <mark> */
-.conference-card__highlight {
-  background: var(--mark-bg);
-  color: var(--mark-text);
-  border: 1px solid var(--mark-border);
-  border-radius: 3px;
-  padding: 0 3px;
-  font-weight: 700;
 }
 
 .card-meta-row {
@@ -1833,13 +1583,11 @@ body.dark {
   .accordion-head,
   .accordion-head__title,
   .accordion-head .chevron,
-  .accordion-clear-btn,
   .check-row,
   .check-row input[type="checkbox"],
   .check-row input[type="checkbox"]::before,
   .filter-option__input,
   .filter-option__input::before,
-  .rank-btn,
   .topic-toggle-btn,
   .filters__reset-btn,
   .apply-btn,
@@ -1996,9 +1744,7 @@ body.dark {
   .keyword,
   .accordion-head,
   .filter-group__toggle,
-  .accordion-clear-btn,
   .check-row,
-  .rank-btn,
   .filter-option,
   .date-range input[type="date"],
   .topic-toggle-btn,
