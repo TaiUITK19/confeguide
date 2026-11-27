@@ -681,6 +681,626 @@ body.dark {
   box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--focus-ring);
 }
 
+/* --- Quy trình 3 bước Đăng nhập Google & OpenAlex --- */
+.google-auth-modal__box {
+  max-width: 660px;
+}
+
+.google-steps {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.google-steps__item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--surface-alt);
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.google-steps__num {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--surface-muted);
+  color: var(--text-muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.google-steps__item.is-active {
+  border-color: var(--primary);
+  background: var(--primary-soft);
+  color: var(--navy);
+}
+
+.google-steps__item.is-active .google-steps__num {
+  background: var(--primary);
+  color: var(--on-primary);
+}
+
+.google-steps__item.is-done {
+  border-color: var(--status-open-border);
+  background: var(--status-open-bg);
+  color: var(--status-open-text);
+}
+
+.google-steps__item.is-done .google-steps__num {
+  background: var(--status-open-dot);
+  color: var(--on-primary);
+}
+
+.google-step-pane[hidden] {
+  display: none;
+}
+
+.google-real-box {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 13px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--conf-badge-border);
+  background: var(--primary-soft);
+  margin-bottom: 12px;
+}
+
+.google-env-banner {
+  margin: 0;
+  padding: 8px 11px;
+  border-radius: 6px;
+  font-size: 12px;
+  line-height: 1.45;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-muted);
+}
+
+.google-env-banner.is-ready {
+  border-color: var(--status-open-border);
+  background: var(--status-open-bg);
+  color: var(--status-open-text);
+}
+
+.google-env-banner.is-warning {
+  border-color: var(--status-warning-border);
+  background: var(--status-warning-bg);
+  color: var(--status-warning-text);
+}
+
+.google-real-box__actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.google-real-box__popup-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  min-height: 40px;
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: border-color 140ms ease, background-color 140ms ease, transform 120ms ease;
+}
+
+.google-real-box__popup-btn:hover:not(:disabled) {
+  border-color: var(--primary);
+  transform: translateY(-1px);
+}
+
+.google-real-box__popup-btn:disabled {
+  opacity: 0.58;
+  cursor: not-allowed;
+}
+
+.google-real-box__gsi-slot {
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+}
+
+.google-config-box {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  padding: 9px 12px;
+  margin-bottom: 12px;
+}
+
+.google-config-box__summary {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--primary);
+  cursor: pointer;
+}
+
+.google-config-box__body {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.google-config-box__guide {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
+.google-config-box__row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.google-config-box__row .modal-input {
+  flex: 1;
+  min-width: 220px;
+}
+
+.google-account-card__avatar {
+  overflow: hidden;
+}
+
+.google-account-card__avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  border-radius: 50%;
+}
+
+.google-identity-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 13px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--conf-badge-border);
+  background: var(--primary-soft);
+  margin-bottom: 12px;
+}
+
+.google-identity-bar__left {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  min-width: 0;
+}
+
+.google-identity-bar__avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--brand-gradient);
+  color: var(--on-brand);
+  font-size: 16px;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.google-identity-bar__avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  border-radius: 50%;
+}
+
+.google-identity-bar__info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.google-identity-bar__name {
+  font-size: 14px;
+  color: var(--text);
+}
+
+.google-identity-bar__email {
+  font-size: 12px;
+  color: var(--text-muted);
+  overflow-wrap: anywhere;
+}
+
+.google-oa-search {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.google-oa-search__grid {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  align-items: end;
+}
+
+.google-oa-search__name-row {
+  display: flex;
+  gap: 6px;
+}
+
+.google-oa-search__name-row .modal-input {
+  flex: 1;
+  min-width: 0;
+}
+
+.google-oa-search__orcid-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.google-oa-search__orcid-row .modal-input {
+  flex: 1 1 210px;
+  min-width: 0;
+}
+
+.google-lookup-meta {
+  margin: 0 0 8px;
+  padding: 7px 11px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--surface-alt);
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.google-lookup-meta[hidden] {
+  display: none;
+}
+
+.google-fallback-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--status-warning-border);
+  background: var(--status-warning-bg);
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--text);
+}
+
+.google-fallback-panel__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.google-paste-box {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--surface-alt);
+  margin-bottom: 10px;
+}
+
+.google-paste-box__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.google-paste-box__label {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.google-paste-box__row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.google-paste-box__textarea {
+  min-height: 54px;
+  resize: vertical;
+  font-family: inherit;
+  font-size: 12.5px;
+  line-height: 1.45;
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+@media (max-width: 680px) {
+  .google-paste-box__row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.google-oa-results {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 250px;
+  overflow-y: auto;
+}
+
+.google-oa-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 11px 13px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-strong);
+  background: var(--surface-alt);
+}
+
+.google-oa-card__info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.google-oa-card__name {
+  font-size: 14px;
+  color: var(--text);
+}
+
+.google-oa-card__meta,
+.google-oa-card__topics {
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--text-muted);
+}
+
+.google-mapper-banner {
+  padding: 11px 13px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  margin-bottom: 12px;
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+
+.google-mapper-banner.is-success {
+  border-color: var(--status-open-border);
+  background: var(--status-open-bg);
+  color: var(--text);
+}
+
+.google-mapper-banner.is-fallback {
+  border-color: var(--status-warning-border);
+  background: var(--status-warning-bg);
+  color: var(--text);
+}
+
+.google-mapper-banner__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 4px;
+}
+
+.google-mapper-banner__badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 9px;
+  border-radius: var(--radius-pill);
+  font-size: 11.5px;
+  font-weight: 700;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+}
+
+.google-manual-quick-add {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr auto;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.google-manual-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  max-height: 185px;
+  overflow-y: auto;
+  padding: 2px;
+}
+
+.google-auth-modal__body {
+  padding-bottom: 18px;
+}
+
+.google-step-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.google-step-footer__right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.google-scholar-consent {
+  padding: 14px 16px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--conf-badge-border);
+  background: var(--primary-soft);
+  margin-bottom: 12px;
+}
+
+.google-scholar-consent__title {
+  margin: 0 0 6px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.google-scholar-consent__desc {
+  margin: 0 0 12px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
+.google-scholar-consent__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.google-oa-card__mapped {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--primary);
+}
+
+.google-unmatched-note {
+  margin: 8px 0 0;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.google-signin-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 12px;
+  padding: 20px 18px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--surface-alt);
+}
+
+.google-signin-panel__title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.google-signin-panel__desc {
+  margin: 0;
+  max-width: 440px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
+.google-real-box__gsi-slot--center {
+  justify-content: center;
+  min-height: 44px;
+}
+
+.google-origin-note {
+  margin: 0;
+  max-width: 520px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
+.google-setup-guide {
+  width: 100%;
+  text-align: left;
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--text-muted);
+}
+
+.google-setup-guide[hidden],
+.google-origin-note[hidden] {
+  display: none;
+}
+
+.google-setup-guide__title {
+  margin: 0 0 6px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.google-setup-guide__list {
+  margin: 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.google-setup-guide__code {
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: var(--surface-muted);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 11.5px;
+  word-break: break-all;
+}
+
+.google-setup-guide__link {
+  color: var(--primary);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
 /* ================= 6. RESPONSIVE & REDUCED MOTION ================= */
 @media (max-width: 900px) {
   .auth-main {
@@ -773,6 +1393,19 @@ body.dark {
 
   .login-heading h2 {
     font-size: 23px;
+  }
+
+  .google-steps,
+  .google-oa-search__grid,
+  .google-manual-quick-add,
+  .google-manual-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .google-identity-bar,
+  .google-oa-card {
+    flex-direction: column;
+    align-items: stretch;
   }
 }
 

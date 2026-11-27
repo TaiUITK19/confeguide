@@ -93,7 +93,7 @@
 
             <!-- Lĩnh vực nghiên cứu -->
             <div class="profile-fields-wrap">
-              <span class="profile-fields-label">Lĩnh vực nghiên cứu:</span>
+              <span class="profile-fields-label">Lĩnh vực của tôi:</span>
               <div class="profile-fields-body">
                 <div class="profile-fields-chips" id="profileFieldsChips">
                   <!-- Nạp động -->
@@ -103,7 +103,7 @@
                     <path d="M12 20h9"></path>
                     <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
                   </svg>
-                  <span>Chỉnh sửa lĩnh vực nghiên cứu</span>
+                  <span>Quản lý lĩnh vực (Thêm / Xóa / Sửa)</span>
                 </button>
               </div>
             </div>
@@ -280,6 +280,10 @@
 
   <!-- Chân trang dùng chung -->
   <div id="site-footer"></div>
+
+  <!-- Dịch vụ tra cứu OpenAlex và ánh xạ lĩnh vực -->
+  <script src="js/services/openalex.js" defer></script>
+  <script src="js/services/domain-mapper.js" defer></script>
 
   <!-- Script thành phần và nghiệp vụ trang Hồ sơ -->
   <script src="js/components/compare.js" defer></script>

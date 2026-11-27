@@ -1,0 +1,29 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "rewrites": [
+    {
+      "source": "/auth/(.*)",
+      "destination": "/api/index.js"
+    },
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/index.js"
+    },
+    {
+      "source": "/health",
+      "destination": "/api/index.js"
+    },
+    {
+      "source": "/backend",
+      "destination": "/404.html"
+    },
+    {
+      "source": "/backend/(.*)",
+      "destination": "/404.html"
+    },
+    {
+      "source": "/AGENT.md",
+      "destination": "/404.html"
+    }
+  ]
+}

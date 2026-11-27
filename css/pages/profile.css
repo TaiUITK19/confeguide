@@ -843,3 +843,28 @@
     justify-content: flex-end;
   }
 }
+
+/* --- Thẻ lĩnh vực chi tiết (Ưu tiên, Tùy chỉnh, Nguồn OpenAlex) --- */
+.profile-field-pill--primary {
+  border-color: var(--status-open-border);
+  background: var(--status-open-bg);
+  color: var(--status-open-text);
+}
+
+.profile-field-pill__priority {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 6px;
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  border: 1px solid var(--status-open-border);
+  color: var(--status-open-text);
+  font-size: 10.5px;
+  font-weight: 700;
+}
+
+.profile-field-pill__source {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--text-muted);
+}

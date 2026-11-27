@@ -12,6 +12,59 @@
   const VN_TIMEZONE_LABEL = 'UTC+7 (giờ Việt Nam)';
   const VN_UTC_OFFSET_MS = 7 * 3600000;
   const AOE_TO_UTC_OFFSET_MS = 12 * 3600000;
+  const DEFAULT_BACKEND_API_BASE = 'http://localhost:3000';
+
+  /**
+   * Lấy URL gốc của backend ConfGuide (tự khớp cổng 3000 hoặc cùng origin khi mở trực tiếp từ backend).
+   * @returns {string} URL backend.
+   */
+  function getBackendApiBase() {
+    if (window.ConfGuideGoogleAuth && typeof window.ConfGuideGoogleAuth.getBackendBaseUrl === 'function') {
+      return window.ConfGuideGoogleAuth.getBackendBaseUrl();
+    }
+    if (typeof window.CONFGUIDE_API_BASE === 'string' && window.CONFGUIDE_API_BASE.trim()) {
+      return window.CONFGUIDE_API_BASE.trim().replace(/\/+$/, '');
+    }
+    if (typeof window !== 'undefined' && window.location) {
+      const { protocol, hostname, port, origin } = window.location;
+      const isLocalHost = hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '[::1]';
+      try {
+        const saved = window.localStorage.getItem('confguide_backend_url');
+        if (saved && saved.trim()) {
+          const cleanSaved = saved.trim().replace(/\/+$/, '');
+          const savedIsLocal = /^https?:\/\/(?:localhost|127\.0\.0\.1|\[::1\])(?::\d+)?$/i.test(cleanSaved);
+          if (isLocalHost || !savedIsLocal) return cleanSaved;
+        }
+      } catch {
+        // Bỏ qua lỗi Storage
+      }
+      if (protocol === 'http:' || protocol === 'https:') {
+        // Khi chạy frontend qua Live Server / server tĩnh cục bộ khác cổng 3000, trỏ về backend cổng 3000
+        if (isLocalHost && port && port !== '3000') {
+          const apiHost = hostname === '[::1]' ? 'localhost' : hostname;
+          return `http://${apiHost}:3000`;
+        }
+        // Khi chạy trên Vercel hoặc mở trực tiếp trên cổng 3000, gọi API cùng origin
+        return origin.replace(/\/+$/, '');
+      }
+    }
+    try {
+      const saved = window.localStorage.getItem('confguide_backend_url');
+      if (saved && saved.trim()) return saved.trim().replace(/\/+$/, '');
+    } catch {
+      // Bỏ qua lỗi Storage
+    }
+    return DEFAULT_BACKEND_API_BASE;
+  }
+
+  /**
+   * Kiểm tra trang hiện tại có đang chạy qua HTTP/HTTPS hay không (tránh gọi backend trên file:///).
+   * @returns {boolean} True nếu là http: hoặc https:.
+   */
+  function isHttpOriginContext() {
+    const protocol = typeof window !== 'undefined' && window.location ? window.location.protocol : '';
+    return protocol === 'http:' || protocol === 'https:';
+  }
 
   /**
    * Lấy ngày lịch hiện tại dạng ISO YYYY-MM-DD theo múi giờ cố định Asia/Ho_Chi_Minh (UTC+7).
@@ -1353,16 +1406,18 @@
    * @returns {string} Chuỗi HTML `.user-menu-wrapper`.
    */
   function renderLoggedInUserMenu(user) {
-    const displayName = user.fullName || user.username || user.email || 'U';
+    const displayName = user.fullName || user.name || user.username || user.email || 'U';
     const initial = displayName.trim().charAt(0).toUpperCase() || 'U';
     const hasPhoto = Boolean(user.avatarUrl && typeof user.avatarUrl === 'string');
     const avatarContent = hasPhoto
       ? `<img src="${escapeHtml(user.avatarUrl)}" alt="${escapeHtml(displayName)}" `
-        + `width="36" height="36" class="header-avatar-img">`
+        + `width="36" height="36" class="header-avatar-img js-avatar-img-fallback" `
+        + `referrerpolicy="no-referrer" data-fallback-initial="${escapeHtml(initial)}">`
       : escapeHtml(initial);
     const thumbContent = hasPhoto
       ? `<img src="${escapeHtml(user.avatarUrl)}" alt="${escapeHtml(displayName)}" `
-        + `width="44" height="44" class="dropdown-avatar-img">`
+        + `width="44" height="44" class="dropdown-avatar-img js-avatar-img-fallback" `
+        + `referrerpolicy="no-referrer" data-fallback-initial="${escapeHtml(initial)}">`
       : escapeHtml(initial);
     const userSubtitle = escapeHtml(user.email || user.username || '');
 
@@ -1931,51 +1986,200 @@
   }
 
   /**
-   * Lấy danh sách khóa lĩnh vực nghiên cứu (slug) gắn với tài khoản đang đăng nhập.
-   * Luôn trả về `[]` khi người dùng chưa đăng nhập.
-   * @returns {Array<string>} Danh sách khóa lĩnh vực của tài khoản hiện tại.
-   */
-  function getUserResearchTopicKeys() {
-    if (!isUserAuthenticated()) return [];
-    return parseTopicKeysFromText(getUserResearchFieldsText());
-  }
-
-  /**
-   * Lấy danh sách nhãn lĩnh vực nghiên cứu gắn với tài khoản đang đăng nhập.
-   * Luôn trả về `[]` khi người dùng chưa đăng nhập.
-   * @returns {Array<string>} Danh sách nhãn lĩnh vực để hiển thị.
-   */
-  function getUserResearchTopicLabels() {
-    if (!isUserAuthenticated()) return [];
-    return parseTopicDisplayLabelsFromText(getUserResearchFieldsText());
-  }
-
-  /**
-   * Cập nhật danh sách lĩnh vực nghiên cứu vào đúng trường `fieldsOfInterest` của tài khoản đang đăng nhập
-   * (đồng bộ cả `confguide_current_user` và `confguide_users`). Từ chối lưu nếu chưa đăng nhập.
-   * @param {Array<string>} topicKeys - Danh sách khóa lĩnh vực muốn lưu.
-   * @param {{ silent?: boolean }} [options={}] - Tùy chọn không phát sự kiện nếu đang gộp lưu cùng prefs.
+   * Chuẩn hóa một bản ghi lĩnh vực nghiên cứu trong danh sách quản lý của người dùng (`researchDomains`).
+   * @param {Object|string|null} rawDomain - Dữ liệu lĩnh vực thô.
+   * @param {number} [idx=0] - Chỉ số dự phòng tạo ID.
    * @returns {{
-   *   ok: boolean, requiresAuth: boolean, keys: Array<string>,
-   *   labels: Array<string>, fieldsOfInterest: string
-   * }} Kết quả thao tác.
+   *   id: string, key: string, label: string, priority: 'primary'|'normal',
+   *   source: 'openalex'|'manual'|'custom', confidence: number|null,
+   *   openAlexTopicName: string, updatedAt: string
+   * }|null} Bản ghi chuẩn hóa hoặc null nếu khóa không hợp lệ.
    */
-  function setUserResearchTopicKeys(topicKeys, options = {}) {
-    const activeUser = getCurrentUser();
-    if (!activeUser) {
-      return { ok: false, requiresAuth: true, keys: [], labels: [], fieldsOfInterest: '' };
+  function normalizeManagedDomainItem(rawDomain, idx = 0) {
+    if (!rawDomain) return null;
+    if (typeof rawDomain === 'string') {
+      const keys = parseTopicKeysFromText(rawDomain);
+      const key = keys[0] || '';
+      if (!VALID_PREF_TOPIC_KEYS.has(key)) return null;
+      const canonLabel = PREF_TOPIC_LABEL_MAP[key] || key;
+      const cleanRaw = rawDomain.trim();
+      const isCustom = Boolean(cleanRaw && cleanRaw.toLowerCase() !== canonLabel.toLowerCase());
+      return {
+        id: `dom_${key}_${idx}`,
+        key,
+        label: isCustom ? cleanRaw : canonLabel,
+        priority: 'normal',
+        source: isCustom ? 'custom' : 'manual',
+        confidence: null,
+        openAlexTopicName: '',
+        updatedAt: ''
+      };
     }
 
-    const inputSet = new Set(
-      Array.isArray(topicKeys) ? topicKeys.map(item => String(item || '').trim()).filter(Boolean) : []
-    );
-    const cleanKeys = PREFERENCE_TOPICS
-      .map(item => item.key)
-      .filter(key => inputSet.has(key));
-    const labels = cleanKeys.map(key => PREF_TOPIC_LABEL_MAP[key] || key);
-    const fieldsText = labels.join(', ');
+    if (typeof rawDomain !== 'object') return null;
+    let key = String(rawDomain.key || '').trim();
+    if (!VALID_PREF_TOPIC_KEYS.has(key)) {
+      const mapped = TOPIC_SLUG_ALIAS_FALLBACK[toCanonicalTopicSlug(key)] || '';
+      key = VALID_PREF_TOPIC_KEYS.has(mapped) ? mapped : '';
+    }
+    if (!key) return null;
 
-    const updatedCurrentUser = Object.assign({}, activeUser, { fieldsOfInterest: fieldsText });
+    const rawLabel = String(rawDomain.label || '').trim();
+    const label = rawLabel || PREF_TOPIC_LABEL_MAP[key] || key;
+    const priority = rawDomain.priority === 'primary' ? 'primary' : 'normal';
+    const rawSource = String(rawDomain.source || '').trim().toLowerCase();
+    const recognizedSources = new Set([
+      'serpapi',
+      'scholar',
+      'openalex',
+      'orcid',
+      'semantic_scholar',
+      'confguide_saved',
+      'custom',
+      'manual'
+    ]);
+    const source = recognizedSources.has(rawSource)
+      ? rawSource
+      : (label.toLowerCase() !== (PREF_TOPIC_LABEL_MAP[key] || '').toLowerCase() ? 'custom' : 'manual');
+    const confNum = Number(rawDomain.confidence);
+    const confidence = Number.isFinite(confNum) && confNum > 0 ? Math.min(100, Math.round(confNum)) : null;
+
+    const rawOaTopic = rawDomain.openAlexTopicName || rawDomain.originalInterest;
+    let cleanOaTopic = (rawOaTopic && typeof rawOaTopic === 'object')
+      ? String(rawOaTopic.name || rawOaTopic.displayName || '').trim()
+      : String(rawOaTopic || '').trim();
+    if (cleanOaTopic === '[object Object]') {
+      cleanOaTopic = '';
+    }
+
+    return {
+      id: String(rawDomain.id || `dom_${key}_${idx}`).trim(),
+      key,
+      label,
+      priority,
+      source,
+      confidence,
+      openAlexTopicName: cleanOaTopic,
+      originalInterest: cleanOaTopic,
+      updatedAt: typeof rawDomain.updatedAt === 'string' ? rawDomain.updatedAt : ''
+    };
+  }
+
+  /**
+   * Đọc danh sách lĩnh vực nghiên cứu chi tiết (`researchDomains`) gắn với tài khoản đang đăng nhập.
+   * Tự động suy xuất từ `fieldsOfInterest` nếu tài khoản cũ chưa có trường `researchDomains`.
+   * @returns {Array<Object>} Danh sách lĩnh vực đã chuẩn hóa.
+   */
+  function getUserResearchDomains() {
+    const activeUser = getCurrentUser();
+    if (!activeUser) return [];
+
+    let rawList = Array.isArray(activeUser.researchDomains) ? activeUser.researchDomains : null;
+    if (!rawList) {
+      const users = readStorage('confguide_users', []);
+      if (Array.isArray(users)) {
+        const matched = users.find(candidate => isMatchingStoredAccount(candidate, activeUser));
+        if (matched && Array.isArray(matched.researchDomains)) {
+          rawList = matched.researchDomains;
+        }
+      }
+    }
+
+    const normalized = [];
+    const seenIds = new Set();
+
+    if (Array.isArray(rawList)) {
+      rawList.forEach((item, idx) => {
+        const clean = normalizeManagedDomainItem(item, idx);
+        if (!clean || seenIds.has(clean.id)) return;
+        seenIds.add(clean.id);
+        normalized.push(clean);
+      });
+      return normalized;
+    }
+
+    // Tự động chuyển đổi từ chuỗi fieldsOfInterest của tài khoản cũ
+    const fallbackKeys = parseTopicKeysFromText(getUserResearchFieldsText());
+    fallbackKeys.forEach((key, idx) => {
+      const clean = normalizeManagedDomainItem({
+        id: `dom_${key}_${idx}`,
+        key,
+        label: PREF_TOPIC_LABEL_MAP[key] || key,
+        priority: 'normal',
+        source: 'manual'
+      }, idx);
+      if (clean && !seenIds.has(clean.id)) {
+        seenIds.add(clean.id);
+        normalized.push(clean);
+      }
+    });
+    return normalized;
+  }
+
+  /**
+   * Lưu toàn bộ danh sách lĩnh vực chi tiết (`researchDomains`) của tài khoản đang đăng nhập,
+   * đồng bộ ngược về `fieldsOfInterest`, `confguide_current_user`, `confguide_users` và phát sự kiện cập nhật.
+   * @param {Array<Object>} domainsList - Mảng bản ghi lĩnh vực cần lưu.
+   * @param {{ silent?: boolean }} [options={}] - Tùy chọn không phát sự kiện khi gọi lồng.
+   * @returns {{
+   *   ok: boolean, requiresAuth: boolean, domains: Array<Object>,
+   *   keys: Array<string>, labels: Array<string>, fieldsOfInterest: string
+   * }} Kết quả lưu dữ liệu.
+   */
+  function setUserResearchDomains(domainsList, options = {}) {
+    const activeUser = getCurrentUser();
+    if (!activeUser) {
+      return { ok: false, requiresAuth: true, domains: [], keys: [], labels: [], fieldsOfInterest: '' };
+    }
+
+    const cleanDomains = [];
+    const seenIds = new Set();
+    const seenCanonicalPairs = new Set();
+
+    (Array.isArray(domainsList) ? domainsList : []).forEach((item, idx) => {
+      const clean = normalizeManagedDomainItem(item, idx);
+      if (!clean) return;
+      const pairKey = `${clean.key}::${clean.label.toLowerCase()}`;
+      if (seenCanonicalPairs.has(pairKey)) return;
+      seenCanonicalPairs.add(pairKey);
+      let safeId = clean.id;
+      while (seenIds.has(safeId)) {
+        safeId = `${clean.id}_${idx}`;
+      }
+      seenIds.add(safeId);
+      cleanDomains.push(Object.assign({}, clean, {
+        id: safeId,
+        updatedAt: clean.updatedAt || new Date().toISOString()
+      }));
+    });
+
+    // Sắp xếp ưu tiên cao lên trước, giữ ổn định thứ tự còn lại
+    cleanDomains.sort((a, b) => Number(b.priority === 'primary') - Number(a.priority === 'primary'));
+
+    const uniqueKeys = [];
+    const seenKeys = new Set();
+    const uniqueLabels = [];
+    const seenLabels = new Set();
+
+    cleanDomains.forEach(item => {
+      if (!seenKeys.has(item.key)) {
+        seenKeys.add(item.key);
+        uniqueKeys.push(item.key);
+      }
+      const normLbl = item.label.toLowerCase();
+      if (!seenLabels.has(normLbl)) {
+        seenLabels.add(normLbl);
+        uniqueLabels.push(item.label);
+      }
+    });
+
+    const fieldsText = uniqueLabels.join(', ');
+    const syncStamp = new Date().toISOString();
+    const updatedCurrentUser = Object.assign({}, activeUser, {
+      researchDomains: cleanDomains,
+      fieldsOfInterest: fieldsText,
+      fieldsUpdatedAt: syncStamp
+    });
     writeStorage('confguide_current_user', updatedCurrentUser);
 
     const users = readStorage('confguide_users', []);
@@ -1984,11 +2188,19 @@
       const nextUsers = users.map(candidate => {
         if (!isMatchingStoredAccount(candidate, updatedCurrentUser)) return candidate;
         modified = true;
-        return Object.assign({}, candidate, { fieldsOfInterest: fieldsText });
+        return Object.assign({}, candidate, {
+          researchDomains: cleanDomains,
+          fieldsOfInterest: fieldsText,
+          fieldsUpdatedAt: syncStamp
+        });
       });
       if (modified) {
         writeStorage('confguide_users', nextUsers);
       }
+    }
+
+    if (!options.skipBackendSync) {
+      syncUserFieldsToBackend(updatedCurrentUser, cleanDomains);
     }
 
     updateSettingsPrefSummary();
@@ -2001,13 +2213,146 @@
         /* Bỏ qua nếu môi trường không hỗ trợ CustomEvent */
       }
     }
+
     return {
       ok: true,
       requiresAuth: false,
-      keys: cleanKeys,
-      labels,
+      domains: cleanDomains,
+      keys: uniqueKeys,
+      labels: uniqueLabels,
       fieldsOfInterest: fieldsText
     };
+  }
+
+  /**
+   * Thêm một lĩnh vực nghiên cứu mới vào hồ sơ người dùng đang đăng nhập.
+   * @param {Object} domainInput - Thông tin lĩnh vực mới (`{ key, label, priority, source }`).
+   * @returns {Object} Kết quả từ `setUserResearchDomains`.
+   */
+  function addUserResearchDomain(domainInput) {
+    const current = getUserResearchDomains();
+    const normalized = normalizeManagedDomainItem(
+      Object.assign({ id: `dom_${Date.now()}_${Math.random().toString(36).slice(2, 6)}` }, domainInput || {}),
+      current.length
+    );
+    if (!normalized) {
+      return { ok: false, requiresAuth: !isUserAuthenticated(), domains: current, keys: [], labels: [], fieldsOfInterest: '' };
+    }
+    return setUserResearchDomains([...current, normalized]);
+  }
+
+  /**
+   * Cập nhật tên, nhóm lĩnh vực chuẩn hoặc độ ưu tiên của một lĩnh vực theo ID.
+   * @param {string} domainId - Mã ID bản ghi lĩnh vực cần sửa.
+   * @param {Object} patch - Trường cần cập nhật (`{ label, key, priority }`).
+   * @returns {Object} Kết quả từ `setUserResearchDomains`.
+   */
+  function updateUserResearchDomain(domainId, patch = {}) {
+    const current = getUserResearchDomains();
+    const targetId = String(domainId || '').trim();
+    const nextList = current.map((item, idx) => {
+      if (item.id !== targetId) return item;
+      return normalizeManagedDomainItem(Object.assign({}, item, patch, {
+        id: item.id,
+        updatedAt: new Date().toISOString()
+      }), idx) || item;
+    });
+    return setUserResearchDomains(nextList);
+  }
+
+  /**
+   * Xóa một lĩnh vực nghiên cứu theo ID khỏi hồ sơ người dùng đang đăng nhập.
+   * @param {string} domainId - Mã ID bản ghi lĩnh vực cần xóa.
+   * @returns {Object} Kết quả từ `setUserResearchDomains`.
+   */
+  function removeUserResearchDomain(domainId) {
+    const targetId = String(domainId || '').trim();
+    const nextList = getUserResearchDomains().filter(item => item.id !== targetId);
+    return setUserResearchDomains(nextList);
+  }
+
+  /**
+   * Lấy danh sách khóa lĩnh vực nghiên cứu (slug) gắn với tài khoản đang đăng nhập.
+   * Luôn trả về `[]` khi người dùng chưa đăng nhập.
+   * @returns {Array<string>} Danh sách khóa lĩnh vực của tài khoản hiện tại.
+   */
+  function getUserResearchTopicKeys() {
+    if (!isUserAuthenticated()) return [];
+    const domains = getUserResearchDomains();
+    if (domains.length > 0) {
+      const keys = [];
+      const seen = new Set();
+      domains.forEach(item => {
+        if (item && VALID_PREF_TOPIC_KEYS.has(item.key) && !seen.has(item.key)) {
+          seen.add(item.key);
+          keys.push(item.key);
+        }
+      });
+      if (keys.length > 0) return keys;
+    }
+    return parseTopicKeysFromText(getUserResearchFieldsText());
+  }
+
+  /**
+   * Lấy danh sách nhãn lĩnh vực nghiên cứu gắn với tài khoản đang đăng nhập.
+   * Luôn trả về `[]` khi người dùng chưa đăng nhập.
+   * @returns {Array<string>} Danh sách nhãn lĩnh vực để hiển thị.
+   */
+  function getUserResearchTopicLabels() {
+    if (!isUserAuthenticated()) return [];
+    const domains = getUserResearchDomains();
+    if (domains.length > 0) {
+      const labels = [];
+      const seen = new Set();
+      domains.forEach(item => {
+        const lbl = item && String(item.label || '').trim();
+        if (lbl && !seen.has(lbl.toLowerCase())) {
+          seen.add(lbl.toLowerCase());
+          labels.push(lbl);
+        }
+      });
+      if (labels.length > 0) return labels;
+    }
+    return parseTopicDisplayLabelsFromText(getUserResearchFieldsText());
+  }
+
+  /**
+   * Cập nhật danh sách khóa lĩnh vực chuẩn vào tài khoản đang đăng nhập,
+   * vẫn giữ nguyên nhãn tùy chỉnh/độ ưu tiên cho các khóa đang tồn tại.
+   * @param {Array<string>} topicKeys - Danh sách khóa lĩnh vực muốn lưu.
+   * @param {{ silent?: boolean }} [options={}] - Tùy chọn không phát sự kiện nếu đang gộp lưu cùng prefs.
+   * @returns {{
+   *   ok: boolean, requiresAuth: boolean, keys: Array<string>,
+   *   labels: Array<string>, fieldsOfInterest: string, domains: Array<Object>
+   * }} Kết quả thao tác.
+   */
+  function setUserResearchTopicKeys(topicKeys, options = {}) {
+    const activeUser = getCurrentUser();
+    if (!activeUser) {
+      return { ok: false, requiresAuth: true, keys: [], labels: [], fieldsOfInterest: '', domains: [] };
+    }
+
+    const inputSet = new Set(
+      Array.isArray(topicKeys) ? topicKeys.map(item => String(item || '').trim()).filter(Boolean) : []
+    );
+    const existingDomains = getUserResearchDomains();
+    const keptDomains = existingDomains.filter(item => inputSet.has(item.key));
+    const keptKeySet = new Set(keptDomains.map(item => item.key));
+
+    const addedDomains = PREFERENCE_TOPICS
+      .map(item => item.key)
+      .filter(key => inputSet.has(key) && !keptKeySet.has(key))
+      .map((key, idx) => ({
+        id: `dom_${key}_${Date.now()}_${idx}`,
+        key,
+        label: PREF_TOPIC_LABEL_MAP[key] || key,
+        priority: 'normal',
+        source: 'manual',
+        confidence: null,
+        openAlexTopicName: ''
+      }));
+
+    return setUserResearchDomains([...keptDomains, ...addedDomains], options);
   }
 
   /**
@@ -2038,7 +2383,10 @@
     const summaryEl = document.getElementById('globalPrefPersonalSummary');
     if (!summaryEl) return;
     const prefs = getUserPreferences();
-    const topicLabels = prefs.topics.map(key => PREF_TOPIC_LABEL_MAP[key] || key);
+    const customLabels = getUserResearchTopicLabels();
+    const topicLabels = customLabels.length > 0
+      ? customLabels
+      : prefs.topics.map(key => PREF_TOPIC_LABEL_MAP[key] || key);
     if (topicLabels.length === 0) {
       summaryEl.textContent = 'Chưa chọn lĩnh vực nghiên cứu quan tâm.';
       return;
@@ -2306,10 +2654,54 @@
     `;
   }
 
+  let domainServicesPromise = null;
+
   /**
-   * Tạo HTML cho modal chọn lĩnh vực nghiên cứu toàn cục dạng bảng biểu có ô tích dùng chung
-   * (cho lần đăng nhập đầu sau đăng ký, Cài đặt, Trang chủ và Hồ sơ cá nhân).
-   * Sử dụng đúng danh mục 25 lĩnh vực đơn thực tế từ dữ liệu hội nghị.
+   * Nạp động các service OpenAlex và DomainMapper khi mở tìm kiếm tác giả trên trang bất kỳ.
+   * @returns {Promise<boolean>} True nếu cả hai service đã sẵn sàng.
+   */
+  function ensureDomainServices() {
+    if (window.ConfGuideOpenAlex && window.ConfGuideDomainMapper) {
+      return Promise.resolve(true);
+    }
+    if (domainServicesPromise) return domainServicesPromise;
+
+    const loadScriptOnce = src => new Promise(resolve => {
+      const existing = document.querySelector(`script[src="${src}"]`);
+      if (existing) {
+        if (window.ConfGuideOpenAlex && src.includes('openalex')) {
+          resolve(true);
+          return;
+        }
+        if (window.ConfGuideDomainMapper && src.includes('domain-mapper')) {
+          resolve(true);
+          return;
+        }
+        existing.addEventListener('load', () => resolve(true), { once: true });
+        existing.addEventListener('error', () => resolve(false), { once: true });
+        return;
+      }
+      const script = document.createElement('script');
+      script.src = src;
+      script.async = true;
+      script.addEventListener('load', () => resolve(true), { once: true });
+      script.addEventListener('error', () => resolve(false), { once: true });
+      document.head.appendChild(script);
+    });
+
+    domainServicesPromise = Promise.all([
+      window.ConfGuideOpenAlex ? true : loadScriptOnce('js/services/openalex.js'),
+      window.ConfGuideDomainMapper ? true : loadScriptOnce('js/services/domain-mapper.js')
+    ])
+      .then(() => Boolean(window.ConfGuideOpenAlex && window.ConfGuideDomainMapper))
+      .catch(() => false);
+
+    return domainServicesPromise;
+  }
+
+  /**
+   * Tạo HTML cho modal quản lý lĩnh vực nghiên cứu toàn cục (Thêm / Xóa / Sửa, đồng bộ OpenAlex
+   * và bảng 25 lĩnh vực chuẩn dùng chung cho onboarding, Cài đặt, Trang chủ và Hồ sơ cá nhân).
    * @returns {string} Chuỗi HTML `#globalPreferencesSurveyModal`.
    */
   function buildPreferencesSurveyModalHtml() {
@@ -2321,26 +2713,35 @@
       </label>
     `;
 
+    const categoryOptionsHtml = PREFERENCE_TOPICS.map(item =>
+      `<option value="${escapeHtml(item.key)}">${escapeHtml(item.label)}</option>`
+    ).join('');
+
     return `
       <div class="layout-modal" id="globalPreferencesSurveyModal" role="dialog"
         aria-modal="true" aria-labelledby="prefSurveyModalTitle" hidden>
         <div class="layout-modal-backdrop"></div>
         <div class="layout-modal-box layout-modal-box--wide">
           <div class="layout-modal-header">
-            <h3 class="layout-modal-title" id="prefSurveyModalTitle">Chọn lĩnh vực nghiên cứu</h3>
+            <h3 class="layout-modal-title" id="prefSurveyModalTitle">Quản lý lĩnh vực nghiên cứu</h3>
             <button type="button" class="layout-modal-close-btn" aria-label="Đóng">&times;</button>
           </div>
           <div class="layout-modal-body">
             <p class="modal-block-desc pref-survey-intro" id="prefSurveyIntro">
-              Tích chọn các lĩnh vực nghiên cứu bạn quan tâm rồi nhấn Lưu thay đổi để lưu lại.
+              Thêm, sửa tên/nhóm, đánh dấu ưu tiên, xóa hoặc đồng bộ lại từ OpenAlex rồi nhấn Lưu thay đổi.
             </p>
 
             <div class="pref-recognition js-pref-recognition" id="prefRecognitionBox" hidden></div>
 
-            <div class="modal-section-block" id="prefTopicsSection">
+            <!-- Khối quản lý danh sách lĩnh vực (Thêm / Xóa / Sửa & đồng bộ OpenAlex) -->
+            <div class="modal-section-block pref-managed-section" id="prefManagedSection">
               <div class="pref-survey-section-head">
-                <h4 class="modal-block-title" id="prefTopicsHeading">Bảng lĩnh vực nghiên cứu</h4>
+                <h4 class="modal-block-title" id="prefManagedHeading">Danh sách lĩnh vực đang quản lý</h4>
                 <div class="pref-survey-section-meta">
+                  <button type="button" class="btn btn-secondary btn--compact-sm pref-openalex-toggle-btn"
+                    id="prefToggleOpenAlexBtn" aria-expanded="false" aria-controls="prefOpenAlexPanel">
+                    Tìm từ OpenAlex
+                  </button>
                   <button type="button" class="btn btn-secondary btn--compact-sm pref-reanalyze-btn js-pref-reanalyze"
                     id="prefReanalyzeBtn" hidden>
                     Gợi ý tự động từ hồ sơ
@@ -2348,9 +2749,75 @@
                   <span class="pref-count-badge" id="prefTopicCountBadge">Đã chọn: 0 lĩnh vực</span>
                 </div>
               </div>
+
+              <!-- Bảng tìm kiếm hồ sơ tác giả OpenAlex thu gọn -->
+              <div class="pref-openalex-panel" id="prefOpenAlexPanel" hidden>
+                <div class="pref-openalex-panel__head">
+                  <strong>Đồng bộ chủ đề từ OpenAlex</strong>
+                  <span>Nhập tên tác giả (ưu tiên không dấu để tăng tỷ lệ khớp) và/hoặc ORCID</span>
+                </div>
+                <div class="pref-openalex-panel__controls">
+                  <div class="pref-openalex-panel__field">
+                    <label for="prefOpenAlexNameInput">Tên tác giả</label>
+                    <div class="pref-openalex-panel__name-wrap">
+                      <input type="text" id="prefOpenAlexNameInput" class="modal-input"
+                        placeholder="VD: Nguyen Minh Khoa">
+                      <button type="button" class="btn btn-secondary btn--compact-sm" id="prefOpenAlexNoAccentBtn"
+                        title="Loại bỏ dấu tiếng Việt">Bỏ dấu</button>
+                    </div>
+                  </div>
+                  <div class="pref-openalex-panel__field">
+                    <label for="prefOpenAlexOrcidInput">ORCID (tùy chọn)</label>
+                    <input type="text" id="prefOpenAlexOrcidInput" class="modal-input"
+                      placeholder="0000-0002-xxxx-xxxx">
+                  </div>
+                  <button type="button" class="btn btn-primary btn--compact-sm pref-openalex-search-btn"
+                    id="prefOpenAlexSearchBtn">Tìm tác giả</button>
+                </div>
+                <p class="pref-openalex-status" id="prefOpenAlexStatus" aria-live="polite"></p>
+                <div class="pref-openalex-authors" id="prefOpenAlexAuthors"></div>
+              </div>
+
+              <!-- Thanh thêm nhanh lĩnh vực mới / tùy chỉnh -->
+              <div class="pref-add-box" id="prefAddCustomBox">
+                <div class="pref-add-box__grid">
+                  <div class="pref-add-box__field">
+                    <label for="prefCustomLabelInput">Tên lĩnh vực muốn thêm</label>
+                    <input type="text" id="prefCustomLabelInput" class="modal-input"
+                      placeholder="VD: AI trong Y tế, An toàn IoT...">
+                  </div>
+                  <div class="pref-add-box__field">
+                    <label for="prefCustomCategorySelect">Ánh xạ nhóm hội nghị chuẩn</label>
+                    <select id="prefCustomCategorySelect" class="modal-input">
+                      <option value="">-- Chọn nhóm lĩnh vực --</option>
+                      ${categoryOptionsHtml}
+                    </select>
+                  </div>
+                  <div class="pref-add-box__field pref-add-box__field--priority">
+                    <label for="prefCustomPrioritySelect">Ưu tiên</label>
+                    <select id="prefCustomPrioritySelect" class="modal-input">
+                      <option value="normal">Bình thường</option>
+                      <option value="primary">Ưu tiên chính</option>
+                    </select>
+                  </div>
+                  <button type="button" class="btn btn-primary btn--compact-sm pref-add-box__btn"
+                    id="prefAddCustomBtn">+ Thêm</button>
+                </div>
+                <p class="field-error js-field-error" id="prefAddCustomError" aria-live="polite"></p>
+              </div>
+
+              <!-- Danh sách lĩnh vực chi tiết hỗ trợ Sửa & Xóa -->
+              <div class="pref-managed-list" id="prefManagedDomainsList" role="list"
+                aria-labelledby="prefManagedHeading"></div>
+            </div>
+
+            <div class="modal-section-block" id="prefTopicsSection">
+              <div class="pref-survey-section-head">
+                <h4 class="modal-block-title" id="prefTopicsHeading">Tích chọn nhanh 25 danh mục lĩnh vực chuẩn</h4>
+              </div>
               <div class="pref-topic-table">
                 <div class="pref-topic-table__head">
-                  <span>Tích chọn một hoặc nhiều lĩnh vực nghiên cứu</span>
+                  <span>Tích chọn một hoặc nhiều danh mục để đồng bộ nhanh với danh sách quản lý ở trên</span>
                 </div>
                 <div class="pref-topic-table__grid" id="prefTopicGrid" role="group" aria-labelledby="prefTopicsHeading">
                   ${PREFERENCE_TOPICS.map(renderTopicCheckboxRow).join('')}
@@ -2403,16 +2870,20 @@
       const bodyEl = modal.querySelector('.layout-modal-body');
       if (bodyEl) bodyEl.scrollTop = 0;
       const focusTarget = modalId === 'globalPreferencesSurveyModal'
-        ? (modal.querySelector('.js-pref-topic-checkbox')
+        ? (modal.querySelector('#prefCustomLabelInput')
+          || modal.querySelector('.js-pref-topic-checkbox')
           || modal.querySelector('button.layout-modal-close-btn'))
         : modal.querySelector('input, select, textarea, button.layout-modal-close-btn');
       if (focusTarget) focusTarget.focus();
     });
   }
 
-  /** Trạng thái nháp trong modal bảng chọn lĩnh vực nghiên cứu dùng chung */
+  /** Trạng thái nháp trong modal quản lý lĩnh vực nghiên cứu dùng chung */
   const surveyDraftState = {
-    topics: new Set(),
+    domains: [],
+    editingDomainId: null,
+    openAlexPanelOpen: false,
+    openAlexAuthors: [],
     isOnboarding: false,
     preserveOpenModals: false,
     recognitionResult: null,
@@ -2439,9 +2910,9 @@
   }
 
   /**
-   * Kết xuất khối thông báo kết quả nhận diện lĩnh vực NLP/AI (đề xuất thành công hoặc thông báo chuyển thủ công).
+   * Kết xuất khối thông báo kết quả nhận diện lĩnh vực (từ OpenAlex hoặc hồ sơ học thuật).
    * @param {HTMLElement|null} boxEl - Phần tử `#prefRecognitionBox`.
-   * @param {Object|null} rec - Kết quả trả về từ `analyzeUserAcademicDomains`.
+   * @param {Object|null} rec - Kết quả từ `ConfGuideDomainMapper` hoặc `analyzeUserAcademicDomains`.
    */
   function renderRecognitionBannerUi(boxEl, rec) {
     if (!boxEl) return;
@@ -2454,7 +2925,7 @@
 
     const sourcesLabel = Array.isArray(rec.sourcesUsed) && rec.sourcesUsed.length > 0
       ? rec.sourcesUsed.map(escapeHtml).join(' • ')
-      : 'Google Profile';
+      : 'OpenAlex';
 
     if (rec.recognized && Array.isArray(rec.recommendedTopics) && rec.recommendedTopics.length > 0) {
       const chipsHtml = rec.recommendedTopics.map(item => {
@@ -2473,16 +2944,16 @@
       boxEl.innerHTML = `
         <div class="pref-recognition__head">
           <div class="pref-recognition__title-group">
-            <span class="pref-recognition__badge">Đề xuất NLP/AI · Độ tin cậy ${escapeHtml(String(rec.overallConfidence))}%</span>
-            <span class="pref-recognition__sources">Nguồn phân tích: ${sourcesLabel}</span>
+            <span class="pref-recognition__badge">Đề xuất tự động · Độ tin cậy ${escapeHtml(String(rec.overallConfidence))}%</span>
+            <span class="pref-recognition__sources">Nguồn: ${sourcesLabel}</span>
           </div>
           <button type="button" class="pref-recognition__manual-btn js-pref-switch-manual">
             Chuyển sang chọn thủ công
           </button>
         </div>
         <p class="pref-recognition__desc">
-          Các lĩnh vực dưới đây đã được nhận diện tự động và tích chọn sẵn. Bạn có thể xem xét, điều chỉnh thêm hoặc nhấn
-          <strong>Xác nhận lĩnh vực</strong> để đồng bộ ngay với hồ sơ và hệ thống khuyến nghị.
+          Các lĩnh vực dưới đây được ánh xạ từ hồ sơ tác giả và đã đưa vào danh sách quản lý. Bạn có thể sửa tên, đổi mức ưu tiên,
+          thêm hoặc xóa bớt trước khi nhấn <strong>Xác nhận lĩnh vực</strong>.
         </p>
         <div class="pref-recognition__chips" aria-label="Các lĩnh vực được hệ thống đề xuất">
           ${chipsHtml}
@@ -2492,12 +2963,15 @@
       return;
     }
 
-    let reasonText = 'Hồ sơ hiện chưa có từ khóa nghiên cứu hoặc công trình khoa học đủ chi tiết.';
+    let reasonText = 'Hồ sơ hiện chưa có dữ liệu chủ đề hoặc công trình đủ chi tiết để ánh xạ tự động.';
     if (rec.fallbackReason === 'no-external-permission') {
-      reasonText = 'Bạn đã chọn không khai thác dữ liệu học thuật bên ngoài khi đăng nhập Google.';
+      reasonText = 'Bạn đã chọn không đồng bộ dữ liệu học thuật từ bên ngoài.';
+    } else if (rec.fallbackReason === 'author-not-found' || rec.fallbackReason === 'no-author') {
+      reasonText = 'Không tìm thấy tác giả khớp trên OpenAlex hoặc chưa chọn hồ sơ tác giả.';
+    } else if (rec.fallbackReason === 'no-matching-it-topics' || rec.fallbackReason === 'no-academic-match') {
+      reasonText = 'Các chủ đề OpenAlex của tác giả chưa khớp với 25 danh mục CNTT của hệ thống.';
     } else if (rec.fallbackReason === 'low-confidence') {
-      reasonText =
-        `Độ tin cậy nhận diện hiện đạt ${rec.overallConfidence}%, chưa vượt ngưỡng tối thiểu ${rec.threshold}%.`;
+      reasonText = `Độ tin cậy nhận diện hiện đạt ${rec.overallConfidence}%, chưa đạt ngưỡng tối thiểu ${rec.threshold}%.`;
     }
 
     boxEl.className = 'pref-recognition pref-recognition--fallback js-pref-recognition';
@@ -2507,14 +2981,140 @@
         <span class="pref-recognition__sources">Nguồn kiểm tra: ${sourcesLabel}</span>
       </div>
       <p class="pref-recognition__desc">
-        ${escapeHtml(reasonText)} Hệ thống đã chuyển sang phương thức lựa chọn lĩnh vực thủ công thông thường bên dưới.
+        ${escapeHtml(reasonText)} Vui lòng thêm lĩnh vực mới hoặc tích chọn thủ công ở bên dưới.
       </p>
     `;
     boxEl.removeAttribute('hidden');
   }
 
   /**
-   * Đồng bộ giao diện modal chọn lĩnh vực nghiên cứu dạng bảng biểu từ trạng thái nháp `surveyDraftState`.
+   * Tạo HTML cho danh sách các lĩnh vực đang quản lý trong `#prefManagedDomainsList` (hỗ trợ Sửa nội tuyến & Xóa).
+   * @returns {string} Chuỗi HTML danh sách lĩnh vực.
+   */
+  function renderManagedDomainsListHtml() {
+    if (!Array.isArray(surveyDraftState.domains) || surveyDraftState.domains.length === 0) {
+      return `
+        <p class="pref-managed-empty">
+          Chưa có lĩnh vực nào. Hãy nhập thêm lĩnh vực mới ở trên, tìm từ OpenAlex hoặc tích chọn nhanh trong bảng 25 danh mục bên dưới.
+        </p>
+      `;
+    }
+
+    const renderOptionTags = selectedKey => PREFERENCE_TOPICS.map(item =>
+      `<option value="${escapeHtml(item.key)}"${item.key === selectedKey ? ' selected' : ''}>${escapeHtml(item.label)}</option>`
+    ).join('');
+
+    return surveyDraftState.domains.map(item => {
+      const canonLabel = PREF_TOPIC_LABEL_MAP[item.key] || item.key;
+      const isEditing = surveyDraftState.editingDomainId === item.id;
+
+      if (isEditing) {
+        return `
+          <div class="pref-domain-item is-editing" role="listitem" data-domain-id="${escapeHtml(item.id)}">
+            <div class="pref-domain-edit-grid">
+              <input type="text" class="modal-input pref-domain-edit__input js-pref-edit-label"
+                value="${escapeHtml(item.label)}" aria-label="Sửa tên lĩnh vực">
+              <select class="modal-input pref-domain-edit__select js-pref-edit-key" aria-label="Sửa nhóm hội nghị">
+                ${renderOptionTags(item.key)}
+              </select>
+              <select class="modal-input pref-domain-edit__priority js-pref-edit-priority" aria-label="Sửa độ ưu tiên">
+                <option value="normal"${item.priority !== 'primary' ? ' selected' : ''}>Bình thường</option>
+                <option value="primary"${item.priority === 'primary' ? ' selected' : ''}>Ưu tiên chính</option>
+              </select>
+              <div class="pref-domain-edit__actions">
+                <button type="button" class="btn btn-primary btn--compact-sm js-pref-edit-save">Lưu</button>
+                <button type="button" class="btn btn-secondary btn--compact-sm js-pref-edit-cancel">Hủy</button>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      const isPrimary = item.priority === 'primary';
+      const showCanonNote = item.label.toLowerCase() !== canonLabel.toLowerCase();
+      let sourceLabel = 'Danh mục chuẩn';
+      if (item.source === 'serpapi') {
+        sourceLabel = 'SerpApi (Google Scholar)';
+      } else if (item.source === 'scholar') {
+        sourceLabel = 'Google Scholar';
+      } else if (item.source === 'orcid') {
+        sourceLabel = 'ORCID';
+      } else if (item.source === 'semantic_scholar') {
+        sourceLabel = 'Semantic Scholar';
+      } else if (item.source === 'confguide_saved') {
+        sourceLabel = 'Hội nghị đã lưu';
+      } else if (item.source === 'openalex') {
+        sourceLabel = item.confidence ? `OpenAlex · ${item.confidence}%` : 'OpenAlex';
+      } else if (item.source === 'custom') {
+        sourceLabel = 'Tùy chỉnh';
+      }
+
+      return `
+        <div class="pref-domain-item${isPrimary ? ' is-primary' : ''}" role="listitem"
+          data-domain-id="${escapeHtml(item.id)}">
+          <div class="pref-domain-item__main">
+            <button type="button"
+              class="pref-domain-priority-btn js-pref-domain-priority${isPrimary ? ' is-primary' : ''}"
+              title="Nhấn để chuyển đổi ưu tiên chính / bình thường"
+              aria-pressed="${isPrimary ? 'true' : 'false'}">
+              ${isPrimary ? 'Ưu tiên' : 'Chính/Phụ'}
+            </button>
+            <div class="pref-domain-item__info">
+              <strong class="pref-domain-item__title">${escapeHtml(item.label)}</strong>
+              <span class="pref-domain-item__meta">
+                ${showCanonNote ? `Nhóm: ${escapeHtml(canonLabel)} · ` : ''}
+                <span class="pref-domain-source">${escapeHtml(sourceLabel)}</span>
+                ${item.openAlexTopicName ? ` · Gốc: ${escapeHtml(item.openAlexTopicName)}` : ''}
+              </span>
+            </div>
+          </div>
+          <div class="pref-domain-item__actions">
+            <button type="button" class="btn btn-secondary btn--compact-sm js-pref-domain-edit"
+              aria-label="Sửa lĩnh vực ${escapeHtml(item.label)}">Sửa</button>
+            <button type="button" class="btn btn-secondary btn--compact-sm pref-domain-delete-btn js-pref-domain-delete"
+              aria-label="Xóa lĩnh vực ${escapeHtml(item.label)}">Xóa</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  /**
+   * Kết xuất danh sách hồ sơ tác giả ứng viên trả về từ OpenAlex trong panel đồng bộ.
+   * @param {Array<Object>} authors - Mảng tác giả đã chuẩn hóa từ `ConfGuideOpenAlex`.
+   * @returns {string} Chuỗi HTML thẻ tác giả.
+   */
+  function renderOpenAlexAuthorsHtml(authors) {
+    if (!Array.isArray(authors) || authors.length === 0) return '';
+    return authors.map((author, idx) => {
+      const topicNames = Array.isArray(author.topics)
+        ? author.topics.slice(0, 4).map(t => t.displayName).filter(Boolean)
+        : [];
+      return `
+        <div class="pref-openalex-card" data-openalex-idx="${idx}">
+          <div class="pref-openalex-card__info">
+            <strong class="pref-openalex-card__name">${escapeHtml(author.displayName)}</strong>
+            <span class="pref-openalex-card__meta">
+              ${escapeHtml(author.primaryAffiliation || 'Chưa rõ đơn vị công tác')}
+              · ${Number(author.worksCount || 0).toLocaleString('vi-VN')} công trình
+              · ${Number(author.citedByCount || 0).toLocaleString('vi-VN')} trích dẫn
+              ${author.orcid ? ` · ORCID: ${escapeHtml(author.orcid)}` : ''}
+            </span>
+            ${topicNames.length > 0
+              ? `<span class="pref-openalex-card__topics">Chủ đề: ${escapeHtml(topicNames.join(', '))}</span>`
+              : '<span class="pref-openalex-card__topics">Chưa có danh sách topics trên OpenAlex</span>'}
+          </div>
+          <button type="button" class="btn btn-primary btn--compact-sm js-pref-openalex-select"
+            data-openalex-idx="${idx}">
+            Áp dụng hồ sơ
+          </button>
+        </div>
+      `;
+    }).join('');
+  }
+
+  /**
+   * Đồng bộ giao diện modal quản lý lĩnh vực nghiên cứu từ trạng thái nháp `surveyDraftState`.
    */
   function syncPreferencesSurveyModalUi() {
     const modal = document.getElementById('globalPreferencesSurveyModal');
@@ -2531,29 +3131,28 @@
 
     const titleEl = document.getElementById('prefSurveyModalTitle');
     const introEl = document.getElementById('prefSurveyIntro');
-    const topicsHeading = document.getElementById('prefTopicsHeading');
     const cancelBtn = document.getElementById('prefSurveyCancelBtn');
     const saveBtn = document.getElementById('prefSurveySaveBtn');
     const reanalyzeBtn = document.getElementById('prefReanalyzeBtn');
+    const toggleOpenAlexBtn = document.getElementById('prefToggleOpenAlexBtn');
+    const openAlexPanel = document.getElementById('prefOpenAlexPanel');
+    const openAlexAuthorsEl = document.getElementById('prefOpenAlexAuthors');
+    const managedListEl = document.getElementById('prefManagedDomainsList');
 
     if (titleEl) {
       titleEl.textContent = isRecognizedProposal
         ? 'Xem xét & Xác nhận lĩnh vực nghiên cứu đề xuất'
-        : 'Chọn lĩnh vực nghiên cứu';
+        : 'Quản lý lĩnh vực nghiên cứu';
     }
     if (introEl) {
       if (isRecognizedProposal) {
         introEl.textContent =
-          'Kiểm tra các lĩnh vực được đề xuất từ hồ sơ học thuật của bạn, có thể thêm hoặc bỏ bớt trước khi xác nhận.';
+          'Kiểm tra các lĩnh vực được ánh xạ từ hồ sơ học thuật, có thể thêm, sửa hoặc xóa trước khi xác nhận.';
       } else {
         introEl.textContent = isOnboarding
-          ? 'Chào mừng bạn đến với ConfGuide! '
-            + 'Tích chọn các lĩnh vực nghiên cứu bạn quan tâm rồi nhấn Lưu thay đổi để lưu lại.'
-          : 'Tích chọn các lĩnh vực nghiên cứu bạn quan tâm rồi nhấn Lưu thay đổi để lưu lại.';
+          ? 'Chào mừng bạn đến với ConfGuide! Hãy thêm, chọn hoặc đồng bộ lĩnh vực nghiên cứu rồi nhấn Lưu thay đổi.'
+          : 'Thêm, sửa tên/nhóm, đánh dấu ưu tiên, xóa hoặc đồng bộ lại từ OpenAlex rồi nhấn Lưu thay đổi.';
       }
-    }
-    if (topicsHeading) {
-      topicsHeading.textContent = 'Bảng lĩnh vực nghiên cứu';
     }
     if (cancelBtn) {
       cancelBtn.textContent = isOnboarding ? 'Để sau' : 'Hủy';
@@ -2569,12 +3168,30 @@
         reanalyzeBtn.setAttribute('hidden', '');
       }
     }
+    if (toggleOpenAlexBtn) {
+      toggleOpenAlexBtn.setAttribute('aria-expanded', String(Boolean(surveyDraftState.openAlexPanelOpen)));
+    }
+    if (openAlexPanel) {
+      if (surveyDraftState.openAlexPanelOpen) {
+        openAlexPanel.removeAttribute('hidden');
+      } else {
+        openAlexPanel.setAttribute('hidden', '');
+      }
+    }
+    if (openAlexAuthorsEl) {
+      openAlexAuthorsEl.innerHTML = renderOpenAlexAuthorsHtml(surveyDraftState.openAlexAuthors);
+    }
 
     renderRecognitionBannerUi(document.getElementById('prefRecognitionBox'), rec);
 
+    if (managedListEl) {
+      managedListEl.innerHTML = renderManagedDomainsListHtml();
+    }
+
+    const activeKeySet = new Set(surveyDraftState.domains.map(d => d.key));
     modal.querySelectorAll('.js-pref-topic-checkbox').forEach(checkbox => {
       const tKey = checkbox.value || '';
-      const isSelected = Boolean(tKey && surveyDraftState.topics.has(tKey));
+      const isSelected = Boolean(tKey && activeKeySet.has(tKey));
       checkbox.checked = isSelected;
       const row = checkbox.closest('.pref-topic-row');
       if (row) {
@@ -2594,42 +3211,69 @@
 
     const countBadge = document.getElementById('prefTopicCountBadge');
     if (countBadge) {
-      countBadge.textContent = `Đã chọn: ${surveyDraftState.topics.size} lĩnh vực`;
+      countBadge.textContent = `Đã chọn: ${surveyDraftState.domains.length} lĩnh vực`;
     }
   }
 
   /**
-   * Mở modal bảng chọn lĩnh vực nghiên cứu dùng chung (onboarding sau đăng ký/Google, Cài đặt, Trang chủ, Hồ sơ).
+   * Mở modal quản lý lĩnh vực nghiên cứu dùng chung (onboarding, Cài đặt, Trang chủ, Hồ sơ).
    * @param {{
    *   isOnboarding?: boolean,
    *   topicsOnly?: boolean,
    *   preserveOpenModals?: boolean,
+   *   initialDomains?: Array<Object>,
    *   initialTopicKeys?: Array<string>,
    *   recognitionResult?: Object|null,
+   *   openOpenAlexLookup?: boolean,
    *   onConfirm?: Function|null,
    *   returnFocusEl?: HTMLElement|null
    * }} [options={}] Tùy chọn hiển thị và callback khi nhấn Lưu thay đổi.
    */
   function openPreferencesSurveyModal(options = {}) {
     const safeOpts = (options && typeof options === 'object') ? options : {};
-    const prefs = getUserPreferences();
     const isOnboarding = Boolean(safeOpts.isOnboarding);
     const recognitionResult = (safeOpts.recognitionResult && typeof safeOpts.recognitionResult === 'object')
       ? safeOpts.recognitionResult
       : null;
 
-    let initialTopics = [];
-    if (recognitionResult && recognitionResult.recognized && Array.isArray(recognitionResult.recommendedTopics)) {
-      initialTopics = recognitionResult.recommendedTopics
-        .map(item => item.key)
-        .filter(key => VALID_PREF_TOPIC_KEYS.has(key));
+    let initialDomains = [];
+    if (Array.isArray(safeOpts.initialDomains)) {
+      initialDomains = safeOpts.initialDomains
+        .map((item, idx) => normalizeManagedDomainItem(item, idx))
+        .filter(Boolean);
+    } else if (recognitionResult && recognitionResult.recognized && Array.isArray(recognitionResult.recommendedTopics)) {
+      initialDomains = recognitionResult.recommendedTopics
+        .map((item, idx) => normalizeManagedDomainItem({
+          id: `dom_oa_${item.key}_${idx}`,
+          key: item.key,
+          label: item.label || PREF_TOPIC_LABEL_MAP[item.key] || item.key,
+          priority: idx === 0 ? 'primary' : 'normal',
+          source: 'openalex',
+          confidence: item.confidence,
+          openAlexTopicName: Array.isArray(item.matchedOpenAlexTopics) ? (item.matchedOpenAlexTopics[0] || '') : ''
+        }, idx))
+        .filter(Boolean);
     } else if (!isOnboarding) {
-      initialTopics = Array.isArray(safeOpts.initialTopicKeys)
-        ? safeOpts.initialTopicKeys.filter(key => VALID_PREF_TOPIC_KEYS.has(key))
-        : prefs.topics;
+      const currentDomains = getUserResearchDomains();
+      if (Array.isArray(safeOpts.initialTopicKeys)) {
+        const keySet = new Set(safeOpts.initialTopicKeys.filter(k => VALID_PREF_TOPIC_KEYS.has(k)));
+        const kept = currentDomains.filter(d => keySet.has(d.key));
+        const keptKeys = new Set(kept.map(d => d.key));
+        const extra = PREFERENCE_TOPICS
+          .map(t => t.key)
+          .filter(k => keySet.has(k) && !keptKeys.has(k))
+          .map((k, idx) => normalizeManagedDomainItem({ key: k, source: 'manual' }, kept.length + idx))
+          .filter(Boolean);
+        initialDomains = [...kept, ...extra];
+      } else {
+        initialDomains = currentDomains;
+      }
     }
 
-    surveyDraftState.topics = new Set(initialTopics);
+    surveyDraftState.domains = initialDomains;
+    surveyDraftState.editingDomainId = null;
+    surveyDraftState.openAlexPanelOpen = Boolean(safeOpts.openOpenAlexLookup);
+    surveyDraftState.openAlexAuthors = [];
     surveyDraftState.isOnboarding = isOnboarding;
     surveyDraftState.preserveOpenModals = Boolean(safeOpts.preserveOpenModals);
     surveyDraftState.recognitionResult = recognitionResult;
@@ -2638,6 +3282,25 @@
     const modalEl = document.getElementById('globalPreferencesSurveyModal');
     if (modalEl) {
       modalEl.classList.toggle('layout-modal--nested', surveyDraftState.preserveOpenModals);
+    }
+
+    const activeUser = getCurrentUser();
+    const oaNameEl = document.getElementById('prefOpenAlexNameInput');
+    const oaOrcidEl = document.getElementById('prefOpenAlexOrcidInput');
+    const oaStatusEl = document.getElementById('prefOpenAlexStatus');
+    const customLabelEl = document.getElementById('prefCustomLabelInput');
+    const customCatEl = document.getElementById('prefCustomCategorySelect');
+    const customErrEl = document.getElementById('prefAddCustomError');
+
+    if (oaNameEl) oaNameEl.value = (activeUser && (activeUser.fullName || activeUser.name)) || '';
+    if (oaOrcidEl) oaOrcidEl.value = (activeUser && activeUser.orcid) || '';
+    if (oaStatusEl) oaStatusEl.textContent = '';
+    if (customLabelEl) customLabelEl.value = '';
+    if (customCatEl) customCatEl.value = '';
+    if (customErrEl) customErrEl.textContent = '';
+
+    if (surveyDraftState.openAlexPanelOpen) {
+      ensureDomainServices();
     }
 
     // Đóng nhanh các modal toàn cục khác nếu không mở chồng lên modal chỉnh sửa hồ sơ
@@ -2670,6 +3333,9 @@
       surveyDraftState.recognitionResult = null;
       surveyDraftState.onConfirm = null;
       surveyDraftState.preserveOpenModals = false;
+      surveyDraftState.editingDomainId = null;
+      surveyDraftState.openAlexPanelOpen = false;
+      surveyDraftState.openAlexAuthors = [];
     }
     if (document.querySelectorAll('.layout-modal.show').length === 0) {
       document.body.classList.remove('modal-open');
@@ -2941,6 +3607,27 @@
   }
 
   /**
+   * Gắn xử lý dự phòng khi ảnh đại diện Google/ngoài tải thất bại (chuyển về ký tự viết tắt tên).
+   * @param {HTMLElement|null} rootEl - Phần tử gốc chứa các thẻ ảnh `.js-avatar-img-fallback`.
+   */
+  function bindAvatarImageFallbacks(rootEl) {
+    if (!rootEl) return;
+    rootEl.querySelectorAll('img.js-avatar-img-fallback').forEach(img => {
+      const revertToInitial = () => {
+        const parent = img.parentElement;
+        if (!parent) return;
+        const fallbackChar = img.getAttribute('data-fallback-initial') || 'U';
+        parent.classList.remove('has-avatar-photo');
+        parent.textContent = fallbackChar;
+      };
+      img.addEventListener('error', revertToInitial, { once: true });
+      if (img.complete && img.naturalWidth === 0 && img.getAttribute('src')) {
+        revertToInitial();
+      }
+    });
+  }
+
+  /**
    * Gắn toàn bộ sự kiện tương tác trong Header, Dropdown, Mobile Drawer và Modal toàn cục.
    * @param {HTMLElement} headerContainer - Phần tử chứa Header.
    * @param {Object|null} user - Thông tin người dùng hiện tại.
@@ -2948,6 +3635,7 @@
    * @param {string} moonSvg - Biểu tượng SVG mặt trăng.
    */
   function bindHeaderEvents(headerContainer, user, sunSvg, moonSvg) {
+    bindAvatarImageFallbacks(headerContainer);
     const themeBtn = document.getElementById('themeToggleBtn');
     if (themeBtn) {
       themeBtn.addEventListener('click', () => {
@@ -3135,28 +3823,70 @@
   }
 
   /**
-   * Lưu các lĩnh vực nghiên cứu đã chọn từ modal khảo sát và thông báo phản hồi tới người dùng.
+   * Lưu toàn bộ danh sách lĩnh vực nghiên cứu (tùy chỉnh + chuẩn) từ modal quản lý và đồng bộ hệ thống.
    */
   function handlePreferencesSurveySave() {
-    const topicGrid = document.getElementById('prefTopicGrid');
-    if (topicGrid) {
-      surveyDraftState.topics.clear();
-      topicGrid.querySelectorAll('.js-pref-topic-checkbox:checked').forEach(checkbox => {
-        const key = checkbox.value || '';
-        if (VALID_PREF_TOPIC_KEYS.has(key)) {
-          surveyDraftState.topics.add(key);
+    // Nếu người dùng đang mở chế độ sửa nội tuyến của một dòng, tự động áp dụng thay đổi hợp lệ trước khi lưu
+    if (surveyDraftState.editingDomainId) {
+      const activeEditRow = document.querySelector(
+        `#prefManagedDomainsList .pref-domain-item[data-domain-id="${CSS.escape ? CSS.escape(surveyDraftState.editingDomainId) : surveyDraftState.editingDomainId}"]`
+      );
+      if (activeEditRow) {
+        const labelEl = activeEditRow.querySelector('.js-pref-edit-label');
+        const keyEl = activeEditRow.querySelector('.js-pref-edit-key');
+        const prioEl = activeEditRow.querySelector('.js-pref-edit-priority');
+        const nextLabel = labelEl ? labelEl.value.trim() : '';
+        const nextKey = keyEl ? keyEl.value.trim() : '';
+        const nextPrio = prioEl && prioEl.value === 'primary' ? 'primary' : 'normal';
+        if (nextLabel && VALID_PREF_TOPIC_KEYS.has(nextKey)) {
+          surveyDraftState.domains = surveyDraftState.domains.map((item, idx) => {
+            if (item.id !== surveyDraftState.editingDomainId) return item;
+            const canonLbl = PREF_TOPIC_LABEL_MAP[nextKey] || nextKey;
+            return normalizeManagedDomainItem(Object.assign({}, item, {
+              key: nextKey,
+              label: nextLabel,
+              priority: nextPrio,
+              source: nextLabel.toLowerCase() === canonLbl.toLowerCase()
+                ? ((item.source === 'serpapi' || item.source === 'openalex' || item.source === 'orcid' || item.source === 'semantic_scholar' || item.source === 'confguide_saved' || item.source === 'scholar') ? item.source : 'manual')
+                : 'custom',
+              updatedAt: new Date().toISOString()
+            }), idx) || item;
+          });
         }
-      });
+      }
+      surveyDraftState.editingDomainId = null;
     }
 
+    const cleanDomains = [];
+    const seenPairs = new Set();
+    surveyDraftState.domains.forEach((item, idx) => {
+      const normalized = normalizeManagedDomainItem(item, idx);
+      if (!normalized) return;
+      const pairKey = `${normalized.key}::${normalized.label.toLowerCase()}`;
+      if (seenPairs.has(pairKey)) return;
+      seenPairs.add(pairKey);
+      cleanDomains.push(normalized);
+    });
+    cleanDomains.sort((a, b) => Number(b.priority === 'primary') - Number(a.priority === 'primary'));
+
+    const activeKeySet = new Set(cleanDomains.map(item => item.key));
     const selectedTopics = PREFERENCE_TOPICS
       .map(item => item.key)
-      .filter(key => surveyDraftState.topics.has(key));
-    const selectedLabels = selectedTopics.map(key => PREF_TOPIC_LABEL_MAP[key] || key);
+      .filter(key => activeKeySet.has(key));
+    const selectedLabels = [];
+    const seenLbls = new Set();
+    cleanDomains.forEach(item => {
+      const low = item.label.toLowerCase();
+      if (!seenLbls.has(low)) {
+        seenLbls.add(low);
+        selectedLabels.push(item.label);
+      }
+    });
 
     if (typeof surveyDraftState.onConfirm === 'function') {
       const confirmHandler = surveyDraftState.onConfirm;
       confirmHandler({
+        domains: cleanDomains,
         topics: selectedTopics,
         labels: selectedLabels
       });
@@ -3170,22 +3900,200 @@
       return;
     }
 
+    setUserResearchDomains(cleanDomains, { silent: true });
     saveUserPreferences({
-      topics: selectedTopics,
       onboardingCompleted: true,
       bannerDismissed: false
     });
     closeLayoutModal('globalPreferencesSurveyModal');
     showToast(
-      selectedTopics.length > 0
-        ? `Đã lưu ${selectedTopics.length} lĩnh vực nghiên cứu.`
+      cleanDomains.length > 0
+        ? `Đã lưu ${cleanDomains.length} lĩnh vực nghiên cứu.`
         : 'Đã xóa danh sách lĩnh vực nghiên cứu.',
       'success'
     );
   }
 
   /**
-   * Gắn sự kiện tương tác cho modal bảng biểu chọn lĩnh vực nghiên cứu dùng chung.
+   * Thực hiện truy vấn tác giả OpenAlex từ bảng tìm kiếm bên trong modal quản lý lĩnh vực.
+   * @returns {Promise<void>}
+   */
+  async function handleModalOpenAlexSearch() {
+    const nameInput = document.getElementById('prefOpenAlexNameInput');
+    const orcidInput = document.getElementById('prefOpenAlexOrcidInput');
+    const statusEl = document.getElementById('prefOpenAlexStatus');
+    const searchBtn = document.getElementById('prefOpenAlexSearchBtn');
+    const name = nameInput ? nameInput.value.trim() : '';
+    const orcid = orcidInput ? orcidInput.value.trim() : '';
+
+    if (!name && !orcid) {
+      if (statusEl) {
+        statusEl.textContent = 'Vui lòng nhập tên tác giả hoặc mã ORCID để tìm trên OpenAlex.';
+      }
+      if (nameInput) nameInput.focus();
+      return;
+    }
+
+    if (searchBtn) searchBtn.setAttribute('disabled', 'true');
+    if (statusEl) statusEl.textContent = 'Đang tìm hồ sơ tác giả trên OpenAlex...';
+
+    const ready = await ensureDomainServices();
+    if (!ready || !window.ConfGuideOpenAlex) {
+      if (searchBtn) searchBtn.removeAttribute('disabled');
+      if (statusEl) statusEl.textContent = 'Không thể tải mô-đun kết nối OpenAlex. Vui lòng thử lại.';
+      return;
+    }
+
+    const res = await window.ConfGuideOpenAlex.searchAuthors({ name, orcid, perPage: 6 });
+    if (searchBtn) searchBtn.removeAttribute('disabled');
+
+    if (!res.ok) {
+      surveyDraftState.openAlexAuthors = [];
+      if (statusEl) statusEl.textContent = res.message || 'Tra cứu OpenAlex thất bại.';
+      syncPreferencesSurveyModalUi();
+      return;
+    }
+
+    surveyDraftState.openAlexAuthors = Array.isArray(res.authors) ? res.authors : [];
+    if (surveyDraftState.openAlexAuthors.length === 0) {
+      if (statusEl) {
+        statusEl.textContent = 'Không tìm thấy hồ sơ khớp trên OpenAlex. Bạn có thể bỏ dấu tên hoặc thêm thủ công bên dưới.';
+      }
+    } else if (statusEl) {
+      statusEl.textContent = `Tìm thấy ${surveyDraftState.openAlexAuthors.length} hồ sơ tác giả phù hợp (${res.queryUsed || 'OpenAlex'}).`;
+    }
+    syncPreferencesSurveyModalUi();
+  }
+
+  /**
+   * Áp dụng chủ đề từ một hồ sơ tác giả OpenAlex đã chọn vào danh sách lĩnh vực nháp.
+   * @param {Object} author - Hồ sơ tác giả đã chọn từ OpenAlex.
+   * @returns {Promise<void>}
+   */
+  async function applyOpenAlexAuthorToDraft(author) {
+    if (!author) return;
+    const ready = await ensureDomainServices();
+    if (!ready || !window.ConfGuideDomainMapper) {
+      showToast('Không thể nạp bộ ánh xạ lĩnh vực OpenAlex.', 'info');
+      return;
+    }
+
+    const rec = window.ConfGuideDomainMapper.mapOpenAlexAuthorToDomains(author, {
+      threshold: DOMAIN_CONFIDENCE_THRESHOLD
+    });
+    surveyDraftState.recognitionResult = rec;
+
+    if (rec.recognized && Array.isArray(rec.recommendedTopics) && rec.recommendedTopics.length > 0) {
+      const existingByKey = new Map();
+      surveyDraftState.domains.forEach(item => {
+        if (!existingByKey.has(item.key)) existingByKey.set(item.key, item);
+      });
+      const hasPrimary = surveyDraftState.domains.some(item => item.priority === 'primary');
+
+      rec.recommendedTopics.forEach((topic, idx) => {
+        if (!VALID_PREF_TOPIC_KEYS.has(topic.key)) return;
+        const firstOaTopic = Array.isArray(topic.matchedOpenAlexTopics) ? topic.matchedOpenAlexTopics[0] : '';
+        const topicName = (firstOaTopic && typeof firstOaTopic === 'object')
+          ? String(firstOaTopic.name || firstOaTopic.displayName || '').trim()
+          : String(firstOaTopic || '').trim();
+        if (existingByKey.has(topic.key)) {
+          const prev = existingByKey.get(topic.key);
+          if (prev.source !== 'custom') {
+            prev.confidence = topic.confidence;
+            prev.openAlexTopicName = prev.openAlexTopicName || topicName;
+            prev.source = 'openalex';
+          }
+          return;
+        }
+        const added = normalizeManagedDomainItem({
+          id: `dom_oa_${topic.key}_${Date.now()}_${idx}`,
+          key: topic.key,
+          label: topic.label || PREF_TOPIC_LABEL_MAP[topic.key] || topic.key,
+          priority: (!hasPrimary && idx === 0) ? 'primary' : 'normal',
+          source: 'openalex',
+          confidence: topic.confidence,
+          openAlexTopicName: topicName
+        }, surveyDraftState.domains.length + idx);
+        if (added) surveyDraftState.domains.push(added);
+      });
+
+      surveyDraftState.openAlexPanelOpen = false;
+      showToast(
+        `Đã ánh xạ ${rec.recommendedTopics.length} lĩnh vực từ hồ sơ ${author.displayName} (tin cậy ${rec.overallConfidence}%).`,
+        'success'
+      );
+    } else {
+      showToast(
+        `Hồ sơ ${author.displayName} có độ tin cậy thấp hoặc chưa khớp ngành CNTT — hãy chọn thủ công bên dưới.`,
+        'info'
+      );
+    }
+
+    syncPreferencesSurveyModalUi();
+  }
+
+  /**
+   * Thêm một lĩnh vực mới từ thanh nhập nhanh vào danh sách nháp `surveyDraftState.domains`.
+   */
+  function handleAddCustomDomainClick() {
+    const labelInput = document.getElementById('prefCustomLabelInput');
+    const categorySelect = document.getElementById('prefCustomCategorySelect');
+    const prioritySelect = document.getElementById('prefCustomPrioritySelect');
+    const errorEl = document.getElementById('prefAddCustomError');
+    if (!labelInput || !categorySelect) return;
+
+    const rawLabel = labelInput.value.trim();
+    let chosenKey = categorySelect.value.trim();
+    if (!chosenKey && rawLabel) {
+      chosenKey = parseTopicKeysFromText(rawLabel)[0] || '';
+      if (chosenKey) categorySelect.value = chosenKey;
+    }
+
+    if (!rawLabel) {
+      if (errorEl) errorEl.textContent = 'Vui lòng nhập tên lĩnh vực muốn thêm.';
+      labelInput.focus();
+      return;
+    }
+    if (!VALID_PREF_TOPIC_KEYS.has(chosenKey)) {
+      if (errorEl) errorEl.textContent = 'Vui lòng chọn nhóm hội nghị chuẩn tương ứng.';
+      categorySelect.focus();
+      return;
+    }
+
+    const isDuplicate = surveyDraftState.domains.some(
+      item => item.key === chosenKey && item.label.toLowerCase() === rawLabel.toLowerCase()
+    );
+    if (isDuplicate) {
+      if (errorEl) errorEl.textContent = 'Lĩnh vực này đã tồn tại trong danh sách đang quản lý.';
+      labelInput.focus();
+      return;
+    }
+
+    const canonLabel = PREF_TOPIC_LABEL_MAP[chosenKey] || chosenKey;
+    const priority = prioritySelect && prioritySelect.value === 'primary' ? 'primary' : 'normal';
+    const newItem = normalizeManagedDomainItem({
+      id: `dom_add_${chosenKey}_${Date.now()}`,
+      key: chosenKey,
+      label: rawLabel,
+      priority,
+      source: rawLabel.toLowerCase() === canonLabel.toLowerCase() ? 'manual' : 'custom'
+    }, surveyDraftState.domains.length);
+
+    if (newItem) {
+      surveyDraftState.domains.unshift(newItem);
+    }
+
+    labelInput.value = '';
+    categorySelect.value = '';
+    delete categorySelect.dataset.userPicked;
+    if (prioritySelect) prioritySelect.value = 'normal';
+    if (errorEl) errorEl.textContent = '';
+
+    syncPreferencesSurveyModalUi();
+  }
+
+  /**
+   * Gắn sự kiện tương tác cho modal quản lý lĩnh vực nghiên cứu dùng chung (Thêm / Xóa / Sửa & OpenAlex).
    */
   function initPreferencesSurveyModal() {
     const modal = document.getElementById('globalPreferencesSurveyModal');
@@ -3196,6 +4104,177 @@
     const saveBtn = document.getElementById('prefSurveySaveBtn');
     const recognitionBox = document.getElementById('prefRecognitionBox');
     const reanalyzeBtn = document.getElementById('prefReanalyzeBtn');
+    const toggleOpenAlexBtn = document.getElementById('prefToggleOpenAlexBtn');
+    const oaNameInput = document.getElementById('prefOpenAlexNameInput');
+    const oaNoAccentBtn = document.getElementById('prefOpenAlexNoAccentBtn');
+    const oaOrcidInput = document.getElementById('prefOpenAlexOrcidInput');
+    const oaSearchBtn = document.getElementById('prefOpenAlexSearchBtn');
+    const oaAuthorsEl = document.getElementById('prefOpenAlexAuthors');
+    const customLabelInput = document.getElementById('prefCustomLabelInput');
+    const customCatSelect = document.getElementById('prefCustomCategorySelect');
+    const customAddBtn = document.getElementById('prefAddCustomBtn');
+    const customErrEl = document.getElementById('prefAddCustomError');
+    const managedListEl = document.getElementById('prefManagedDomainsList');
+
+    if (toggleOpenAlexBtn) {
+      toggleOpenAlexBtn.addEventListener('click', () => {
+        surveyDraftState.openAlexPanelOpen = !surveyDraftState.openAlexPanelOpen;
+        if (surveyDraftState.openAlexPanelOpen) {
+          ensureDomainServices();
+        }
+        syncPreferencesSurveyModalUi();
+        if (surveyDraftState.openAlexPanelOpen && oaNameInput) {
+          oaNameInput.focus();
+        }
+      });
+    }
+
+    if (oaNoAccentBtn && oaNameInput) {
+      oaNoAccentBtn.addEventListener('click', async () => {
+        await ensureDomainServices();
+        if (window.ConfGuideOpenAlex && typeof window.ConfGuideOpenAlex.stripVietnameseDiacritics === 'function') {
+          oaNameInput.value = window.ConfGuideOpenAlex.stripVietnameseDiacritics(oaNameInput.value);
+        } else {
+          oaNameInput.value = oaNameInput.value
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .replace(/[đĐ]/g, ch => (ch === 'Đ' ? 'D' : 'd'));
+        }
+        oaNameInput.focus();
+      });
+    }
+
+    if (oaSearchBtn) {
+      oaSearchBtn.addEventListener('click', handleModalOpenAlexSearch);
+    }
+
+    [oaNameInput, oaOrcidInput].forEach(inputEl => {
+      if (!inputEl) return;
+      inputEl.addEventListener('keydown', event => {
+        if (event.key !== 'Enter') return;
+        event.preventDefault();
+        handleModalOpenAlexSearch();
+      });
+    });
+
+    if (oaAuthorsEl) {
+      oaAuthorsEl.addEventListener('click', event => {
+        if (!(event.target instanceof Element)) return;
+        const pickBtn = event.target.closest('.js-pref-openalex-select');
+        if (!pickBtn) return;
+        const idx = Number(pickBtn.getAttribute('data-openalex-idx'));
+        const selected = Number.isInteger(idx) ? surveyDraftState.openAlexAuthors[idx] : null;
+        if (selected) applyOpenAlexAuthorToDraft(selected);
+      });
+    }
+
+    if (customCatSelect) {
+      customCatSelect.addEventListener('change', () => {
+        customCatSelect.dataset.userPicked = customCatSelect.value ? 'true' : '';
+        if (customErrEl) customErrEl.textContent = '';
+      });
+    }
+
+    if (customLabelInput) {
+      customLabelInput.addEventListener('input', () => {
+        if (customErrEl) customErrEl.textContent = '';
+        if (customCatSelect && customCatSelect.dataset.userPicked !== 'true') {
+          const suggestedKey = parseTopicKeysFromText(customLabelInput.value)[0] || '';
+          if (suggestedKey) customCatSelect.value = suggestedKey;
+        }
+      });
+      customLabelInput.addEventListener('keydown', event => {
+        if (event.key !== 'Enter') return;
+        event.preventDefault();
+        handleAddCustomDomainClick();
+      });
+    }
+
+    if (customAddBtn) {
+      customAddBtn.addEventListener('click', handleAddCustomDomainClick);
+    }
+
+    if (managedListEl) {
+      managedListEl.addEventListener('click', event => {
+        if (!(event.target instanceof Element)) return;
+        const row = event.target.closest('.pref-domain-item[data-domain-id]');
+        if (!row) return;
+        const domainId = row.getAttribute('data-domain-id') || '';
+        if (!domainId) return;
+
+        if (event.target.closest('.js-pref-domain-priority')) {
+          surveyDraftState.domains = surveyDraftState.domains.map(item =>
+            item.id === domainId
+              ? Object.assign({}, item, { priority: item.priority === 'primary' ? 'normal' : 'primary' })
+              : item
+          );
+          syncPreferencesSurveyModalUi();
+          return;
+        }
+
+        if (event.target.closest('.js-pref-domain-delete')) {
+          surveyDraftState.domains = surveyDraftState.domains.filter(item => item.id !== domainId);
+          if (surveyDraftState.editingDomainId === domainId) {
+            surveyDraftState.editingDomainId = null;
+          }
+          syncPreferencesSurveyModalUi();
+          return;
+        }
+
+        if (event.target.closest('.js-pref-domain-edit')) {
+          surveyDraftState.editingDomainId = domainId;
+          syncPreferencesSurveyModalUi();
+          const editLabelInput = managedListEl.querySelector('.js-pref-edit-label');
+          if (editLabelInput) editLabelInput.focus();
+          return;
+        }
+
+        if (event.target.closest('.js-pref-edit-cancel')) {
+          surveyDraftState.editingDomainId = null;
+          syncPreferencesSurveyModalUi();
+          return;
+        }
+
+        if (event.target.closest('.js-pref-edit-save')) {
+          const editLabelEl = row.querySelector('.js-pref-edit-label');
+          const editKeyEl = row.querySelector('.js-pref-edit-key');
+          const editPrioEl = row.querySelector('.js-pref-edit-priority');
+          const nextLabel = editLabelEl ? editLabelEl.value.trim() : '';
+          const nextKey = editKeyEl ? editKeyEl.value.trim() : '';
+          const nextPrio = editPrioEl && editPrioEl.value === 'primary' ? 'primary' : 'normal';
+          if (!nextLabel || !VALID_PREF_TOPIC_KEYS.has(nextKey)) {
+            showToast('Tên lĩnh vực không được để trống và phải thuộc nhóm hợp lệ.', 'info');
+            if (editLabelEl) editLabelEl.focus();
+            return;
+          }
+          const canonLbl = PREF_TOPIC_LABEL_MAP[nextKey] || nextKey;
+          surveyDraftState.domains = surveyDraftState.domains.map((item, idx) => {
+            if (item.id !== domainId) return item;
+            return normalizeManagedDomainItem(Object.assign({}, item, {
+              key: nextKey,
+              label: nextLabel,
+              priority: nextPrio,
+              source: nextLabel.toLowerCase() === canonLbl.toLowerCase()
+                ? ((item.source === 'serpapi' || item.source === 'openalex' || item.source === 'orcid' || item.source === 'semantic_scholar' || item.source === 'confguide_saved' || item.source === 'scholar') ? item.source : 'manual')
+                : 'custom',
+              updatedAt: new Date().toISOString()
+            }), idx) || item;
+          });
+          surveyDraftState.editingDomainId = null;
+          syncPreferencesSurveyModalUi();
+        }
+      });
+
+      managedListEl.addEventListener('keydown', event => {
+        if (!(event.target instanceof HTMLElement)) return;
+        if (!event.target.closest('.pref-domain-item.is-editing')) return;
+        if (event.key === 'Enter') {
+          event.preventDefault();
+          const saveInlineBtn = event.target.closest('.pref-domain-item.is-editing').querySelector('.js-pref-edit-save');
+          if (saveInlineBtn) saveInlineBtn.click();
+        }
+      });
+    }
 
     if (topicGrid) {
       topicGrid.addEventListener('change', event => {
@@ -3206,9 +4285,23 @@
         const tKey = checkbox.value || '';
         if (!VALID_PREF_TOPIC_KEYS.has(tKey)) return;
         if (checkbox.checked) {
-          surveyDraftState.topics.add(tKey);
+          const alreadyExists = surveyDraftState.domains.some(item => item.key === tKey);
+          if (!alreadyExists) {
+            const added = normalizeManagedDomainItem({
+              id: `dom_${tKey}_${Date.now()}`,
+              key: tKey,
+              label: PREF_TOPIC_LABEL_MAP[tKey] || tKey,
+              priority: 'normal',
+              source: 'manual'
+            }, surveyDraftState.domains.length);
+            if (added) surveyDraftState.domains.push(added);
+          }
         } else {
-          surveyDraftState.topics.delete(tKey);
+          surveyDraftState.domains = surveyDraftState.domains.filter(item => item.key !== tKey);
+          if (surveyDraftState.editingDomainId
+            && !surveyDraftState.domains.some(item => item.id === surveyDraftState.editingDomainId)) {
+            surveyDraftState.editingDomainId = null;
+          }
         }
         syncPreferencesSurveyModalUi();
       });
@@ -3220,7 +4313,8 @@
         const switchManualBtn = event.target.closest('.js-pref-switch-manual');
         if (!switchManualBtn) return;
         surveyDraftState.recognitionResult = null;
-        surveyDraftState.topics.clear();
+        surveyDraftState.domains = [];
+        surveyDraftState.editingDomainId = null;
         syncPreferencesSurveyModalUi();
       });
     }
@@ -3232,10 +4326,18 @@
         const result = analyzeUserAcademicDomains(activeUser, { allowExternalAcademic: true });
         surveyDraftState.recognitionResult = result;
         if (result.recognized && Array.isArray(result.recommendedTopics)) {
-          result.recommendedTopics.forEach(item => {
-            if (VALID_PREF_TOPIC_KEYS.has(item.key)) {
-              surveyDraftState.topics.add(item.key);
-            }
+          const existingKeys = new Set(surveyDraftState.domains.map(d => d.key));
+          result.recommendedTopics.forEach((item, idx) => {
+            if (!VALID_PREF_TOPIC_KEYS.has(item.key) || existingKeys.has(item.key)) return;
+            const added = normalizeManagedDomainItem({
+              id: `dom_rec_${item.key}_${Date.now()}_${idx}`,
+              key: item.key,
+              label: item.label || PREF_TOPIC_LABEL_MAP[item.key] || item.key,
+              priority: idx === 0 ? 'primary' : 'normal',
+              source: 'openalex',
+              confidence: item.confidence
+            }, surveyDraftState.domains.length + idx);
+            if (added) surveyDraftState.domains.push(added);
           });
         }
         syncPreferencesSurveyModalUi();
@@ -3244,7 +4346,9 @@
 
     if (resetBtn) {
       resetBtn.addEventListener('click', () => {
-        surveyDraftState.topics.clear();
+        surveyDraftState.domains = [];
+        surveyDraftState.editingDomainId = null;
+        surveyDraftState.recognitionResult = null;
         syncPreferencesSurveyModalUi();
       });
     }
@@ -3784,6 +4888,70 @@
   }
 
   /**
+   * Đồng bộ ngầm danh sách lĩnh vực nghiên cứu lên backend PUT /api/fields (lưu vào data/fields.json).
+   * Bỏ qua an toàn nếu đang mở qua file:/// hoặc backend chưa khởi chạy.
+   * @param {Object|null} user - Tài khoản đang đăng nhập.
+   * @param {Array<Object>} domainsList - Danh sách lĩnh vực đã chuẩn hóa.
+   */
+  function syncUserFieldsToBackend(user, domainsList) {
+    if (!isHttpOriginContext() || !user || !user.email) return;
+    fetch(`${getBackendApiBase()}/api/fields`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json'
+      },
+      body: JSON.stringify({
+        email: user.email,
+        name: user.fullName || user.name || '',
+        scholarId: user.scholarId || '',
+        source: user.fieldsSource || 'manual',
+        fields: Array.isArray(domainsList) ? domainsList : []
+      })
+    }).catch(() => {
+      // Giữ trải nghiệm mượt nếu backend chưa bật
+    });
+  }
+
+  /**
+   * Đọc danh sách lĩnh vực đã xác nhận từ backend GET /api/fields?email=... khi tải trang
+   * để cập nhật đồng bộ "Lĩnh vực của tôi" và gợi ý hội nghị.
+   */
+  async function syncUserFieldsFromBackend() {
+    if (!isHttpOriginContext() || !isUserAuthenticated()) return;
+    const activeUser = getCurrentUser();
+    if (!activeUser || !activeUser.email) return;
+
+    const controller = typeof AbortController === 'function' ? new AbortController() : null;
+    const timeoutId = controller ? window.setTimeout(() => controller.abort(), 3000) : null;
+
+    try {
+      const url = `${getBackendApiBase()}/api/fields?email=${encodeURIComponent(activeUser.email)}`;
+      const res = await fetch(url, {
+        headers: { Accept: 'application/json' },
+        signal: controller ? controller.signal : undefined
+      });
+      if (!res.ok) return;
+      const data = await res.json();
+      if (!data || !Array.isArray(data.fields) || data.fields.length === 0) return;
+
+      const localDomains = getUserResearchDomains();
+      const serverUpdatedMs = data.updatedAt ? Date.parse(data.updatedAt) : 0;
+      const localUpdatedMs = activeUser.fieldsUpdatedAt ? Date.parse(activeUser.fieldsUpdatedAt) : 0;
+      const shouldApplyServer = localDomains.length === 0
+        || (Number.isFinite(serverUpdatedMs) && serverUpdatedMs > (Number.isFinite(localUpdatedMs) ? localUpdatedMs : 0));
+
+      if (shouldApplyServer) {
+        setUserResearchDomains(data.fields, { skipBackendSync: true });
+      }
+    } catch {
+      // Bỏ qua lặng lẽ nếu backend chưa chạy
+    } finally {
+      if (timeoutId !== null) window.clearTimeout(timeoutId);
+    }
+  }
+
+  /**
    * Khởi tạo toàn bộ bố cục trang dùng chung khi DOM sẵn sàng.
    */
   function initLayout() {
@@ -3796,6 +4964,7 @@
     initContactForm();
     layoutInitialized = true;
     maybeTriggerNewUserOnboarding(page);
+    syncUserFieldsFromBackend();
   }
 
   if (document.getElementById('site-header')) {
@@ -3887,6 +5056,13 @@
     analyzeUserAcademicDomains: analyzeUserAcademicDomains,
     parseTopicKeysFromText: parseTopicKeysFromText,
     parseTopicDisplayLabelsFromText: parseTopicDisplayLabelsFromText,
+    normalizeManagedDomainItem: normalizeManagedDomainItem,
+    getUserResearchFieldsText: getUserResearchFieldsText,
+    getUserResearchDomains: getUserResearchDomains,
+    setUserResearchDomains: setUserResearchDomains,
+    addUserResearchDomain: addUserResearchDomain,
+    updateUserResearchDomain: updateUserResearchDomain,
+    removeUserResearchDomain: removeUserResearchDomain,
     getUserResearchTopicKeys: getUserResearchTopicKeys,
     getUserResearchTopicLabels: getUserResearchTopicLabels,
     setUserResearchTopicKeys: setUserResearchTopicKeys,
