@@ -1,8 +1,8 @@
 {
   "hero": {
     "eyebrow": "VỀ CHÚNG TÔI",
-    "title": "Nền tảng Tra cứu & Theo dõi Hội nghị Khoa học",
-    "description": "ConfGuide được nghiên cứu và phát triển nhằm hỗ trợ sinh viên, giảng viên và các nhóm nghiên cứu dễ dàng tra cứu, đối chiếu uy tín và quản lý các mốc thời hạn công bố khoa học. Hệ thống giải quyết các rào cản phổ biến trong tiếp cận thông tin học thuật, hướng tới trở thành công cụ hỗ trợ tin cậy cho cộng đồng nghiên cứu tại Việt Nam.",
+    "title": "Nền tảng Khám phá Hội nghị Khoa học CNTT",
+    "description": "ConfGuide là nền tảng hỗ trợ sinh viên, giảng viên và các nhóm nghiên cứu khám phá, tra cứu, nhận khuyến nghị và theo dõi hạn nộp bài của các hội nghị khoa học Công nghệ thông tin trong nước và quốc tế. Hệ thống chuẩn hóa thông tin học thuật và quy đổi thời hạn nộp bài về giờ Việt Nam (UTC+7), giúp người làm nghiên cứu chủ động lựa chọn diễn đàn công bố phù hợp.",
     "contextTitle": "Bối cảnh thực tế & Sứ mệnh",
     "contextChallenges": [
       {
@@ -18,7 +18,7 @@
         "desc": "Thời hạn nộp bài thường áp dụng múi giờ quốc tế Anywhere on Earth (AoE, UTC-12) hoặc giờ địa phương của nước chủ nhà, dễ gây sai sót và lỡ hẹn nộp bài."
       }
     ],
-    "mission": "Sứ mệnh của ConfGuide là chuẩn hóa, quy tụ và minh bạch hóa thông tin hội nghị khoa học công nghệ thông tin trên một nền tảng thống nhất, hỗ trợ sinh viên và nghiên cứu sinh chủ động xây dựng lộ trình nghiên cứu và tự tin công bố công trình."
+    "mission": "Sứ mệnh của ConfGuide là chuẩn hóa, quy tụ và minh bạch hóa thông tin các hội nghị khoa học Công nghệ thông tin trong nước và quốc tế trên một nền tảng thống nhất, hỗ trợ sinh viên, giảng viên và nghiên cứu sinh chủ động lộ trình nghiên cứu và công bố khoa học."
   },
   "coreValues": [
     {

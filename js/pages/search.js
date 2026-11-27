@@ -21,6 +21,7 @@
     cfp: true,
     mode: true,
     when: true,
+    scope: true,
     where: true,
     what: true
   };
@@ -68,6 +69,14 @@
   ];
   const MODE_ORDER = MODE_CATALOG_DEFS.map(item => item.key);
   const ALL_MODE_KEYS = new Set(MODE_ORDER);
+
+  const SCOPE_CATALOG_DEFS = [
+    { key: 'vietnam', label: 'Việt Nam' },
+    { key: 'international', label: 'Quốc tế' }
+  ];
+  const SCOPE_ORDER = SCOPE_CATALOG_DEFS.map(item => item.key);
+  const VALID_SCOPE_KEYS = new Set(SCOPE_ORDER);
+  const SCOPE_FACET_KEYS = SCOPE_ORDER.map(key => `scope:${key}`);
 
   const VALID_CFP_VALUES = new Set(['all', 'open', 'closingSoon', 'closed', 'unknown']);
   const VALID_CITY_VALUES = new Set(['all', 'ha-noi', 'ho-chi-minh', 'other']);
@@ -121,6 +130,9 @@
   let lastRenderedConferenceIds = null;
   let updateScheduled = false;
   let renderToken = 0;
+  let isFirstUrlSync = true;
+  let isRestoringHistoryState = false;
+  let lastUrlFilterSignature = '';
 
   /**
    * Đối tượng trạng thái lọc thô ban đầu (nguồn chân lý duy nhất).
@@ -133,6 +145,7 @@
     dateFrom: '',
     dateTo: '',
     modes: [],
+    scopes: [],
     city: 'all',
     topics: [],
     sort: 'deadline',
@@ -185,6 +198,8 @@
       toTopicSlug: str => String(str || '').toLowerCase().trim(),
       normalizeTopicFields: () => [],
       expandTopicFilterValues: list => (Array.isArray(list) ? list : []),
+      normalizeCityKey: () => 'other',
+      normalizeScopeKey: () => '',
       buildIndex: list => list,
       scoreConference: () => ({ matched: true, score: 0 }),
       matchesFilters: () => true,
@@ -314,16 +329,15 @@
 
   /**
    * Phân loại thành phố/khu vực tổ chức thành 3 nhóm: 'ha-noi' | 'ho-chi-minh' | 'other'
-   * Mọi địa điểm ngoài Hà Nội và TP.HCM (kể cả thiếu dữ liệu) đều rơi vào 'other' (Khu vực khác).
-   * @param {string|null} rawLocation
-   * @returns {'ha-noi'|'ho-chi-minh'|'other'}
+   * Tái sử dụng logic chuẩn hóa địa điểm từ `ConfGuideSearchCore.normalizeCityKey`.
+   * @param {string|null} rawLocation - Chuỗi địa điểm thô của hội nghị.
+   * @returns {'ha-noi'|'ho-chi-minh'|'other'} Khóa địa điểm chuẩn hóa.
    */
   function extractCityKey(rawLocation) {
-    if (!rawLocation || String(rawLocation).trim() === '') return 'other';
     const core = getCore();
-    const normalized = core.normalizeText(rawLocation);
-    if (/\b(ha noi|hanoi)\b/.test(normalized)) return 'ha-noi';
-    if (/\b(ho chi minh|hcm|saigon|sai gon)\b/.test(normalized)) return 'ho-chi-minh';
+    if (typeof core.normalizeCityKey === 'function') {
+      return core.normalizeCityKey(rawLocation);
+    }
     return 'other';
   }
 
@@ -674,6 +688,7 @@
       rank: VALID_RANK_VALUES.has(rawRank) ? rawRank : '',
       rankKey: VALID_RANK_VALUES.has(rawRank) ? rawRank : 'unranked',
       modeKey: typeof core.normalizeModeKey === 'function' ? core.normalizeModeKey(raw) : 'unknown',
+      scopeKey: typeof core.normalizeScopeKey === 'function' ? core.normalizeScopeKey(raw) : '',
       rankInfo: raw.rank && typeof raw.rank === 'object' ? raw.rank : null,
       topics: topicGroups.map(group => group.key),
       topicGroups,
@@ -836,6 +851,7 @@
     rawFilterState.dateFrom = '';
     rawFilterState.dateTo = '';
     rawFilterState.modes = [];
+    rawFilterState.scopes = [];
     rawFilterState.city = 'all';
     rawFilterState.topics = [];
     rawFilterState.sort = 'deadline';
@@ -911,6 +927,13 @@
       rawFilterState.modes = parseMultiUrlParam(params, 'mode', ALL_MODE_KEYS, val => val.toLowerCase());
     }
 
+    if (ENABLED_FILTER_GROUPS.scope) {
+      const parsedScopes = new Set(
+        parseMultiUrlParam(params, 'scope', VALID_SCOPE_KEYS, val => val.toLowerCase())
+      );
+      rawFilterState.scopes = SCOPE_ORDER.filter(key => parsedScopes.has(key));
+    }
+
     if (ENABLED_FILTER_GROUPS.where) {
       let rawCity = (params.get('city') || '').trim();
       if (rawCity === 'da-nang' || rawCity === 'unknown') rawCity = 'other';
@@ -929,50 +952,103 @@
   }
 
   /**
-   * Đồng bộ filterState lên URL với debounce 300ms và các lớp bảo vệ an toàn.
+   * Tạo chữ ký trạng thái của các bộ lọc rời rạc (không tính từ khóa đang gõ)
+   * để phân biệt thao tác bật/tắt bộ lọc (pushState) với thao tác gõ trực tiếp (replaceState).
+   * @param {Object} state - Trạng thái bộ lọc cần tạo chữ ký.
+   * @returns {string} Chuỗi chữ ký trạng thái rời rạc.
+   */
+  function buildDiscreteFilterSignature(state) {
+    if (!state) return '';
+    return [
+      Array.isArray(state.ranks) ? state.ranks.join(',') : '',
+      state.month || '',
+      state.cfp || 'all',
+      state.dateFrom || '',
+      state.dateTo || '',
+      Array.isArray(state.modes) ? state.modes.join(',') : '',
+      Array.isArray(state.scopes) ? state.scopes.join(',') : '',
+      state.city || 'all',
+      Array.isArray(state.topics) ? state.topics.join(',') : '',
+      state.sort || 'deadline',
+      String(state.page || 1)
+    ].join('|');
+  }
+
+  /**
+   * Đóng gói trạng thái `filterState` hiện hành thành chuỗi query URL chuẩn.
+   * @returns {string} Chuỗi query dạng `?scope=...` hoặc chuỗi rỗng.
+   */
+  function serializeFilterStateToSearch() {
+    const params = new URLSearchParams();
+    if (filterState.q) params.set('q', filterState.q);
+    if (ENABLED_FILTER_GROUPS.rank && Array.isArray(filterState.ranks) && filterState.ranks.length > 0) {
+      params.set('rank', filterState.ranks.join(','));
+    }
+    if (ENABLED_FILTER_GROUPS.month && filterState.month) {
+      params.set('when', filterState.month);
+    }
+    if (ENABLED_FILTER_GROUPS.cfp) {
+      if (filterState.cfp && filterState.cfp !== 'all') params.set('cfp', filterState.cfp);
+      if (filterState.dateFrom) params.set('from', filterState.dateFrom);
+      if (filterState.dateTo) params.set('to', filterState.dateTo);
+    }
+    if (ENABLED_FILTER_GROUPS.mode && Array.isArray(filterState.modes) && filterState.modes.length > 0) {
+      params.set('mode', filterState.modes.join(','));
+    }
+    if (ENABLED_FILTER_GROUPS.scope && Array.isArray(filterState.scopes) && filterState.scopes.length > 0) {
+      params.set('scope', filterState.scopes.join(','));
+    }
+    if (ENABLED_FILTER_GROUPS.where && filterState.city && filterState.city !== 'all') {
+      params.set('city', filterState.city);
+    }
+    if (ENABLED_FILTER_GROUPS.what && filterState.topics.length > 0) {
+      params.set('topic', filterState.topics.join(','));
+    }
+    if (filterState.sort && filterState.sort !== 'deadline') {
+      params.set('sort', filterState.sort);
+    }
+    if (filterState.page > 1) {
+      params.set('page', String(filterState.page));
+    }
+    const qs = params.toString();
+    return qs ? `?${qs}` : '';
+  }
+
+  /**
+   * Đồng bộ filterState lên URL với debounce 300ms, hỗ trợ điều hướng Back/Forward qua History API.
    */
   function syncUrlDebounced() {
     if (typeof window === 'undefined' || window.location.protocol === 'file:') return;
+    if (isRestoringHistoryState) return;
     if (urlSyncTimer) clearTimeout(urlSyncTimer);
 
     urlSyncTimer = setTimeout(() => {
       try {
-        const params = new URLSearchParams();
-        if (filterState.q) params.set('q', filterState.q);
-        if (ENABLED_FILTER_GROUPS.rank && Array.isArray(filterState.ranks) && filterState.ranks.length > 0) {
-          params.set('rank', filterState.ranks.join(','));
-        }
-        if (ENABLED_FILTER_GROUPS.month) {
-          if (filterState.month) params.set('when', filterState.month);
-        }
-        if (ENABLED_FILTER_GROUPS.cfp) {
-          if (filterState.cfp && filterState.cfp !== 'all') params.set('cfp', filterState.cfp);
-          if (filterState.dateFrom) params.set('from', filterState.dateFrom);
-          if (filterState.dateTo) params.set('to', filterState.dateTo);
-        }
-        if (ENABLED_FILTER_GROUPS.mode && Array.isArray(filterState.modes) && filterState.modes.length > 0) {
-          params.set('mode', filterState.modes.join(','));
-        }
-        if (ENABLED_FILTER_GROUPS.where && filterState.city && filterState.city !== 'all') {
-          params.set('city', filterState.city);
-        }
-        if (ENABLED_FILTER_GROUPS.what && filterState.topics.length > 0) {
-          params.set('topic', filterState.topics.join(','));
-        }
-        if (filterState.sort && filterState.sort !== 'deadline') {
-          params.set('sort', filterState.sort);
-        }
-        if (filterState.page > 1) {
-          params.set('page', String(filterState.page));
+        if (isRestoringHistoryState) return;
+        const nextSearch = serializeFilterStateToSearch();
+        const nextFilterSig = buildDiscreteFilterSignature(filterState);
+        const targetUrl = `${window.location.pathname}${nextSearch}`;
+
+        if (isFirstUrlSync) {
+          isFirstUrlSync = false;
+          lastUrlFilterSignature = nextFilterSig;
+          if (window.location.search !== nextSearch) {
+            window.history.replaceState(null, '', targetUrl);
+          }
+          return;
         }
 
-        const qs = params.toString();
-        const nextSearch = qs ? `?${qs}` : '';
+        const discreteChanged = nextFilterSig !== lastUrlFilterSignature;
+        lastUrlFilterSignature = nextFilterSig;
         if (window.location.search !== nextSearch) {
-          window.history.replaceState(null, '', `${window.location.pathname}${nextSearch}`);
+          if (discreteChanged) {
+            window.history.pushState(null, '', targetUrl);
+          } else {
+            window.history.replaceState(null, '', targetUrl);
+          }
         }
       } catch (e) {
-        // Bỏ qua lỗi replaceState hạn chế tần suất của trình duyệt
+        // Bỏ qua lỗi History API hạn chế tần suất của trình duyệt
       }
     }, DEBOUNCE_URL_MS);
   }
@@ -1012,8 +1088,11 @@
 
   /**
    * Đếm số bộ lọc đang chọn theo từng nhóm bộ lọc.
-   * @param {Object} state
-   * @returns {{rank: number, month: number, cfp: number, mode: number, where: number, what: number, total: number}}
+   * @param {Object} state - Trạng thái bộ lọc.
+   * @returns {{
+   *   rank: number, month: number, cfp: number, mode: number,
+   *   scope: number, where: number, what: number, total: number
+   * }} Số lượng lựa chọn đang bật theo nhóm và tổng cộng.
    */
   function getGroupActiveCounts(state) {
     const rankCount = (ENABLED_FILTER_GROUPS.rank && Array.isArray(state.ranks)) ? state.ranks.length : 0;
@@ -1024,6 +1103,7 @@
     let cfpCount = (ENABLED_FILTER_GROUPS.cfp && state.cfp && state.cfp !== 'all') ? 1 : 0;
     if (ENABLED_FILTER_GROUPS.cfp && (state.dateFrom || state.dateTo)) cfpCount += 1;
     const modeCount = (ENABLED_FILTER_GROUPS.mode && Array.isArray(state.modes)) ? state.modes.length : 0;
+    const scopeCount = (ENABLED_FILTER_GROUPS.scope && Array.isArray(state.scopes)) ? state.scopes.length : 0;
     const whereCount = (ENABLED_FILTER_GROUPS.where && state.city && state.city !== 'all') ? 1 : 0;
     const whatCount = (ENABLED_FILTER_GROUPS.what && Array.isArray(state.topics)) ? state.topics.length : 0;
 
@@ -1032,9 +1112,10 @@
       month: monthCount,
       cfp: cfpCount,
       mode: modeCount,
+      scope: scopeCount,
       where: whereCount,
       what: whatCount,
-      total: rankCount + monthCount + cfpCount + modeCount + whereCount + whatCount
+      total: rankCount + monthCount + cfpCount + modeCount + scopeCount + whereCount + whatCount
     };
   }
 
@@ -1357,11 +1438,38 @@
   }
 
   /**
-   * Cập nhật bộ đếm nhóm, nút Đặt lại và nhãn cho toàn bộ thanh bên.
+   * Tính toán và cập nhật số lượng hội nghị khớp trước (facet pre-count) cho các tùy chọn nhóm Phạm vi.
+   * @param {Object} state - Trạng thái bộ lọc hiện tại (hoặc bản nháp khi đang mở drawer di động).
+   */
+  function updateScopeFacetCounts(state) {
+    if (!isDataLoaded) return;
+    const core = getCore();
+    if (typeof core.computeFacetCounts !== 'function') return;
+
+    const queryTokens = core.tokenizeQuery(state.q);
+    const facetCounts = core.computeFacetCounts(
+      baseSearchConferences,
+      state,
+      SCOPE_FACET_KEYS,
+      queryTokens,
+      state.q
+    );
+
+    SCOPE_FACET_KEYS.forEach(facetKey => {
+      const countVal = facetCounts[facetKey] !== undefined ? facetCounts[facetKey] : 0;
+      document.querySelectorAll(`.js-filter-count[data-count-for="${facetKey}"]`).forEach(el => {
+        el.textContent = `(${countVal})`;
+      });
+    });
+  }
+
+  /**
+   * Cập nhật bộ đếm nhóm, pre-count Phạm vi, nút Đặt lại và nhãn cho toàn bộ thanh bên.
    * Mọi lựa chọn luôn bấm được, kể cả khi hiện chưa có hội nghị phù hợp.
    * @param {Object} state - Trạng thái bộ lọc hiện tại.
    */
   function updateSidebarUI(state) {
+    updateScopeFacetCounts(state);
 
     const groupCounts = getGroupActiveCounts(state);
     updateSidebarGroupCounters(state, groupCounts);
@@ -1426,6 +1534,7 @@
     syncFilterCheckboxes('.js-filter-cfp', cb => (cb.value === 'all' ? state.cfp === 'all' : state.cfp === cb.value));
     syncFilterCheckboxes('.js-filter-time', cb => cb.value === (state.month || 'all'));
     syncFilterCheckboxes('.js-filter-mode', cb => Array.isArray(state.modes) && state.modes.includes(cb.value));
+    syncFilterCheckboxes('.js-filter-scope', cb => Array.isArray(state.scopes) && state.scopes.includes(cb.value));
     syncFilterCheckboxes('.js-filter-city', cb => (
       cb.value === 'all' ? state.city === 'all' : state.city === cb.value
     ));
@@ -1498,13 +1607,13 @@
   }
 
   /**
-   * Khởi tạo trạng thái mở accordion (thứ tự nhóm: Hạn nộp, Lĩnh vực, Địa điểm, Tháng, Hình thức, Phân hạng):
-   * Desktop mở 4 nhóm dùng nhiều đầu tiên, thu gọn Hình thức và Phân hạng;
-   * Mobile mở 2 nhóm đầu tiên. Nhóm nào đang có bộ lọc luôn được mở.
+   * Khởi tạo trạng thái mở accordion (7 nhóm: Hạn nộp, Lĩnh vực, Phạm vi, Địa điểm, Thời gian, Hình thức, Phân hạng):
+   * Desktop mở 5 nhóm đầu (bao gồm Phạm vi), thu gọn Hình thức và Phân hạng;
+   * Mobile mở 3 nhóm đầu (bao gồm Phạm vi). Nhóm nào đang có bộ lọc luôn được mở.
    */
   function syncInitialAccordionStates() {
     const isMobile = window.innerWidth <= 767;
-    const openLimit = isMobile ? 2 : 4;
+    const openLimit = isMobile ? 3 : 5;
     const groupCounts = getGroupActiveCounts(filterState);
     document.querySelectorAll('.js-filter-accordion').forEach((acc, idx) => {
       const groupKey = acc.getAttribute('data-group') || '';
@@ -1528,6 +1637,7 @@
       draftFilterState.dateFrom = '';
       draftFilterState.dateTo = '';
       draftFilterState.modes = [];
+      draftFilterState.scopes = [];
       draftFilterState.city = 'all';
       draftFilterState.topics = [];
       draftFilterState.page = 1;
@@ -2039,6 +2149,7 @@
       dateFrom: filterState.dateFrom,
       dateTo: filterState.dateTo,
       modes: [...filterState.modes],
+      scopes: [...filterState.scopes],
       city: filterState.city,
       topics: [...filterState.topics],
       sort: filterState.sort,
@@ -2082,6 +2193,7 @@
       filterState.dateFrom = draftFilterState.dateFrom;
       filterState.dateTo = draftFilterState.dateTo;
       filterState.modes = [...draftFilterState.modes];
+      filterState.scopes = [...draftFilterState.scopes];
       filterState.city = draftFilterState.city;
       filterState.topics = [...draftFilterState.topics];
       filterState.page = 1;
@@ -2231,6 +2343,13 @@
           .filter(v => validModeKeys.has(v))
       );
       targetState.modes = modeCatalog.map(item => item.key).filter(m => selectedModes.has(m));
+    } else if (target.classList.contains('js-filter-scope') && target instanceof HTMLInputElement) {
+      const selectedScopes = new Set(
+        [...sidebar.querySelectorAll('.js-filter-scope:checked')]
+          .map(cb => cb.value)
+          .filter(v => VALID_SCOPE_KEYS.has(v))
+      );
+      targetState.scopes = SCOPE_ORDER.filter(s => selectedScopes.has(s));
     } else if (target.classList.contains('js-filter-city') && target instanceof HTMLInputElement) {
       targetState.city = target.value === 'all' ? 'all' : (target.checked ? target.value : 'all');
     } else if (target.classList.contains('js-filter-topic') && target instanceof HTMLInputElement) {
@@ -2437,6 +2556,46 @@
   }
 
   /**
+   * Làm sạch các khóa bộ lọc đọc từ URL dựa trên danh mục dữ liệu thực tế đã nạp.
+   */
+  function sanitizeUrlFilterStateKeys() {
+    rawFilterState.ranks = rawFilterState.ranks.filter((key, idx, arr) =>
+      validRankKeys.has(key) && arr.indexOf(key) === idx
+    );
+    rawFilterState.modes = rawFilterState.modes.filter((key, idx, arr) =>
+      validModeKeys.has(key) && arr.indexOf(key) === idx
+    );
+    rawFilterState.scopes = SCOPE_ORDER.filter(key => rawFilterState.scopes.includes(key));
+    rawFilterState.topics = rawFilterState.topics
+      .map(key => (validTopicValues.has(key) ? key : (singleTopicToGroupKey.get(key) || key)))
+      .filter((key, idx, arr) => validTopicValues.has(key) && arr.indexOf(key) === idx);
+  }
+
+  /**
+   * Khôi phục trạng thái bộ lọc từ URL hiện hành khi người dùng nhấn nút Back/Forward của trình duyệt.
+   */
+  function restoreStateFromBrowserHistory() {
+    if (urlSyncTimer) {
+      clearTimeout(urlSyncTimer);
+      urlSyncTimer = null;
+    }
+    if (isFilterDrawerOpen) {
+      closeFiltersDrawer(false);
+    }
+    isRestoringHistoryState = true;
+    readUrlIntoFilterState();
+    if (isDataLoaded) {
+      sanitizeUrlFilterStateKeys();
+    }
+    syncSidebarInputsFromState(filterState);
+    syncInitialAccordionStates();
+    executePipeline().finally(() => {
+      lastUrlFilterSignature = buildDiscreteFilterSignature(filterState);
+      isRestoringHistoryState = false;
+    });
+  }
+
+  /**
    * Tải dữ liệu hội nghị từ data/conference_data.json kèm try/catch fallback về FALLBACK_CONFERENCES.
    */
   async function loadData() {
@@ -2473,15 +2632,7 @@
     // 2. Xây dựng danh mục Phân hạng, Hình thức, Lĩnh vực thực có & lọc lại khóa URL an toàn
     buildFilterCatalogs(baseSearchConferences);
     renderDynamicFilterOptions();
-    rawFilterState.ranks = rawFilterState.ranks.filter((key, idx, arr) =>
-      validRankKeys.has(key) && arr.indexOf(key) === idx
-    );
-    rawFilterState.modes = rawFilterState.modes.filter((key, idx, arr) =>
-      validModeKeys.has(key) && arr.indexOf(key) === idx
-    );
-    rawFilterState.topics = rawFilterState.topics
-      .map(key => (validTopicValues.has(key) ? key : (singleTopicToGroupKey.get(key) || key)))
-      .filter((key, idx, arr) => validTopicValues.has(key) && arr.indexOf(key) === idx);
+    sanitizeUrlFilterStateKeys();
 
     // 3. Xây dựng chỉ mục tìm kiếm và khớp mờ 1 lần duy nhất bằng ConfGuideSearchCore
     indexedConferences = core.buildIndex(baseSearchConferences);
@@ -2514,7 +2665,13 @@
     loadData();
   });
 
-  window.addEventListener('pageshow', syncSearchSaveButtonsUi);
+  window.addEventListener('popstate', restoreStateFromBrowserHistory);
+  window.addEventListener('pageshow', event => {
+    syncSearchSaveButtonsUi();
+    if (event && event.persisted) {
+      restoreStateFromBrowserHistory();
+    }
+  });
   window.addEventListener('storage', event => {
     if (!event.key || event.key === 'confguide_current_user' || event.key === getSavedStorageKey()) {
       syncSearchSaveButtonsUi();

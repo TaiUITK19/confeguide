@@ -1,6 +1,6 @@
 /* =========================================================
    ConfGuide — Search & Filter Stylesheet (css/pages/search.css)
-   Khung lọc hợp nhất CÒN – KHI – ĐÂU – GÌ | Thẻ kết quả BEM (.conference-card)
+   Khung lọc đa chiều 7 nhóm | Thẻ kết quả BEM (.conference-card)
    Sticky Sidebar Desktop & Drawer/Bottom-Sheet Mobile | Skeleton Loading
    Chuẩn WCAG 2.1 AA (:focus-within, vùng chạm >= 44px, prefers-reduced-motion)
    ========================================================= */
@@ -387,7 +387,7 @@ body.dark {
   outline-offset: 2px;
 }
 
-/* Phần thân chứa 6 nhóm lọc accordion */
+/* Phần thân chứa 7 nhóm lọc accordion */
 .filters__body {
   display: flex;
   flex-direction: column;
@@ -639,6 +639,23 @@ body.dark {
 .filter-option input:checked ~ .filter-option__text {
   color: var(--text);
   font-weight: 500;
+}
+
+/* Bộ đếm số lượng kết quả trước (pre-count) hiển thị cạnh nhãn tùy chọn lọc */
+.check-row__count,
+.filter-option__count {
+  margin-left: 6px;
+  font-size: 13.5px;
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-muted);
+  line-height: 1.4;
+  flex-shrink: 0;
+}
+
+.check-row input:checked ~ .check-row__count,
+.filter-option input:checked ~ .filter-option__count {
+  color: var(--text-muted);
 }
 
 .filter-sub-label {

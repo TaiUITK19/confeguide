@@ -17,8 +17,8 @@
   const FALLBACK_ABOUT_DATA = {
     hero: {
       eyebrow: 'VỀ CHÚNG TÔI',
-      title: 'Nền tảng Tra cứu & Khuyến nghị Hội nghị Khoa học CNTT tại Việt Nam',
-      description: 'ConfGuide được nghiên cứu và phát triển nhằm hỗ trợ sinh viên, giảng viên và các nhóm nghiên cứu dễ dàng tra cứu, đối chiếu uy tín và quản lý các mốc thời hạn công bố tại các hội nghị khoa học Công nghệ thông tin diễn ra tại Việt Nam (bao gồm cả hội nghị quốc tế tổ chức tại Việt Nam). Hệ thống giải quyết các rào cản phổ biến trong tiếp cận thông tin học thuật, hướng tới trở thành công cụ hỗ trợ tin cậy cho cộng đồng nghiên cứu.',
+      title: 'Nền tảng Khám phá Hội nghị Khoa học CNTT',
+      description: 'ConfGuide là nền tảng hỗ trợ sinh viên, giảng viên và các nhóm nghiên cứu khám phá, tra cứu, nhận khuyến nghị và theo dõi hạn nộp bài của các hội nghị khoa học Công nghệ thông tin trong nước và quốc tế. Hệ thống chuẩn hóa thông tin học thuật và quy đổi thời hạn nộp bài về giờ Việt Nam (UTC+7), giúp người làm nghiên cứu chủ động lựa chọn diễn đàn công bố phù hợp.',
       contextTitle: 'Bối cảnh thực tế & Sứ mệnh',
       contextChallenges: [
         {
@@ -27,21 +27,21 @@
         },
         {
           title: 'Khó đối chiếu phân hạng',
-          desc: 'Các tiêu chuẩn phân hạng học thuật (như CORE Rankings, Scopus) chưa được tổng hợp tập trung, khiến người làm nghiên cứu khó đánh giá độ phù hợp của diễn đàn.'
+          desc: 'Các tiêu chuẩn phân hạng học thuật quốc tế (như CORE Rankings, Scopus) chưa được tổng hợp tập trung, khiến người làm nghiên cứu khó đánh giá độ phù hợp của diễn đàn.'
         },
         {
           title: 'Lệch chuẩn múi giờ nộp bài',
           desc: 'Thời hạn nộp bài thường công bố theo múi giờ Anywhere on Earth (AoE, UTC-12), nếu không quy đổi sang giờ Việt Nam (UTC+7) rất dễ gây sai sót và lỡ hẹn nộp bài.'
         }
       ],
-      mission: 'Sứ mệnh của ConfGuide là chuẩn hóa, quy tụ và minh bạch hóa thông tin các hội nghị khoa học Công nghệ thông tin diễn ra tại Việt Nam (bao gồm cả hội nghị quốc tế được tổ chức tại Việt Nam) trên một nền tảng thống nhất, hỗ trợ sinh viên và nghiên cứu sinh chủ động lộ trình công bố.'
+      mission: 'Sứ mệnh của ConfGuide là chuẩn hóa, quy tụ và minh bạch hóa thông tin các hội nghị khoa học Công nghệ thông tin trong nước và quốc tế trên một nền tảng thống nhất, hỗ trợ sinh viên, giảng viên và nghiên cứu sinh chủ động lộ trình nghiên cứu và công bố khoa học.'
     },
     coreValues: [
       {
         id: 'ranking',
         icon: 'award',
         title: 'Chuẩn hóa phân hạng học thuật',
-        description: 'Đối chiếu trực quan các bảng xếp hạng học thuật uy tín gồm CORE Rankings (từ hạng A* đến C) và phân loại Scopus (Q1 đến Q4), hỗ trợ người nghiên cứu định vị chính xác chất lượng học thuật của từng hội nghị.'
+        description: 'Đối chiếu trực quan các bảng xếp hạng uy tín quốc tế gồm CORE Rankings (từ hạng A* đến C) và phân loại Scopus (Q1 đến Q4), hỗ trợ người nghiên cứu định vị chính xác tầm vóc học thuật của từng hội nghị.'
       },
       {
         id: 'deadline',
@@ -63,7 +63,7 @@
         sources: [
           {
             name: 'CORE (Computing Research & Education)',
-            purpose: 'Chuẩn hóa phân hạng học thuật uy tín (A*, A, B, C) dành riêng cho các hội nghị Khoa học Máy tính.'
+            purpose: 'Chuẩn hóa phân hạng học thuật uy tín (A*, A, B, C) dành riêng cho các hội nghị Khoa học Máy tính quốc tế.'
           },
           {
             name: 'DBLP Computer Science Bibliography',
@@ -75,7 +75,7 @@
           },
           {
             name: 'Scopus (Elsevier)',
-            purpose: 'Đối chiếu chỉ mục trích dẫn học thuật và phân nhóm phân hạng ấn phẩm khoa học.'
+            purpose: 'Đối chiếu chỉ mục trích dẫn quốc tế và phân nhóm phân hạng ấn phẩm khoa học.'
           }
         ]
       },
@@ -246,20 +246,22 @@
 
   /**
    * Chuẩn hóa chuỗi văn bản từ data/about.json trong bộ nhớ RAM (không sửa file JSON gốc)
-   * để đồng bộ định hướng hội nghị CNTT tại Việt Nam (gồm cả hội nghị quốc tế tổ chức tại Việt Nam)
-   * và nhãn múi giờ UTC+7 (giờ Việt Nam).
+   * để đồng bộ định hướng hội nghị khoa học CNTT trong nước lẫn quốc tế
+   * và nhãn múi giờ hiển thị chuẩn UTC+7 (giờ Việt Nam).
    * @param {string} text - Chuỗi văn bản đầu vào.
    * @returns {string} Chuỗi văn bản đã chuẩn hóa theo định hướng dự án.
    */
   const ABOUT_HERO_DESC_OLD_RE = new RegExp(
-    'quản lý các mốc thời hạn công bố khoa học\\. Hệ thống giải quyết các rào cản phổ biến '
-      + 'trong tiếp cận thông tin học thuật, hướng tới trở thành công cụ hỗ trợ tin cậy '
-      + 'cho cộng đồng nghiên cứu tại Việt Nam\\.',
+    '^ConfGuide được nghiên cứu và phát triển nhằm hỗ trợ sinh viên, giảng viên và các nhóm nghiên cứu '
+      + 'dễ dàng tra cứu, đối chiếu uy tín và quản lý các mốc thời hạn công bố khoa học\\. '
+      + 'Hệ thống giải quyết các rào cản phổ biến trong tiếp cận thông tin học thuật, '
+      + 'hướng tới trở thành công cụ hỗ trợ tin cậy cho cộng đồng nghiên cứu tại Việt Nam\\.$',
     'g'
   );
   const ABOUT_MISSION_OLD_RE = new RegExp(
     'minh bạch hóa thông tin hội nghị khoa học công nghệ thông tin '
-      + 'trên một nền tảng thống nhất',
+      + 'trên một nền tảng thống nhất, hỗ trợ sinh viên và nghiên cứu sinh '
+      + 'chủ động xây dựng lộ trình nghiên cứu và tự tin công bố công trình\\.',
     'g'
   );
 
@@ -277,28 +279,27 @@
       )
       .replace(
         /múi giờ quốc tế Anywhere on Earth \(AoE, UTC-12\) hoặc giờ địa phương của nước chủ nhà/g,
-        'múi giờ Anywhere on Earth (AoE, UTC-12) khi chưa quy đổi sang giờ Việt Nam (UTC+7)'
+        'múi giờ Anywhere on Earth (AoE, UTC-12) hoặc giờ địa phương khi chưa quy đổi sang giờ Việt Nam (UTC+7)'
       )
       .replace(
         /đếm ngược deadline thời gian thực chuẩn AoE/g,
         'đếm ngược deadline thời gian thực theo múi giờ UTC+7 (giờ Việt Nam)'
       )
-      .replace(/\s*quốc tế/gi, '')
       .replace(
-        /^Nền tảng Tra cứu & Theo dõi Hội nghị Khoa học$/g,
-        'Nền tảng Tra cứu & Khuyến nghị Hội nghị Khoa học CNTT tại Việt Nam'
+        /^Nền tảng Tra cứu(?:, Khuyến nghị)? & Theo dõi Hội nghị Khoa học(?: CNTT)?$/g,
+        'Nền tảng Khám phá Hội nghị Khoa học CNTT'
       )
       .replace(
         ABOUT_HERO_DESC_OLD_RE,
-        'quản lý các mốc thời hạn công bố tại các hội nghị khoa học Công nghệ thông tin '
-          + 'diễn ra tại Việt Nam (bao gồm cả hội nghị quốc tế tổ chức tại Việt Nam). '
-          + 'Hệ thống giải quyết các rào cản phổ biến trong tiếp cận thông tin học thuật, '
-          + 'hướng tới trở thành công cụ hỗ trợ tin cậy cho cộng đồng nghiên cứu.'
+        'ConfGuide là nền tảng hỗ trợ sinh viên, giảng viên và các nhóm nghiên cứu khám phá, tra cứu, '
+          + 'nhận khuyến nghị và theo dõi hạn nộp bài của các hội nghị khoa học Công nghệ thông tin trong nước '
+          + 'và quốc tế. Hệ thống chuẩn hóa thông tin học thuật và quy đổi thời hạn nộp bài về giờ Việt Nam '
+          + '(UTC+7), giúp người làm nghiên cứu chủ động lựa chọn diễn đàn công bố phù hợp.'
       )
       .replace(
         ABOUT_MISSION_OLD_RE,
-        'minh bạch hóa thông tin các hội nghị khoa học Công nghệ thông tin diễn ra tại Việt Nam '
-          + '(bao gồm cả hội nghị quốc tế được tổ chức tại Việt Nam) trên một nền tảng thống nhất'
+        'minh bạch hóa thông tin các hội nghị khoa học Công nghệ thông tin trong nước và quốc tế '
+          + 'trên một nền tảng thống nhất, hỗ trợ sinh viên, giảng viên và nghiên cứu sinh chủ động lộ trình nghiên cứu và công bố khoa học.'
       );
   }
 

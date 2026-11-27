@@ -720,6 +720,11 @@
         ${introBlockHtml}
         <div class="hero-slider__cta-box hero-slider__cta-box--centered">
           <p class="hero-slider__cta-text">Chưa có hội nghị phù hợp với lĩnh vực đã chọn</p>
+          <div class="hero-slider__cta-actions">
+            <button type="button" class="btn btn-secondary hero-slider__cta-btn js-hero-choose-topics">
+              <span>Quản lý lĩnh vực</span>
+            </button>
+          </div>
         </div>
       `;
     }
@@ -733,6 +738,9 @@
     return `
       <div class="hero-slider__slide-head">
         <h2 class="hero-slider__slide-title">Gợi ý dành cho bạn</h2>
+        <button type="button" class="hero-slider__manage-btn js-hero-choose-topics">
+          Quản lý lĩnh vực (${selectedKeys.length})
+        </button>
       </div>
       <div class="hero-slider__rec-list">
         ${cardsHtml}
@@ -790,12 +798,12 @@
 
     const introBlockHtml = `
       <div class="hero-slider__slide-head">
-        <h2 class="hero-slider__slide-title">Khám phá &amp; Chọn đúng Hội nghị Khoa học</h2>
+        <h2 class="hero-slider__slide-title">Chọn đúng Hội nghị cho Nghiên cứu của Bạn</h2>
         <span class="hero-slider__slide-badge">Cá nhân hóa</span>
       </div>
       <p class="hero-slider__intro-desc">
-        Tra cứu nhanh chóng, đánh giá uy tín và theo dõi thời hạn nộp bài theo giờ Việt Nam (UTC+7)
-        cho các hội nghị khoa học Công nghệ thông tin tại Việt Nam.
+        Khám phá, nhận khuyến nghị theo lĩnh vực quan tâm và theo dõi hạn nộp bài quy đổi về giờ Việt Nam (UTC+7)
+        cho các hội nghị khoa học CNTT trong nước và quốc tế.
       </p>
     `;
 

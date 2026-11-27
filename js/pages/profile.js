@@ -87,9 +87,8 @@
     academicTitle: 'Nghiên cứu sinh / Giảng viên',
     affiliation: 'Đại học Quốc gia TP.HCM',
     fieldsOfInterest: 'Trí tuệ nhân tạo, Thị giác máy tính, Xử lý ngôn ngữ tự nhiên, Khoa học dữ liệu',
-    bio: 'Quan tâm đến các hội nghị khoa học Công nghệ thông tin diễn ra tại Việt Nam '
-      + '(gồm cả hội nghị quốc tế tổ chức tại Việt Nam) trong các lĩnh vực trí tuệ nhân tạo, '
-      + 'khoa học dữ liệu và kỹ thuật phần mềm.',
+    bio: 'Quan tâm đến các hội nghị khoa học Công nghệ thông tin trong nước và quốc tế '
+      + 'thuộc các lĩnh vực trí tuệ nhân tạo, khoa học dữ liệu và kỹ thuật phần mềm.',
     scholarUrl: 'https://scholar.google.com'
   };
 
@@ -202,18 +201,40 @@
 
   /**
    * Kết xuất danh sách nhãn lĩnh vực nghiên cứu vào phần tử container chỉ định.
+   * Khi `allowQuickRemove = true` (trên thẻ hồ sơ chính), mỗi lĩnh vực chuẩn gắn thêm nút `×` để xóa nhanh.
    * @param {HTMLElement|null} containerEl - Phần tử chứa các pill lĩnh vực.
    * @param {string} fieldsText - Chuỗi lĩnh vực ngăn cách bằng dấu phẩy.
+   * @param {boolean} [allowQuickRemove=false] - Cho phép hiển thị nút xóa nhanh từng lĩnh vực.
    */
-  function renderFieldsChips(containerEl, fieldsText) {
+  function renderFieldsChips(containerEl, fieldsText, allowQuickRemove = false) {
     if (!containerEl) return;
     const rawText = typeof fieldsText === 'string' ? fieldsText : '';
     const fieldList = typeof utils.parseTopicDisplayLabelsFromText === 'function'
       ? utils.parseTopicDisplayLabelsFromText(rawText)
       : (rawText ? rawText.split(',').map(f => f.trim()).filter(Boolean) : []);
-    containerEl.innerHTML = fieldList.length > 0
-      ? fieldList.map(f => `<span class="profile-field-pill">${escapeHtml(f)}</span>`).join('')
-      : '<span class="profile-field-pill profile-field-pill--empty">Chưa chọn lĩnh vực nghiên cứu</span>';
+    if (fieldList.length === 0) {
+      containerEl.innerHTML =
+        '<span class="profile-field-pill profile-field-pill--empty">Chưa chọn lĩnh vực nghiên cứu</span>';
+      return;
+    }
+
+    containerEl.innerHTML = fieldList.map(label => {
+      const matchedKeys = typeof utils.parseTopicKeysFromText === 'function'
+        ? utils.parseTopicKeysFromText(label)
+        : [];
+      const topicKey = matchedKeys[0] || '';
+      if (allowQuickRemove && topicKey) {
+        return `
+          <span class="profile-field-pill profile-field-pill--removable">
+            <span>${escapeHtml(label)}</span>
+            <button type="button" class="profile-field-pill__remove js-remove-profile-topic"
+              data-topic-key="${escapeHtml(topicKey)}"
+              aria-label="Xóa lĩnh vực ${escapeHtml(label)}">&times;</button>
+          </span>
+        `;
+      }
+      return `<span class="profile-field-pill">${escapeHtml(label)}</span>`;
+    }).join('');
   }
 
   /**
@@ -277,8 +298,13 @@
       scholarLink.classList.toggle('is-hidden', !hasValidScholar);
     }
 
-    renderFieldsChips(document.getElementById('profileFieldsChips'), fieldsRaw);
-    renderFieldsChips(document.getElementById('editProfileFieldsChips'), fieldsRaw);
+    const statusEl = document.getElementById('statUserStatus');
+    if (statusEl) {
+      statusEl.textContent = currentUser.authProvider === 'google' ? 'Đã xác thực Google' : 'Đã xác thực';
+    }
+
+    renderFieldsChips(document.getElementById('profileFieldsChips'), fieldsRaw, true);
+    renderFieldsChips(document.getElementById('editProfileFieldsChips'), fieldsRaw, false);
 
     populateEditProfileFields({
       editFullName: fullName,
@@ -393,8 +419,14 @@
     };
 
     syncCurrentUserRecord(user => ({ ...user, ...patch }));
+    if (typeof utils.saveUserPreferences === 'function' && typeof utils.parseTopicKeysFromText === 'function') {
+      utils.saveUserPreferences({
+        topics: utils.parseTopicKeysFromText(patch.fieldsOfInterest),
+        onboardingCompleted: true
+      });
+    }
     closeModal();
-    showPageAlert('Đã cập nhật thông tin hồ sơ nghiên cứu thành công!', 'success');
+    showPageAlert('Đã cập nhật thông tin hồ sơ nghiên cứu và đồng bộ lĩnh vực khuyến nghị!', 'success');
   }
 
   /**
@@ -763,9 +795,8 @@
         </svg>
         <h3 class="empty-state-title">Chưa có hội nghị nào được lưu</h3>
         <p class="empty-state-desc">
-          Khám phá danh sách hội nghị khoa học Công nghệ thông tin diễn ra tại Việt Nam
-          (bao gồm cả hội nghị quốc tế tổ chức tại Việt Nam), bấm biểu tượng lưu để
-          theo dõi thời gian nộp bài tại đây.
+          Khám phá các hội nghị khoa học Công nghệ thông tin trong nước và quốc tế,
+          nhấn biểu tượng lưu để theo dõi hạn nộp bài tại đây.
         </p>
         <a href="search.html" class="btn btn-primary btn--compact-md">
           <span>Khám phá danh mục hội nghị &rarr;</span>
@@ -1068,6 +1099,22 @@
             topicsOnly: true,
             returnFocusEl: profileChooseBtn
           });
+        }
+      });
+    }
+
+    const profileChipsEl = document.getElementById('profileFieldsChips');
+    if (profileChipsEl) {
+      profileChipsEl.addEventListener('click', event => {
+        if (!(event.target instanceof Element)) return;
+        const removeBtn = event.target.closest('.js-remove-profile-topic');
+        if (!removeBtn) return;
+        const targetKey = removeBtn.getAttribute('data-topic-key') || '';
+        if (!targetKey || typeof utils.getUserResearchTopicKeys !== 'function') return;
+        const nextKeys = utils.getUserResearchTopicKeys().filter(k => k !== targetKey);
+        if (typeof utils.saveUserPreferences === 'function') {
+          utils.saveUserPreferences({ topics: nextKeys, onboardingCompleted: true });
+          showPageAlert('Đã cập nhật danh sách lĩnh vực nghiên cứu quan tâm.', 'success', 2500);
         }
       });
     }

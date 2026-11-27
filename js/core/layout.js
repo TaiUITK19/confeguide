@@ -1546,6 +1546,257 @@
     hci: 'tuong-tac-nguoi-may'
   };
 
+  /** Ngưỡng độ tin cậy tối thiểu (%) để hệ thống đề xuất tự động lĩnh vực thay vì chuyển sang chọn thủ công */
+  const DOMAIN_CONFIDENCE_THRESHOLD = 60;
+
+  /**
+   * Từ điển tri thức từ vựng & cụm n-gram học thuật (tiếng Việt không dấu + tiếng Anh)
+   * ánh xạ vào đúng 25 lĩnh vực nghiên cứu chuẩn của ConfGuide phục vụ phân tích NLP/AI phía Client.
+   */
+  const ACADEMIC_DOMAIN_LEXICON = {
+    'tri-tue-nhan-tao': [
+      'artificial intelligence', 'tri tue nhan tao', 'generative ai', 'ai agent', 'multiagent',
+      'expert system', 'knowledge representation', 'reasoning', 'multimodal', 'ai foundations'
+    ],
+    'hoc-may': [
+      'machine learning', 'deep learning', 'hoc may', 'hoc sau', 'neural network', 'transformer',
+      'reinforcement learning', 'federated learning', 'self supervised', 'representation learning'
+    ],
+    'khoa-hoc-du-lieu': [
+      'data science', 'khoa hoc du lieu', 'data mining', 'khai pha du lieu', 'data analytics',
+      'predictive modeling', 'statistical learning', 'phan tich du lieu'
+    ],
+    'du-lieu-lon': [
+      'big data', 'du lieu lon', 'data pipeline', 'spark', 'hadoop', 'stream processing',
+      'distributed data', 'data lake', 'data warehouse'
+    ],
+    'mang-may-tinh': [
+      'computer network', 'wireless network', 'sensor network', 'mang may tinh', 'mang khong day',
+      'routing protocol', 'sdn', 'software defined network', '5g', '6g'
+    ],
+    'iot': [
+      'internet of things', 'industrial iot', 'iiot', 'iot', 'smart home', 'smart city',
+      'edge device', 'embedded sensor', 'van vat ket noi'
+    ],
+    'an-toan-thong-tin': [
+      'cyber security', 'cybersecurity', 'information security', 'network security', 'an toan thong tin',
+      'intrusion detection', 'cryptography', 'malware', 'zero trust', 'privacy preserving', 'bao mat'
+    ],
+    'thi-giac-may-tinh': [
+      'computer vision', 'thi giac may tinh', 'image segmentation', 'object detection',
+      'vision transformer', 'image processing', 'pattern recognition', 'medical image'
+    ],
+    'cong-nghe-phan-mem': [
+      'software engineering', 'cong nghe phan mem', 'ky thuat phan mem', 'software testing',
+      'fault localization', 'program analysis', 'devops', 'microservice', 'kiem thu phan mem'
+    ],
+    'xu-ly-ngon-ngu-tu-nhien': [
+      'natural language processing', 'xu ly ngon ngu tu nhien', 'large language model', 'llm',
+      'question answering', 'machine translation', 'sentiment analysis', 'text mining', 'nlp'
+    ],
+    'truyen-thong': [
+      'communication system', 'digital communication', 'truyen thong so', 'optical communication',
+      'wireless communication'
+    ],
+    'da-phuong-tien': [
+      'multimedia', 'da phuong tien', 'video coding', 'audio processing', 'speech synthesis'
+    ],
+    'dien-tu': [
+      'electronics', 'dien tu', 'vlsi', 'fpga', 'integrated circuit', 'vi mach', 'semiconductor'
+    ],
+    'vien-thong': [
+      'telecommunication', 'vien thong', 'antenna', 'rf engineering', 'mobile communication'
+    ],
+    'xu-ly-tin-hieu': [
+      'signal processing', 'xu ly tin hieu', 'biomedical signal', 'dsp', 'radar signal'
+    ],
+    'cntt-tong-hop': [
+      'information technology', 'information and communication technology', 'cntt tong hop'
+    ],
+    'robot': [
+      'robotics', 'autonomous robot', 'mobile robot', 'robot manipulator', 'nguoi may'
+    ],
+    'tu-dong-hoa': [
+      'automation', 'tu dong hoa', 'industrial automation', 'plc', 'scada'
+    ],
+    'dieu-khien': [
+      'control system', 'dieu khien tu dong', 'adaptive control', 'nonlinear control'
+    ],
+    'he-thong-thong-tin': [
+      'information system', 'he thong thong tin', 'enterprise architecture', 'erp', 'decision support'
+    ],
+    'chuyen-doi-so': [
+      'digital transformation', 'chuyen doi so', 'e government', 'smart enterprise', 'digital economy'
+    ],
+    'tuong-tac-nguoi-may': [
+      'human computer interaction', 'tuong tac nguoi may', 'user experience', 'usability', 'hci', 'ar vr'
+    ],
+    'cong-nghe-giao-duc': [
+      'educational technology', 'cong nghe giao duc', 'e learning', 'adaptive learning', 'edtech'
+    ],
+    'dien-toan-dam-may': [
+      'cloud computing', 'multi cloud', 'cloud native', 'dien toan dam may', 'serverless', 'kubernetes'
+    ],
+    'he-thong-phan-tan': [
+      'distributed system', 'he thong phan tan', 'parallel computing', 'high performance computing',
+      'consensus protocol', 'blockchain'
+    ]
+  };
+
+  /**
+   * Chuẩn hóa chuỗi tiếng Việt/Anh về chữ thường ASCII không dấu để so khớp từ vựng NLP ổn định.
+   * @param {*} raw - Chuỗi văn bản đầu vào.
+   * @returns {string} Chuỗi ASCII chữ thường cách nhau bằng một khoảng trắng đơn.
+   */
+  function normalizeAcademicSearchText(raw) {
+    return String(raw || '')
+      .toLowerCase()
+      .replace(/[đĐ]/g, 'd')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]+/g, ' ')
+      .trim();
+  }
+
+  /**
+   * Phân tích hồ sơ người dùng (thông tin Google, Google Scholar, ORCID, OpenAlex) bằng phương pháp
+   * chấm điểm từ vựng & cụm n-gram có trọng số (NLP/AI phía Client) để nhận diện lĩnh vực quan tâm
+   * và tính độ tin cậy (`0..98%`).
+   * @param {Object|null} userRecord - Bản ghi người dùng chứa `academicProfile`, `bio`, `academicTitle`.
+   * @param {{ allowExternalAcademic?: boolean, threshold?: number }} [options={}] - Tùy chọn quyền truy cập và ngưỡng.
+   * @returns {{
+   *   recognized: boolean,
+   *   threshold: number,
+   *   overallConfidence: number,
+   *   sourcesUsed: Array<string>,
+   *   recommendedTopics: Array<{ key: string, label: string, confidence: number, matchedTerms: Array<string> }>,
+   *   fallbackReason: string
+   * }} Kết quả nhận diện lĩnh vực và mức độ tin cậy.
+   */
+  function analyzeUserAcademicDomains(userRecord, options = {}) {
+    const threshold = Number.isFinite(options.threshold) ? options.threshold : DOMAIN_CONFIDENCE_THRESHOLD;
+    const allowExternal = options.allowExternalAcademic !== false;
+    if (!userRecord || typeof userRecord !== 'object') {
+      return {
+        recognized: false,
+        threshold,
+        overallConfidence: 0,
+        sourcesUsed: ['Google Profile'],
+        recommendedTopics: [],
+        fallbackReason: 'insufficient-data'
+      };
+    }
+
+    if (!allowExternal) {
+      return {
+        recognized: false,
+        threshold,
+        overallConfidence: 0,
+        sourcesUsed: ['Google Profile'],
+        recommendedTopics: [],
+        fallbackReason: 'no-external-permission'
+      };
+    }
+
+    const profile = (userRecord.academicProfile && typeof userRecord.academicProfile === 'object')
+      ? userRecord.academicProfile
+      : {};
+    const rawSources = Array.isArray(profile.sources) && profile.sources.length > 0
+      ? profile.sources.slice()
+      : ['Google Profile'];
+
+    const weightedSegments = [];
+    const keywordsArr = Array.isArray(profile.keywords) ? profile.keywords : [];
+    const pubsArr = Array.isArray(profile.publications) ? profile.publications : [];
+    keywordsArr.forEach(kw => {
+      const norm = normalizeAcademicSearchText(kw);
+      if (norm) weightedSegments.push({ text: ` ${norm} `, weight: 3.2, kind: 'keyword' });
+    });
+    pubsArr.forEach(pub => {
+      const norm = normalizeAcademicSearchText(pub);
+      if (norm) weightedSegments.push({ text: ` ${norm} `, weight: 2.8, kind: 'publication' });
+    });
+    [profile.jobInfo, userRecord.academicTitle, userRecord.bio].forEach(info => {
+      const norm = normalizeAcademicSearchText(info);
+      if (norm) weightedSegments.push({ text: ` ${norm} `, weight: 1.6, kind: 'job' });
+    });
+
+    if (weightedSegments.length === 0) {
+      return {
+        recognized: false,
+        threshold,
+        overallConfidence: 0,
+        sourcesUsed: rawSources,
+        recommendedTopics: [],
+        fallbackReason: 'insufficient-data'
+      };
+    }
+
+    const candidates = [];
+    Object.entries(ACADEMIC_DOMAIN_LEXICON).forEach(([topicKey, terms]) => {
+      if (!VALID_PREF_TOPIC_KEYS.has(topicKey)) return;
+      let rawScore = 0;
+      const matchedTerms = [];
+      const matchedKinds = new Set();
+
+      terms.forEach(term => {
+        const normTerm = normalizeAcademicSearchText(term);
+        if (!normTerm) return;
+        const escaped = normTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const termRegex = normTerm.length <= 4
+          ? new RegExp(`\\b${escaped}\\b`)
+          : new RegExp(`\\b${escaped}(?:s|es)?\\b`);
+        let termBestWeight = 0;
+        let termKind = '';
+        weightedSegments.forEach(seg => {
+          if (termRegex.test(seg.text) && seg.weight > termBestWeight) {
+            termBestWeight = seg.weight;
+            termKind = seg.kind;
+          }
+        });
+        if (termBestWeight > 0) {
+          rawScore += termBestWeight;
+          matchedKinds.add(termKind);
+          if (matchedTerms.length < 3) matchedTerms.push(term);
+        }
+      });
+
+      if (rawScore <= 0) return;
+      // Cộng điểm thưởng đa nguồn khi khớp đồng thời cả từ khóa lẫn công trình/nghề nghiệp
+      const multiSourceBonus = matchedKinds.size >= 2 ? 1.4 : 0;
+      const totalScore = rawScore + multiSourceBonus;
+      // Quy đổi điểm sang độ tin cậy % phân tầng tự nhiên:
+      // 1 tín hiệu nghề nghiệp đơn lẻ (~1.6) đạt ~53% (< 60%), từ khóa/công trình rõ ràng đạt 66%–96%.
+      const basePart = Math.min(totalScore, 4) * 11;
+      const extraPart = Math.max(0, totalScore - 4) * 3.2;
+      const confidence = Math.min(96, Math.round(35 + basePart + extraPart));
+      candidates.push({
+        key: topicKey,
+        label: PREF_TOPIC_LABEL_MAP[topicKey] || topicKey,
+        confidence,
+        matchedTerms
+      });
+    });
+
+    candidates.sort((a, b) => b.confidence - a.confidence || a.label.localeCompare(b.label, 'vi'));
+    const recommendedTopics = candidates.filter(item => item.confidence >= threshold).slice(0, 6);
+    const overallConfidence = recommendedTopics.length > 0
+      ? Math.round(
+          recommendedTopics.reduce((sum, item) => sum + item.confidence, 0) / recommendedTopics.length
+        )
+      : (candidates[0] ? candidates[0].confidence : 0);
+
+    const recognized = recommendedTopics.length > 0 && overallConfidence >= threshold;
+    return {
+      recognized,
+      threshold,
+      overallConfidence,
+      sourcesUsed: rawSources,
+      recommendedTopics,
+      fallbackReason: recognized ? '' : (candidates.length > 0 ? 'low-confidence' : 'insufficient-data')
+    };
+  }
+
   /**
    * Chuyển đổi tên hoặc cụm lĩnh vực sang khóa slug chuẩn khớp bộ lọc Tra cứu (hỗ trợ đ/Đ).
    * @param {string} text - Chuỗi tên lĩnh vực.
@@ -2063,9 +2314,10 @@
    */
   function buildPreferencesSurveyModalHtml() {
     const renderTopicCheckboxRow = item => `
-      <label class="pref-topic-row">
+      <label class="pref-topic-row" data-topic-row-key="${escapeHtml(item.key)}">
         <input type="checkbox" class="pref-topic-row__input js-pref-topic-checkbox" value="${escapeHtml(item.key)}">
         <span class="pref-topic-row__label">${escapeHtml(item.label)}</span>
+        <span class="pref-topic-row__ai-tag js-pref-topic-ai-tag" hidden></span>
       </label>
     `;
 
@@ -2083,10 +2335,18 @@
               Tích chọn các lĩnh vực nghiên cứu bạn quan tâm rồi nhấn Lưu thay đổi để lưu lại.
             </p>
 
+            <div class="pref-recognition js-pref-recognition" id="prefRecognitionBox" hidden></div>
+
             <div class="modal-section-block" id="prefTopicsSection">
               <div class="pref-survey-section-head">
                 <h4 class="modal-block-title" id="prefTopicsHeading">Bảng lĩnh vực nghiên cứu</h4>
-                <span class="pref-count-badge" id="prefTopicCountBadge">Đã chọn: 0 lĩnh vực</span>
+                <div class="pref-survey-section-meta">
+                  <button type="button" class="btn btn-secondary btn--compact-sm pref-reanalyze-btn js-pref-reanalyze"
+                    id="prefReanalyzeBtn" hidden>
+                    Gợi ý tự động từ hồ sơ
+                  </button>
+                  <span class="pref-count-badge" id="prefTopicCountBadge">Đã chọn: 0 lĩnh vực</span>
+                </div>
               </div>
               <div class="pref-topic-table">
                 <div class="pref-topic-table__head">
@@ -2155,8 +2415,103 @@
     topics: new Set(),
     isOnboarding: false,
     preserveOpenModals: false,
+    recognitionResult: null,
     onConfirm: null
   };
+
+  /**
+   * Kiểm tra tài khoản hiện tại có thông tin học thuật để hỗ trợ nút gợi ý lại lĩnh vực hay không.
+   * @param {Object|null} user - Bản ghi người dùng đang đăng nhập.
+   * @returns {boolean} True nếu có dữ liệu từ khóa/công trình/tiểu sử học thuật.
+   */
+  function hasAnalyzableAcademicData(user) {
+    if (!user || typeof user !== 'object') return false;
+    const ap = user.academicProfile;
+    if (ap && ((Array.isArray(ap.keywords) && ap.keywords.length > 0)
+      || (Array.isArray(ap.publications) && ap.publications.length > 0)
+      || (ap.jobInfo && String(ap.jobInfo).trim()))) {
+      return true;
+    }
+    return Boolean(
+      (user.bio && String(user.bio).trim())
+      || (user.academicTitle && String(user.academicTitle).trim())
+    );
+  }
+
+  /**
+   * Kết xuất khối thông báo kết quả nhận diện lĩnh vực NLP/AI (đề xuất thành công hoặc thông báo chuyển thủ công).
+   * @param {HTMLElement|null} boxEl - Phần tử `#prefRecognitionBox`.
+   * @param {Object|null} rec - Kết quả trả về từ `analyzeUserAcademicDomains`.
+   */
+  function renderRecognitionBannerUi(boxEl, rec) {
+    if (!boxEl) return;
+    if (!rec) {
+      boxEl.setAttribute('hidden', '');
+      boxEl.className = 'pref-recognition js-pref-recognition';
+      boxEl.innerHTML = '';
+      return;
+    }
+
+    const sourcesLabel = Array.isArray(rec.sourcesUsed) && rec.sourcesUsed.length > 0
+      ? rec.sourcesUsed.map(escapeHtml).join(' • ')
+      : 'Google Profile';
+
+    if (rec.recognized && Array.isArray(rec.recommendedTopics) && rec.recommendedTopics.length > 0) {
+      const chipsHtml = rec.recommendedTopics.map(item => {
+        const hintTerms = Array.isArray(item.matchedTerms) && item.matchedTerms.length > 0
+          ? `Khớp tín hiệu: ${item.matchedTerms.join(', ')}`
+          : '';
+        return `
+          <span class="pref-recognition__chip" title="${escapeHtml(hintTerms)}">
+            <strong>${escapeHtml(item.label)}</strong>
+            <span class="pref-recognition__chip-score">${escapeHtml(String(item.confidence))}%</span>
+          </span>
+        `;
+      }).join('');
+
+      boxEl.className = 'pref-recognition pref-recognition--success js-pref-recognition';
+      boxEl.innerHTML = `
+        <div class="pref-recognition__head">
+          <div class="pref-recognition__title-group">
+            <span class="pref-recognition__badge">Đề xuất NLP/AI · Độ tin cậy ${escapeHtml(String(rec.overallConfidence))}%</span>
+            <span class="pref-recognition__sources">Nguồn phân tích: ${sourcesLabel}</span>
+          </div>
+          <button type="button" class="pref-recognition__manual-btn js-pref-switch-manual">
+            Chuyển sang chọn thủ công
+          </button>
+        </div>
+        <p class="pref-recognition__desc">
+          Các lĩnh vực dưới đây đã được nhận diện tự động và tích chọn sẵn. Bạn có thể xem xét, điều chỉnh thêm hoặc nhấn
+          <strong>Xác nhận lĩnh vực</strong> để đồng bộ ngay với hồ sơ và hệ thống khuyến nghị.
+        </p>
+        <div class="pref-recognition__chips" aria-label="Các lĩnh vực được hệ thống đề xuất">
+          ${chipsHtml}
+        </div>
+      `;
+      boxEl.removeAttribute('hidden');
+      return;
+    }
+
+    let reasonText = 'Hồ sơ hiện chưa có từ khóa nghiên cứu hoặc công trình khoa học đủ chi tiết.';
+    if (rec.fallbackReason === 'no-external-permission') {
+      reasonText = 'Bạn đã chọn không khai thác dữ liệu học thuật bên ngoài khi đăng nhập Google.';
+    } else if (rec.fallbackReason === 'low-confidence') {
+      reasonText =
+        `Độ tin cậy nhận diện hiện đạt ${rec.overallConfidence}%, chưa vượt ngưỡng tối thiểu ${rec.threshold}%.`;
+    }
+
+    boxEl.className = 'pref-recognition pref-recognition--fallback js-pref-recognition';
+    boxEl.innerHTML = `
+      <div class="pref-recognition__head">
+        <span class="pref-recognition__badge pref-recognition__badge--muted">Chế độ chọn thủ công</span>
+        <span class="pref-recognition__sources">Nguồn kiểm tra: ${sourcesLabel}</span>
+      </div>
+      <p class="pref-recognition__desc">
+        ${escapeHtml(reasonText)} Hệ thống đã chuyển sang phương thức lựa chọn lĩnh vực thủ công thông thường bên dưới.
+      </p>
+    `;
+    boxEl.removeAttribute('hidden');
+  }
 
   /**
    * Đồng bộ giao diện modal chọn lĩnh vực nghiên cứu dạng bảng biểu từ trạng thái nháp `surveyDraftState`.
@@ -2166,33 +2521,75 @@
     if (!modal) return;
 
     const isOnboarding = Boolean(surveyDraftState.isOnboarding);
+    const rec = surveyDraftState.recognitionResult;
+    const isRecognizedProposal = Boolean(rec && rec.recognized);
+    const confidenceByKey = new Map(
+      isRecognizedProposal && Array.isArray(rec.recommendedTopics)
+        ? rec.recommendedTopics.map(item => [item.key, item.confidence])
+        : []
+    );
+
     const titleEl = document.getElementById('prefSurveyModalTitle');
     const introEl = document.getElementById('prefSurveyIntro');
     const topicsHeading = document.getElementById('prefTopicsHeading');
     const cancelBtn = document.getElementById('prefSurveyCancelBtn');
+    const saveBtn = document.getElementById('prefSurveySaveBtn');
+    const reanalyzeBtn = document.getElementById('prefReanalyzeBtn');
 
     if (titleEl) {
-      titleEl.textContent = 'Chọn lĩnh vực nghiên cứu';
+      titleEl.textContent = isRecognizedProposal
+        ? 'Xem xét & Xác nhận lĩnh vực nghiên cứu đề xuất'
+        : 'Chọn lĩnh vực nghiên cứu';
     }
     if (introEl) {
-      introEl.textContent = isOnboarding
-        ? 'Chào mừng bạn đến với ConfGuide! '
-          + 'Tích chọn các lĩnh vực nghiên cứu bạn quan tâm rồi nhấn Lưu thay đổi để lưu lại.'
-        : 'Tích chọn các lĩnh vực nghiên cứu bạn quan tâm rồi nhấn Lưu thay đổi để lưu lại.';
+      if (isRecognizedProposal) {
+        introEl.textContent =
+          'Kiểm tra các lĩnh vực được đề xuất từ hồ sơ học thuật của bạn, có thể thêm hoặc bỏ bớt trước khi xác nhận.';
+      } else {
+        introEl.textContent = isOnboarding
+          ? 'Chào mừng bạn đến với ConfGuide! '
+            + 'Tích chọn các lĩnh vực nghiên cứu bạn quan tâm rồi nhấn Lưu thay đổi để lưu lại.'
+          : 'Tích chọn các lĩnh vực nghiên cứu bạn quan tâm rồi nhấn Lưu thay đổi để lưu lại.';
+      }
     }
     if (topicsHeading) {
       topicsHeading.textContent = 'Bảng lĩnh vực nghiên cứu';
     }
     if (cancelBtn) {
-      cancelBtn.textContent = isOnboarding ? 'Bỏ qua' : 'Hủy';
+      cancelBtn.textContent = isOnboarding ? 'Để sau' : 'Hủy';
     }
+    if (saveBtn) {
+      saveBtn.textContent = isRecognizedProposal ? 'Xác nhận lĩnh vực' : 'Lưu thay đổi';
+    }
+    if (reanalyzeBtn) {
+      const activeUser = getCurrentUser();
+      if (hasAnalyzableAcademicData(activeUser) && !isRecognizedProposal) {
+        reanalyzeBtn.removeAttribute('hidden');
+      } else {
+        reanalyzeBtn.setAttribute('hidden', '');
+      }
+    }
+
+    renderRecognitionBannerUi(document.getElementById('prefRecognitionBox'), rec);
 
     modal.querySelectorAll('.js-pref-topic-checkbox').forEach(checkbox => {
       const tKey = checkbox.value || '';
       const isSelected = Boolean(tKey && surveyDraftState.topics.has(tKey));
       checkbox.checked = isSelected;
       const row = checkbox.closest('.pref-topic-row');
-      if (row) row.classList.toggle('is-selected', isSelected);
+      if (row) {
+        row.classList.toggle('is-selected', isSelected);
+        const aiTag = row.querySelector('.js-pref-topic-ai-tag');
+        if (aiTag) {
+          if (confidenceByKey.has(tKey)) {
+            aiTag.textContent = `${confidenceByKey.get(tKey)}%`;
+            aiTag.removeAttribute('hidden');
+          } else {
+            aiTag.textContent = '';
+            aiTag.setAttribute('hidden', '');
+          }
+        }
+      }
     });
 
     const countBadge = document.getElementById('prefTopicCountBadge');
@@ -2202,12 +2599,13 @@
   }
 
   /**
-   * Mở modal bảng chọn lĩnh vực nghiên cứu dùng chung (onboarding sau đăng ký, Cài đặt, Trang chủ, Hồ sơ).
+   * Mở modal bảng chọn lĩnh vực nghiên cứu dùng chung (onboarding sau đăng ký/Google, Cài đặt, Trang chủ, Hồ sơ).
    * @param {{
    *   isOnboarding?: boolean,
    *   topicsOnly?: boolean,
    *   preserveOpenModals?: boolean,
    *   initialTopicKeys?: Array<string>,
+   *   recognitionResult?: Object|null,
    *   onConfirm?: Function|null,
    *   returnFocusEl?: HTMLElement|null
    * }} [options={}] Tùy chọn hiển thị và callback khi nhấn Lưu thay đổi.
@@ -2216,15 +2614,25 @@
     const safeOpts = (options && typeof options === 'object') ? options : {};
     const prefs = getUserPreferences();
     const isOnboarding = Boolean(safeOpts.isOnboarding);
-    const initialTopics = isOnboarding
-      ? []
-      : (Array.isArray(safeOpts.initialTopicKeys)
+    const recognitionResult = (safeOpts.recognitionResult && typeof safeOpts.recognitionResult === 'object')
+      ? safeOpts.recognitionResult
+      : null;
+
+    let initialTopics = [];
+    if (recognitionResult && recognitionResult.recognized && Array.isArray(recognitionResult.recommendedTopics)) {
+      initialTopics = recognitionResult.recommendedTopics
+        .map(item => item.key)
+        .filter(key => VALID_PREF_TOPIC_KEYS.has(key));
+    } else if (!isOnboarding) {
+      initialTopics = Array.isArray(safeOpts.initialTopicKeys)
         ? safeOpts.initialTopicKeys.filter(key => VALID_PREF_TOPIC_KEYS.has(key))
-        : prefs.topics);
+        : prefs.topics;
+    }
 
     surveyDraftState.topics = new Set(initialTopics);
     surveyDraftState.isOnboarding = isOnboarding;
     surveyDraftState.preserveOpenModals = Boolean(safeOpts.preserveOpenModals);
+    surveyDraftState.recognitionResult = recognitionResult;
     surveyDraftState.onConfirm = typeof safeOpts.onConfirm === 'function' ? safeOpts.onConfirm : null;
 
     const modalEl = document.getElementById('globalPreferencesSurveyModal');
@@ -2259,6 +2667,7 @@
     modal.classList.remove('show', 'layout-modal--nested');
     if (modalId === 'globalPreferencesSurveyModal') {
       surveyDraftState.isOnboarding = false;
+      surveyDraftState.recognitionResult = null;
       surveyDraftState.onConfirm = null;
       surveyDraftState.preserveOpenModals = false;
     }
@@ -2729,6 +3138,17 @@
    * Lưu các lĩnh vực nghiên cứu đã chọn từ modal khảo sát và thông báo phản hồi tới người dùng.
    */
   function handlePreferencesSurveySave() {
+    const topicGrid = document.getElementById('prefTopicGrid');
+    if (topicGrid) {
+      surveyDraftState.topics.clear();
+      topicGrid.querySelectorAll('.js-pref-topic-checkbox:checked').forEach(checkbox => {
+        const key = checkbox.value || '';
+        if (VALID_PREF_TOPIC_KEYS.has(key)) {
+          surveyDraftState.topics.add(key);
+        }
+      });
+    }
+
     const selectedTopics = PREFERENCE_TOPICS
       .map(item => item.key)
       .filter(key => surveyDraftState.topics.has(key));
@@ -2774,6 +3194,8 @@
     const topicGrid = document.getElementById('prefTopicGrid');
     const resetBtn = document.getElementById('prefSurveyResetBtn');
     const saveBtn = document.getElementById('prefSurveySaveBtn');
+    const recognitionBox = document.getElementById('prefRecognitionBox');
+    const reanalyzeBtn = document.getElementById('prefReanalyzeBtn');
 
     if (topicGrid) {
       topicGrid.addEventListener('change', event => {
@@ -2787,6 +3209,34 @@
           surveyDraftState.topics.add(tKey);
         } else {
           surveyDraftState.topics.delete(tKey);
+        }
+        syncPreferencesSurveyModalUi();
+      });
+    }
+
+    if (recognitionBox) {
+      recognitionBox.addEventListener('click', event => {
+        if (!(event.target instanceof Element)) return;
+        const switchManualBtn = event.target.closest('.js-pref-switch-manual');
+        if (!switchManualBtn) return;
+        surveyDraftState.recognitionResult = null;
+        surveyDraftState.topics.clear();
+        syncPreferencesSurveyModalUi();
+      });
+    }
+
+    if (reanalyzeBtn) {
+      reanalyzeBtn.addEventListener('click', () => {
+        const activeUser = getCurrentUser();
+        if (!activeUser) return;
+        const result = analyzeUserAcademicDomains(activeUser, { allowExternalAcademic: true });
+        surveyDraftState.recognitionResult = result;
+        if (result.recognized && Array.isArray(result.recommendedTopics)) {
+          result.recommendedTopics.forEach(item => {
+            if (VALID_PREF_TOPIC_KEYS.has(item.key)) {
+              surveyDraftState.topics.add(item.key);
+            }
+          });
         }
         syncPreferencesSurveyModalUi();
       });
@@ -3080,8 +3530,8 @@
               <div>
                 ${renderBrandHtml('footer-brand')}
                 <p class="footer-brand-desc">
-                  Nền tảng hỗ trợ tra cứu, khuyến nghị và theo dõi các hội nghị khoa học Công nghệ thông tin
-                  diễn ra tại Việt Nam (bao gồm cả hội nghị quốc tế được tổ chức tại Việt Nam).
+                  ConfGuide là nền tảng hỗ trợ khám phá, tra cứu, khuyến nghị và theo dõi hạn nộp bài của các
+                  hội nghị khoa học Công nghệ thông tin trong nước và quốc tế.
                 </p>
               </div>
               <div class="footer-copyright">
@@ -3257,14 +3707,17 @@
   }
 
   /**
-   * Đánh dấu tài khoản đang đăng nhập đã được hiển thị bảng khảo sát cá nhân hóa lần đầu
-   * bằng cách đặt `needsOnboarding: false` ở cả phiên hiện tại và danh sách tài khoản.
+   * Đánh dấu tài khoản đang đăng nhập đã được hiển thị bảng khảo sát cá nhân hóa / nhận diện lần đầu
+   * bằng cách đặt `needsOnboarding: false` và xóa `pendingGoogleRecognition` ở phiên hiện tại và danh sách tài khoản.
    */
   function consumeUserOnboardingFlag() {
     const activeUser = getCurrentUser();
-    if (!activeUser || !activeUser.needsOnboarding) return;
+    if (!activeUser || (!activeUser.needsOnboarding && !activeUser.pendingGoogleRecognition)) return;
 
-    const updatedSession = Object.assign({}, activeUser, { needsOnboarding: false });
+    const updatedSession = Object.assign({}, activeUser, {
+      needsOnboarding: false,
+      pendingGoogleRecognition: null
+    });
     writeStorage('confguide_current_user', updatedSession);
 
     const users = readStorage('confguide_users', []);
@@ -3284,8 +3737,8 @@
   }
 
   /**
-   * Tự động mở bảng chọn lĩnh vực nghiên cứu một lần duy nhất
-   * khi người dùng vừa đăng ký tài khoản mới và bắt đầu phiên sử dụng đầu tiên.
+   * Tự động phân tích nhận diện lĩnh vực (khi đăng nhập qua Google lần đầu) hoặc mở bảng chọn lĩnh vực
+   * thủ công khi người dùng vừa đăng ký tài khoản mới và bắt đầu phiên sử dụng đầu tiên.
    * @param {string} currentPage - Tên trang hiện tại.
    */
   function maybeTriggerNewUserOnboarding(currentPage) {
@@ -3298,15 +3751,28 @@
     }
 
     const activeUser = getCurrentUser();
-    if (!activeUser || activeUser.needsOnboarding !== true) return;
+    const hasPendingGoogle = Boolean(activeUser && activeUser.pendingGoogleRecognition);
+    if (!activeUser || (activeUser.needsOnboarding !== true && !hasPendingGoogle)) return;
     if (!document.getElementById('globalPreferencesSurveyModal')) return;
+
+    const pendingMeta = activeUser.pendingGoogleRecognition;
+    let recognitionResult = null;
+    if (hasPendingGoogle || activeUser.authProvider === 'google') {
+      const allowExternal = pendingMeta && typeof pendingMeta === 'object'
+        ? pendingMeta.allowExternalAcademic !== false
+        : true;
+      recognitionResult = analyzeUserAcademicDomains(activeUser, {
+        allowExternalAcademic: allowExternal
+      });
+    }
 
     consumeUserOnboardingFlag();
     saveUserPreferences({ onboardingCompleted: false });
 
     const launchOnboardingModal = () => {
       openPreferencesSurveyModal({
-        isOnboarding: true
+        isOnboarding: true,
+        recognitionResult
       });
     };
 
@@ -3417,6 +3883,8 @@
     showToast: showToast,
     showConfirmModal: showConfirmModal,
     PREFERENCE_TOPICS: PREFERENCE_TOPICS,
+    DOMAIN_CONFIDENCE_THRESHOLD: DOMAIN_CONFIDENCE_THRESHOLD,
+    analyzeUserAcademicDomains: analyzeUserAcademicDomains,
     parseTopicKeysFromText: parseTopicKeysFromText,
     parseTopicDisplayLabelsFromText: parseTopicDisplayLabelsFromText,
     getUserResearchTopicKeys: getUserResearchTopicKeys,

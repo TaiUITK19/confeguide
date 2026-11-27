@@ -255,6 +255,7 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  max-width: 100%;
   white-space: nowrap;
 }
 
@@ -277,6 +278,36 @@
   background: var(--primary-soft);
   color: var(--navy);
   border: 1px solid var(--conf-badge-border);
+}
+
+.profile-field-pill--removable {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding-right: 6px;
+}
+
+.profile-field-pill__remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border-radius: 4px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  transition: background-color 140ms ease, color 140ms ease;
+}
+
+.profile-field-pill__remove:hover {
+  background: var(--danger-bg);
+  color: var(--danger-text);
 }
 
 .profile-field-pill--empty {
@@ -778,6 +809,23 @@
     padding: 8px 14px;
     font-size: 13px;
     white-space: nowrap;
+  }
+  .profile-fields-wrap {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .profile-fields-label {
+    padding-top: 0;
+  }
+  .profile-fields-body {
+    width: 100%;
+    flex: none;
+  }
+  .profile-fields-add-btn {
+    max-width: 100%;
+    white-space: normal;
+    text-align: left;
   }
   .profile-stats-grid {
     grid-template-columns: 1fr;
