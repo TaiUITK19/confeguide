@@ -1,0 +1,46 @@
+{
+  "endermod.162006@gmail.com": {
+    "email": "endermod.162006@gmail.com",
+    "name": "Tâm Nhất Dương",
+    "scholarId": "",
+    "source": "manual",
+    "fields": [],
+    "updatedAt": "2026-11-27T14:08:53.403Z"
+  },
+  "nhattamduong.456@gmail.com": {
+    "email": "nhattamduong.456@gmail.com",
+    "name": "Nhất Tâm Dương",
+    "scholarId": "0000-0003-2852-4263",
+    "source": "manual",
+    "fields": [
+      {
+        "id": "dom_g_he-thong-thong-tin_1795792752296_19",
+        "key": "he-thong-thong-tin",
+        "label": "Hệ thống thông tin",
+        "priority": "primary",
+        "source": "manual",
+        "originalInterest": "",
+        "updatedAt": "2026-11-27T15:19:12.296Z"
+      },
+      {
+        "id": "dom_g_tuong-tac-nguoi-may_1795792752297_21",
+        "key": "tuong-tac-nguoi-may",
+        "label": "Tương tác người-máy",
+        "priority": "normal",
+        "source": "manual",
+        "originalInterest": "",
+        "updatedAt": "2026-11-27T15:19:12.297Z"
+      },
+      {
+        "id": "dom_g_dien-toan-dam-may_1795792752297_23",
+        "key": "dien-toan-dam-may",
+        "label": "Điện toán đám mây",
+        "priority": "normal",
+        "source": "manual",
+        "originalInterest": "",
+        "updatedAt": "2026-11-27T15:19:12.297Z"
+      }
+    ],
+    "updatedAt": "2026-11-27T15:19:12.313Z"
+  }
+}

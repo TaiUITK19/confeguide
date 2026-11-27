@@ -18,159 +18,6 @@
     "createdAt": "2026-10-09T08:00:00.000Z"
   },
   {
-    "id": "usr_03",
-    "username": "user3",
-    "email": "user3@gmail.com",
-    "name": "User 3",
-    "role": "user",
-    "passwordHash": "3735ea5ceff922e67d0a2b71bbe24b75634a89421b17889059876c3381851bc3",
-    "createdAt": "2026-10-09T08:00:00.000Z"
-  },
-  {
-    "id": "usr_04",
-    "username": "user4",
-    "email": "user4@gmail.com",
-    "name": "User 4",
-    "role": "user",
-    "passwordHash": "02ec675829326be7e15158cbc18758397d855d93de8cf3c50b5babcf6f2582a1",
-    "createdAt": "2026-10-09T08:00:00.000Z"
-  },
-  {
-    "id": "usr_05",
-    "username": "user5",
-    "email": "user5@gmail.com",
-    "name": "User 5",
-    "role": "user",
-    "passwordHash": "c2b7e250c5f202c542798fe7d969aff00303df57f4ed7fd5b4a78e1f45f82bd9",
-    "createdAt": "2026-10-09T08:00:00.000Z"
-  },
-  {
-    "id": "usr_06",
-    "username": "user6",
-    "email": "user6@gmail.com",
-    "name": "User 6",
-    "role": "user",
-    "passwordHash": "388691d520f7a5bc71891351c5d1ff3b421fa9a78d78b1899f58e4ef3f6d116a",
-    "createdAt": "2026-10-09T08:00:00.000Z"
-  },
-  {
-    "id": "usr_07",
-    "username": "user7",
-    "email": "user7@gmail.com",
-    "name": "User 7",
-    "role": "user",
-    "passwordHash": "fcd7cdbbd3e547439a97f12674f3f81c5317476a5dae078e3a6504cd7da96808",
-    "createdAt": "2026-10-09T08:00:00.000Z"
-  },
-  {
-    "id": "usr_08",
-    "username": "user8",
-    "email": "user8@gmail.com",
-    "name": "User 8",
-    "role": "user",
-    "passwordHash": "d025c7d135909d1a2264a2ecb39518ca606baee1ae2820cce05ba4fd5b85e4c0",
-    "createdAt": "2026-10-09T08:00:00.000Z"
-  },
-  {
-    "id": "usr_09",
-    "username": "user9",
-    "email": "user9@gmail.com",
-    "name": "User 9",
-    "role": "user",
-    "passwordHash": "7cb0e2366f20a782d3d347a979ad21aaaa0de742d0dab5c80201aee757941d48",
-    "createdAt": "2026-10-09T08:00:00.000Z"
-  },
-  {
-    "id": "usr_10",
-    "username": "user10",
-    "email": "user10@gmail.com",
-    "name": "User 10",
-    "role": "user",
-    "passwordHash": "154a2d7df356edea51c8907c1766bbd2af5a008160991f50204b0f9607101c95",
-    "createdAt": "2026-10-09T08:00:00.000Z"
-  },
-  {
-    "id": "usr_11",
-    "username": "user11",
-    "email": "user11@gmail.com",
-    "name": "User 11",
-    "role": "user",
-    "passwordHash": "c4bb150c5a9d7673562dfbf41aa7142cd7cb15a17037c839986e0dff83fe5eb6",
-    "createdAt": "2026-10-09T08:00:00.000Z"
-  },
-  {
-    "id": "usr_12",
-    "username": "user12",
-    "email": "user12@gmail.com",
-    "name": "User 12",
-    "role": "user",
-    "passwordHash": "f2beef4edc4f7b8ff4cebbe8ad078485b24e78da2f03c735c1a09ad1a00a8142",
-    "createdAt": "2026-10-09T08:00:00.000Z"
-  },
-  {
-    "id": "usr_13",
-    "username": "user13",
-    "email": "user13@gmail.com",
-    "name": "User 13",
-    "role": "user",
-    "passwordHash": "a71a22ff4d6acd04449bc0f5c6fb98f8e52d83b0b3d222c6db4c18d1bc667507",
-    "createdAt": "2026-10-09T08:00:00.000Z"
-  },
-  {
-    "id": "usr_14",
-    "username": "user14",
-    "email": "user14@gmail.com",
-    "name": "User 14",
-    "role": "user",
-    "passwordHash": "db3be5a7355742e116d555496a4b93f4604286f111dba53b49912d4e8b9c11c1",
-    "createdAt": "2026-10-09T08:00:00.000Z"
-  },
-  {
-    "id": "usr_15",
-    "username": "user15",
-    "email": "user15@gmail.com",
-    "name": "User 15",
-    "role": "user",
-    "passwordHash": "7c02f731eca21d4b16628e17b2aa49dc17f7ed801680ffa45806e98a83d331d1",
-    "createdAt": "2026-10-09T08:00:00.000Z"
-  },
-  {
-    "id": "usr_16",
-    "username": "user16",
-    "email": "user16@gmail.com",
-    "name": "User 16",
-    "role": "user",
-    "passwordHash": "a68a174404e2592f0760a63208ba7f60a8c37f303a49d0b3a55c28e8c1704a02",
-    "createdAt": "2026-10-09T08:00:00.000Z"
-  },
-  {
-    "id": "usr_17",
-    "username": "user17",
-    "email": "user17@gmail.com",
-    "name": "User 17",
-    "role": "user",
-    "passwordHash": "8fa601033122d4b66480de3f7dec1682b51f973f0eac7812e04285d7c3e107f8",
-    "createdAt": "2026-10-09T08:00:00.000Z"
-  },
-  {
-    "id": "usr_18",
-    "username": "user18",
-    "email": "user18@gmail.com",
-    "name": "User 18",
-    "role": "user",
-    "passwordHash": "99877aaa4ac9c5e63546dc8199f088422da61bef22da6ae0f2bcd8d3bbcfd93a",
-    "createdAt": "2026-10-09T08:00:00.000Z"
-  },
-  {
-    "id": "usr_19",
-    "username": "user19",
-    "email": "user19@gmail.com",
-    "name": "User 19",
-    "role": "user",
-    "passwordHash": "7b1e9939b47c8799f2e48f96e902b6522fdcf495cdc875fe76aac33c1679ebff",
-    "createdAt": "2026-10-09T08:00:00.000Z"
-  },
-  {
     "id": "usr_20",
     "username": "user20",
     "email": "user20@gmail.com",
@@ -178,5 +25,121 @@
     "role": "user",
     "passwordHash": "bade2b88e7c6c6b8c1634748bc33dafe948c67bdb7780858f74044da60875cb9",
     "createdAt": "2026-10-09T08:00:00.000Z"
+  },
+  {
+    "id": "usr_google_01",
+    "username": "minhkhoa_ai",
+    "email": "minhkhoa.ai@uit.edu.vn",
+    "name": "Nguyễn Minh Khoa",
+    "fullName": "TS. Nguyễn Minh Khoa",
+    "role": "user",
+    "authProvider": "google",
+    "academicTitle": "Giảng viên Khoa Khoa học & Kỹ thuật Thông tin",
+    "affiliation": "Trường Đại học Công nghệ Thông tin, ĐHQG-HCM",
+    "scholarUrl": "https://scholar.google.com/citations?user=minhkhoa_uit",
+    "orcid": "0000-0002-1825-0097",
+    "openAlexId": "A5023888391",
+    "bio": "Nghiên cứu về mô hình ngôn ngữ lớn, học sâu đa phương thức và thị giác máy tính ứng dụng.",
+    "academicProfile": {
+      "sources": ["Google Profile", "Google Scholar", "ORCID", "OpenAlex"],
+      "keywords": [
+        "Artificial Intelligence",
+        "Deep Learning",
+        "Large Language Models",
+        "Natural Language Processing",
+        "Computer Vision"
+      ],
+      "publications": [
+        "Retrieval-Augmented Large Language Models for Vietnamese Question Answering",
+        "Self-Supervised Vision Transformer for Medical Image Segmentation",
+        "Deep Learning Architectures for Multimodal Representation Learning"
+      ],
+      "jobInfo": "Giảng viên nghiên cứu Trí tuệ nhân tạo, Học máy và Xử lý ngôn ngữ tự nhiên"
+    },
+    "createdAt": "2026-11-20T08:00:00.000Z"
+  },
+  {
+    "id": "usr_google_02",
+    "username": "thuha_sec",
+    "email": "thuha.sec@hcmut.edu.vn",
+    "name": "Trần Thu Hà",
+    "fullName": "ThS. Trần Thu Hà",
+    "role": "user",
+    "authProvider": "google",
+    "academicTitle": "Nghiên cứu sinh An toàn thông tin & Hệ thống mạng",
+    "affiliation": "Trường Đại học Bách khoa, ĐHQG-HCM",
+    "scholarUrl": "https://orcid.org/0000-0003-4192-8821",
+    "orcid": "0000-0003-4192-8821",
+    "openAlexId": "A5081920344",
+    "bio": "Tập trung nghiên cứu phát hiện xâm nhập mạng, bảo mật hệ thống IoT công nghiệp và điện toán đám mây.",
+    "academicProfile": {
+      "sources": ["Google Profile", "ORCID", "OpenAlex"],
+      "keywords": [
+        "Cyber Security",
+        "Intrusion Detection",
+        "Internet of Things",
+        "Wireless Sensor Networks",
+        "Cloud Computing"
+      ],
+      "publications": [
+        "Lightweight Intrusion Detection System for Industrial IoT Networks",
+        "Zero-Trust Network Security Architecture in Multi-Cloud Computing"
+      ],
+      "jobInfo": "Nghiên cứu sinh chuyên ngành An toàn thông tin, Mạng máy tính và Điện toán đám mây"
+    },
+    "createdAt": "2026-11-20T08:00:00.000Z"
+  },
+  {
+    "id": "usr_google_03",
+    "username": "hoangnam_se",
+    "email": "hoangnam.se@gmail.com",
+    "name": "Lê Hoàng Nam",
+    "fullName": "KS. Lê Hoàng Nam",
+    "role": "user",
+    "authProvider": "google",
+    "academicTitle": "Kỹ sư Nghiên cứu Phần mềm & Dữ liệu",
+    "affiliation": "Phòng Thí nghiệm Hệ thống Phân tán & Dữ liệu lớn",
+    "scholarUrl": "https://scholar.google.com/citations?user=hoangnam_se",
+    "orcid": "",
+    "openAlexId": "A5049102771",
+    "bio": "Phát triển kiến trúc hệ thống phân tán, kiểm thử phần mềm tự động và xử lý dữ liệu lớn.",
+    "academicProfile": {
+      "sources": ["Google Profile", "Google Scholar", "OpenAlex"],
+      "keywords": [
+        "Software Engineering",
+        "Distributed Systems",
+        "Big Data",
+        "Data Science",
+        "Automated Software Testing"
+      ],
+      "publications": [
+        "Automated Fault Localization for Cloud-Native Distributed Systems",
+        "Scalable Big Data Processing Pipeline for Data Science Analytics"
+      ],
+      "jobInfo": "Kỹ sư nghiên cứu Công nghệ phần mềm, Hệ thống phân tán và Khoa học dữ liệu"
+    },
+    "createdAt": "2026-11-20T08:00:00.000Z"
+  },
+  {
+    "id": "usr_google_04",
+    "username": "giahuy_sv",
+    "email": "giahuy.student@gmail.com",
+    "name": "Phạm Gia Huy",
+    "fullName": "Phạm Gia Huy",
+    "role": "user",
+    "authProvider": "google",
+    "academicTitle": "Sinh viên năm hai",
+    "affiliation": "Trường Đại học Công nghệ Thông tin, ĐHQG-HCM",
+    "scholarUrl": "",
+    "orcid": "",
+    "openAlexId": "",
+    "bio": "Sinh viên mới bắt đầu tìm hiểu phương pháp nghiên cứu khoa học và công bố học thuật.",
+    "academicProfile": {
+      "sources": ["Google Profile"],
+      "keywords": [],
+      "publications": [],
+      "jobInfo": "Sinh viên đại học mới tìm hiểu nghiên cứu khoa học"
+    },
+    "createdAt": "2026-11-20T08:00:00.000Z"
   }
 ]

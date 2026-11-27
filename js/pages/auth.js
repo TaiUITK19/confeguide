@@ -65,10 +65,124 @@
     createSeedUser(17, '8fa601033122d4b66480de3f7dec1682b51f973f0eac7812e04285d7c3e107f8'),
     createSeedUser(18, '99877aaa4ac9c5e63546dc8199f088422da61bef22da6ae0f2bcd8d3bbcfd93a'),
     createSeedUser(19, '7b1e9939b47c8799f2e48f96e902b6522fdcf495cdc875fe76aac33c1679ebff'),
-    createSeedUser(20, 'bade2b88e7c6c6b8c1634748bc33dafe948c67bdb7780858f74044da60875cb9')
+    createSeedUser(20, 'bade2b88e7c6c6b8c1634748bc33dafe948c67bdb7780858f74044da60875cb9'),
+    {
+      id: 'usr_google_01',
+      username: 'minhkhoa_ai',
+      email: 'minhkhoa.ai@uit.edu.vn',
+      name: 'Nguyễn Minh Khoa',
+      fullName: 'TS. Nguyễn Minh Khoa',
+      role: 'user',
+      authProvider: 'google',
+      academicTitle: 'Giảng viên Khoa Khoa học & Kỹ thuật Thông tin',
+      affiliation: 'Trường Đại học Công nghệ Thông tin, ĐHQG-HCM',
+      scholarUrl: 'https://scholar.google.com/citations?user=minhkhoa_uit',
+      orcid: '0000-0002-1825-0097',
+      bio: 'Nghiên cứu về mô hình ngôn ngữ lớn, học sâu đa phương thức và thị giác máy tính ứng dụng.',
+      academicProfile: {
+        sources: ['Google Profile', 'Google Scholar', 'ORCID'],
+        keywords: [
+          'Artificial Intelligence',
+          'Deep Learning',
+          'Large Language Models',
+          'Natural Language Processing',
+          'Computer Vision'
+        ],
+        publications: [
+          'Retrieval-Augmented Large Language Models for Vietnamese Question Answering',
+          'Self-Supervised Vision Transformer for Medical Image Segmentation',
+          'Deep Learning Architectures for Multimodal Representation Learning'
+        ],
+        jobInfo: 'Giảng viên nghiên cứu Trí tuệ nhân tạo, Học máy và Xử lý ngôn ngữ tự nhiên'
+      },
+      createdAt: '2026-11-20T08:00:00.000Z'
+    },
+    {
+      id: 'usr_google_02',
+      username: 'thuha_sec',
+      email: 'thuha.sec@hcmut.edu.vn',
+      name: 'Trần Thu Hà',
+      fullName: 'ThS. Trần Thu Hà',
+      role: 'user',
+      authProvider: 'google',
+      academicTitle: 'Nghiên cứu sinh An toàn thông tin & Hệ thống mạng',
+      affiliation: 'Trường Đại học Bách khoa, ĐHQG-HCM',
+      scholarUrl: 'https://orcid.org/0000-0003-4192-8821',
+      orcid: '0000-0003-4192-8821',
+      bio: 'Tập trung nghiên cứu phát hiện xâm nhập mạng, bảo mật hệ thống IoT công nghiệp và điện toán đám mây.',
+      academicProfile: {
+        sources: ['Google Profile', 'ORCID'],
+        keywords: [
+          'Cyber Security',
+          'Intrusion Detection',
+          'Internet of Things',
+          'Wireless Sensor Networks',
+          'Cloud Computing'
+        ],
+        publications: [
+          'Lightweight Intrusion Detection System for Industrial IoT Networks',
+          'Zero-Trust Network Security Architecture in Multi-Cloud Computing'
+        ],
+        jobInfo: 'Nghiên cứu sinh chuyên ngành An toàn thông tin, Mạng máy tính và Điện toán đám mây'
+      },
+      createdAt: '2026-11-20T08:00:00.000Z'
+    },
+    {
+      id: 'usr_google_03',
+      username: 'hoangnam_se',
+      email: 'hoangnam.se@gmail.com',
+      name: 'Lê Hoàng Nam',
+      fullName: 'KS. Lê Hoàng Nam',
+      role: 'user',
+      authProvider: 'google',
+      academicTitle: 'Kỹ sư Nghiên cứu Phần mềm & Dữ liệu',
+      affiliation: 'Phòng Thí nghiệm Hệ thống Phân tán & Dữ liệu lớn',
+      scholarUrl: 'https://scholar.google.com/citations?user=hoangnam_se',
+      orcid: '',
+      bio: 'Phát triển kiến trúc hệ thống phân tán, kiểm thử phần mềm tự động và xử lý dữ liệu lớn.',
+      academicProfile: {
+        sources: ['Google Profile', 'Google Scholar'],
+        keywords: [
+          'Software Engineering',
+          'Distributed Systems',
+          'Big Data',
+          'Data Science',
+          'Automated Software Testing'
+        ],
+        publications: [
+          'Automated Fault Localization for Cloud-Native Distributed Systems',
+          'Scalable Big Data Processing Pipeline for Data Science Analytics'
+        ],
+        jobInfo: 'Kỹ sư nghiên cứu Công nghệ phần mềm, Hệ thống phân tán và Khoa học dữ liệu'
+      },
+      createdAt: '2026-11-20T08:00:00.000Z'
+    },
+    {
+      id: 'usr_google_04',
+      username: 'giahuy_sv',
+      email: 'giahuy.student@gmail.com',
+      name: 'Phạm Gia Huy',
+      fullName: 'Phạm Gia Huy',
+      role: 'user',
+      authProvider: 'google',
+      academicTitle: 'Sinh viên năm hai',
+      affiliation: 'Trường Đại học Công nghệ Thông tin, ĐHQG-HCM',
+      scholarUrl: '',
+      orcid: '',
+      bio: 'Sinh viên mới bắt đầu tìm hiểu phương pháp nghiên cứu khoa học và công bố học thuật.',
+      academicProfile: {
+        sources: ['Google Profile'],
+        keywords: [],
+        publications: [],
+        jobInfo: 'Sinh viên đại học mới tìm hiểu nghiên cứu khoa học'
+      },
+      createdAt: '2026-11-20T08:00:00.000Z'
+    }
   ];
 
   let seedPromise = null;
+  let googleModalLastFocus = null;
+  let googleModalBound = false;
 
   /* ================= 2. HÀM HỖ TRỢ STORAGE, BẢO MẬT & VALIDATE ================= */
 
@@ -205,12 +319,18 @@
     let hasChanges = false;
 
     sourceList.forEach(seedUser => {
-      const exists = existingUsers.some(u =>
+      const existingIdx = existingUsers.findIndex(u =>
         (u.email && seedUser.email && u.email.toLowerCase() === seedUser.email.toLowerCase()) ||
         (u.username && seedUser.username && u.username.toLowerCase() === seedUser.username.toLowerCase())
       );
-      if (!exists) {
+      if (existingIdx === -1) {
         existingUsers.push(seedUser);
+        hasChanges = true;
+      } else if (seedUser.academicProfile && !existingUsers[existingIdx].academicProfile) {
+        existingUsers[existingIdx] = Object.assign({}, seedUser, existingUsers[existingIdx], {
+          academicProfile: seedUser.academicProfile,
+          authProvider: existingUsers[existingIdx].authProvider || seedUser.authProvider
+        });
         hasChanges = true;
       }
     });
@@ -483,11 +603,7 @@
 
     const googleBtn = document.getElementById('googleLogin');
     if (googleBtn) {
-      googleBtn.addEventListener('click', () => {
-        message.className = 'form-message form-message--info';
-        message.textContent =
-          'Gợi ý: Bạn có thể đăng nhập thử bằng user1@gmail.com (Mật khẩu: User1@2026 hoặc user1@).';
-      });
+      googleBtn.addEventListener('click', () => openGoogleAuthModal(googleBtn, message));
     }
 
     const forgotBtn = document.getElementById('forgotPassword');
@@ -707,7 +823,546 @@
       nameField, emailField, passwordField, submitButton, message, updateButton: validators.updateButton
     }));
 
+    const googleRegBtn = document.getElementById('googleRegister');
+    if (googleRegBtn) {
+      googleRegBtn.addEventListener('click', () => openGoogleAuthModal(googleRegBtn, message));
+    }
+
     validators.updateButton();
+  }
+
+  /* ================= 5B. ĐĂNG NHẬP GOOGLE CHÍNH THỨC (CHUYỂN THẲNG TRANG CHỦ) ================= */
+
+  /**
+   * Thoát ký tự đặc biệt HTML để hiển thị an toàn thông tin cấu hình trong modal đăng nhập Google.
+   * @param {*} raw - Giá trị đầu vào cần làm sạch.
+   * @returns {string} Chuỗi HTML an toàn.
+   */
+  function escapeAuthHtml(raw) {
+    if (window.ConfGuideUtils && typeof window.ConfGuideUtils.escapeHtml === 'function') {
+      return window.ConfGuideUtils.escapeHtml(raw);
+    }
+    const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+    return String(raw ?? '').replace(/[&<>"']/g, ch => map[ch]);
+  }
+
+  /**
+   * Chuẩn hóa nguồn dữ liệu lĩnh vực hợp lệ (serpapi | orcid | semantic_scholar | confguide_saved | custom | manual).
+   * @param {*} rawSource - Chuỗi nguồn thô.
+   * @returns {string} Tên nguồn hợp lệ.
+   */
+  function normalizeResearchSource(rawSource) {
+    const low = String(rawSource || '').trim().toLowerCase();
+    if (
+      low === 'serpapi'
+      || low === 'orcid'
+      || low === 'semantic_scholar'
+      || low === 'confguide_saved'
+      || low === 'custom'
+      || low === 'manual'
+    ) {
+      return low;
+    }
+    if (low === 'scholar') return 'serpapi';
+    return 'manual';
+  }
+
+  /**
+   * Chuẩn hóa mảng lĩnh vực khôi phục từ backend hoặc localStorage, loại bỏ mọi nhãn nguồn cũ không còn dùng.
+   * @param {Array<Object>} rawList - Danh sách lĩnh vực thô.
+   * @returns {Array<Object>} Danh sách lĩnh vực sạch.
+   */
+  function sanitizeRestoredDomains(rawList) {
+    if (!Array.isArray(rawList)) return [];
+    const seen = new Set();
+    const cleaned = [];
+    rawList.forEach((item, idx) => {
+      if (!item || typeof item !== 'object') return;
+      const key = String(item.key || '').trim();
+      const label = String(item.label || key).trim();
+      if (!key || !label) return;
+      const pairKey = `${key}::${label.toLowerCase()}`;
+      if (seen.has(pairKey)) return;
+      seen.add(pairKey);
+      cleaned.push({
+        id: String(item.id || `dom_${key}_${idx}`).trim(),
+        key,
+        label,
+        priority: item.priority === 'primary' ? 'primary' : 'normal',
+        source: normalizeResearchSource(item.source),
+        originalInterest: String(item.originalInterest || '').trim(),
+        updatedAt: typeof item.updatedAt === 'string' ? item.updatedAt : ''
+      });
+    });
+    return cleaned;
+  }
+
+  /**
+   * Khởi tạo phần tử DOM `#googleAuthModal` (hộp thoại đăng nhập Google gọn một bước).
+   * @returns {HTMLElement} Phần tử gốc của modal đăng nhập Google.
+   */
+  function ensureGoogleAuthModalDom() {
+    let modal = document.getElementById('googleAuthModal');
+    if (modal) return modal;
+
+    const googleLogoSvg = `
+      <svg class="google-auth-modal__logo" viewBox="0 0 48 48" width="22" height="22" aria-hidden="true">
+        <path fill="#4285F4" d="M43.6 24.5c0-1.4-.1-2.8-.4-4.1H24v7.8h11a9.4 9.4 0 0 1-4.1 6.2v5.1h6.7c3.9-3.6 6-8.8 6-15Z"/>
+        <path fill="#34A853" d="M24 44c5.5 0 10.1-1.8 13.5-4.8l-6.7-5.1c-1.9 1.3-4.1 2-6.8 2-5.2 0-9.6-3.5-11.2-8.2H5.9v5.3A20 20 0 0 0 24 44Z"/>
+        <path fill="#FBBC05" d="M12.8 27.9a12 12 0 0 1 0-7.7v-5.3H5.9a20 20 0 0 0 0 18.3l6.9-5.3Z"/>
+        <path fill="#EA4335" d="M24 12c3 0 5.7 1 7.8 3.1l5.9-5.9A19.7 19.7 0 0 0 24 4 20 20 0 0 0 5.9 14.9l6.9 5.3C14.4 15.5 18.8 12 24 12Z"/>
+      </svg>
+    `;
+
+    const wrapper = document.createElement('div');
+    wrapper.innerHTML = `
+      <div class="layout-modal google-auth-modal" id="googleAuthModal" role="dialog"
+        aria-modal="true" aria-labelledby="googleAuthModalTitle" hidden>
+        <div class="layout-modal-backdrop js-google-modal-close"></div>
+        <div class="layout-modal-box google-auth-modal__box">
+          <div class="layout-modal-header">
+            <div class="google-auth-modal__brand">
+              ${googleLogoSvg}
+              <h2 class="layout-modal-title" id="googleAuthModalTitle">Đăng nhập bằng tài khoản Google</h2>
+            </div>
+            <button type="button" class="layout-modal-close-btn js-google-modal-close"
+              id="googleAuthCloseBtn" aria-label="Đóng cửa sổ đăng nhập Google">&times;</button>
+          </div>
+          <div class="layout-modal-body google-auth-modal__body">
+            <div class="google-signin-panel">
+              <p class="google-signin-panel__title">Xác thực bằng tài khoản Google của bạn</p>
+              <p class="google-signin-panel__desc">
+                Sau khi xác thực thành công, bạn sẽ vào thẳng Trang chủ để hệ thống tự động quét hồ sơ và gợi ý lĩnh vực nghiên cứu phù hợp.
+              </p>
+              <div class="google-real-box__gsi-slot google-real-box__gsi-slot--center" id="googleGsiButtonSlot"></div>
+              <p class="google-env-banner" id="googleEnvBanner" role="status"></p>
+              <p class="google-origin-note" id="googleOriginNote" hidden></p>
+              <div class="google-setup-guide" id="googleSetupGuide" hidden></div>
+              <button type="button" class="btn btn-secondary btn--compact-sm" id="googleRetryConfigBtn" hidden>
+                Kiểm tra lại kết nối
+              </button>
+            </div>
+            <p class="form-message" id="googleModalStatus" role="status" aria-live="polite"></p>
+          </div>
+        </div>
+      </div>
+    `;
+    modal = wrapper.firstElementChild;
+    document.body.appendChild(modal);
+    bindGoogleAuthModalEvents(modal);
+    return modal;
+  }
+
+  /**
+   * Đóng hộp thoại đăng nhập Google và trả lại tiêu điểm bàn phím cho nút kích hoạt trước đó.
+   */
+  function closeGoogleAuthModal() {
+    const modal = document.getElementById('googleAuthModal');
+    if (!modal || modal.hasAttribute('hidden')) return;
+    modal.classList.remove('show');
+    document.body.classList.remove('modal-open');
+    setTimeout(() => {
+      modal.setAttribute('hidden', 'true');
+      if (googleModalLastFocus && typeof googleModalLastFocus.focus === 'function') {
+        googleModalLastFocus.focus();
+      }
+      googleModalLastFocus = null;
+    }, 180);
+  }
+
+  /**
+   * Đặt thông báo trạng thái cho modal đăng nhập Google.
+   * @param {string} text - Nội dung thông báo.
+   * @param {'neutral'|'success'|'error'|'muted'} [tone='neutral'] - Kiểu trạng thái.
+   */
+  function setGoogleModalStatus(text, tone = 'neutral') {
+    const statusEl = document.getElementById('googleModalStatus');
+    if (!statusEl) return;
+    if (!text) {
+      statusEl.className = 'form-message';
+      statusEl.textContent = '';
+      return;
+    }
+    const cls = tone === 'success'
+      ? 'form-message success'
+      : (tone === 'error' ? 'form-message form-message--error' : 'form-message form-message--muted');
+    statusEl.className = cls;
+    statusEl.textContent = text;
+  }
+
+  /**
+   * Tạo HTML hướng dẫn khắc phục nhanh khi cổng đăng nhập Google chưa sẵn sàng (thiếu Client ID hoặc sai origin).
+   * @param {'file'|'offline'|'missing-id'|'invalid-id'|'gis-failed'} mode - Trạng thái lỗi hiện tại.
+   * @param {string} currentOrigin - Origin hiện tại của trình duyệt.
+   * @param {string} apiBase - URL gốc của backend đang gọi.
+   * @returns {string} Chuỗi HTML an toàn để hiển thị trong `#googleSetupGuide`.
+   */
+  function buildGoogleSetupGuideHtml(mode, currentOrigin, apiBase) {
+    const loc = window.location || {};
+    const isIpLoopback = loc.hostname === '127.0.0.1' || loc.hostname === '[::1]';
+    const localhostSamePort = isIpLoopback
+      ? `http://localhost${loc.port ? `:${loc.port}` : ''}${loc.pathname || '/login.html'}`
+      : '';
+    const loopbackHint = isIpLoopback
+      ? `<li>Bạn đang mở bằng IP <code class="google-setup-guide__code">${escapeAuthHtml(currentOrigin)}</code> — Google OAuth thường ưu tiên tên miền <code class="google-setup-guide__code">localhost</code>. Hãy thử mở trực tiếp qua <a class="google-setup-guide__link" href="${escapeAuthHtml(localhostSamePort)}">${escapeAuthHtml(localhostSamePort)}</a> hoặc <a class="google-setup-guide__link" href="http://localhost:3000/login.html">http://localhost:3000/login.html</a>.</li>`
+      : '';
+
+    if (mode === 'file') {
+      return `
+        <p class="google-setup-guide__title">Cách chạy cổng Google Sign-In đúng chuẩn:</p>
+        <ol class="google-setup-guide__list">
+          <li>Mở ConfGuide qua máy chủ web thay vì mở trực tiếp tệp <code class="google-setup-guide__code">file:///</code>.</li>
+          <li>Chạy backend ở thư mục gốc (<code class="google-setup-guide__code">npm.cmd start</code>) rồi truy cập <a class="google-setup-guide__link" href="http://localhost:3000/login.html">http://localhost:3000/login.html</a>.</li>
+        </ol>
+      `;
+    }
+
+    if (mode === 'offline') {
+      return `
+        <p class="google-setup-guide__title">Kiểm tra kết nối Backend (${escapeAuthHtml(apiBase)}):</p>
+        <ol class="google-setup-guide__list">
+          <li>Nếu chạy trên máy cá nhân: mở terminal tại thư mục gốc dự án hoặc <code class="google-setup-guide__code">backend/</code> rồi chạy <code class="google-setup-guide__code">npm.cmd start</code>.</li>
+          <li>Nếu đã đẩy lên Vercel: kiểm tra Deployment log của hàm <code class="google-setup-guide__code">/api/auth/config</code> và đảm bảo chưa ghi nhầm URL localhost vào bộ nhớ trình duyệt.</li>
+          ${loopbackHint}
+        </ol>
+      `;
+    }
+
+    const originText = currentOrigin || 'http://localhost:3000';
+    return `
+      <p class="google-setup-guide__title">Hướng dẫn kích hoạt cổng Google Sign-In:</p>
+      <ol class="google-setup-guide__list">
+        <li>Tạo OAuth 2.0 Client ID (loại <strong>Web application</strong>) trên <strong>Google Cloud Console &rarr; Credentials</strong>.</li>
+        <li>Trong mục <strong>Authorized JavaScript origins</strong>, thêm đúng origin hiện tại: <code class="google-setup-guide__code">${escapeAuthHtml(originText)}</code>${originText !== 'http://localhost:3000' ? ' và <code class="google-setup-guide__code">http://localhost:3000</code>' : ''} (không có dấu <code class="google-setup-guide__code">/</code> ở cuối).</li>
+        <li>Dán Client ID vào biến <code class="google-setup-guide__code">GOOGLE_CLIENT_ID=...</code> trong <code class="google-setup-guide__code">backend/.env</code> (cục bộ) hoặc <strong>Project Settings &rarr; Environment Variables</strong> trên Vercel (rồi Redeploy), sau đó bấm <strong>Kiểm tra lại kết nối</strong>.</li>
+        ${loopbackHint}
+      </ol>
+    `;
+  }
+
+  /**
+   * Tải danh sách lĩnh vực đã lưu của tài khoản từ backend (nếu có) với timeout ngắn.
+   * @param {string} email - Email Google đã xác thực.
+   * @returns {Promise<{ fields: Array<Object>, scholarId: string, source: string, updatedAt: string }|null>}
+   */
+  async function fetchSavedBackendFields(email) {
+    const protocol = window.location ? window.location.protocol : '';
+    if (!email || (protocol !== 'http:' && protocol !== 'https:')) return null;
+
+    const authSvc = window.ConfGuideGoogleAuth;
+    const apiBase = authSvc && typeof authSvc.getBackendBaseUrl === 'function'
+      ? authSvc.getBackendBaseUrl()
+      : 'http://localhost:3000';
+    const controller = typeof AbortController === 'function' ? new AbortController() : null;
+    const timeoutId = controller ? window.setTimeout(() => controller.abort(), 2200) : null;
+
+    try {
+      const res = await fetch(`${apiBase}/api/fields?email=${encodeURIComponent(email)}`, {
+        headers: { Accept: 'application/json' },
+        signal: controller ? controller.signal : undefined
+      });
+      if (!res.ok) return null;
+      const data = await res.json();
+      if (!data || !Array.isArray(data.fields)) return null;
+      return {
+        fields: sanitizeRestoredDomains(data.fields),
+        scholarId: String(data.scholarId || '').trim(),
+        source: normalizeResearchSource(data.source),
+        updatedAt: typeof data.updatedAt === 'string' ? data.updatedAt : ''
+      };
+    } catch {
+      return null;
+    } finally {
+      if (timeoutId !== null) window.clearTimeout(timeoutId);
+    }
+  }
+
+  /**
+   * Lưu phiên đăng nhập Google và chuyển thẳng về Trang chủ ConfGuide (`index.html`).
+   * Nếu tài khoản chưa có lĩnh vực xác nhận, gắn cờ `pendingGoogleCrawl` để Trang chủ mở modal tự động quét hồ sơ.
+   * @param {Object} realProfile - Hồ sơ Google trả về sau `POST /auth/google`.
+   */
+  async function completeDirectGoogleLogin(realProfile) {
+    if (!realProfile || !realProfile.email) return;
+
+    const displayName = realProfile.fullName || realProfile.name || realProfile.email.split('@')[0];
+    setGoogleModalStatus(`Xác thực Google thành công (${displayName}). Đang vào Trang chủ...`, 'success');
+
+    const users = readJsonStorage(USERS_STORAGE_KEY, []);
+    const safeUsers = Array.isArray(users) ? users : [];
+    const emailClean = realProfile.email.trim();
+    const emailLower = emailClean.toLowerCase();
+    const existingIdx = safeUsers.findIndex(u => u && u.email && u.email.toLowerCase() === emailLower);
+    const existingRecord = existingIdx >= 0 ? safeUsers[existingIdx] : null;
+    const baseAccount = existingRecord || {};
+
+    const backendData = await fetchSavedBackendFields(emailClean);
+    const localDomains = sanitizeRestoredDomains(baseAccount.researchDomains);
+    let restoredDomains = localDomains;
+    let resolvedScholarId = baseAccount.scholarId || '';
+    let resolvedFieldsSource = normalizeResearchSource(baseAccount.fieldsSource);
+    let resolvedUpdatedAt = baseAccount.fieldsUpdatedAt || '';
+
+    if (backendData && backendData.fields.length > 0) {
+      const srvMs = backendData.updatedAt ? Date.parse(backendData.updatedAt) : 0;
+      const locMs = baseAccount.fieldsUpdatedAt ? Date.parse(baseAccount.fieldsUpdatedAt) : 0;
+      if (localDomains.length === 0 || (Number.isFinite(srvMs) && srvMs >= (Number.isFinite(locMs) ? locMs : 0))) {
+        restoredDomains = backendData.fields;
+        resolvedScholarId = backendData.scholarId || resolvedScholarId;
+        resolvedFieldsSource = backendData.source || resolvedFieldsSource;
+        resolvedUpdatedAt = backendData.updatedAt || resolvedUpdatedAt;
+      }
+    } else if (backendData && backendData.scholarId && !resolvedScholarId) {
+      resolvedScholarId = backendData.scholarId;
+    }
+
+    const seenLbls = new Set();
+    const fieldsLabels = [];
+    restoredDomains.forEach(item => {
+      const low = String(item.label || '').trim().toLowerCase();
+      if (low && !seenLbls.has(low)) {
+        seenLbls.add(low);
+        fieldsLabels.push(item.label.trim());
+      }
+    });
+    const fieldsText = fieldsLabels.join(', ');
+    const hasConfirmedFields = restoredDomains.length > 0;
+    const nowIso = new Date().toISOString();
+
+    const mergedUser = Object.assign({}, baseAccount, {
+      id: baseAccount.id || `usr_google_${Date.now()}`,
+      username: baseAccount.username
+        || emailLower.split('@')[0].replace(/[^a-zA-Z0-9_]/g, '')
+        || `guser_${Date.now()}`,
+      email: emailClean,
+      name: realProfile.name || baseAccount.name || displayName,
+      fullName: realProfile.fullName || baseAccount.fullName || displayName,
+      avatarUrl: realProfile.avatarUrl || realProfile.picture || baseAccount.avatarUrl || '',
+      role: 'user',
+      authProvider: 'google',
+      scholarId: resolvedScholarId,
+      orcid: baseAccount.orcid || '',
+      fieldsSource: resolvedFieldsSource,
+      fieldsUpdatedAt: resolvedUpdatedAt || nowIso,
+      affiliation: baseAccount.affiliation || 'Nhà nghiên cứu độc lập',
+      scholarUrl: baseAccount.scholarUrl || '',
+      researchDomains: restoredDomains,
+      fieldsOfInterest: fieldsText,
+      pendingGoogleCrawl: !hasConfirmedFields,
+      needsOnboarding: !hasConfirmedFields
+    });
+
+    if (existingIdx >= 0) {
+      safeUsers[existingIdx] = mergedUser;
+    } else {
+      mergedUser.createdAt = nowIso;
+      safeUsers.push(mergedUser);
+    }
+    writeTextStorage(localStorage, USERS_STORAGE_KEY, JSON.stringify(safeUsers));
+
+    const { passwordHash: _omitHash, ...safeUser } = mergedUser;
+    writeTextStorage(
+      localStorage,
+      CURRENT_USER_KEY,
+      JSON.stringify(Object.assign({}, safeUser, { loggedInAt: nowIso }))
+    );
+
+    const prevPrefs = readJsonStorage('confguide_user_preferences', {});
+    const safePrev = (prevPrefs && typeof prevPrefs === 'object' && !Array.isArray(prevPrefs)) ? prevPrefs : {};
+    writeTextStorage(
+      localStorage,
+      'confguide_user_preferences',
+      JSON.stringify({
+        aoe: safePrev.aoe !== false,
+        countdown: safePrev.countdown !== false,
+        bannerDismissed: false,
+        onboardingCompleted: hasConfirmedFields,
+        updatedAt: nowIso
+      })
+    );
+
+    const pageMessageEl = document.querySelector('#formMessage, #registerMessage');
+    if (pageMessageEl) {
+      pageMessageEl.className = 'form-message success';
+      pageMessageEl.textContent = `Đăng nhập Google thành công (${displayName}). Đang chuyển về Trang chủ...`;
+    }
+
+    setTimeout(() => {
+      window.location.assign('index.html');
+    }, AUTH_REDIRECT_DELAY_MS);
+  }
+
+  /**
+   * Cập nhật trạng thái cấu hình Google OAuth Client ID và nút đăng nhập Google chính thức.
+   */
+  async function refreshGoogleEnvironmentUi() {
+    const bannerEl = document.getElementById('googleEnvBanner');
+    const originNoteEl = document.getElementById('googleOriginNote');
+    const guideEl = document.getElementById('googleSetupGuide');
+    const gsiSlot = document.getElementById('googleGsiButtonSlot');
+    const retryBtn = document.getElementById('googleRetryConfigBtn');
+    const authSvc = window.ConfGuideGoogleAuth;
+
+    if (!authSvc || !bannerEl || !gsiSlot) return;
+
+    const showGuide = html => {
+      if (!guideEl) return;
+      if (html) {
+        guideEl.innerHTML = html;
+        guideEl.removeAttribute('hidden');
+      } else {
+        guideEl.innerHTML = '';
+        guideEl.setAttribute('hidden', 'true');
+      }
+    };
+
+    const setOriginNote = html => {
+      if (!originNoteEl) return;
+      if (html) {
+        originNoteEl.innerHTML = html;
+        originNoteEl.removeAttribute('hidden');
+      } else {
+        originNoteEl.innerHTML = '';
+        originNoteEl.setAttribute('hidden', 'true');
+      }
+    };
+
+    bannerEl.className = 'google-env-banner';
+    bannerEl.textContent = 'Đang kiểm tra cấu hình backend và tải cổng đăng nhập Google...';
+    gsiSlot.innerHTML = '';
+    setOriginNote('');
+    showGuide('');
+    if (retryBtn) retryBtn.setAttribute('hidden', 'true');
+
+    const cfgRes = typeof authSvc.fetchBackendAuthConfig === 'function'
+      ? await authSvc.fetchBackendAuthConfig()
+      : { backendReachable: false };
+    const status = authSvc.getEnvironmentStatus();
+    const apiBase = typeof authSvc.getBackendBaseUrl === 'function' ? authSvc.getBackendBaseUrl() : 'http://localhost:3000';
+    const currentOrigin = status.origin || '';
+
+    if (!status.supportedOrigin) {
+      bannerEl.className = 'google-env-banner is-warning';
+      bannerEl.textContent =
+        'Đăng nhập Google yêu cầu mở qua HTTP/HTTPS (VD: http://localhost:3000/login.html hoặc Live Server), không chạy trực tiếp trên file:///.';
+      showGuide(buildGoogleSetupGuideHtml('file', currentOrigin, apiBase));
+      return;
+    }
+
+    if (!cfgRes.backendReachable && !status.hasClientId) {
+      bannerEl.className = 'google-env-banner is-warning';
+      bannerEl.textContent =
+        `Không kết nối được tới backend (${apiBase}). Nếu chạy cục bộ, hãy mở terminal chạy "npm.cmd start" rồi bấm Kiểm tra lại.`;
+      showGuide(buildGoogleSetupGuideHtml('offline', currentOrigin, apiBase));
+      if (retryBtn) retryBtn.removeAttribute('hidden');
+      return;
+    }
+
+    if (cfgRes.rawGoogleClientId && !cfgRes.clientIdValidFormat && !status.hasClientId) {
+      bannerEl.className = 'google-env-banner is-warning';
+      bannerEl.textContent =
+        'Giá trị GOOGLE_CLIENT_ID trên backend chưa đúng định dạng Google OAuth Web Client ID (*.apps.googleusercontent.com).';
+      showGuide(buildGoogleSetupGuideHtml('invalid-id', currentOrigin, apiBase));
+      if (retryBtn) retryBtn.removeAttribute('hidden');
+      return;
+    }
+
+    if (!status.hasClientId) {
+      bannerEl.className = 'google-env-banner is-warning';
+      bannerEl.textContent =
+        `Đã kết nối backend (${apiBase}), nhưng GOOGLE_CLIENT_ID đang để trống nên nút đăng nhập Google chưa thể hiển thị.`;
+      showGuide(buildGoogleSetupGuideHtml('missing-id', currentOrigin, apiBase));
+      if (retryBtn) retryBtn.removeAttribute('hidden');
+      return;
+    }
+
+    const rendered = await authSvc.renderOfficialGoogleButton(
+      gsiSlot,
+      realProfile => completeDirectGoogleLogin(realProfile),
+      err => setGoogleModalStatus(err.message || 'Không thể đăng nhập Google.', 'error')
+    );
+
+    if (rendered) {
+      bannerEl.className = 'google-env-banner is-ready';
+      bannerEl.textContent = 'Nhấn nút Google ở trên để đăng nhập và vào thẳng Trang chủ ConfGuide.';
+
+      const loc = window.location || {};
+      if (loc.hostname === '127.0.0.1' || loc.hostname === '[::1]') {
+        const localhostAlt = `http://localhost${loc.port ? `:${loc.port}` : ''}${loc.pathname || '/login.html'}`;
+        setOriginNote(
+          `Nếu gặp <strong>Error 400: origin_mismatch</strong>: Origin hiện tại là <code class="google-setup-guide__code">${escapeAuthHtml(currentOrigin)}</code> `
+          + `(Google Cloud Console thường yêu cầu dùng <code class="google-setup-guide__code">localhost</code>). `
+          + `Hãy thêm <code class="google-setup-guide__code">${escapeAuthHtml(currentOrigin)}</code> hoặc chuyển sang `
+          + `<a class="google-setup-guide__link" href="${escapeAuthHtml(localhostAlt)}">${escapeAuthHtml(localhostAlt)}</a> / `
+          + `<a class="google-setup-guide__link" href="http://localhost:3000/login.html">http://localhost:3000/login.html</a> `
+          + 'và khai báo các URL đó trong <strong>Authorized JavaScript origins</strong>.'
+        );
+      } else if (currentOrigin) {
+        setOriginNote(
+          `Origin trang hiện tại: <code class="google-setup-guide__code">${escapeAuthHtml(currentOrigin)}</code> `
+          + '— nếu gặp <strong>Error 400: origin_mismatch</strong>, hãy kiểm tra chuỗi này đã có trong <strong>Authorized JavaScript origins</strong> của Google Cloud Console (không có dấu <code class="google-setup-guide__code">/</code> ở cuối).'
+        );
+      }
+    } else {
+      bannerEl.className = 'google-env-banner is-warning';
+      bannerEl.textContent =
+        'Không thể tải nút Google Sign-In từ accounts.google.com. Vui lòng kiểm tra kết nối mạng, trình chặn quảng cáo hoặc Authorized JavaScript origins.';
+      showGuide(buildGoogleSetupGuideHtml('gis-failed', currentOrigin, apiBase));
+      if (retryBtn) retryBtn.removeAttribute('hidden');
+    }
+  }
+
+  /**
+   * Gắn sự kiện tương tác cho hộp thoại đăng nhập Google.
+   * @param {HTMLElement} modal - Phần tử `#googleAuthModal`.
+   */
+  function bindGoogleAuthModalEvents(modal) {
+    if (googleModalBound) return;
+    googleModalBound = true;
+
+    modal.addEventListener('click', async event => {
+      if (!(event.target instanceof Element)) return;
+
+      if (event.target.closest('.js-google-modal-close')) {
+        closeGoogleAuthModal();
+        return;
+      }
+
+      if (event.target.closest('#googleRetryConfigBtn')) {
+        setGoogleModalStatus('');
+        await refreshGoogleEnvironmentUi();
+      }
+    });
+
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape' && !modal.hasAttribute('hidden')) {
+        closeGoogleAuthModal();
+      }
+    });
+  }
+
+  /**
+   * Mở hộp thoại đăng nhập Google (xác thực trực tiếp rồi chuyển thẳng về Trang chủ).
+   * @param {HTMLElement} triggerBtn - Nút `#googleLogin` hoặc `#googleRegister` vừa nhấn.
+   * @param {HTMLElement|null} pageMessageEl - Phần tử thông báo của form hiện tại.
+   * @returns {Promise<void>}
+   */
+  async function openGoogleAuthModal(triggerBtn, pageMessageEl) {
+    if (seedPromise) await seedPromise;
+    if (pageMessageEl) pageMessageEl.textContent = '';
+
+    const modal = ensureGoogleAuthModalDom();
+    setGoogleModalStatus('');
+    refreshGoogleEnvironmentUi();
+
+    googleModalLastFocus = triggerBtn;
+    modal.removeAttribute('hidden');
+    document.body.classList.add('modal-open');
+    requestAnimationFrame(() => {
+      modal.classList.add('show');
+      const closeBtn = modal.querySelector('#googleAuthCloseBtn');
+      if (closeBtn) closeBtn.focus();
+    });
   }
 
   /**
@@ -715,11 +1370,14 @@
    */
   function initializeAuthPage() {
     seedPromise = loadAndSeedUsers();
+    if (window.ConfGuideGoogleAuth && typeof window.ConfGuideGoogleAuth.fetchBackendAuthConfig === 'function') {
+      window.ConfGuideGoogleAuth.fetchBackendAuthConfig();
+    }
     initLoginForm();
     initRegisterForm();
   }
 
-  /* ================= 6. CHUYỂN TRANG MỀM, THEME & KHỞI CHẠY ================= */
+  /* ================= 6. CHUYỂN TRANG MỀM & KHỞI CHẠY ================= */
 
   /**
    * Chuyển đổi mềm không tải lại toàn trang giữa login.html và register.html qua History API.
@@ -731,9 +1389,6 @@
   async function navigateAuthPage(target, { replace = false } = {}) {
     const url = new URL(target, window.location.href);
     if (url.origin !== window.location.origin || !/\/(?:login|register)\.html$/.test(url.pathname)) return;
-    const activeLink = document.querySelector('.auth-nav-link.active');
-    const activePath = activeLink ? new URL(activeLink.href, window.location.href).pathname : '';
-    if (url.pathname === activePath && !url.search && !url.hash) return;
 
     const response = await fetch(url.href);
     if (!response.ok) throw new Error('Không tải được trang tài khoản.');
@@ -745,42 +1400,9 @@
 
     currentCard.replaceWith(document.importNode(nextCard, true));
     document.title = nextDocument.title;
-    document.querySelectorAll('.auth-nav-link').forEach(link => {
-      const active = new URL(link.href, window.location.href).pathname === url.pathname;
-      link.classList.toggle('active', active);
-      if (active) link.setAttribute('aria-current', 'page');
-      else link.removeAttribute('aria-current');
-    });
     if (replace) history.replaceState({ authPage: true }, '', url.href);
     else history.pushState({ authPage: true }, '', url.href);
     initializeAuthPage();
-  }
-
-  /**
-   * Khởi tạo bộ chuyển giao diện sáng/tối trên trang xác thực và đồng bộ trạng thái nút.
-   */
-  function initThemeToggle() {
-    const themeToggle = document.getElementById('themeToggle');
-    if (!themeToggle) return;
-
-    const syncThemeButton = () => {
-      themeToggle.setAttribute('aria-pressed', String(document.body.classList.contains('dark')));
-    };
-
-    if (
-      readTextStorage(localStorage, 'darkMode') === 'true' ||
-      readTextStorage(localStorage, 'confguide_theme') === 'dark'
-    ) {
-      document.body.classList.add('dark');
-    }
-    syncThemeButton();
-
-    themeToggle.addEventListener('click', () => {
-      const isDark = document.body.classList.toggle('dark');
-      writeTextStorage(localStorage, 'darkMode', String(isDark));
-      writeTextStorage(localStorage, 'confguide_theme', isDark ? 'dark' : 'light');
-      syncThemeButton();
-    });
   }
 
   /**
@@ -788,11 +1410,10 @@
    */
   function bootstrapAuth() {
     initializeAuthPage();
-    initThemeToggle();
 
     document.addEventListener('click', event => {
       const link = event.target.closest('a[href]');
-      if (!link || !link.matches('.auth-nav-link, .register-prompt a')) return;
+      if (!link || !link.matches('.register-prompt a')) return;
       const url = new URL(link.href, window.location.href);
       if (!/\/(?:login|register)\.html$/.test(url.pathname)) return;
       event.preventDefault();
@@ -804,8 +1425,6 @@
     window.addEventListener('popstate', () => {
       if (/\/(?:login|register)\.html$/.test(window.location.pathname)) {
         navigateAuthPage(window.location.href, { replace: true }).catch(() => {
-          const activeLink = document.querySelector('.auth-nav-link.active');
-          if (activeLink) history.replaceState({ authPage: true }, '', activeLink.href);
           const message = document.querySelector('#formMessage, #registerMessage');
           if (message) {
             message.className = 'form-message form-message--error';
