@@ -1222,7 +1222,7 @@
     let savedTheme = 'light';
     try {
       savedTheme = localStorage.getItem('confguide_theme') || 'light';
-    } catch (e) {}
+    } catch (e) { }
 
     const targetEl = document.body || document.documentElement;
     if (!targetEl) return;
@@ -1412,13 +1412,13 @@
     const hasPhoto = Boolean(user.avatarUrl && typeof user.avatarUrl === 'string');
     const avatarContent = hasPhoto
       ? `<img src="${escapeHtml(user.avatarUrl)}" alt="${escapeHtml(displayName)}" `
-        + `width="36" height="36" class="header-avatar-img js-avatar-img-fallback" `
-        + `referrerpolicy="no-referrer" data-fallback-initial="${escapeHtml(initial)}">`
+      + `width="36" height="36" class="header-avatar-img js-avatar-img-fallback" `
+      + `referrerpolicy="no-referrer" data-fallback-initial="${escapeHtml(initial)}">`
       : escapeHtml(initial);
     const thumbContent = hasPhoto
       ? `<img src="${escapeHtml(user.avatarUrl)}" alt="${escapeHtml(displayName)}" `
-        + `width="44" height="44" class="dropdown-avatar-img js-avatar-img-fallback" `
-        + `referrerpolicy="no-referrer" data-fallback-initial="${escapeHtml(initial)}">`
+      + `width="44" height="44" class="dropdown-avatar-img js-avatar-img-fallback" `
+      + `referrerpolicy="no-referrer" data-fallback-initial="${escapeHtml(initial)}">`
       : escapeHtml(initial);
     const userSubtitle = escapeHtml(user.email || user.username || '');
 
@@ -1845,8 +1845,8 @@
     const recommendedTopics = candidates.filter(item => item.confidence >= threshold).slice(0, 6);
     const overallConfidence = recommendedTopics.length > 0
       ? Math.round(
-          recommendedTopics.reduce((sum, item) => sum + item.confidence, 0) / recommendedTopics.length
-        )
+        recommendedTopics.reduce((sum, item) => sum + item.confidence, 0) / recommendedTopics.length
+      )
       : (candidates[0] ? candidates[0].confidence : 0);
 
     const recognized = recommendedTopics.length > 0 && overallConfidence >= threshold;
@@ -2661,7 +2661,7 @@
   }
 
   /**
-   * Tạo HTML cho modal tự động cào hồ sơ Google Scholar / ORCID / mô tả cá nhân ngay trên Trang chủ.
+   * Tạo HTML cho modal chọn lĩnh vực nghiên cứu (gợi ý hồ sơ "Có phải bạn?", dán link / mô tả, lĩnh vực đã chọn).
    * @returns {string} Chuỗi HTML `#googleCrawlModal`.
    */
   function buildGoogleCrawlModalHtml() {
@@ -2671,68 +2671,63 @@
         <div class="layout-modal-backdrop"></div>
         <div class="layout-modal-box layout-modal-box--wide">
           <div class="layout-modal-header">
-            <h3 class="layout-modal-title" id="googleCrawlModalTitle">Tự động quét hồ sơ &amp; Chọn lĩnh vực nghiên cứu</h3>
+            <h3 class="layout-modal-title" id="googleCrawlModalTitle">Chọn lĩnh vực nghiên cứu</h3>
             <button type="button" class="layout-modal-close-btn" aria-label="Đóng">&times;</button>
           </div>
-          <div class="layout-modal-body">
+          <div class="layout-modal-body crawl-modal-body">
             <div class="crawl-identity-bar" id="googleCrawlIdentityBar"></div>
 
             <div class="crawl-status-box is-loading" id="googleCrawlStatusBox" role="status" aria-live="polite">
               <span class="crawl-status-box__spinner" aria-hidden="true"></span>
-              <span>Đang chuẩn bị quét hồ sơ công khai...</span>
+              <span>Đang tìm hồ sơ nghiên cứu của bạn...</span>
             </div>
 
-            <div class="crawl-candidates-list" id="googleCrawlCandidatesBox" hidden></div>
+            <div class="crawl-section" id="googleCrawlCandidatesSection" hidden>
+              <p class="crawl-section__title">Có phải bạn?</p>
+              <div class="crawl-candidates-list" id="googleCrawlCandidatesBox"></div>
+            </div>
 
-            <div class="crawl-assist-box" id="googleCrawlAssistBox">
-              <div class="crawl-assist-box__row">
-                <div class="crawl-assist-box__head">
-                  <label for="googleCrawlQueryInput">Quét theo tên tác giả, link Google Scholar hoặc ORCID iD</label>
-                  <a id="googleCrawlScholarLink" class="crawl-assist-box__link"
-                    href="https://scholar.google.com/citations?hl=en" target="_blank" rel="noopener noreferrer">
-                    Mở Google Scholar &#8599;
-                  </a>
-                </div>
-                <div class="crawl-assist-box__controls">
+            <div class="crawl-section">
+              <div class="crawl-tabs" role="tablist" aria-label="Cách nhập thông tin">
+                <button type="button" class="crawl-tab is-active js-crawl-tab" role="tab" id="googleCrawlTabLink"
+                  aria-selected="true" aria-controls="googleCrawlPanelLink" data-tab="link">Dán link Scholar / ORCID</button>
+                <button type="button" class="crawl-tab js-crawl-tab" role="tab" id="googleCrawlTabDesc"
+                  aria-selected="false" aria-controls="googleCrawlPanelDesc" data-tab="desc">Mô tả bằng lời</button>
+              </div>
+
+              <div class="crawl-tab-panel" id="googleCrawlPanelLink" role="tabpanel" aria-labelledby="googleCrawlTabLink">
+                <div class="crawl-input-row">
+                  <label for="googleCrawlQueryInput" class="sr-only">Tên tác giả, link Google Scholar hoặc ORCID iD</label>
                   <input type="text" id="googleCrawlQueryInput" class="modal-input"
-                    placeholder="Tên tác giả, link scholar.google.com/citations?user=... hoặc 0000-0002-...">
-                  <button type="button" class="btn btn-secondary btn--compact-sm" id="googleCrawlStripBtn"
-                    title="Loại bỏ dấu tiếng Việt">Bỏ dấu</button>
-                  <button type="button" class="btn btn-primary btn--compact-sm" id="googleCrawlSearchBtn">Quét hồ sơ</button>
+                    placeholder="scholar.google.com/citations?user=...  ·  0000-0002-...  ·  hoặc tên tác giả">
+                  <button type="button" class="btn btn-primary btn--compact-sm" id="googleCrawlSearchBtn">Tìm</button>
                 </div>
+                <a id="googleCrawlScholarLink" class="crawl-assist-box__link"
+                  href="https://scholar.google.com/citations?hl=en" target="_blank" rel="noopener noreferrer">
+                  Mở Google Scholar &#8599;
+                </a>
               </div>
 
-              <div class="crawl-assist-box__row">
-                <label for="googleCrawlDescInput">
-                  Hoặc dán nhanh mô tả từ hồ sơ / chuyên ngành / từ khóa (VD: khoa học máy tính, Machine Learning, Web Development...)
-                </label>
-                <div class="crawl-assist-box__desc-row">
+              <div class="crawl-tab-panel" id="googleCrawlPanelDesc" role="tabpanel" aria-labelledby="googleCrawlTabDesc" hidden>
+                <div class="crawl-input-row">
+                  <label for="googleCrawlDescInput" class="sr-only">Mô tả chuyên ngành hoặc lĩnh vực quan tâm</label>
                   <textarea id="googleCrawlDescInput" class="modal-input crawl-assist-box__textarea" rows="2"
-                    placeholder="VD: Sinh viên khoa học máy tính, quan tâm Machine Learning, Data Science, Computer Vision, Web Development..."></textarea>
-                  <button type="button" class="btn btn-secondary btn--compact-sm" id="googleCrawlAnalyzeDescBtn">
-                    Phân tích mô tả
-                  </button>
+                    placeholder="VD: Sinh viên khoa học máy tính, quan tâm Machine Learning, Web Development..."></textarea>
+                  <button type="button" class="btn btn-primary btn--compact-sm" id="googleCrawlAnalyzeDescBtn">Phân tích</button>
                 </div>
               </div>
             </div>
 
-            <div class="crawl-matched-box" id="googleCrawlMatchedBox">
-              <p class="crawl-matched-box__title" id="googleCrawlMatchedTitle">Lĩnh vực AI trích xuất &amp; đề xuất</p>
+            <div class="crawl-section crawl-matched-box" id="googleCrawlMatchedBox">
+              <p class="crawl-section__title" id="googleCrawlMatchedTitle">Lĩnh vực đã chọn</p>
               <div class="crawl-matched-list" id="googleCrawlMatchedList"></div>
-              <p class="crawl-empty-note" id="googleCrawlUnmatchedNote" hidden></p>
             </div>
           </div>
           <div class="pref-modal-actions">
-            <button type="button" class="btn btn-secondary layout-modal-cancel-btn" id="googleCrawlSkipBtn">
-              Bỏ qua (Dùng nút + sau)
-            </button>
+            <button type="button" class="btn btn-secondary layout-modal-cancel-btn" id="googleCrawlSkipBtn">Để sau</button>
             <div class="pref-modal-actions__right">
-              <button type="button" class="btn btn-secondary" id="googleCrawlManualBtn">
-                Chọn 25 nhóm thủ công
-              </button>
-              <button type="button" class="btn btn-primary" id="googleCrawlSaveBtn" disabled>
-                Xác nhận &amp; Lưu lĩnh vực
-              </button>
+              <button type="button" class="btn btn-secondary" id="googleCrawlManualBtn">Chọn thủ công</button>
+              <button type="button" class="btn btn-primary" id="googleCrawlSaveBtn" disabled>Lưu lĩnh vực</button>
             </div>
           </div>
         </div>
@@ -3307,7 +3302,7 @@
     if (!confirmed) return;
     try {
       localStorage.removeItem('confguide_current_user');
-    } catch (e) {}
+    } catch (e) { }
     window.location.assign('login.html');
   }
 
@@ -3421,7 +3416,7 @@
     const isAbout = currentPage === 'about.html';
 
     let storedTheme = 'light';
-    try { storedTheme = localStorage.getItem('confguide_theme') || 'light'; } catch (e) {}
+    try { storedTheme = localStorage.getItem('confguide_theme') || 'light'; } catch (e) { }
     const isDark = document.body.classList.contains('dark') || storedTheme === 'dark';
 
     const { sunSvg, moonSvg, hamburgerSvg } = getHeaderIcons();
@@ -3587,7 +3582,7 @@
     if (themeBtn) {
       themeBtn.addEventListener('click', () => {
         const currentlyDark = document.body.classList.toggle('dark');
-        try { localStorage.setItem('confguide_theme', currentlyDark ? 'dark' : 'light'); } catch (e) {}
+        try { localStorage.setItem('confguide_theme', currentlyDark ? 'dark' : 'light'); } catch (e) { }
         themeBtn.innerHTML = currentlyDark ? sunSvg : moonSvg;
       });
     }
@@ -3936,6 +3931,7 @@
     const modal = document.getElementById('googleCrawlModal');
     if (!modal) return;
 
+    // 1. Thanh danh tính (bỏ nhãn "Google Gmail" thừa)
     const activeUser = getCurrentUser();
     const idBar = document.getElementById('googleCrawlIdentityBar');
     if (idBar && activeUser) {
@@ -3946,15 +3942,14 @@
         <div class="crawl-identity-bar__left">
           <div class="crawl-identity-bar__avatar" aria-hidden="true">
             ${hasPhoto
-              ? `<img src="${escapeHtml(activeUser.avatarUrl)}" alt="${escapeHtml(displayName)}" width="40" height="40" class="crawl-identity-bar__avatar-img js-crawl-avatar-img" referrerpolicy="no-referrer">`
-              : escapeHtml(avatarInitial)}
+          ? `<img src="${escapeHtml(activeUser.avatarUrl)}" alt="" width="40" height="40" class="crawl-identity-bar__avatar-img js-crawl-avatar-img" referrerpolicy="no-referrer">`
+          : escapeHtml(avatarInitial)}
           </div>
           <div class="crawl-identity-bar__info">
             <strong class="crawl-identity-bar__name">${escapeHtml(displayName)}</strong>
             <span class="crawl-identity-bar__email">${escapeHtml(activeUser.email || '')}</span>
           </div>
         </div>
-        <span class="crawl-identity-bar__tag">${activeUser.authProvider === 'google' ? 'Google Gmail' : 'Tài khoản ConfGuide'}</span>
       `;
       const img = idBar.querySelector('.js-crawl-avatar-img');
       if (img) {
@@ -3965,138 +3960,85 @@
       }
     }
 
+    // 2. Một dòng trạng thái ngắn duy nhất (ẩn khi không có gì để nói)
     const statusBox = document.getElementById('googleCrawlStatusBox');
     if (statusBox) {
+      const msg = crawlModalState.statusMessage;
       const toneClass = crawlModalState.loading
-        ? 'crawl-status-box is-loading'
-        : (crawlModalState.statusTone === 'success'
-          ? 'crawl-status-box is-success'
-          : (crawlModalState.statusTone === 'fallback' ? 'crawl-status-box is-fallback' : 'crawl-status-box'));
-      statusBox.className = toneClass;
+        ? 'is-loading'
+        : (crawlModalState.statusTone === 'success' ? 'is-success'
+          : (crawlModalState.statusTone === 'fallback' ? 'is-fallback' : ''));
+      statusBox.className = `crawl-status-box ${toneClass}`.trim();
+      statusBox.hidden = !crawlModalState.loading && !msg;
       statusBox.innerHTML = crawlModalState.loading
-        ? `<span class="crawl-status-box__spinner" aria-hidden="true"></span><span>${escapeHtml(crawlModalState.statusMessage)}</span>`
-        : `<span>${escapeHtml(crawlModalState.statusMessage || 'Sẵn sàng quét dữ liệu hồ sơ.')}</span>`;
+        ? `<span class="crawl-status-box__spinner" aria-hidden="true"></span><span>${escapeHtml(msg || 'Đang xử lý...')}</span>`
+        : `<span>${escapeHtml(msg || '')}</span>`;
     }
 
+    // 3. Danh sách "Có phải bạn?" — thẻ gọn: tên, nơi công tác, nguồn, tối đa 3 lĩnh vực
+    const candidatesSection = document.getElementById('googleCrawlCandidatesSection');
     const candidatesBox = document.getElementById('googleCrawlCandidatesBox');
-    if (candidatesBox) {
-      if (crawlModalState.candidates.length > 0) {
-        candidatesBox.removeAttribute('hidden');
-        candidatesBox.innerHTML = crawlModalState.candidates.map((cand, idx) => {
-          const isSelected = idx === crawlModalState.selectedCandidateIdx;
-          const interests = Array.isArray(cand.interests) ? cand.interests : [];
-          const papers = Array.isArray(cand.paperTitles) ? cand.paperTitles : [];
-          const matchedLabels = cand.mapped && Array.isArray(cand.mapped.matched)
-            ? cand.mapped.matched.map(m => m.label).filter(Boolean)
-            : [];
-          const metaParts = [cand.affiliation || 'Chưa rõ đơn vị công tác'];
-          if (cand.orcid) metaParts.push(`ORCID: ${cand.orcid}`);
-          metaParts.push(`Nguồn: ${formatCrawlSourceLabel(cand.source)}`);
-
-          return `
-            <div class="crawl-candidate-card${isSelected ? ' is-selected' : ''}">
-              <div class="crawl-candidate-card__info">
-                <strong class="crawl-candidate-card__name">${escapeHtml(cand.name)}</strong>
-                <span class="crawl-candidate-card__meta">${escapeHtml(metaParts.join(' · '))}</span>
-                ${interests.length > 0
-                  ? `<span class="crawl-candidate-card__topics">Lĩnh vực công khai: ${escapeHtml(interests.slice(0, 5).join(', '))}</span>`
-                  : ''}
-                ${cand.biography
-                  ? `<span class="crawl-candidate-card__topics">Tiểu sử: ${escapeHtml(cand.biography)}</span>`
-                  : ''}
-                ${papers.length > 0
-                  ? `<span class="crawl-candidate-card__topics">Bài báo: ${escapeHtml(papers.slice(0, 2).join(' | '))}</span>`
-                  : ''}
-                ${matchedLabels.length > 0
-                  ? `<span class="crawl-candidate-card__mapped">Ánh xạ ConfGuide: ${escapeHtml(matchedLabels.join(', '))}</span>`
-                  : ''}
-              </div>
-              <button type="button" class="btn btn-primary btn--compact-sm js-crawl-pick-candidate" data-cand-idx="${idx}">
-                ${isSelected ? 'Đang chọn' : 'Áp dụng hồ sơ'}
-              </button>
+    if (candidatesSection && candidatesBox) {
+      const list = crawlModalState.candidates;
+      candidatesSection.hidden = list.length === 0;
+      candidatesBox.innerHTML = list.map((cand, idx) => {
+        const isSelected = idx === crawlModalState.selectedCandidateIdx;
+        const interests = Array.isArray(cand.interests) ? cand.interests.slice(0, 3) : [];
+        const metaParts = [cand.affiliation || 'Chưa rõ nơi công tác', formatCrawlSourceLabel(cand.source)];
+        return `
+          <div class="crawl-candidate-card${isSelected ? ' is-selected' : ''}">
+            <div class="crawl-candidate-card__info">
+              <strong class="crawl-candidate-card__name">${escapeHtml(cand.name)}</strong>
+              <span class="crawl-candidate-card__meta">${escapeHtml(metaParts.join(' · '))}</span>
+              ${interests.length > 0
+            ? `<span class="crawl-candidate-card__topics">${escapeHtml(interests.join(', '))}</span>`
+            : ''}
             </div>
-          `;
-        }).join('');
-      } else {
-        candidatesBox.setAttribute('hidden', '');
-        candidatesBox.innerHTML = '';
-      }
+            <div class="crawl-candidate-card__actions">
+              ${isSelected
+            ? '<span class="crawl-candidate-card__chosen">✓ Đã xác nhận</span>'
+            : `<button type="button" class="btn btn-secondary btn--compact-sm js-crawl-reject-candidate" data-cand-idx="${idx}">Không phải tôi</button>
+                   <button type="button" class="btn btn-primary btn--compact-sm js-crawl-pick-candidate" data-cand-idx="${idx}">Đúng là tôi</button>`}
+            </div>
+          </div>
+        `;
+      }).join('');
     }
 
-    const matchedTitleEl = document.getElementById('googleCrawlMatchedTitle');
-    const matchedListEl = document.getElementById('googleCrawlMatchedList');
-    const unmatchedNoteEl = document.getElementById('googleCrawlUnmatchedNote');
-    const saveBtn = document.getElementById('googleCrawlSaveBtn');
-    const searchBtn = document.getElementById('googleCrawlSearchBtn');
-    const analyzeBtn = document.getElementById('googleCrawlAnalyzeDescBtn');
+    // 4. Nút & link phụ
     const scholarLinkEl = document.getElementById('googleCrawlScholarLink');
-
     if (scholarLinkEl) {
       scholarLinkEl.setAttribute('href', buildCrawlScholarSearchUrl(crawlModalState.query));
     }
+    ['googleCrawlSearchBtn', 'googleCrawlAnalyzeDescBtn'].forEach(id => {
+      const btn = document.getElementById(id);
+      if (btn) btn.disabled = crawlModalState.loading;
+    });
 
-    if (searchBtn) {
-      if (crawlModalState.loading) searchBtn.setAttribute('disabled', 'true');
-      else searchBtn.removeAttribute('disabled');
-    }
-    if (analyzeBtn) {
-      if (crawlModalState.loading) analyzeBtn.setAttribute('disabled', 'true');
-      else analyzeBtn.removeAttribute('disabled');
-    }
-
+    // 5. Lĩnh vực đã chọn (chip bật/tắt) — không liệt kê từ khóa thô chưa khớp
+    const matchedListEl = document.getElementById('googleCrawlMatchedList');
     if (matchedListEl) {
       if (crawlModalState.matchedItems.length > 0) {
-        if (matchedTitleEl) {
-          matchedTitleEl.textContent = `Lĩnh vực AI đề xuất (${formatCrawlSourceLabel(crawlModalState.source)})`;
-        }
-        matchedListEl.innerHTML = crawlModalState.matchedItems.map((item, idx) => {
+        matchedListEl.innerHTML = crawlModalState.matchedItems.map(item => {
           const checked = crawlModalState.selectedKeys.has(item.key);
-          const origHint = Array.isArray(item.matchedInterests) && item.matchedInterests[0]
-            ? item.matchedInterests[0]
-            : (Array.isArray(item.matchedTerms) ? item.matchedTerms[0] : '');
           return `
             <label class="crawl-matched-chip${checked ? ' is-selected' : ''}">
               <input type="checkbox" class="js-crawl-match-check" value="${escapeHtml(item.key)}"${checked ? ' checked' : ''}>
               <span>${escapeHtml(item.label || PREF_TOPIC_LABEL_MAP[item.key] || item.key)}</span>
-              ${idx === 0 && checked ? '<span class="profile-field-pill__priority">Ưu tiên</span>' : ''}
-              ${origHint ? `<span class="crawl-matched-chip__via">(${escapeHtml(origHint)})</span>` : ''}
             </label>
           `;
         }).join('');
       } else {
-        if (matchedTitleEl) {
-          matchedTitleEl.textContent = 'Lĩnh vực AI trích xuất & đề xuất';
-        }
-        matchedListEl.innerHTML = `
-          <p class="crawl-empty-note">
-            ${crawlModalState.loading
-              ? 'Đang chờ kết quả quét...'
-              : 'Chưa có dữ liệu lĩnh vực nào được trích xuất tự động. Bạn có thể dán mô tả hồ sơ (VD: "khoa học máy tính, Machine Learning, Web Development") ở trên hoặc nhấn "Bỏ qua (Dùng nút + sau)" để Trang chủ & Hồ sơ hiển thị nút + như bình thường.'}
-          </p>
-        `;
+        matchedListEl.innerHTML = `<p class="crawl-empty-note">${crawlModalState.loading ? 'Đang chờ kết quả...' : '(chưa có)'}</p>`;
       }
     }
 
-    if (unmatchedNoteEl) {
-      if (crawlModalState.unmatchedTerms.length > 0) {
-        unmatchedNoteEl.textContent =
-          `Từ khóa chưa khớp trực tiếp 25 nhóm chuẩn (${crawlModalState.unmatchedTerms.join(', ')}) — bạn có thể thêm tùy chỉnh trong "Chọn 25 nhóm thủ công".`;
-        unmatchedNoteEl.removeAttribute('hidden');
-      } else {
-        unmatchedNoteEl.textContent = '';
-        unmatchedNoteEl.setAttribute('hidden', 'true');
-      }
-    }
-
-    const selectedCount = crawlModalState.selectedKeys.size;
+    // 6. Nút Lưu: khóa khi chưa chọn lĩnh vực nào, ghi rõ số lượng
+    const saveBtn = document.getElementById('googleCrawlSaveBtn');
     if (saveBtn) {
-      if (selectedCount > 0 && !crawlModalState.loading) {
-        saveBtn.removeAttribute('disabled');
-        saveBtn.textContent = `Xác nhận & Lưu (${selectedCount} lĩnh vực)`;
-      } else {
-        saveBtn.setAttribute('disabled', 'true');
-        saveBtn.textContent = 'Xác nhận & Lưu lĩnh vực';
-      }
+      const selectedCount = crawlModalState.selectedKeys.size;
+      saveBtn.disabled = selectedCount === 0 || crawlModalState.loading;
+      saveBtn.textContent = selectedCount > 0 ? `Lưu ${selectedCount} lĩnh vực` : 'Lưu lĩnh vực';
     }
   }
 
@@ -4154,12 +4096,11 @@
 
     if (matched.length > 0) {
       crawlModalState.statusTone = 'success';
-      crawlModalState.statusMessage =
-        `Đã tự động cào ${matched.length} lĩnh vực từ ${formatCrawlSourceLabel(candSource)} (${activeCand.name}). Kiểm tra rồi bấm Xác nhận & Lưu.`;
+      crawlModalState.statusMessage = `Đã lấy ${matched.length} lĩnh vực từ hồ sơ của ${activeCand.name}.`;
     } else {
       crawlModalState.statusTone = 'fallback';
       crawlModalState.statusMessage =
-        `Đã tìm thấy hồ sơ ${activeCand.name} (${formatCrawlSourceLabel(candSource)}) nhưng chưa có từ khóa khớp 25 nhóm CNTT. Bạn có thể dán mô tả ngắn bên dưới hoặc chọn thủ công.`;
+        `Hồ sơ của ${activeCand.name} chưa có lĩnh vực CNTT phù hợp. Hãy thử "Mô tả bằng lời" hoặc chọn thủ công.`;
     }
     syncGoogleCrawlModalUi();
   }
@@ -4218,19 +4159,23 @@
       crawlModalState.candidates = candidates;
 
       if (candidates.length > 0) {
-        const bestIdx = candidates.findIndex(c => c.mapped && Array.isArray(c.mapped.matched) && c.mapped.matched.length > 0);
-        if (bestIdx >= 0) {
-          await applyCrawlCandidateToDraft(bestIdx, false);
+        // Link Scholar / ORCID iD là định danh chính xác => áp dụng ngay.
+        // Tìm theo tên có thể trùng người khác => chỉ gợi ý "Có phải bạn?", chờ người dùng xác nhận.
+        const isExactId = /scholar\.google\.|[?&]user=|\b\d{4}-\d{4}-\d{4}-\d{3}[\dXx]\b/.test(rawQuery);
+        if (isExactId) {
+          await applyCrawlCandidateToDraft(0, false);
           return;
         }
-        await applyCrawlCandidateToDraft(0, false);
+        crawlModalState.selectedCandidateIdx = -1;
+        crawlModalState.statusTone = 'neutral';
+        crawlModalState.statusMessage = '';
+        syncGoogleCrawlModalUi();
         return;
       }
 
       crawlModalState.statusTone = 'fallback';
       crawlModalState.statusMessage =
-        data.message
-        || `Chưa tự động lấy được hồ sơ công khai khớp "${rawQuery || email}". Hãy thử sửa tên tác giả (bỏ dấu), dán link Google Scholar / ORCID hoặc nhập mô tả hồ sơ bên dưới.`;
+        'Không tìm thấy hồ sơ phù hợp. Hãy dán link Google Scholar / ORCID hoặc mô tả bằng lời.';
       syncGoogleCrawlModalUi();
     } catch {
       if (!crawlModalState.isOpen) return;
@@ -4238,7 +4183,7 @@
       crawlModalState.candidates = [];
       crawlModalState.statusTone = 'fallback';
       crawlModalState.statusMessage =
-        'Không kết nối được backend quét tự động lúc này. Bạn vẫn có thể dán mô tả hồ sơ (VD: khoa học máy tính, Machine Learning...) ở ô dưới hoặc bỏ qua để dùng nút +.';
+        'Chưa kết nối được máy chủ. Bạn vẫn có thể mô tả bằng lời hoặc chọn thủ công.';
       syncGoogleCrawlModalUi();
     } finally {
       if (timeoutId !== null) window.clearTimeout(timeoutId);
@@ -4534,9 +4479,44 @@
       });
     }
 
+    // Chuyển tab "Dán link Scholar / ORCID" <-> "Mô tả bằng lời"
+    modal.querySelectorAll('.js-crawl-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        const target = tab.getAttribute('data-tab');
+        modal.querySelectorAll('.js-crawl-tab').forEach(t => {
+          const active = t === tab;
+          t.classList.toggle('is-active', active);
+          t.setAttribute('aria-selected', String(active));
+        });
+        const linkPanel = document.getElementById('googleCrawlPanelLink');
+        const descPanel = document.getElementById('googleCrawlPanelDesc');
+        if (linkPanel) linkPanel.hidden = target !== 'link';
+        if (descPanel) descPanel.hidden = target !== 'desc';
+        const focusEl = target === 'desc' ? descInput : queryInput;
+        if (focusEl) focusEl.focus();
+      });
+    });
+
     if (candidatesBox) {
       candidatesBox.addEventListener('click', event => {
         if (!(event.target instanceof Element)) return;
+
+        // "Không phải tôi": bỏ ứng viên khỏi danh sách gợi ý
+        const rejectBtn = event.target.closest('.js-crawl-reject-candidate');
+        if (rejectBtn) {
+          const rIdx = Number(rejectBtn.getAttribute('data-cand-idx'));
+          if (!Number.isInteger(rIdx)) return;
+          crawlModalState.candidates.splice(rIdx, 1);
+          if (crawlModalState.selectedCandidateIdx > rIdx) crawlModalState.selectedCandidateIdx -= 1;
+          if (crawlModalState.candidates.length === 0) {
+            crawlModalState.statusTone = 'fallback';
+            crawlModalState.statusMessage = 'Hãy dán link Google Scholar / ORCID của bạn, hoặc mô tả bằng lời.';
+          }
+          syncGoogleCrawlModalUi();
+          return;
+        }
+
+        // "Đúng là tôi": lấy lĩnh vực từ hồ sơ này
         const pickBtn = event.target.closest('.js-crawl-pick-candidate');
         if (!pickBtn) return;
         const idx = Number(pickBtn.getAttribute('data-cand-idx'));
