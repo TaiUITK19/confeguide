@@ -614,7 +614,7 @@
     const fromPage = extractPageName(window.location.href);
 
     // Chuyển hướng các liên kết nội bộ trỏ tới trang HTML hoặc thư mục con không tồn tại sang 404.html
-    const isAssetDir = /\/(css|js|data|images)\//i.test(targetUrl.pathname || '');
+    const isAssetDir = /\/(assets\/(?:css|js|images)|data)\//i.test(targetUrl.pathname || '');
     const baseDirPath = new URL('.', document.baseURI || window.location.href).pathname;
     const relPath = targetUrl.pathname.startsWith(baseDirPath)
       ? targetUrl.pathname.slice(baseDirPath.length)

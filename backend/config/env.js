@@ -155,7 +155,7 @@ function validateStartupConfig() {
 module.exports = {
   isVercel,
   port,
-  frontendRoot: PROJECT_ROOT,
+  frontendRoot: path.join(PROJECT_ROOT, 'frontend'),
   backendDataDir: path.join(BACKEND_ROOT, 'data'),
   allowedOrigins,
   googleClientId: googleClientInfo.status === 'ok' ? googleClientInfo.value : '',

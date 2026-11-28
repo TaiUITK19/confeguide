@@ -58,19 +58,21 @@ ConfGuide tập hợp thông tin các hội nghị khoa học CNTT trong nước
 
 ```text
 confeguide/
-├── *.html                      # 10 trang: index, search, detail, tracker, profile,
-│                               # about, contact, login, register, 404
-├── css/
-│   ├── base/                   # Design tokens, layout dùng chung, chuyển trang
-│   ├── components/             # Lịch, so sánh hội nghị
-│   └── pages/                  # Stylesheet riêng của từng trang
-├── js/
-│   ├── core/                   # Header/Footer, theme, phiên đăng nhập, chuyển trang
-│   ├── components/             # Lõi tìm kiếm, so sánh, lịch
-│   ├── services/               # google-auth.js (kết nối Google Identity Services & backend)
-│   └── pages/                  # Logic riêng của từng trang
-├── data/                       # conference_data.json, users.json, about.json
-├── images/                     # logo.svg, ben-cang-nha-rong.jpg
+├── frontend/
+│   ├── *.html                  # 10 trang: index, search, detail, tracker, profile,
+│   │                           # about, contact, login, register, 404
+│   ├── assets/
+│   │   ├── css/
+│   │   │   ├── base/           # Design tokens, layout dùng chung, chuyển trang
+│   │   │   ├── components/     # Lịch, so sánh hội nghị
+│   │   │   └── pages/          # Stylesheet riêng của từng trang
+│   │   ├── js/
+│   │   │   ├── core/           # Header/Footer, theme, phiên đăng nhập, chuyển trang
+│   │   │   ├── components/     # Lõi tìm kiếm, so sánh, lịch
+│   │   │   ├── services/       # google-auth.js (kết nối Google Identity Services & backend)
+│   │   │   └── pages/          # Logic riêng của từng trang
+│   │   └── images/             # logo.svg, ben-cang-nha-rong.jpg
+│   └── data/                   # conference_data.json, users.json, about.json
 ├── api/
 │   └── index.js                # Entrypoint Vercel Serverless chuyển tiếp vào backend/server.js
 ├── backend/
@@ -83,11 +85,11 @@ confeguide/
 │   ├── data/                   # Dữ liệu runtime (fields.json, serpapi-usage.json - nằm trong .gitignore)
 │   └── .env.example            # Mẫu biến môi trường cho backend
 ├── package.json                # Dependencies và script start / dev tại thư mục gốc
-├── vercel.json                 # Rewrite route API, chặn thư mục nội bộ, maxDuration 60s cho hàm API
+├── vercel.json                 # Cấu hình outputDirectory frontend, rewrite route API, chặn thư mục nội bộ, maxDuration 60s
 └── AGENT.md                    # Quy ước kỹ thuật chi tiết của dự án (tài liệu cục bộ)
 ```
 
-- **Quy ước:** Frontend dùng chữ thường `kebab-case` (ngoại lệ `conference_data.json`), bộ ba `<trang>.html` ↔ `css/pages/<trang>.css` ↔ `js/pages/<trang>.js` (`contact.html`, `404.html` không tạo tệp rỗng; `login.html` và `register.html` dùng chung `auth.*`); CSS theo BEM; Backend dùng `camelCase` cho module dịch vụ/tiện ích (`fieldMap.js`, `fieldsStore.js`, `semanticScholar.js`, `jsonStore.js`, `rateLimit.js`, `errorHandler.js`); comment mã nguồn bằng tiếng Việt. Chi tiết xem tại [AGENT.md](AGENT.md).
+- **Quy ước:** Frontend dùng chữ thường `kebab-case` (ngoại lệ `conference_data.json`), bộ ba `frontend/<trang>.html` ↔ `frontend/assets/css/pages/<trang>.css` ↔ `frontend/assets/js/pages/<trang>.js` (`contact.html`, `404.html` không tạo tệp rỗng; `login.html` và `register.html` dùng chung `auth.*`); CSS theo BEM; Backend dùng `camelCase` cho module dịch vụ/tiện ích (`fieldMap.js`, `fieldsStore.js`, `semanticScholar.js`, `jsonStore.js`, `rateLimit.js`, `errorHandler.js`); comment mã nguồn bằng tiếng Việt. Chi tiết xem tại [AGENT.md](AGENT.md).
 
 ## Cài đặt và chạy
 
@@ -116,20 +118,20 @@ Mở trình duyệt tại `http://localhost:3000/`.
 
 ### Cách 2: Chạy giao diện tĩnh (không bật backend, tự fallback `localStorage`)
 
-- **VS Code Live Server:** Chuột phải [`index.html`](index.html) → **Open with Live Server**.
+- **VS Code Live Server:** Chuột phải [`frontend/index.html`](frontend/index.html) → **Open with Live Server** (khuyến nghị mở workspace ở `frontend/` để URL ở gốc `/`).
 - **Python:**
 
 ```bash
-python -m http.server 8000
+python -m http.server 8000 --directory frontend
 ```
 
 Sau đó mở `http://localhost:8000/`.
 
-- **Triển khai:** Hỗ trợ Vercel (tự nhận `package.json`, `vercel.json` và `api/index.js`) hoặc GitHub Pages / Netlify ở chế độ tĩnh (`Publish directory = .`). Ở chế độ tĩnh không có backend nên trợ lý AI không hoạt động, chatbox chỉ còn bộ lọc theo từ khóa.
+- **Triển khai:** Hỗ trợ Vercel (tự nhận `package.json`, `vercel.json` với `outputDirectory: "frontend"` và `api/index.js`) hoặc GitHub Pages / Netlify ở chế độ tĩnh (`Publish directory = frontend`). Ở chế độ tĩnh không có backend nên trợ lý AI không hoạt động, chatbox chỉ còn bộ lọc theo từ khóa.
 
 ## Trợ lý AI (Chatbox)
 
-Chatbox nổi ở góc phải trang **Tra cứu** ([`search.html`](search.html)). Mọi câu hỏi được gửi tới backend, backend gọi mô hình ngôn ngữ kèm toàn bộ dữ liệu trong [`data/conference_data.json`](data/conference_data.json), nên AI chỉ trả lời và gợi ý dựa trên các hội nghị có trong ConfGuide.
+Chatbox nổi ở góc phải trang **Tra cứu** ([`frontend/search.html`](frontend/search.html)). Mọi câu hỏi được gửi tới backend, backend gọi mô hình ngôn ngữ kèm toàn bộ dữ liệu trong [`frontend/data/conference_data.json`](frontend/data/conference_data.json), nên AI chỉ trả lời và gợi ý dựa trên các hội nghị có trong ConfGuide.
 
 ### Chatbox làm được gì
 
@@ -143,7 +145,7 @@ Chatbox nổi ở góc phải trang **Tra cứu** ([`search.html`](search.html))
 
 - Trợ lý nhớ 10 tin nhắn gần nhất nên có thể hỏi nối tiếp (VD: *"trong số đó cái nào rank cao nhất?"*).
 - Lịch sử trò chuyện lưu trong `sessionStorage` (giữ khi tải lại trang, mất khi đóng tab); nút 🗑 trên đầu khung chat để xóa.
-- Khi AI không khả dụng (backend chưa chạy, thiếu khóa, hết lượt miễn phí), chatbox tự chuyển về bộ lọc theo từ khóa ([`js/components/intent-parser.js`](js/components/intent-parser.js)).
+- Khi AI không khả dụng (backend chưa chạy, thiếu khóa, hết lượt miễn phí), chatbox tự chuyển về bộ lọc theo từ khóa ([`frontend/assets/js/components/intent-parser.js`](frontend/assets/js/components/intent-parser.js)).
 - Câu trả lời do AI tạo nên vẫn có thể sai sót; người dùng nên kiểm tra lại trên trang chi tiết hội nghị.
 
 ### Cấu hình khóa AI
@@ -198,7 +200,7 @@ search.js: hiển thị câu trả lời (dựng DOM bằng textContent, không 
 
 - Khóa API chỉ nằm ở backend, trình duyệt không bao giờ nhận được khóa.
 - AI chỉ được chọn hội nghị theo số thứ tự trong danh mục; backend loại bỏ số không tồn tại nên AI không thể bịa thêm hội nghị ngoài dữ liệu.
-- Mỗi lần gọi gửi kèm danh mục khoảng 20.000 token. Khi cập nhật `data/conference_data.json`, trợ lý tự dùng dữ liệu mới sau khi khởi động lại backend (hoặc deploy lại).
+- Mỗi lần gọi gửi kèm danh mục khoảng 20.000 token. Khi cập nhật `frontend/data/conference_data.json`, trợ lý tự dùng dữ liệu mới sau khi khởi động lại backend (hoặc deploy lại).
 
 ### Khắc phục sự cố
 

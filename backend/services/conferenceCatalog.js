@@ -1,11 +1,11 @@
 /**
  * Danh mục hội nghị dùng chung cho các tính năng AI (backend/services/conferenceCatalog.js)
- * Đọc data/conference_data.json một lần và dựng bản tóm tắt dạng văn bản có chỉ số để đưa vào prompt.
+ * Đọc frontend/data/conference_data.json một lần và dựng bản tóm tắt dạng văn bản có chỉ số để đưa vào prompt.
  */
 
 'use strict';
 
-const CONFERENCES = require('../../data/conference_data.json');
+const CONFERENCES = require('../../frontend/data/conference_data.json');
 
 const SHORT_SUMMARY_CHARS = 420;
 const DETAILED_SUMMARY_CHARS = 300;
