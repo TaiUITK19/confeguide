@@ -2786,42 +2786,11 @@
                 </div>
               </div>
 
-              <!-- Thanh thêm nhanh lĩnh vực mới / tùy chỉnh -->
-              <div class="pref-add-box" id="prefAddCustomBox">
-                <div class="pref-add-box__grid">
-                  <div class="pref-add-box__field">
-                    <label for="prefCustomLabelInput">Tên lĩnh vực muốn thêm</label>
-                    <input type="text" id="prefCustomLabelInput" class="modal-input"
-                      placeholder="VD: AI trong Y tế, An toàn IoT...">
-                  </div>
-                  <div class="pref-add-box__field">
-                    <label for="prefCustomCategorySelect">Ánh xạ nhóm hội nghị chuẩn</label>
-                    <select id="prefCustomCategorySelect" class="modal-input">
-                      <option value="">-- Chọn nhóm lĩnh vực --</option>
-                      ${categoryOptionsHtml}
-                    </select>
-                  </div>
-                  <div class="pref-add-box__field pref-add-box__field--priority">
-                    <label for="prefCustomPrioritySelect">Ưu tiên</label>
-                    <select id="prefCustomPrioritySelect" class="modal-input">
-                      <option value="normal">Bình thường</option>
-                      <option value="primary">Ưu tiên chính</option>
-                    </select>
-                  </div>
-                  <button type="button" class="btn btn-primary btn--compact-sm pref-add-box__btn"
-                    id="prefAddCustomBtn">+ Thêm</button>
-                </div>
-                <p class="field-error js-field-error" id="prefAddCustomError" aria-live="polite"></p>
-              </div>
-
-              <!-- Danh sách lĩnh vực chi tiết hỗ trợ Sửa & Xóa -->
-              <div class="pref-managed-list" id="prefManagedDomainsList" role="list"
-                aria-labelledby="prefManagedHeading"></div>
             </div>
 
             <div class="modal-section-block" id="prefTopicsSection">
               <div class="pref-survey-section-head">
-                <h4 class="modal-block-title" id="prefTopicsHeading">Tích chọn nhanh 25 danh mục lĩnh vực chuẩn</h4>
+                <h4 class="modal-block-title" id="prefTopicsHeading">Tích chọn danh mục lĩnh vực </h4>
               </div>
               <div class="pref-topic-table">
                 <div class="pref-topic-table__head">
