@@ -440,16 +440,27 @@
         </span>
         <div class="intent-chat__heading">
           <h2 class="intent-chat__title" id="intentChatTitle">Trợ lý ConfGuide</h2>
-          <p class="intent-chat__subtitle">Mô tả nhu cầu, mình lọc hội nghị giúp bạn</p>
+          <p class="intent-chat__subtitle">Hỏi đáp AI về hội nghị &amp; cách dùng ConfGuide</p>
         </div>
+        <button type="button" class="intent-chat__close intent-chat__clear" id="intentChatClear"
+          aria-label="Xóa cuộc trò chuyện" title="Xóa cuộc trò chuyện">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polyline points="3 6 5 6 21 6"></polyline>
+            <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
+            <path d="M10 11v6M14 11v6M9 6V4h6v2"></path>
+          </svg>
+        </button>
         <button type="button" class="intent-chat__close" id="intentChatClose" aria-label="Đóng trợ lý">&times;</button>
       </header>
 
       <div class="intent-chat__messages" id="intentChatMessages" aria-live="polite">
         <div class="intent-chat__msg intent-chat__msg--bot">
-          Xin chào! 👋 Hãy mô tả cho mình bạn muốn tìm hội nghị như thế nào: <strong>lĩnh vực</strong>,
-          <strong>phân hạng</strong> (VD: rank B trở lên), <strong>địa điểm</strong> hay <strong>hình thức</strong> tham
-          dự.
+          Xin chào! 👋 Mình là trợ lý AI của ConfGuide. Bạn có thể:
+          <br>• <strong>Hỏi về hội nghị</strong>: hạn nộp, phân hạng, địa điểm, lệ phí, so sánh...
+          <br>• <strong>Tìm hội nghị</strong> theo lĩnh vực, rank, phạm vi, mình lọc sẵn danh sách bên trái.
+          <br>• <strong>Dán abstract bài báo</strong> để nhận gợi ý hội nghị phù hợp.
+          <br>• <strong>Hỏi cách dùng website</strong>: lưu, theo dõi, xuất lịch...
         </div>
       </div>
 
@@ -458,14 +469,18 @@
           data-sample="Tôi nghiên cứu trí tuệ nhân tạo, muốn dự hội nghị từ rank B trở lên tại Việt Nam">AI · rank B+ ·
           Việt Nam</button>
         <button type="button" class="intent-chat__sample"
-          data-sample="Hội nghị an toàn thông tin quốc tế hạng A trở lên">Bảo mật · quốc tế · A+</button>
-        <button type="button" class="intent-chat__sample" data-sample="Hội nghị về IoT tổ chức ở Hà Nội">IoT · Hà
-          Nội</button>
+          data-sample="Những hội nghị nào sắp hết hạn nộp bài trong tháng tới?">⏰ Sắp hết hạn nộp</button>
+        <button type="button" class="intent-chat__sample"
+          data-sample="Làm sao để lưu và theo dõi hạn nộp của một hội nghị trên ConfGuide?">💡 Cách theo dõi hội
+          nghị</button>
+        <button type="button" class="intent-chat__sample"
+          data-sample="We propose a lightweight vision transformer for real-time object detection on edge devices. By combining token pruning with knowledge distillation from a larger teacher model, our method reduces computation by 45% while keeping accuracy within 1% of the baseline on COCO and Pascal VOC benchmarks.">🤖
+          Thử abstract mẫu</button>
       </div>
 
       <form class="intent-chat__form" id="intentForm">
         <label for="intentInput" class="sr-only">Mô tả nhu cầu tìm hội nghị</label>
-        <textarea id="intentInput" class="intent-chat__input" rows="1" placeholder="Nhập mô tả của bạn..."></textarea>
+        <textarea id="intentInput" class="intent-chat__input" rows="1" placeholder="Đặt câu hỏi hoặc dán abstract..."></textarea>
         <button type="submit" class="intent-chat__send" aria-label="Gửi mô tả">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">

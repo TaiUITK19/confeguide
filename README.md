@@ -44,13 +44,14 @@ ConfGuide tập hợp thông tin các hội nghị khoa học CNTT trong nước
 - **Chi tiết hội nghị:** Timeline trượt ngang toàn bộ mốc thời hạn tự động quy đổi `AoE → UTC+7` căn giữa mốc đang chọn, đồng hồ đếm ngược, thông tin học thuật, xuất lịch sang Google Calendar hoặc tệp `.ics`.
 - **Theo dõi & so sánh:** Lưu hội nghị theo tài khoản, xem hạn nộp gần nhất; so sánh cạnh nhau tối đa 3 hội nghị.
 - **Hồ sơ cá nhân & lịch:** Chọn lĩnh vực nghiên cứu, cập nhật ảnh đại diện, lịch tháng hiển thị hạn nộp và ngày diễn ra hội nghị đã lưu.
+- **Trợ lý AI (chatbox):** Hỏi đáp về hội nghị và cách dùng website, tự lọc danh sách theo yêu cầu, gợi ý hội nghị phù hợp từ abstract bài báo (Google Gemini). Xem mục [Trợ lý AI (Chatbox)](#trợ-lý-ai-chatbox).
 - **Tài khoản:** Đăng ký / đăng nhập (băm mật khẩu SHA-256 bằng Web Crypto API), gợi ý hội nghị cá nhân hóa theo lĩnh vực.
 - **Trải nghiệm:** Light / Dark Mode, bố cục responsive (desktop, tablet, mobile), hiệu ứng chuyển trang mượt bằng View Transitions.
 
 ## Công nghệ & ràng buộc
 
 - **Công nghệ Frontend:** HTML5 ngữ nghĩa, CSS3 (Custom Properties, OKLCH, Flexbox, Grid), JavaScript ES6+ (Fetch, Web Crypto, Web Animations, LocalStorage / SessionStorage, Canvas 2D), không dùng framework hay thư viện UI ngoài.
-- **Công nghệ Backend & Triển khai:** Node.js (`24.x`), Express (`express`, `cors`, `dotenv`, `google-auth-library`), hàm serverless Vercel (`api/index.js`).
+- **Công nghệ Backend & Triển khai:** Node.js (`24.x`), Express (`express`, `cors`, `dotenv`, `google-auth-library`), hàm serverless Vercel (`api/index.js`); trợ lý AI gọi Google Gemini qua API tương thích OpenAI bằng `fetch` có sẵn của Node.js (không thêm thư viện).
 - **Chất lượng:** Đã kiểm chứng Lighthouse Accessibility, Best Practices và SEO đạt `100` ở đợt đo trên hệ thống trang gốc (trước khi tinh gọn `404.html`); mã nguồn giữ Console sạch `0` lỗi và cảnh báo.
 
 ## Cấu trúc thư mục
@@ -75,13 +76,14 @@ confeguide/
 ├── backend/
 │   ├── server.js               # Khởi tạo Express app, CORS, rate limit, routes, static & listen
 │   ├── config/                 # env.js (đọc và kiểm tra biến môi trường một lần)
-│   ├── routes/                 # auth.js, fields.js, scholar.js (nhận request, validate input)
-│   ├── services/               # scholar.js, orcid.js, semanticScholar.js, fieldMap.js, fieldsStore.js
+│   ├── routes/                 # auth.js, fields.js, scholar.js, chat.js, recommend.js (nhận request, validate input)
+│   ├── services/               # scholar.js, orcid.js, semanticScholar.js, fieldMap.js, fieldsStore.js,
+│   │                           # aiClient.js, conferenceCatalog.js, chatAssistant.js, conferenceRecommender.js (trợ lý AI)
 │   ├── utils/                  # cache.js, http.js, jsonStore.js, rateLimit.js, errorHandler.js
 │   ├── data/                   # Dữ liệu runtime (fields.json, serpapi-usage.json - nằm trong .gitignore)
 │   └── .env.example            # Mẫu biến môi trường cho backend
 ├── package.json                # Dependencies và script start / dev tại thư mục gốc
-├── vercel.json                 # Cấu hình rewrite route API và chặn truy cập thư mục nội bộ
+├── vercel.json                 # Rewrite route API, chặn thư mục nội bộ, maxDuration 60s cho hàm API
 └── AGENT.md                    # Quy ước kỹ thuật chi tiết của dự án (tài liệu cục bộ)
 ```
 
@@ -100,7 +102,7 @@ cd confeguide
 npm install
 ```
 
-Tạo tệp `backend/.env` từ [`backend/.env.example`](backend/.env.example) (điền `PORT`, `FRONTEND_ORIGIN`, `GOOGLE_CLIENT_ID`, và tùy chọn `SERPAPI_API_KEY`, `SEMANTIC_SCHOLAR_API_KEY`), sau đó khởi chạy từ thư mục gốc:
+Tạo tệp `backend/.env` từ [`backend/.env.example`](backend/.env.example) (điền `PORT`, `FRONTEND_ORIGIN`, `GOOGLE_CLIENT_ID`, và tùy chọn `SERPAPI_API_KEY`, `SEMANTIC_SCHOLAR_API_KEY`, `GEMINI_API_KEY` cho trợ lý AI), sau đó khởi chạy từ thư mục gốc:
 
 ```bash
 # Chạy ổn định
@@ -123,12 +125,95 @@ python -m http.server 8000
 
 Sau đó mở `http://localhost:8000/`.
 
-- **Triển khai:** Hỗ trợ Vercel (tự nhận `package.json`, `vercel.json` và `api/index.js`) hoặc GitHub Pages / Netlify ở chế độ tĩnh (`Publish directory = .`).
+- **Triển khai:** Hỗ trợ Vercel (tự nhận `package.json`, `vercel.json` và `api/index.js`) hoặc GitHub Pages / Netlify ở chế độ tĩnh (`Publish directory = .`). Ở chế độ tĩnh không có backend nên trợ lý AI không hoạt động, chatbox chỉ còn bộ lọc theo từ khóa.
+
+## Trợ lý AI (Chatbox)
+
+Chatbox nổi ở góc phải trang **Tra cứu** ([`search.html`](search.html)). Mọi câu hỏi được gửi tới backend, backend gọi mô hình ngôn ngữ kèm toàn bộ dữ liệu trong [`data/conference_data.json`](data/conference_data.json), nên AI chỉ trả lời và gợi ý dựa trên các hội nghị có trong ConfGuide.
+
+### Chatbox làm được gì
+
+| Người dùng nhập | Trợ lý phản hồi |
+|---|---|
+| Câu hỏi về hội nghị (hạn nộp, phân hạng, địa điểm, lệ phí, so sánh...) | Câu trả lời kèm liên kết tới trang chi tiết các hội nghị được nhắc tới |
+| Yêu cầu tìm hội nghị (VD: *"hội nghị bảo mật quốc tế rank A trở lên"*) | Câu trả lời và **tự áp bộ lọc** lĩnh vực / phân hạng / phạm vi / hình thức lên danh sách bên trái |
+| Câu hỏi cách dùng website (lưu, theo dõi, so sánh, xuất lịch...) | Hướng dẫn theo các trang thực tế của ConfGuide |
+| Abstract bài báo (văn bản từ 180 ký tự hoặc 25 từ trở lên) | Tối đa 5 hội nghị phù hợp nhất kèm % phù hợp, lý do và từ khóa của bài |
+| Câu hỏi ngoài phạm vi (không liên quan nghiên cứu / hội nghị / website) | Từ chối lịch sự |
+
+- Trợ lý nhớ 10 tin nhắn gần nhất nên có thể hỏi nối tiếp (VD: *"trong số đó cái nào rank cao nhất?"*).
+- Lịch sử trò chuyện lưu trong `sessionStorage` (giữ khi tải lại trang, mất khi đóng tab); nút 🗑 trên đầu khung chat để xóa.
+- Khi AI không khả dụng (backend chưa chạy, thiếu khóa, hết lượt miễn phí), chatbox tự chuyển về bộ lọc theo từ khóa ([`js/components/intent-parser.js`](js/components/intent-parser.js)).
+- Câu trả lời do AI tạo nên vẫn có thể sai sót; người dùng nên kiểm tra lại trên trang chi tiết hội nghị.
+
+### Cấu hình khóa AI
+
+1. Lấy khóa Google Gemini miễn phí tại https://aistudio.google.com/apikey.
+2. Điền vào `backend/.env` (tệp này nằm trong `.gitignore`, **không commit và không dán khóa vào mã nguồn, README hay tin nhắn**):
+
+```env
+GEMINI_API_KEY=your-gemini-api-key
+```
+
+3. Khởi động lại backend (`npm start`). Nếu thiếu khóa, terminal in cảnh báo `[Cảnh báo cấu hình] ... chatbox AI sẽ không hoạt động`.
+
+| Biến môi trường | Bắt buộc | Mặc định | Ý nghĩa |
+|---|---|---|---|
+| `GEMINI_API_KEY` | Có (để dùng AI) | (trống) | Khóa Google Gemini |
+| `GEMINI_MODEL` | Không | `gemini-3.5-flash,gemini-3.5-flash-lite` | Các model Gemini, thử lần lượt khi model trước quá tải hoặc trả sai định dạng |
+
+- Muốn trả lời nhanh hơn (khoảng 3-5 giây thay vì 10-30 giây) có thể đặt `GEMINI_MODEL=gemini-3.5-flash-lite,gemini-3.5-flash`, đổi lại câu trả lời dài và kém chọn lọc hơn.
+- **Triển khai Vercel:** thêm `GEMINI_API_KEY` tại *Project → Settings → Environment Variables* (chọn Production và Preview) rồi **Redeploy**. [`vercel.json`](vercel.json) đã đặt `maxDuration: 60` cho hàm API; backend tự dừng mọi lần gọi AI trong 55 giây.
+
+### API backend
+
+| Endpoint | Body gửi lên | Kết quả trả về | Giới hạn |
+|---|---|---|---|
+| `POST /api/chat` | `{ "messages": [{ "role": "user" \| "assistant", "content": "..." }] }` (tin cuối là của người dùng) | `{ ok, model, reply, conferences: [{ name }], filters: { topics, ranks, scopes, modes } \| null }` | 10 lượt/phút/IP; tối đa 10 tin, mỗi tin 5.000 ký tự |
+| `POST /api/recommend` | `{ "abstract": "..." }` (80 - 5.000 ký tự) | `{ ok, model, researchArea, keywords, recommendations: [{ name, fullName, rank, score, reason }] }` | 5 lượt/phút/IP |
+
+Thử nhanh bằng `curl` khi backend đang chạy:
+
+```bash
+curl -X POST http://localhost:3000/api/chat -H "Content-Type: application/json" -d "{\"messages\":[{\"role\":\"user\",\"content\":\"Hội nghị nào sắp hết hạn nộp bài?\"}]}"
+```
+
+Mã lỗi thường gặp: `AI_NOT_CONFIGURED` (503, thiếu hoặc sai khóa), `AI_RATE_LIMITED` (429, hết lượt miễn phí), `AI_TIMEOUT` (504), `AI_BAD_RESPONSE` / `AI_UPSTREAM_ERROR` (502), `INVALID_MESSAGES`, `ABSTRACT_TOO_SHORT`, `ABSTRACT_TOO_LONG` (400).
+
+### Cách hoạt động
+
+```text
+search.js (chatbox) ──► POST /api/chat hoặc /api/recommend
+                          │  routes/chat.js, routes/recommend.js: kiểm tra input, rate limit
+                          ▼
+        services/chatAssistant.js / conferenceRecommender.js: dựng prompt
+        (hướng dẫn website + danh mục hội nghị đánh số từ services/conferenceCatalog.js)
+                          ▼
+        services/aiClient.js ──► Google Gemini (JSON mode, giảm "thinking", tự dự phòng model)
+                          ▼
+        Kiểm tra JSON: chỉ giữ số thứ tự hội nghị có thật và giá trị bộ lọc hợp lệ
+                          ▼
+search.js: hiển thị câu trả lời (dựng DOM bằng textContent, không dùng innerHTML), liên kết chi tiết, áp bộ lọc
+```
+
+- Khóa API chỉ nằm ở backend, trình duyệt không bao giờ nhận được khóa.
+- AI chỉ được chọn hội nghị theo số thứ tự trong danh mục; backend loại bỏ số không tồn tại nên AI không thể bịa thêm hội nghị ngoài dữ liệu.
+- Mỗi lần gọi gửi kèm danh mục khoảng 20.000 token. Khi cập nhật `data/conference_data.json`, trợ lý tự dùng dữ liệu mới sau khi khởi động lại backend (hoặc deploy lại).
+
+### Khắc phục sự cố
+
+| Thông báo trong chatbox | Nguyên nhân & cách xử lý |
+|---|---|
+| *Không kết nối được tới máy chủ ConfGuide* | Backend chưa chạy. Mở terminal riêng và chạy `npm start`; nếu dùng Live Server (cổng 5500) thì backend vẫn phải chạy ở cổng 3000. |
+| *Máy chủ chưa cấu hình GEMINI_API_KEY...* / *GEMINI_API_KEY không hợp lệ* | Chưa điền hoặc điền sai `GEMINI_API_KEY` trong `backend/.env` (hoặc trên Vercel), sau đó khởi động lại / Redeploy. |
+| *Gemini đang quá tải hoặc đã hết lượt miễn phí* | Đã chạm hạn mức gói miễn phí; đợi vài phút hoặc sang ngày hôm sau. |
+| *Mô hình AI trả kết quả không đúng định dạng* | Model trả lời lỗi ở mọi lần thử; gửi lại câu hỏi. |
+| *Bạn hỏi hơi nhanh rồi...* | Vượt giới hạn 10 câu hỏi/phút (hoặc 5 abstract/phút) của backend. |
 
 ## Định hướng phát triển
 
 - Giao diện Liquid Glass (phong cách iOS 26).
-- Khuyến nghị hội nghị bằng AI dựa trên Abstract bài báo.
+- Mở rộng chatbox AI ra toàn bộ các trang và cá nhân hóa theo lĩnh vực nghiên cứu đã lưu.
 - Đồng bộ hạn nộp sang Google / Outlook Calendar và gửi thông báo đẩy.
 
 ## Lời cảm ơn và nguồn dữ liệu

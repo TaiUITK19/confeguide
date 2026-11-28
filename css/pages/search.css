@@ -1988,6 +1988,17 @@ body.dark {
   background: rgba(255, 255, 255, 0.18);
 }
 
+.intent-chat__clear {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.intent-chat__send:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .intent-chat__messages {
   flex: 1;
   overflow-y: auto;
@@ -2106,6 +2117,53 @@ body.dark {
   text-decoration: underline;
 }
 
+/* Câu trả lời từ AI (hỏi đáp và gợi ý theo abstract) */
+.intent-chat__msg--ai {
+  max-width: 92%;
+}
+
+.intent-chat__para {
+  margin: 0 0 6px;
+}
+
+.intent-chat__bullets {
+  margin: 0 0 6px;
+  padding-left: 18px;
+}
+
+.intent-chat__bullets li {
+  margin: 2px 0;
+}
+
+.intent-chat__list--ai li {
+  margin: 0 0 8px;
+}
+
+.intent-chat__score {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--cg-green-50, #e8f5e9);
+  color: var(--cg-green-700, #2e7d32);
+  font-size: 0.72rem;
+  font-weight: 700;
+  vertical-align: middle;
+}
+
+.intent-chat__reason {
+  margin: 2px 0 0;
+  font-size: 0.82rem;
+  color: var(--cg-neutral-600, #475569);
+}
+
+.intent-chat__note {
+  margin: 6px 0 0;
+  font-size: 0.75rem;
+  font-style: italic;
+  color: var(--cg-neutral-500, #64748b);
+}
+
 .intent-chat__samples {
   display: flex;
   flex-wrap: wrap;
@@ -2215,6 +2273,16 @@ body.dark .intent-chat__chip {
 
 body.dark .intent-chat__list a {
   color: var(--cg-blue-300, #90caf9);
+}
+
+body.dark .intent-chat__score {
+  background: rgba(67, 160, 71, 0.2);
+  color: #a5d6a7;
+}
+
+body.dark .intent-chat__reason,
+body.dark .intent-chat__note {
+  color: var(--cg-neutral-400, #94a3b8);
 }
 
 /* Điện thoại: panel chiếm gần hết màn hình */

@@ -20,6 +20,7 @@ dotenv.config({ path: ROOT_ENV_PATH });
 const GOOGLE_CLIENT_ID_PATTERN = /^[0-9]+-[a-zA-Z0-9_.-]+\.apps\.googleusercontent\.com$/;
 const SERPAPI_MONTHLY_LIMIT = 250;
 const DEFAULT_SERPAPI_STOP_AT = 245;
+const DEFAULT_GEMINI_MODELS = ['gemini-3.5-flash', 'gemini-3.5-flash-lite'];
 
 /**
  * Làm sạch chuỗi giá trị từ biến môi trường (loại bỏ khoảng trắng và dấu ngoặc kép bao quanh).
@@ -114,6 +115,9 @@ const googleClientInfo = parseGoogleClientId(process.env.GOOGLE_CLIENT_ID);
 const serpapiApiKey = cleanEnvString(process.env.SERPAPI_API_KEY);
 const semanticScholarApiKey = cleanEnvString(process.env.SEMANTIC_SCHOLAR_API_KEY);
 const serpapiStopAt = parseSerpApiStopAt(process.env.SERPAPI_STOP_AT);
+const geminiApiKey = cleanEnvString(process.env.GEMINI_API_KEY);
+const customGeminiModels = cleanEnvString(process.env.GEMINI_MODEL).split(',').map(m => m.trim()).filter(Boolean);
+const geminiModels = customGeminiModels.length ? customGeminiModels : DEFAULT_GEMINI_MODELS;
 
 /**
  * Kiểm tra cấu hình môi trường lúc khởi động và trả về danh sách cảnh báo rõ ràng (không in khóa bí mật).
@@ -141,6 +145,10 @@ function validateStartupConfig() {
     warnings.push('GOOGLE_CLIENT_ID trong .env chưa đúng định dạng *.apps.googleusercontent.com.');
   }
 
+  if (!geminiApiKey) {
+    warnings.push('Thiếu GEMINI_API_KEY trong .env; chatbox AI sẽ không hoạt động.');
+  }
+
   return warnings;
 }
 
@@ -157,5 +165,7 @@ module.exports = {
   semanticScholarApiKey,
   serpapiMonthlyLimit: SERPAPI_MONTHLY_LIMIT,
   serpapiStopAt,
+  geminiApiKey,
+  geminiModels,
   validateStartupConfig
 };

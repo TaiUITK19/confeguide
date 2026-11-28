@@ -5503,6 +5503,7 @@
   };
 
   window.ConfGuideUtils = {
+    getBackendApiBase: getBackendApiBase,
     VN_TIMEZONE_ID: VN_TIMEZONE_ID,
     VN_TIMEZONE_LABEL: VN_TIMEZONE_LABEL,
     VN_UTC_OFFSET_MS: VN_UTC_OFFSET_MS,

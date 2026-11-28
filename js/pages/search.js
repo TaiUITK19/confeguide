@@ -2487,34 +2487,64 @@
   }
 
   /**
-   * Chatbox trợ lý gợi ý: phân tích mô tả -> gán bộ lọc -> pipeline tự lọc & vẽ lại,
-   * sau đó trả lời trong khung chat (tiêu chí đã hiểu, số kết quả, 3 hội nghị đầu).
+   * Chatbox Trợ lý ConfGuide:
+   * - Abstract bài báo (văn bản dài) -> `/api/recommend` gợi ý hội nghị kèm điểm phù hợp.
+   * - Câu hỏi thường -> `/api/chat` (AI trả lời về website, hội nghị; có thể kèm bộ lọc để lọc danh sách bên trái).
+   * - Khi AI không khả dụng -> dùng bộ phân tích từ khóa ConfGuideIntent để lọc như trước.
+   * Lịch sử hội thoại lưu trong sessionStorage để giữ lại khi tải lại trang.
    */
   function bindIntentChat() {
     const root = document.getElementById('intentChat');
     const toggle = document.getElementById('intentChatToggle');
     const panel = document.getElementById('intentChatPanel');
     const closeBtn = document.getElementById('intentChatClose');
+    const clearBtn = document.getElementById('intentChatClear');
     const form = document.getElementById('intentForm');
     const input = document.getElementById('intentInput');
+    const sendBtn = form ? form.querySelector('[type="submit"]') : null;
     const messages = document.getElementById('intentChatMessages');
     const samples = document.getElementById('intentChatSamples');
-    if (!root || !toggle || !panel || !form || !input || !messages || !window.ConfGuideIntent) return;
+    if (!root || !toggle || !panel || !form || !input || !messages) return;
+
+    const HISTORY_KEY = 'confguide_intent_chat_v1';
+    const MAX_STORED_ENTRIES = 40;
+    const MAX_CONTEXT_MESSAGES = 10;
+    /** Văn bản dài (>= 25 từ hoặc >= 180 ký tự) được coi là abstract bài báo -> gửi AI gợi ý */
+    const ABSTRACT_MIN_WORDS = 25;
+    const ABSTRACT_MIN_CHARS = 180;
+    const MODE_LABELS = { online: 'Trực tuyến', offline: 'Trực tiếp', hybrid: 'Kết hợp' };
+    const AI_NOTE = 'Câu trả lời do AI miễn phí tạo từ dữ liệu ConfGuide, bạn nên kiểm tra lại trên trang chi tiết hội nghị.';
+    const welcomeNodes = Array.from(messages.childNodes).map(node => node.cloneNode(true));
+
+    /** @type {Array<{role: 'user'|'bot', kind: string, text?: string, data?: Object}>} */
+    let entries = [];
+    let isAiPending = false;
+
+    /* ---------- Tiện ích giao diện ---------- */
+
+    const scrollToEnd = () => { messages.scrollTop = messages.scrollHeight; };
 
     const setOpen = open => {
       panel.hidden = !open;
       root.classList.toggle('is-open', open);
       toggle.setAttribute('aria-expanded', String(open));
-      if (open) input.focus();
-      else toggle.focus();
+      if (open) {
+        input.focus();
+        scrollToEnd();
+      } else {
+        toggle.focus();
+      }
     };
 
-    const scrollToEnd = () => { messages.scrollTop = messages.scrollHeight; };
+    const createEl = (tag, className, text) => {
+      const el = document.createElement(tag);
+      if (className) el.className = className;
+      if (text) el.textContent = text;
+      return el;
+    };
 
-    const addMessage = (role, text) => {
-      const msg = document.createElement('div');
-      msg.className = `intent-chat__msg intent-chat__msg--${role}`;
-      if (text) msg.textContent = text;
+    const addBubble = role => {
+      const msg = createEl('div', `intent-chat__msg intent-chat__msg--${role}`);
       messages.appendChild(msg);
       scrollToEnd();
       return msg;
@@ -2525,42 +2555,200 @@
       input.style.height = `${Math.min(input.scrollHeight, 120)}px`;
     };
 
+    const setPending = pending => {
+      isAiPending = pending;
+      if (sendBtn) sendBtn.disabled = pending;
+      messages.setAttribute('aria-busy', String(pending));
+    };
+
     const topicLabel = key => (topicCatalog.find(t => t.key === key) || {}).label || key;
-    const MODE_LABELS = { online: 'Trực tuyến', offline: 'Trực tiếp', hybrid: 'Kết hợp' };
 
-    async function handleSubmit() {
-      const text = input.value.trim();
-      if (!text) return;
-      addMessage('user', text);
-      input.value = '';
-      autoGrow();
-      if (samples) samples.hidden = true;
+    const looksLikeAbstract = text => text.length >= ABSTRACT_MIN_CHARS || text.split(/\s+/).filter(Boolean).length >= ABSTRACT_MIN_WORDS;
 
-      if (!isDataLoaded) {
-        addMessage('bot', 'Dữ liệu hội nghị đang được tải, bạn thử lại sau vài giây nhé.');
-        return;
+    const getApiBase = () => {
+      const utils = getUtils();
+      return utils && typeof utils.getBackendApiBase === 'function' ? utils.getBackendApiBase() : '';
+    };
+
+    /** Tìm hội nghị đã nạp theo tên để tạo liên kết chi tiết (lưu sẵn id khi tạo tin nhắn) */
+    const toConferenceLink = name => {
+      const conf = allNormalizedConferences.find(c => c.name === name);
+      return { name, id: conf ? conf.id : '', rank: conf && conf.rank ? conf.rank : '' };
+    };
+
+    const createConferenceAnchor = link => {
+      const anchor = createEl(link.id ? 'a' : 'strong', '', link.rank ? `${link.name} (Rank ${link.rank})` : link.name);
+      if (link.id) anchor.href = `detail.html?id=${encodeURIComponent(link.id)}`;
+      return anchor;
+    };
+
+    /** Thêm đoạn văn bản có hỗ trợ **in đậm** (dựng DOM, không dùng innerHTML để chống XSS) */
+    const appendInline = (parent, text) => {
+      String(text).split(/\*\*(.+?)\*\*/g).forEach((part, i) => {
+        if (!part) return;
+        parent.appendChild(i % 2 === 1 ? createEl('strong', '', part) : document.createTextNode(part));
+      });
+    };
+
+    /** Hiển thị câu trả lời AI: đoạn văn + danh sách gạch đầu dòng "- " */
+    const appendFormattedReply = (parent, text) => {
+      let list = null;
+      String(text).split(/\r?\n/).forEach(rawLine => {
+        const line = rawLine.trim();
+        if (!line) {
+          list = null;
+          return;
+        }
+        const bullet = line.match(/^[-*•]\s+(.*)$/);
+        if (bullet) {
+          if (!list) list = parent.appendChild(createEl('ul', 'intent-chat__bullets'));
+          appendInline(list.appendChild(createEl('li')), bullet[1]);
+          return;
+        }
+        list = null;
+        appendInline(parent.appendChild(createEl('p', 'intent-chat__para')), line);
+      });
+    };
+
+    const appendChips = (parent, labels) => {
+      if (!labels || !labels.length) return;
+      const chips = parent.appendChild(createEl('div', 'intent-chat__chips'));
+      labels.forEach(label => chips.appendChild(createEl('span', 'intent-chat__chip', label)));
+    };
+
+    const appendFilterResult = (parent, filterResult) => {
+      if (!filterResult) return;
+      appendChips(parent, filterResult.criteria);
+      const text = filterResult.count > 0 ? `Đã lọc ${filterResult.count} hội nghị phù hợp ở danh sách bên trái.` : 'Chưa có hội nghị nào khớp đủ các tiêu chí. Bạn thử bớt một điều kiện nhé.';
+      parent.appendChild(createEl('p', 'intent-chat__result', text));
+    };
+
+    const appendLinkList = (parent, links) => {
+      if (!links || !links.length) return;
+      const list = parent.appendChild(createEl('ul', 'intent-chat__list'));
+      links.forEach(link => list.appendChild(createEl('li')).appendChild(createConferenceAnchor(link)));
+    };
+
+    /* ---------- Vẽ từng loại tin nhắn ---------- */
+
+    const renderers = {
+      text(entry, bubble) {
+        bubble.textContent = entry.text;
+      },
+      chat(entry, bubble) {
+        bubble.classList.add('intent-chat__msg--ai');
+        appendFormattedReply(bubble, entry.data.reply);
+        appendFilterResult(bubble, entry.data.filterResult);
+        appendLinkList(bubble, entry.data.links);
+        bubble.appendChild(createEl('p', 'intent-chat__note', AI_NOTE));
+      },
+      recommend(entry, bubble) {
+        const data = entry.data;
+        bubble.classList.add('intent-chat__msg--ai');
+        bubble.appendChild(createEl('p', '', data.researchArea ? `🤖 ${data.researchArea}` : '🤖 Mình đã đọc abstract của bạn.'));
+        appendChips(bubble, data.keywords);
+        const recs = data.recommendations || [];
+        bubble.appendChild(createEl('p', 'intent-chat__result', recs.length ? `Gợi ý ${recs.length} hội nghị phù hợp nhất trong dữ liệu:` : 'Mình chưa tìm thấy hội nghị nào trong dữ liệu đủ phù hợp với abstract này.'));
+        if (recs.length) {
+          const list = bubble.appendChild(createEl('ol', 'intent-chat__list intent-chat__list--ai'));
+          recs.forEach(rec => {
+            const li = list.appendChild(createEl('li'));
+            li.appendChild(createConferenceAnchor({ name: rec.name, id: rec.id, rank: '' }));
+            if (rec.rank && rec.rank !== 'unranked') li.appendChild(document.createTextNode(` · ${rec.rank}`));
+            const score = li.appendChild(createEl('span', 'intent-chat__score', `${rec.score}%`));
+            score.title = 'Mức độ phù hợp do AI đánh giá';
+            if (rec.reason) li.appendChild(createEl('p', 'intent-chat__reason', rec.reason));
+          });
+        }
+        bubble.appendChild(createEl('p', 'intent-chat__note', AI_NOTE));
+      },
+      filter(entry, bubble) {
+        const data = entry.data;
+        if (data.notice) bubble.appendChild(createEl('p', 'intent-chat__note', data.notice));
+        bubble.appendChild(createEl('p', '', 'Mình hiểu bạn cần:'));
+        appendFilterResult(bubble, data.filterResult);
+        appendLinkList(bubble, data.links);
       }
+    };
 
-      const typing = addMessage('bot');
-      typing.classList.add('intent-chat__msg--typing');
-      typing.innerHTML = '<span></span><span></span><span></span>';
+    const renderEntry = entry => {
+      const bubble = addBubble(entry.role);
+      const render = renderers[entry.kind] || renderers.text;
+      render(entry, bubble);
+      scrollToEnd();
+    };
 
-      const intent = window.ConfGuideIntent.parse(text);
-      const ranks = intent.ranks.filter(r => validRankKeys.has(r));
-      const topics = intent.topics.filter(t => validTopicValues.has(t));
-      const modes = intent.modes.filter(m => validModeKeys.has(m));
+    /* ---------- Lưu lịch sử ---------- */
+
+    const persist = () => {
+      try {
+        sessionStorage.setItem(HISTORY_KEY, JSON.stringify(entries.slice(-MAX_STORED_ENTRIES)));
+      } catch {
+        // Bỏ qua lỗi Storage (chế độ riêng tư / đầy bộ nhớ)
+      }
+    };
+
+    const pushEntry = entry => {
+      entries.push(entry);
+      persist();
+      renderEntry(entry);
+    };
+
+    const restoreHistory = () => {
+      try {
+        const saved = JSON.parse(sessionStorage.getItem(HISTORY_KEY) || '[]');
+        entries = Array.isArray(saved) ? saved.filter(e => e && (e.role === 'user' || e.role === 'bot') && typeof e.kind === 'string' && (e.kind === 'text' ? typeof e.text === 'string' : e.data && typeof e.data === 'object')) : [];
+      } catch {
+        entries = [];
+      }
+      entries.forEach(renderEntry);
+      if (entries.length && samples) samples.hidden = true;
+    };
+
+    const clearHistory = () => {
+      if (isAiPending) return;
+      entries = [];
+      try {
+        sessionStorage.removeItem(HISTORY_KEY);
+      } catch {
+        // Bỏ qua lỗi Storage
+      }
+      messages.replaceChildren(...welcomeNodes.map(node => node.cloneNode(true)));
+      if (samples) samples.hidden = false;
+      input.focus();
+    };
+
+    /** Chuyển lịch sử thành ngữ cảnh hội thoại gửi AI (bỏ tin báo lỗi) */
+    const buildContextMessages = () => entries.map(entry => {
+      if (entry.role === 'user') return { role: 'user', content: entry.text };
+      if (entry.kind === 'chat') return { role: 'assistant', content: entry.data.reply };
+      if (entry.kind === 'recommend') {
+        const names = (entry.data.recommendations || []).map(r => `${r.name} (${r.score}%)`).join(', ');
+        return { role: 'assistant', content: `${entry.data.researchArea || ''} Gợi ý hội nghị: ${names || 'không có'}.`.trim() };
+      }
+      if (entry.kind === 'filter') return { role: 'assistant', content: `Đã lọc danh sách theo: ${((entry.data.filterResult || {}).criteria || []).join('; ')}.` };
+      return null;
+    }).filter(Boolean).slice(-MAX_CONTEXT_MESSAGES);
+
+    /* ---------- Bộ lọc danh sách ---------- */
+
+    /**
+     * Gán bộ lọc vào filterState (pipeline tự lọc & vẽ lại) và trả về tóm tắt để hiển thị trong chat.
+     * @param {{topics?: string[], ranks?: string[], scopes?: string[], modes?: string[]}} filters
+     * @returns {Promise<{criteria: string[], count: number, links: Array<Object>}|null>}
+     */
+    async function applyFilters(filters) {
+      const ranks = (filters.ranks || []).filter(r => validRankKeys.has(r));
+      const topics = (filters.topics || []).filter(t => validTopicValues.has(t));
+      const modes = (filters.modes || []).filter(m => validModeKeys.has(m));
+      const scopes = (filters.scopes || []).filter(s => s === 'vietnam' || s === 'international').slice(0, 1);
 
       const criteria = [];
-      if (topics.length) criteria.push(['Lĩnh vực', topics.map(topicLabel).join(', ')]);
-      if (ranks.length) criteria.push(['Phân hạng', ranks.join(', ')]);
-      if (intent.scopes.length) criteria.push(['Phạm vi', intent.scopes[0] === 'vietnam' ? 'Việt Nam' : 'Quốc tế']);
-      if (modes.length) criteria.push(['Hình thức', modes.map(m => MODE_LABELS[m] || m).join(', ')]);
-
-      if (criteria.length === 0) {
-        typing.remove();
-        addMessage('bot', 'Mình chưa nhận ra tiêu chí nào 😅. Bạn thử nêu lĩnh vực (AI, bảo mật, IoT...), phân hạng (rank B trở lên) hoặc địa điểm (Việt Nam, Hà Nội...) nhé.');
-        return;
-      }
+      if (topics.length) criteria.push(`Lĩnh vực: ${topics.map(topicLabel).join(', ')}`);
+      if (ranks.length) criteria.push(`Phân hạng: ${ranks.join(', ')}`);
+      if (scopes.length) criteria.push(`Phạm vi: ${scopes[0] === 'vietnam' ? 'Việt Nam' : 'Quốc tế'}`);
+      if (modes.length) criteria.push(`Hình thức: ${modes.map(m => MODE_LABELS[m] || m).join(', ')}`);
+      if (!criteria.length) return null;
 
       const searchInput = document.getElementById('searchInput');
       if (searchInput) searchInput.value = '';
@@ -2568,55 +2756,101 @@
       filterState.ranks = ranks;
       filterState.topics = topics;
       filterState.modes = modes;
-      filterState.scopes = intent.scopes;
-      filterState.city = "all";
+      filterState.scopes = scopes;
+      filterState.city = 'all';
       filterState.page = 1;
+      syncSidebarInputsFromState(filterState);
 
       // Chờ pipeline lọc xong để đọc số kết quả
       await new Promise(resolve => setTimeout(resolve, 400));
-      typing.remove();
-
-      const reply = addMessage('bot');
-      const intro = document.createElement('p');
-      intro.textContent = 'Mình hiểu bạn cần:';
-      reply.appendChild(intro);
-
-      const chips = document.createElement('div');
-      chips.className = 'intent-chat__chips';
-      criteria.forEach(([label, value]) => {
-        const chip = document.createElement('span');
-        chip.className = 'intent-chat__chip';
-        chip.textContent = `${label}: ${value}`;
-        chips.appendChild(chip);
-      });
-      reply.appendChild(chips);
-
-      const count = filteredConferences.length;
-      const result = document.createElement('p');
-      result.className = 'intent-chat__result';
-      result.textContent = count > 0
-        ? `Tìm thấy ${count} hội nghị phù hợp. Danh sách đã được lọc sẵn bên trái.`
-        : 'Chưa có hội nghị nào khớp đủ các tiêu chí. Bạn thử bớt một điều kiện (VD: bỏ phân hạng hoặc địa điểm) nhé.';
-      reply.appendChild(result);
-
-      if (count > 0) {
-        const list = document.createElement('ul');
-        list.className = 'intent-chat__list';
-        filteredConferences.slice(0, 3).forEach(conf => {
-          const li = document.createElement('li');
-          const link = document.createElement('a');
-          link.href = `detail.html?id=${encodeURIComponent(conf.id)}`;
-          link.textContent = conf.rank ? `${conf.name} (Rank ${conf.rank})` : conf.name;
-          li.appendChild(link);
-          list.appendChild(li);
-        });
-        reply.appendChild(list);
-      }
-      scrollToEnd();
+      const links = filteredConferences.slice(0, 3).map(conf => ({ name: conf.name, id: conf.id, rank: conf.rank || '' }));
+      return { criteria, count: filteredConferences.length, links };
     }
+
+    /** Dự phòng khi AI không khả dụng: phân tích từ khóa bằng ConfGuideIntent */
+    async function runKeywordFallback(text, notice) {
+      const intent = window.ConfGuideIntent ? window.ConfGuideIntent.parse(text) : null;
+      const filterResult = intent ? await applyFilters(intent) : null;
+      if (!filterResult) {
+        pushEntry({ role: 'bot', kind: 'text', text: `${notice} Mình chưa nhận ra tiêu chí lọc nào 😅. Bạn thử nêu lĩnh vực (AI, bảo mật, IoT...), phân hạng (rank B trở lên) hoặc phạm vi (Việt Nam, quốc tế) nhé.` });
+        return;
+      }
+      pushEntry({ role: 'bot', kind: 'filter', data: { notice, filterResult: { criteria: filterResult.criteria, count: filterResult.count }, links: filterResult.links } });
+    }
+
+    /* ---------- Gọi backend ---------- */
+
+    /**
+     * Gọi API AI của backend.
+     * @param {string} path Đường dẫn API.
+     * @param {Object} body Dữ liệu JSON gửi đi.
+     * @returns {Promise<{data: Object|null, error: string}>}
+     */
+    async function callAi(path, body) {
+      try {
+        const res = await fetch(`${getApiBase()}${path}`, { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify(body) });
+        const data = await res.json().catch(() => null);
+        if (!res.ok || !data || !data.ok) return { data: null, error: (data && data.message) || `Máy chủ trả lỗi HTTP ${res.status}.` };
+        return { data, error: '' };
+      } catch {
+        return { data: null, error: 'Không kết nối được tới máy chủ ConfGuide (backend chưa chạy hoặc mất mạng).' };
+      }
+    }
+
+    async function handleAbstract(text) {
+      const { data, error } = await callAi('/api/recommend', { abstract: text });
+      if (error) {
+        pushEntry({ role: 'bot', kind: 'text', text: `⚠️ ${error}` });
+        return;
+      }
+      const recommendations = (data.recommendations || []).map(rec => ({ ...rec, id: toConferenceLink(rec.name).id }));
+      pushEntry({ role: 'bot', kind: 'recommend', data: { researchArea: data.researchArea, keywords: data.keywords || [], recommendations } });
+    }
+
+    async function handleQuestion(text) {
+      const { data, error } = await callAi('/api/chat', { messages: buildContextMessages() });
+      if (error) {
+        await runKeywordFallback(text, `⚠️ ${error} Mình tạm dùng bộ lọc từ khóa.`);
+        return;
+      }
+      const filterResult = data.filters ? await applyFilters(data.filters) : null;
+      const links = (data.conferences || []).map(c => toConferenceLink(c.name));
+      pushEntry({ role: 'bot', kind: 'chat', data: { reply: data.reply, links, filterResult: filterResult ? { criteria: filterResult.criteria, count: filterResult.count } : null } });
+    }
+
+    async function handleSubmit() {
+      const text = input.value.trim();
+      if (!text || isAiPending) return;
+      pushEntry({ role: 'user', kind: 'text', text });
+      input.value = '';
+      autoGrow();
+      if (samples) samples.hidden = true;
+
+      if (!isDataLoaded) {
+        pushEntry({ role: 'bot', kind: 'text', text: 'Dữ liệu hội nghị đang được tải, bạn thử lại sau vài giây nhé.' });
+        return;
+      }
+
+      setPending(true);
+      const typing = addBubble('bot');
+      typing.classList.add('intent-chat__msg--typing');
+      typing.setAttribute('aria-label', 'Trợ lý đang trả lời');
+      typing.append(createEl('span'), createEl('span'), createEl('span'));
+      try {
+        if (looksLikeAbstract(text)) await handleAbstract(text);
+        else await handleQuestion(text);
+      } finally {
+        typing.remove();
+        setPending(false);
+        scrollToEnd();
+      }
+    }
+
+    /* ---------- Gắn sự kiện ---------- */
 
     toggle.addEventListener('click', () => setOpen(panel.hidden));
     if (closeBtn) closeBtn.addEventListener('click', () => setOpen(false));
+    if (clearBtn) clearBtn.addEventListener('click', clearHistory);
     panel.addEventListener('keydown', event => {
       if (event.key === 'Escape') setOpen(false);
     });
@@ -2641,6 +2875,8 @@
         handleSubmit();
       });
     }
+
+    restoreHistory();
   }
   /**
    * Khởi tạo toàn bộ sự kiện của trang bằng kỹ thuật Event Delegation trên các phần tử tĩnh.
