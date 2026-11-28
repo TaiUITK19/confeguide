@@ -16,8 +16,19 @@ env/
 Thumbs.db
 desktop.ini
 
-# Dependencies (nếu có công cụ kiểm thử cục bộ)
+# Biến môi trường nhạy cảm
+.env.local
+backend/.env
+backend/.env.*
+!backend/.env.example
+
+# Dependencies (Node.js)
 node_modules/
+
+# Dữ liệu chạy phát sinh của backend
+backend/data/
+backend/data/*.json
 
 # Logs & temp
 *.log
+*.tmp

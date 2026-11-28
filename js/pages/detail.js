@@ -20,6 +20,13 @@
   let allConferences = [];
   let coreMilestonesCache = [];
   let countdownTimer = null;
+  let timelineActiveIndex = -1;
+  let timelineCenteredIndex = 0;
+  let timelineRafId = 0;
+  let timelineEventsBound = false;
+  const timelinePrefersReducedMotion = typeof window !== 'undefined' && window.matchMedia
+    ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    : false;
 
   /* ================= 2. HÀM TIỆN ÍCH CƠ BẢN & STORAGE ================= */
 
@@ -535,7 +542,7 @@
       badgeContent = renderSpriteIcon('icon-check', 14);
     } else if (isActive) {
       const mod = left !== null && left <= DETAIL_URGENT_DAYS ? 'urgent' : 'open';
-      modifierClass = `deadline-timeline__step--active deadline-timeline__step--${mod}`;
+      modifierClass = `deadline-timeline__step--next deadline-timeline__step--${mod}`;
       statusLabel = `Mốc tiếp theo · Còn ${Math.max(0, left)} ngày`;
     }
 
@@ -548,6 +555,7 @@
       converted,
       hasValidDate,
       isPassed,
+      isActive,
       modifierClass,
       statusLabel,
       badgeContent,
@@ -556,19 +564,20 @@
   }
 
   /**
-   * Tạo mã HTML một bước trong danh sách toàn bộ các mốc deadline của hội nghị.
+   * Tạo mã HTML một bước trong thanh trượt ngang toàn bộ các mốc deadline của hội nghị.
    * Giữ nguyên tên, loại, nội dung và ngày tháng theo dữ liệu gốc; không tự tạo ngày thay thế khi thiếu/lỗi.
    * @param {Object} milestone - Dữ liệu mốc deadline đã phân tích.
    * @param {number} idx - Chỉ số thứ tự mốc (0..N-1).
-   * @param {Object|null} next - Mốc hợp lệ sắp tới gần nhất để đánh dấu active.
+   * @param {Object|null} next - Mốc hợp lệ sắp tới gần nhất để đánh dấu trạng thái sắp tới.
    * @param {Object} utils - Tập tiện ích ConfGuideUtils.
-   * @returns {string} Chuỗi HTML `.deadline-timeline__step`.
+   * @param {number} initialCenterIdx - Chỉ mục mốc được chọn căn giữa mặc định lúc khởi tạo.
+   * @returns {{ html: string, isActive: boolean }} HTML thẻ mốc và cờ mốc sắp tới gần nhất.
    */
-  function buildTimelineStepHtml(milestone, idx, next, utils) {
+  function buildTimelineStepHtml(milestone, idx, next, utils, initialCenterIdx) {
     const esc = utils.escapeHtml;
     const state = resolveTimelineStepState(milestone, idx, next, utils);
     const {
-      rawDate, converted, hasValidDate, isPassed,
+      rawDate, converted, hasValidDate, isPassed, isActive,
       modifierClass, statusLabel, badgeContent, timeDisplay
     } = state;
 
@@ -600,33 +609,204 @@
       `
       : '';
 
-    return `
-      <div class="deadline-timeline__step ${modifierClass} timeline-step">
-        <div class="deadline-timeline__step-top">
-          <span class="deadline-timeline__badge" aria-hidden="true">${badgeContent}</span>
-          ${calButtonHtml}
+    const isSelectedInitially = idx === initialCenterIdx;
+    const activeCls = isSelectedInitially ? ' deadline-timeline__step--active' : '';
+    const ariaCurrentAttr = isSelectedInitially ? ' aria-current="true"' : '';
+
+    return {
+      isActive,
+      html: `
+        <div
+          class="deadline-timeline__step ${modifierClass}${activeCls} js-timeline-step timeline-step"
+          data-step-index="${idx}"${ariaCurrentAttr}>
+          <div class="deadline-timeline__step-top">
+            <span class="deadline-timeline__badge" aria-hidden="true">${badgeContent}</span>
+            ${calButtonHtml}
+          </div>
+          ${typeHtml}
+          <h3 class="deadline-timeline__name">${esc(milestone.name)}</h3>
+          ${noteHtml}
+          ${datetimeAttr
+            ? `<time class="deadline-timeline__time" datetime="${esc(datetimeAttr)}">${esc(timeDisplay)}</time>`
+            : `<span class="deadline-timeline__time">${esc(timeDisplay)}</span>`}
+          ${rawDateHtml}
+          ${tzHtml}
+          <span class="deadline-timeline__status">${esc(statusLabel)}</span>
         </div>
-        ${typeHtml}
-        <h3 class="deadline-timeline__name">${esc(milestone.name)}</h3>
-        ${noteHtml}
-        ${datetimeAttr
-          ? `<time class="deadline-timeline__time" datetime="${esc(datetimeAttr)}">${esc(timeDisplay)}</time>`
-          : `<span class="deadline-timeline__time">${esc(timeDisplay)}</span>`}
-        ${rawDateHtml}
-        ${tzHtml}
-        <span class="deadline-timeline__status">${esc(statusLabel)}</span>
-      </div>
-    `;
+      `
+    };
   }
 
   /**
-   * Render toàn bộ danh sách các mốc deadline từ dữ liệu gốc (không giới hạn 4 mốc),
-   * sắp xếp tăng dần các mốc có ngày hợp lệ và giữ nguyên các mốc chưa xác định ngày.
+   * Kiểm tra xem người dùng có bật chế độ giảm chuyển động trên hệ điều hành hay không.
+   * @returns {boolean} True nếu prefers-reduced-motion đang bật.
+   */
+  function isTimelineReducedMotion() {
+    return typeof window !== 'undefined' && window.matchMedia
+      ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      : timelinePrefersReducedMotion;
+  }
+
+  /**
+   * Cập nhật thẻ đang chọn ở giữa dải (`--active` và `aria-current="true"`) cùng thanh điều khiển bên dưới.
+   * @param {number} centerIndex - Chỉ mục thẻ gần tâm khung cuộn nhất.
+   */
+  function applyTimelineActiveState(centerIndex) {
+    const track = document.querySelector('.js-timeline-track');
+    if (!track) return;
+    const steps = Array.from(track.querySelectorAll('.js-timeline-step'));
+    if (!steps.length) return;
+
+    const clamped = Math.max(0, Math.min(centerIndex, steps.length - 1));
+    timelineCenteredIndex = clamped;
+
+    steps.forEach((step, idx) => {
+      const isSelected = idx === clamped;
+      step.classList.toggle('deadline-timeline__step--active', isSelected);
+      if (isSelected) {
+        step.setAttribute('aria-current', 'true');
+      } else {
+        step.removeAttribute('aria-current');
+      }
+    });
+
+    const indicator = document.querySelector('.js-timeline-indicator');
+    const prevBtn = document.querySelector('.js-timeline-prev');
+    const nextBtn = document.querySelector('.js-timeline-next');
+    const jumpBtn = document.querySelector('.js-timeline-jump-active');
+
+    if (indicator) {
+      indicator.textContent = `Mốc ${clamped + 1} / ${steps.length}`;
+    }
+    if (prevBtn) prevBtn.disabled = clamped <= 0;
+    if (nextBtn) nextBtn.disabled = clamped >= steps.length - 1;
+    if (jumpBtn) {
+      const showJump = timelineActiveIndex >= 0 && clamped !== timelineActiveIndex && steps.length > 1;
+      jumpBtn.hidden = !showJump;
+      if (showJump) {
+        jumpBtn.textContent = `Về mốc tiếp theo (#${timelineActiveIndex + 1})`;
+      }
+    }
+  }
+
+  /**
+   * Tìm thẻ nằm gần tâm đường trượt ngang nhất và cập nhật trạng thái active.
+   */
+  function syncTimelineActiveOnScroll() {
+    const track = document.querySelector('.js-timeline-track');
+    if (!track) return;
+    const steps = Array.from(track.querySelectorAll('.js-timeline-step'));
+    if (!steps.length) return;
+
+    const trackCenter = track.scrollLeft + track.clientWidth / 2;
+    let bestIdx = 0;
+    let bestDist = Infinity;
+
+    steps.forEach((step, idx) => {
+      const stepCenter = step.offsetLeft + step.offsetWidth / 2;
+      const dist = Math.abs(stepCenter - trackCenter);
+      if (dist < bestDist) {
+        bestDist = dist;
+        bestIdx = idx;
+      }
+    });
+
+    applyTimelineActiveState(bestIdx);
+  }
+
+  /**
+   * Đưa thẻ mốc tại `targetIndex` vào giữa đường trượt ngang.
+   * Dùng `scrollIntoView` khi người dùng chủ động tương tác và chỉnh `scrollLeft` tức thì lúc khởi tạo/resize
+   * để tránh cuộn dọc toàn bộ trang khi vừa tải xong.
+   * @param {number} targetIndex - Chỉ mục thẻ muốn căn giữa.
+   * @param {boolean} [smooth=true] - Có cuộn mượt bằng `scrollIntoView` hay đặt trực tiếp `scrollLeft`.
+   */
+  function centerTimelineStep(targetIndex, smooth = true) {
+    const track = document.querySelector('.js-timeline-track');
+    if (!track) return;
+    const steps = Array.from(track.querySelectorAll('.js-timeline-step'));
+    if (!steps.length) return;
+
+    const clamped = Math.max(0, Math.min(targetIndex, steps.length - 1));
+    const targetStep = steps[clamped];
+
+    applyTimelineActiveState(clamped);
+
+    if (smooth) {
+      targetStep.scrollIntoView({
+        inline: 'center',
+        block: 'nearest',
+        behavior: isTimelineReducedMotion() ? 'auto' : 'smooth'
+      });
+      return;
+    }
+
+    const targetScrollLeft = targetStep.offsetLeft - (track.clientWidth - targetStep.offsetWidth) / 2;
+    track.scrollLeft = Math.max(0, targetScrollLeft);
+  }
+
+  /**
+   * Gắn sự kiện cho thanh trượt ngang (scroll có throttle bằng rAF, Shift+lăn chuột, bàn phím, resize) 1 lần.
+   */
+  function setupTimelineTrackEvents() {
+    if (timelineEventsBound) return;
+    const track = document.querySelector('.js-timeline-track');
+    if (!track) return;
+    timelineEventsBound = true;
+
+    track.addEventListener('scroll', () => {
+      if (timelineRafId) return;
+      if (typeof window.requestAnimationFrame === 'function') {
+        timelineRafId = window.requestAnimationFrame(() => {
+          timelineRafId = 0;
+          syncTimelineActiveOnScroll();
+        });
+      } else {
+        syncTimelineActiveOnScroll();
+      }
+    }, { passive: true });
+
+    track.addEventListener('keydown', event => {
+      if (event.key === 'ArrowLeft') {
+        event.preventDefault();
+        centerTimelineStep(timelineCenteredIndex - 1, true);
+      } else if (event.key === 'ArrowRight') {
+        event.preventDefault();
+        centerTimelineStep(timelineCenteredIndex + 1, true);
+      } else if (event.key === 'Home') {
+        event.preventDefault();
+        centerTimelineStep(0, true);
+      } else if (event.key === 'End') {
+        event.preventDefault();
+        centerTimelineStep(coreMilestonesCache.length - 1, true);
+      }
+    });
+
+    // Hỗ trợ giữ Shift + lăn chuột để trượt ngang thanh mốc thời gian
+    track.addEventListener('wheel', event => {
+      if (!event.shiftKey || event.deltaY === 0 || event.deltaX !== 0) return;
+      if (track.scrollWidth <= track.clientWidth) return;
+      event.preventDefault();
+      const deltaPx = event.deltaMode === 1 ? event.deltaY * 40 : event.deltaY;
+      track.scrollLeft += deltaPx;
+    }, { passive: false });
+
+    window.addEventListener('resize', () => {
+      if (coreMilestonesCache.length > 0) {
+        centerTimelineStep(timelineCenteredIndex, false);
+      }
+    }, { passive: true });
+  }
+
+  /**
+   * Render toàn bộ danh sách các mốc deadline từ dữ liệu gốc dạng dải cuộn ngang,
+   * tự động căn giữa mốc deadline sắp tới gần nhất (hoặc mốc cuối nếu đã qua hết) khi mở trang.
    * @param {Object} conf - Đối tượng hội nghị.
    */
   function renderTimeline(conf) {
     const track = document.querySelector('.js-timeline-track');
     const countBadge = document.querySelector('.js-timeline-count');
+    const controlsEl = document.querySelector('.js-timeline-controls');
     if (!track || !conf) return;
 
     const utils = getDetailUtils();
@@ -634,17 +814,19 @@
     const next = utils.getNextDeadline(conf);
     coreMilestonesCache = milestones;
 
-    track.classList.toggle('deadline-timeline__track--many', milestones.length > 4);
-    track.classList.toggle('deadline-timeline__track--scrollable', milestones.length > 8);
-
     if (countBadge) {
       countBadge.textContent = milestones.length > 0 ? `${milestones.length} mốc` : '';
       countBadge.hidden = milestones.length === 0;
     }
 
     if (!milestones.length) {
+      timelineActiveIndex = -1;
+      timelineCenteredIndex = 0;
+      if (controlsEl) controlsEl.hidden = true;
       track.innerHTML = `
-        <div class="deadline-timeline__step deadline-timeline__step--undated timeline-step">
+        <div
+          class="deadline-timeline__step deadline-timeline__step--undated deadline-timeline__step--active timeline-step"
+          aria-current="true">
           <div class="deadline-timeline__step-top">
             <span class="deadline-timeline__badge">1</span>
           </div>
@@ -656,7 +838,31 @@
       return;
     }
 
-    track.innerHTML = milestones.map((m, idx) => buildTimelineStepHtml(m, idx, next, utils)).join('');
+    // Xác định mốc tiếp theo (hoặc mốc cuối nếu đã qua hết) để đưa thẳng vào giữa dải khi mở trang
+    const states = milestones.map((m, idx) => resolveTimelineStepState(m, idx, next, utils));
+    const foundActiveIdx = states.findIndex(st => st.isActive);
+    const lastPassedIdx = states.reduce((acc, st, idx) => (st.hasValidDate && st.isPassed ? idx : acc), -1);
+    timelineActiveIndex = foundActiveIdx >= 0 ? foundActiveIdx : (lastPassedIdx >= 0 ? lastPassedIdx : 0);
+    timelineCenteredIndex = timelineActiveIndex;
+
+    track.innerHTML = milestones
+      .map((m, idx) => buildTimelineStepHtml(m, idx, next, utils, timelineActiveIndex).html)
+      .join('');
+
+    if (controlsEl) {
+      controlsEl.hidden = milestones.length <= 1;
+    }
+
+    setupTimelineTrackEvents();
+    applyTimelineActiveState(timelineActiveIndex);
+
+    if (typeof window.requestAnimationFrame === 'function') {
+      window.requestAnimationFrame(() => {
+        centerTimelineStep(timelineActiveIndex, false);
+      });
+    } else {
+      centerTimelineStep(timelineActiveIndex, false);
+    }
   }
 
   /**
@@ -954,6 +1160,31 @@
     if (stepCalBtn && currentConference) {
       const milestone = coreMilestonesCache[Number(stepCalBtn.getAttribute('data-milestone-index'))];
       if (milestone) handleCalendarAction('google', currentConference, milestone);
+      return;
+    }
+
+    if (target.closest('.js-timeline-prev')) {
+      centerTimelineStep(timelineCenteredIndex - 1, true);
+      return;
+    }
+
+    if (target.closest('.js-timeline-next')) {
+      centerTimelineStep(timelineCenteredIndex + 1, true);
+      return;
+    }
+
+    if (target.closest('.js-timeline-jump-active') && timelineActiveIndex >= 0) {
+      centerTimelineStep(timelineActiveIndex, true);
+      return;
+    }
+
+    const clickedStep = target.closest('.js-timeline-step');
+    if (clickedStep && !clickedStep.classList.contains('deadline-timeline__step--active')) {
+      clickedStep.scrollIntoView({
+        inline: 'center',
+        block: 'nearest',
+        behavior: isTimelineReducedMotion() ? 'auto' : 'smooth'
+      });
     }
   }
 

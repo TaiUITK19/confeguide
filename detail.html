@@ -201,7 +201,41 @@
                 </span>
               </div>
 
-              <div class="deadline-timeline__track js-timeline-track" id="timelineTrack"></div>
+              <div class="deadline-timeline__carousel js-timeline-carousel">
+                <div
+                  class="deadline-timeline__track js-timeline-track"
+                  id="timelineTrack"
+                  tabindex="0"
+                  role="region"
+                  aria-label="Các mốc quan trọng"></div>
+                <div class="deadline-timeline__controls js-timeline-controls" id="timelineControls" hidden>
+                  <button
+                    type="button"
+                    class="deadline-timeline__nav-btn js-timeline-prev"
+                    aria-label="Chuyển tới mốc thời gian trước"
+                    title="Mốc trước">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <polyline points="15 18 9 12 15 6"></polyline>
+                    </svg>
+                  </button>
+                  <span class="deadline-timeline__indicator js-timeline-indicator" aria-live="polite">Mốc 1 / 1</span>
+                  <button
+                    type="button"
+                    class="deadline-timeline__jump-btn js-timeline-jump-active"
+                    hidden>
+                    Về mốc tiếp theo
+                  </button>
+                  <button
+                    type="button"
+                    class="deadline-timeline__nav-btn js-timeline-next"
+                    aria-label="Chuyển tới mốc thời gian tiếp theo"
+                    title="Mốc tiếp theo">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                  </button>
+                </div>
+              </div>
             </section>
 
             <!-- 2. Giới thiệu hội nghị -->

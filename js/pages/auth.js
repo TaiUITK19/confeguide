@@ -11,7 +11,6 @@
 
   /* ================= 1. HẰNG SỐ & CẤU HÌNH ================= */
 
-  const AUTH_API_BASE_URL = '';
   const REMEMBERED_EMAIL_KEY = 'confGuideRememberedEmail';
   const USERS_STORAGE_KEY = 'confguide_users';
   const CURRENT_USER_KEY = 'confguide_current_user';
@@ -340,46 +339,6 @@
     }
   }
 
-  /**
-   * Gửi yêu cầu đăng ký lên API máy chủ (chỉ chạy khi có AUTH_API_BASE_URL).
-   * @param {string} name - Họ và tên người dùng.
-   * @param {string} email - Địa chỉ email đăng ký.
-   * @param {string} password - Mật khẩu người dùng nhập.
-   * @returns {Promise<Object|null>} Kết quả phản hồi JSON hoặc null ở chế độ offline/static.
-   */
-  async function registerUser(name, email, password) {
-    if (!AUTH_API_BASE_URL) return null;
-    let response;
-    try {
-      response = await fetch(`${AUTH_API_BASE_URL}/api/auth/register`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-        body: JSON.stringify({ name, email, password })
-      });
-    } catch {
-      throw new Error('Không thể kết nối đến máy chủ. Vui lòng thử lại sau.');
-    }
-    let result = {};
-    try {
-      result = await response.json();
-    } catch {
-      result = {};
-    }
-    if (!response.ok) {
-      if (response.status === 409 || result.code === 'EMAIL_ALREADY_EXISTS') {
-        throw new Error('Email này đã được sử dụng.');
-      }
-      if (response.status >= 500) {
-        throw new Error('Máy chủ đang gặp sự cố. Vui lòng thử lại sau.');
-      }
-      if (response.status === 400 || response.status === 422) {
-        throw new Error('Thông tin đăng ký chưa hợp lệ. Vui lòng kiểm tra lại các trường.');
-      }
-      throw new Error('Không thể tạo tài khoản lúc này. Vui lòng thử lại.');
-    }
-    return result;
-  }
-
   /* ================= 3. HÀM TIỆN ÍCH GIAO DIỆN FORM ================= */
 
   /**
@@ -655,23 +614,19 @@
         throw new Error('Email này đã được sử dụng. Vui lòng chọn email khác.');
       }
 
-      if (AUTH_API_BASE_URL) {
-        await registerUser(nameField.value.trim(), emailTrimmed, passwordField.value);
-      } else {
-        const hashed = await hashPassword(passwordField.value);
-        const rawUsername = emailTrimmed.split('@')[0].replace(/[^a-zA-Z0-9_]/g, '');
-        users.push({
-          id: `usr_${Date.now()}`,
-          username: rawUsername || `user_${users.length + 1}`,
-          email: emailField.value.trim(),
-          name: nameField.value.trim(),
-          role: 'user',
-          passwordHash: hashed,
-          needsOnboarding: true,
-          createdAt: new Date().toISOString()
-        });
-        writeTextStorage(localStorage, USERS_STORAGE_KEY, JSON.stringify(users));
-      }
+      const hashed = await hashPassword(passwordField.value);
+      const rawUsername = emailTrimmed.split('@')[0].replace(/[^a-zA-Z0-9_]/g, '');
+      users.push({
+        id: `usr_${Date.now()}`,
+        username: rawUsername || `user_${users.length + 1}`,
+        email: emailField.value.trim(),
+        name: nameField.value.trim(),
+        role: 'user',
+        passwordHash: hashed,
+        needsOnboarding: true,
+        createdAt: new Date().toISOString()
+      });
+      writeTextStorage(localStorage, USERS_STORAGE_KEY, JSON.stringify(users));
 
       writeTextStorage(
         sessionStorage,
@@ -1021,7 +976,7 @@
       return `
         <p class="google-setup-guide__title">Kiểm tra kết nối Backend (${escapeAuthHtml(apiBase)}):</p>
         <ol class="google-setup-guide__list">
-          <li>Nếu chạy trên máy cá nhân: mở terminal tại thư mục gốc dự án hoặc <code class="google-setup-guide__code">backend/</code> rồi chạy <code class="google-setup-guide__code">npm.cmd start</code>.</li>
+          <li>Nếu chạy trên máy cá nhân: mở terminal tại thư mục gốc dự án rồi chạy <code class="google-setup-guide__code">npm.cmd start</code>.</li>
           <li>Nếu đã đẩy lên Vercel: kiểm tra Deployment log của hàm <code class="google-setup-guide__code">/api/auth/config</code> và đảm bảo chưa ghi nhầm URL localhost vào bộ nhớ trình duyệt.</li>
           ${loopbackHint}
         </ol>

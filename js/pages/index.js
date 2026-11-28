@@ -6,7 +6,7 @@
  * Chức năng: Quản lý Hero 2 cột cân đối (cột trái tìm kiếm nhanh; cột phải Hero Slider 3 slide:
  * Slide 1 cá nhân hóa theo trạng thái đăng nhập và lĩnh vực quan tâm, Slide 2 hội nghị nổi bật,
  * Slide 3 sắp hết hạn UTC+7), modal Cá nhân hóa dạng bảng biểu, nạp dữ liệu conference_data.json
- * (fetch + fallback file:///) và hiển thị 6 hội nghị tiêu biểu kèm nút Lưu.
+ * (fetch + fallback file:///) và hiển thị các hàng hội nghị sắp diễn ra gom nhóm theo rank (cuộn ngang).
  */
 
 (function () {
@@ -29,8 +29,30 @@
   /** Số lượng hội nghị gợi ý tối đa hiển thị trong Slide 1 (Trạng thái C) */
   const HERO_RECOMMENDATION_LIMIT = 2;
 
-  /** Số lượng hội nghị nổi bật tối đa trên lưới Trang chủ */
-  const FEATURED_HOME_LIMIT = 6;
+  /** Thứ tự các hàng phân hạng hiển thị trên Trang chủ (dễ mở rộng thêm B, C...) */
+  const RANK_ORDER = ['A*', 'A', 'B', 'C'];
+
+  /** Số lượng thẻ hội nghị tối đa trong mỗi hàng phân hạng */
+  const FEATURED_CARDS_PER_RANK = 10;
+
+  /** Khoảng cuộn dự phòng theo chiều rộng thẻ thu gọn + gap khi chưa đo được DOM (px) */
+  const RANK_SCROLL_FALLBACK_PX = 376;
+
+  /** Tiêu đề và dòng phụ mô tả từng hàng phân hạng trên Trang chủ */
+  const RANK_ROW_META = {
+    'A*': {
+      title: 'Rank A* · Đỉnh cao học thuật',
+      subtitle: 'Những hội nghị hàng đầu thế giới, nơi công bố nghiên cứu tạo dấu ấn'
+    },
+    A: {
+      title: 'Rank A · Uy tín và chất lượng',
+      subtitle: 'Lựa chọn vững chắc để công bố và kết nối với cộng đồng nghiên cứu'
+    },
+    B: {
+      title: 'Rank B · Cơ hội rộng mở',
+      subtitle: 'Bước đệm tốt để bắt đầu công bố và tích lũy kinh nghiệm'
+    }
+  };
 
   /** Ngưỡng ngày đánh dấu hạn nộp khẩn cấp trên thẻ hội nghị và slider */
   const HOME_URGENT_DAYS = 14;
@@ -1439,23 +1461,23 @@
   }
 
   /**
-   * Tạo mã HTML một thẻ hội nghị nổi bật trên lưới Trang chủ.
+   * Tạo mã HTML một thẻ hội nghị thu gọn hiển thị trong hàng cuộn ngang theo rank trên Trang chủ.
    * @param {Object} item - Đối tượng hội nghị chuẩn hóa.
    * @param {Array<string>} savedIds - Mảng ID hội nghị đã lưu.
    * @param {Object|null} utils - Đối tượng tiện ích ConfGuideUtils.
-   * @returns {string} Chuỗi HTML `<article class="conf-card card-surface">`.
+   * @returns {string} Chuỗi HTML `<article class="conf-card conf-card--compact card-surface">`.
    */
   function buildFeaturedConferenceCardHtml(item, savedIds, utils) {
     const esc = utils && utils.escapeHtml ? utils.escapeHtml : val => String(val ?? '');
     const meta = resolveFeaturedCardMeta(item, savedIds, utils);
 
     return `
-      <article class="conf-card card-surface" data-id="${esc(meta.confId)}">
+      <article class="conf-card conf-card--compact card-surface" data-id="${esc(meta.confId)}">
         <div>
           <div class="conf-top">
             ${meta.avatarHtml}
             <div class="conf-title-wrap">
-              <h3>${esc(item.name)}</h3>
+              <h4 class="conf-card__title">${esc(item.name)}</h4>
               <span class="conf-rank${meta.rankModCls}">${esc(meta.rankBadgeText)}</span>
             </div>
           </div>
@@ -1506,7 +1528,206 @@
   }
 
   /**
-   * Hiển thị tối đa 6 hội nghị tiêu biểu lên lưới trang chủ theo phân hạng và năm tổ chức.
+   * Gom nhóm danh sách hội nghị đã sắp xếp theo thứ tự `RANK_ORDER` và giới hạn số thẻ mỗi hàng.
+   * Rank nào không có hội nghị sẽ bị bỏ qua để không hiển thị hàng trống.
+   * @param {Array<Object>} sortedItems - Mảng hội nghị đã sắp xếp theo quy tắc hiện có.
+   * @returns {Array<{ rank: string, items: Array<Object> }>} Danh sách nhóm theo từng rank có dữ liệu.
+   */
+  function groupConferencesByRank(sortedItems) {
+    const groupedMap = new Map();
+    RANK_ORDER.forEach(rank => {
+      groupedMap.set(rank, []);
+    });
+
+    sortedItems.forEach(item => {
+      const rank = getNormalizedRank(item);
+      if (!rank || !groupedMap.has(rank)) return;
+      const bucket = groupedMap.get(rank);
+      if (bucket.length < FEATURED_CARDS_PER_RANK) {
+        bucket.push(item);
+      }
+    });
+
+    const rankGroups = [];
+    RANK_ORDER.forEach(rank => {
+      const items = groupedMap.get(rank) || [];
+      if (items.length > 0) {
+        rankGroups.push({ rank, items });
+      }
+    });
+
+    return rankGroups;
+  }
+
+  /**
+   * Tạo mã HTML một hàng cuộn ngang cho một phân hạng cụ thể (kèm tiêu đề, dòng phụ và nút mũi tên trái/phải).
+   * @param {{ rank: string, items: Array<Object> }} group - Nhóm hội nghị theo rank.
+   * @param {number} groupIndex - Chỉ mục hàng để tạo ID liên kết aria-labelledby.
+   * @param {Array<string>} savedIds - Danh sách ID hội nghị đã lưu.
+   * @param {Object|null} utils - Đối tượng tiện ích ConfGuideUtils.
+   * @returns {string} Chuỗi HTML `<section class="rank-row js-rank-row">`.
+   */
+  function buildRankRowHtml(group, groupIndex, savedIds, utils) {
+    const esc = utils && utils.escapeHtml ? utils.escapeHtml : val => String(val ?? '');
+    const rankLabel = String(group.rank || '').trim();
+    const rankMeta = RANK_ROW_META[rankLabel] || {
+      title: `Rank ${rankLabel}`,
+      subtitle: ''
+    };
+    const headingId = `rankRowHeading-${groupIndex}`;
+    const subtitleHtml = rankMeta.subtitle
+      ? `<p class="rank-row__subtitle">${esc(rankMeta.subtitle)}</p>`
+      : '';
+    const cardsHtml = group.items
+      .map(conf => buildFeaturedConferenceCardHtml(conf, savedIds, utils))
+      .join('');
+
+    return `
+      <section class="rank-row js-rank-row" aria-labelledby="${headingId}">
+        <div class="rank-row__head">
+          <div class="rank-row__heading">
+            <h3 class="rank-row__title" id="${headingId}">${esc(rankMeta.title)}</h3>
+            ${subtitleHtml}
+          </div>
+          <div class="rank-row__controls">
+            <button
+              type="button"
+              class="rank-row__nav-btn js-rank-scroll-prev"
+              aria-label="Cuộn sang trái danh sách hội nghị Rank ${esc(rankLabel)}"
+              title="Cuộn sang trái">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <polyline points="15 18 9 12 15 6"></polyline>
+              </svg>
+            </button>
+            <button
+              type="button"
+              class="rank-row__nav-btn js-rank-scroll-next"
+              aria-label="Cuộn sang phải danh sách hội nghị Rank ${esc(rankLabel)}"
+              title="Cuộn sang phải">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <polyline points="9 18 15 12 9 6"></polyline>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div
+          class="rank-row__track js-rank-track"
+          tabindex="0"
+          role="region"
+          aria-label="Hội nghị Rank ${esc(rankLabel)}">
+          ${cardsHtml}
+        </div>
+      </section>
+    `;
+  }
+
+  /**
+   * Cập nhật trạng thái bật/tắt của nút cuộn trái/phải dựa theo vị trí cuộn hiện tại của hàng.
+   * @param {HTMLElement} row - Phần tử `.js-rank-row`.
+   */
+  function updateRankRowButtons(row) {
+    if (!row) return;
+    const track = row.querySelector('.js-rank-track');
+    const prevBtn = row.querySelector('.js-rank-scroll-prev');
+    const nextBtn = row.querySelector('.js-rank-scroll-next');
+    if (!track || !prevBtn || !nextBtn) return;
+
+    const maxScrollLeft = Math.max(0, track.scrollWidth - track.clientWidth);
+    const currentLeft = Math.max(0, track.scrollLeft);
+    // Dùng sai số 2px để tránh lệch làm tròn pixel ở các mức zoom/DPR khác nhau
+    prevBtn.disabled = currentLeft <= 2;
+    nextBtn.disabled = currentLeft >= maxScrollLeft - 2;
+  }
+
+  /**
+   * Đồng bộ trạng thái các nút điều hướng cuộn ngang cho toàn bộ hàng phân hạng.
+   */
+  function syncAllRankRowControls() {
+    const grid = document.getElementById('conferenceGrid');
+    if (!grid) return;
+    grid.querySelectorAll('.js-rank-row').forEach(row => {
+      updateRankRowButtons(row);
+    });
+  }
+
+  /**
+   * Cuộn ngang một hàng theo bước rộng tương ứng một thẻ hội nghị.
+   * @param {HTMLElement} track - Thanh cuộn `.js-rank-track`.
+   * @param {number} direction - `-1` (trái) hoặc `1` (phải).
+   */
+  function scrollRankTrack(track, direction) {
+    if (!track) return;
+    const firstCard = track.querySelector('.conf-card');
+    const styles = window.getComputedStyle ? window.getComputedStyle(track) : null;
+    const gap = styles ? parseFloat(styles.columnGap || styles.gap || '16') || 16 : 16;
+    const step = firstCard
+      ? Math.round(firstCard.getBoundingClientRect().width + gap)
+      : RANK_SCROLL_FALLBACK_PX;
+
+    track.scrollBy({
+      left: step * direction,
+      behavior: sliderState.prefersReducedMotion ? 'auto' : 'smooth'
+    });
+  }
+
+  /**
+   * Gắn bộ lắng nghe cuộn ngang bằng Event Delegation cho các hàng phân hạng trên Trang chủ.
+   */
+  function initRankRowScrolling() {
+    const grid = document.getElementById('conferenceGrid');
+    if (!grid) return;
+
+    grid.addEventListener('click', event => {
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+      const navBtn = target.closest('.js-rank-scroll-prev, .js-rank-scroll-next');
+      if (!navBtn) return;
+
+      const row = navBtn.closest('.js-rank-row');
+      const track = row ? row.querySelector('.js-rank-track') : null;
+      if (!track) return;
+
+      const direction = navBtn.classList.contains('js-rank-scroll-next') ? 1 : -1;
+      scrollRankTrack(track, direction);
+    });
+
+    grid.addEventListener('keydown', event => {
+      const target = event.target;
+      if (!(target instanceof Element) || !target.classList.contains('js-rank-track')) return;
+      if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+
+      event.preventDefault();
+      scrollRankTrack(target, event.key === 'ArrowRight' ? 1 : -1);
+    });
+
+    // Hỗ trợ cuộn ngang bằng lăn chuột kèm phím Shift khi trình duyệt chưa tự chuyển deltaY sang deltaX
+    grid.addEventListener('wheel', event => {
+      if (!event.shiftKey || event.deltaY === 0 || event.deltaX !== 0) return;
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+      const track = target.closest('.js-rank-track');
+      if (!track || track.scrollWidth <= track.clientWidth) return;
+
+      event.preventDefault();
+      const deltaPx = event.deltaMode === 1 ? event.deltaY * 40 : event.deltaY;
+      track.scrollLeft += deltaPx;
+    }, { passive: false });
+
+    // Sự kiện scroll không nổi bọt nên dùng capture phase để bắt cuộn mượt cho mọi hàng
+    grid.addEventListener('scroll', event => {
+      const target = event.target;
+      if (!(target instanceof Element) || !target.classList.contains('js-rank-track')) return;
+      const row = target.closest('.js-rank-row');
+      if (row) updateRankRowButtons(row);
+    }, { capture: true, passive: true });
+
+    window.addEventListener('resize', syncAllRankRowControls, { passive: true });
+  }
+
+  /**
+   * Hiển thị danh sách hội nghị sắp diễn ra gom nhóm theo từng hàng phân hạng (cuộn ngang).
    */
   function renderFeaturedConferences() {
     const grid = document.getElementById('conferenceGrid');
@@ -1537,9 +1758,9 @@
         : String(a.name || '').localeCompare(String(b.name || ''), 'vi', { sensitivity: 'base' });
     });
 
-    const displayItems = sortedItems.slice(0, FEATURED_HOME_LIMIT);
+    const rankGroups = groupConferencesByRank(sortedItems);
 
-    if (displayItems.length === 0) {
+    if (rankGroups.length === 0) {
       grid.innerHTML = '';
       if (emptyState) emptyState.hidden = false;
       return;
@@ -1547,9 +1768,18 @@
 
     if (emptyState) emptyState.hidden = true;
     const savedIds = getSavedConferenceIds();
-    grid.innerHTML = displayItems
-      .map(conf => buildFeaturedConferenceCardHtml(conf, savedIds, utils))
+    grid.innerHTML = rankGroups
+      .map((group, index) => buildRankRowHtml(group, index, savedIds, utils))
       .join('');
+
+    if (window.ConfGuideCompare && typeof window.ConfGuideCompare.syncAllUi === 'function') {
+      window.ConfGuideCompare.syncAllUi();
+    }
+
+    syncAllRankRowControls();
+    if (typeof window.requestAnimationFrame === 'function') {
+      window.requestAnimationFrame(syncAllRankRowControls);
+    }
   }
 
   /**
@@ -1583,6 +1813,7 @@
     initSearchGateway();
     initHeroSliderEvents();
     initSaveConferences();
+    initRankRowScrolling();
     initPersonalizationSync();
     loadData();
   }

@@ -41,7 +41,7 @@
   position: relative;
   background: var(--bg-hero);
   border-bottom: 1px solid var(--border);
-  padding: 36px 0 40px;
+  padding: 28px 0 32px;
   overflow: hidden;
   scroll-margin-top: 80px;
 }
@@ -819,13 +819,124 @@ body.dark .hero-slide-card__meta-item svg {
 /* ================= 5. DANH SÁCH HỘI NGHỊ NỔI BẬT ================= */
 .conference-section {
   background: var(--bg-primary);
+  padding: 28px 0 64px;
   scroll-margin-top: 80px;
 }
 
-.conference-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 24px;
+.conference-section .section-head {
+  margin-bottom: 24px;
+}
+
+/* Các hàng phân hạng hội nghị xếp dọc từ Rank A* xuống Rank A, B... */
+.conference-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.rank-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.rank-row__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 0 6px;
+}
+
+.rank-row__heading {
+  flex: 1;
+  min-width: 0;
+}
+
+.rank-row__title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+}
+
+.rank-row__subtitle {
+  margin-top: 3px;
+  font-size: 13.5px;
+  color: var(--text-muted);
+  line-height: 1.45;
+}
+
+.rank-row__controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.rank-row__nav-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--text);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: border-color 160ms ease, color 160ms ease, background-color 160ms ease, opacity 160ms ease;
+}
+
+.rank-row__nav-btn:hover:not(:disabled) {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: var(--primary-soft);
+}
+
+.rank-row__nav-btn:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--focus-ring);
+}
+
+.rank-row__nav-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* Hàng cuộn ngang thẻ hội nghị: chừa padding trên/dưới để không cắt bóng đổ và hiệu ứng hover */
+.rank-row__track {
+  display: flex;
+  align-items: stretch;
+  gap: 16px;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  scroll-padding-left: 6px;
+  padding: 10px 6px 14px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+}
+
+.rank-row__track:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+  border-radius: var(--radius-md);
+}
+
+.rank-row__track::-webkit-scrollbar {
+  height: 6px;
+}
+
+.rank-row__track::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.rank-row__track::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: var(--radius-pill);
 }
 
 .conf-card {
@@ -837,11 +948,31 @@ body.dark .hero-slide-card__meta-item svg {
   min-width: 0;
 }
 
+/* Biến thể thẻ thu gọn cho hàng cuộn ngang Trang chủ (rộng hơn, chiều cao gọn hơn) */
+.conf-card--compact {
+  flex: 0 0 360px;
+  height: auto;
+  scroll-snap-align: start;
+  padding: 14px 16px;
+}
+
 .conf-top {
   display: flex;
   align-items: flex-start;
   gap: 16px;
   margin-bottom: 14px;
+}
+
+.conf-card--compact .conf-top {
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.conf-card--compact .conf-badge-logo {
+  width: 40px;
+  height: 40px;
+  font-size: 12.5px;
+  border-radius: 8px;
 }
 
 /* .conf-badge-logo dùng chung từ css/base/base.css */
@@ -851,12 +982,19 @@ body.dark .hero-slide-card__meta-item svg {
   min-width: 0;
 }
 
-.conf-card h3 {
+.conf-card h3,
+.conf-card h4,
+.conf-card__title {
   font-size: 18px;
   font-weight: 700;
   color: var(--text);
   line-height: 1.25;
   margin-bottom: 4px;
+}
+
+.conf-card--compact .conf-card__title {
+  font-size: 15.5px;
+  margin-bottom: 3px;
 }
 
 .conf-rank {
@@ -886,6 +1024,13 @@ body.dark .hero-slide-card__meta-item svg {
   overflow: hidden;
 }
 
+.conf-card--compact .conf-desc {
+  font-size: 12.5px;
+  line-height: 1.4;
+  margin-bottom: 8px;
+  -webkit-line-clamp: 2;
+}
+
 .conf-meta {
   display: flex;
   flex-direction: column;
@@ -893,6 +1038,23 @@ body.dark .hero-slide-card__meta-item svg {
   margin-bottom: 20px;
   font-size: 13px;
   color: var(--text);
+}
+
+.conf-card--compact .conf-meta {
+  gap: 4px;
+  margin-bottom: 10px;
+  font-size: 12.5px;
+}
+
+.conf-card--compact .conf-meta-item {
+  min-width: 0;
+}
+
+.conf-card--compact .conf-meta-item span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .conf-meta-item {
@@ -929,6 +1091,42 @@ body.dark .hero-slide-card__meta-item svg {
   align-items: center;
   gap: 8px;
   flex-wrap: wrap;
+}
+
+.conf-card--compact .conf-footer {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+  padding-top: 9px;
+}
+
+.conf-card--compact .conf-deadline-badge strong {
+  font-size: 12px;
+}
+
+.conf-card--compact .conf-card-actions {
+  width: 100%;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.conf-card--compact .conf-save-btn {
+  width: 34px;
+  height: 34px;
+  min-width: 34px;
+  min-height: 34px;
+}
+
+.conf-card--compact .compare-toggle {
+  min-height: 34px;
+  padding: 5px 10px;
+  font-size: 12.5px;
+}
+
+.conf-card--compact .btn-detail {
+  min-height: 34px;
+  padding: 5px 12px;
+  font-size: 12.5px;
 }
 
 /* Nút Lưu hội nghị dạng icon (sao đạt tương phản >= 3:1 ở cả hai trạng thái và chế độ) */
@@ -1051,7 +1249,6 @@ body.dark .hero-slide-card__meta-item svg {
 .empty-box {
   text-align: center;
   padding: 64px 20px;
-  grid-column: 1 / -1;
 }
 
 .empty-box svg {
@@ -1076,6 +1273,7 @@ body.dark .hero-slide-card__meta-item svg {
   .hero-slider__dot::before,
   .hero-slide-card,
   .hero-slide-card__link,
+  .rank-row__nav-btn,
   .conf-save-btn {
     transition: none;
   }
@@ -1112,9 +1310,11 @@ body.dark .hero-slide-card__meta-item svg {
     grid-template-columns: 1fr;
     gap: 12px;
   }
-  .features-grid,
-  .conference-grid {
+  .features-grid {
     grid-template-columns: repeat(2, 1fr);
+  }
+  .conf-card--compact {
+    flex: 0 0 328px;
   }
 }
 
@@ -1142,9 +1342,12 @@ body.dark .hero-slide-card__meta-item svg {
     min-height: 38px;
     padding: 7px 14px;
   }
-  .features-grid,
-  .conference-grid {
+  .features-grid {
     grid-template-columns: 1fr;
+  }
+  .rank-row__nav-btn {
+    width: 40px;
+    height: 40px;
   }
 }
 
@@ -1225,6 +1428,37 @@ body.dark .hero-slide-card__meta-item svg {
 }
 
 @media (max-width: 480px) {
+  .rank-row__head {
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .rank-row__title {
+    font-size: 16px;
+  }
+
+  .rank-row__subtitle {
+    font-size: 13px;
+  }
+
+  .conf-card--compact {
+    flex: 0 0 80vw;
+    max-width: 344px;
+    padding: 13px 14px;
+  }
+
+  .conf-card--compact .conf-save-btn {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    min-height: 36px;
+  }
+
+  .conf-card--compact .compare-toggle,
+  .conf-card--compact .btn-detail {
+    min-height: 36px;
+  }
+
   .hero-slider__cta-actions {
     width: 100%;
   }
