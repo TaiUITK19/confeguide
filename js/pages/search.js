@@ -2513,7 +2513,7 @@
     const ABSTRACT_MIN_WORDS = 25;
     const ABSTRACT_MIN_CHARS = 180;
     const MODE_LABELS = { online: 'Trực tuyến', offline: 'Trực tiếp', hybrid: 'Kết hợp' };
-    const AI_NOTE = 'Câu trả lời do AI miễn phí tạo từ dữ liệu ConfGuide, bạn nên kiểm tra lại trên trang chi tiết hội nghị.';
+    const AI_NOTE = 'Thông tin do AI tổng hợp, hãy kiểm tra lại tại trang chi tiết hội nghị.';
     const welcomeNodes = Array.from(messages.childNodes).map(node => node.cloneNode(true));
 
     /** @type {Array<{role: 'user'|'bot', kind: string, text?: string, data?: Object}>} */
