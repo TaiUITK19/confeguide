@@ -885,10 +885,7 @@
           </div>
           <div class="layout-modal-body google-auth-modal__body">
             <div class="google-signin-panel">
-              <p class="google-signin-panel__title">Xác thực bằng tài khoản Google của bạn</p>
-              <p class="google-signin-panel__desc">
-                Sau khi xác thực thành công, bạn sẽ vào thẳng Trang chủ để hệ thống tự động quét hồ sơ và gợi ý lĩnh vực nghiên cứu phù hợp.
-              </p>
+              <p class="google-signin-panel__desc">Đăng nhập để nhận gợi ý hội nghị theo lĩnh vực nghiên cứu của bạn.</p>
               <div class="google-real-box__gsi-slot google-real-box__gsi-slot--center" id="googleGsiButtonSlot"></div>
               <p class="google-env-banner" id="googleEnvBanner" role="status"></p>
               <p class="google-origin-note" id="googleOriginNote" hidden></p>
@@ -1182,6 +1179,7 @@
       }
     };
 
+    bannerEl.hidden = false;
     bannerEl.className = 'google-env-banner';
     bannerEl.textContent = 'Đang kiểm tra cấu hình backend và tải cổng đăng nhập Google...';
     gsiSlot.innerHTML = '';
@@ -1238,26 +1236,8 @@
     );
 
     if (rendered) {
-      bannerEl.className = 'google-env-banner is-ready';
-      bannerEl.textContent = 'Nhấn nút Google ở trên để đăng nhập và vào thẳng Trang chủ ConfGuide.';
-
-      const loc = window.location || {};
-      if (loc.hostname === '127.0.0.1' || loc.hostname === '[::1]') {
-        const localhostAlt = `http://localhost${loc.port ? `:${loc.port}` : ''}${loc.pathname || '/login.html'}`;
-        setOriginNote(
-          `Nếu gặp <strong>Error 400: origin_mismatch</strong>: Origin hiện tại là <code class="google-setup-guide__code">${escapeAuthHtml(currentOrigin)}</code> `
-          + `(Google Cloud Console thường yêu cầu dùng <code class="google-setup-guide__code">localhost</code>). `
-          + `Hãy thêm <code class="google-setup-guide__code">${escapeAuthHtml(currentOrigin)}</code> hoặc chuyển sang `
-          + `<a class="google-setup-guide__link" href="${escapeAuthHtml(localhostAlt)}">${escapeAuthHtml(localhostAlt)}</a> / `
-          + `<a class="google-setup-guide__link" href="http://localhost:3000/login.html">http://localhost:3000/login.html</a> `
-          + 'và khai báo các URL đó trong <strong>Authorized JavaScript origins</strong>.'
-        );
-      } else if (currentOrigin) {
-        setOriginNote(
-          `Origin trang hiện tại: <code class="google-setup-guide__code">${escapeAuthHtml(currentOrigin)}</code> `
-          + '— nếu gặp <strong>Error 400: origin_mismatch</strong>, hãy kiểm tra chuỗi này đã có trong <strong>Authorized JavaScript origins</strong> của Google Cloud Console (không có dấu <code class="google-setup-guide__code">/</code> ở cuối).'
-        );
-      }
+      bannerEl.hidden = true;
+      bannerEl.textContent = '';
     } else {
       bannerEl.className = 'google-env-banner is-warning';
       bannerEl.textContent =
