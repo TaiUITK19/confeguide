@@ -41,7 +41,7 @@ ConfGuide tập hợp thông tin các hội nghị khoa học CNTT trong nước
 ## Tính năng chính
 
 - **Tìm kiếm & lọc nâng cao:** Tìm tức thì, gợi ý sửa chính tả (Damerau-Levenshtein), 7 nhóm bộ lọc (hạn nộp, lĩnh vực, phạm vi Việt Nam / Quốc tế, địa điểm, thời gian, hình thức, phân hạng), 10 kiểu sắp xếp, phân trang và đồng bộ bộ lọc với URL.
-- **Chi tiết hội nghị:** Timeline các mốc thời hạn tự động quy đổi `AoE → UTC+7`, đồng hồ đếm ngược, thông tin học thuật, xuất lịch sang Google Calendar hoặc tệp `.ics`.
+- **Chi tiết hội nghị:** Timeline trượt ngang toàn bộ mốc thời hạn tự động quy đổi `AoE → UTC+7` căn giữa mốc đang chọn, đồng hồ đếm ngược, thông tin học thuật, xuất lịch sang Google Calendar hoặc tệp `.ics`.
 - **Theo dõi & so sánh:** Lưu hội nghị theo tài khoản, xem hạn nộp gần nhất; so sánh cạnh nhau tối đa 3 hội nghị.
 - **Hồ sơ cá nhân & lịch:** Chọn lĩnh vực nghiên cứu, cập nhật ảnh đại diện, lịch tháng hiển thị hạn nộp và ngày diễn ra hội nghị đã lưu.
 - **Tài khoản:** Đăng ký / đăng nhập (băm mật khẩu SHA-256 bằng Web Crypto API), gợi ý hội nghị cá nhân hóa theo lĩnh vực.

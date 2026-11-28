@@ -42,5 +42,32 @@
       }
     ],
     "updatedAt": "2026-11-27T15:19:12.313Z"
+  },
+  "24521566@gm.uit.edu.vn": {
+    "email": "24521566@gm.uit.edu.vn",
+    "name": "Tâm Dương Nhất",
+    "scholarId": "",
+    "source": "manual",
+    "fields": [
+      {
+        "id": "dom_tri-tue-nhan-tao_1795801900464",
+        "key": "tri-tue-nhan-tao",
+        "label": "Trí tuệ nhân tạo",
+        "priority": "normal",
+        "source": "manual",
+        "originalInterest": "",
+        "updatedAt": "2026-11-27T17:51:42.784Z"
+      },
+      {
+        "id": "dom_an-toan-thong-tin_1795801901342",
+        "key": "an-toan-thong-tin",
+        "label": "An toàn thông tin",
+        "priority": "normal",
+        "source": "manual",
+        "originalInterest": "",
+        "updatedAt": "2026-11-27T17:51:42.784Z"
+      }
+    ],
+    "updatedAt": "2026-11-27T17:51:42.791Z"
   }
 }

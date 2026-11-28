@@ -1,5 +1,4 @@
 # Biến môi trường nhạy cảm
-.env
 .env.local
 
 # Thư mục phụ thuộc Node.js
