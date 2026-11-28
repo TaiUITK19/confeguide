@@ -12,6 +12,8 @@ const config = require('./config/env');
 const authRouter = require('./routes/auth');
 const scholarRouter = require('./routes/scholar');
 const fieldsRouter = require('./routes/fields');
+const recommendRouter = require('./routes/recommend');
+const chatRouter = require('./routes/chat');
 const { createRateLimiter } = require('./utils/rateLimit');
 const { AppError, notFoundHandler, errorHandler } = require('./utils/errorHandler');
 
@@ -126,6 +128,8 @@ app.get('/health', (req, res) => {
 app.use('/', authRouter);
 app.use('/api/scholar', scholarRouter);
 app.use('/api/fields', fieldsRouter);
+app.use('/api/recommend', recommendRouter);
+app.use('/api/chat', chatRouter);
 
 app.use(blockInternalPaths);
 
