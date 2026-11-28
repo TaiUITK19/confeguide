@@ -22,7 +22,7 @@
     mode: true,
     when: true,
     scope: true,
-    where: true,
+    where: false,
     what: true
   };
 
@@ -207,7 +207,7 @@
       getRelaxSuggestions: () => ({ relaxations: [], spellingSuggestion: null }),
       highlightMatches: txt => escapeHtml(txt),
       escapeHtml: val => escapeHtml(val),
-      yieldToMain: async () => {}
+      yieldToMain: async () => { }
     };
   }
 
@@ -1791,7 +1791,7 @@
     const fullTitleText = conf.fullName && conf.fullName !== conf.name ? conf.fullName : '';
     const fullNameHtml = fullTitleText
       ? `<div class="card-full-name" title="${escapeHtml(fullTitleText)}">`
-        + `${core.highlightMatches(fullTitleText, rawQuery)}</div>`
+      + `${core.highlightMatches(fullTitleText, rawQuery)}</div>`
       : '';
     return `
       <div class="conference-card__head">
@@ -1838,9 +1838,9 @@
     }).join('');
     const overflowTagHtml = overflowCount > 0
       ? `<span class="tag-field conference-card__topic conference-card__topic--more"`
-        + ` title="${escapeHtml(`Các lĩnh vực khác: ${hiddenLabelsText}`)}"`
-        + ` aria-label="${escapeHtml(`Còn ${overflowCount} lĩnh vực khác: ${hiddenLabelsText}`)}">`
-        + `+${overflowCount}</span>`
+      + ` title="${escapeHtml(`Các lĩnh vực khác: ${hiddenLabelsText}`)}"`
+      + ` aria-label="${escapeHtml(`Còn ${overflowCount} lĩnh vực khác: ${hiddenLabelsText}`)}">`
+      + `+${overflowCount}</span>`
       : '';
 
     const feeText = utils && typeof utils.formatConferenceFee === 'function'
@@ -2487,10 +2487,167 @@
   }
 
   /**
+   * Chatbox trợ lý gợi ý: phân tích mô tả -> gán bộ lọc -> pipeline tự lọc & vẽ lại,
+   * sau đó trả lời trong khung chat (tiêu chí đã hiểu, số kết quả, 3 hội nghị đầu).
+   */
+  function bindIntentChat() {
+    const root = document.getElementById('intentChat');
+    const toggle = document.getElementById('intentChatToggle');
+    const panel = document.getElementById('intentChatPanel');
+    const closeBtn = document.getElementById('intentChatClose');
+    const form = document.getElementById('intentForm');
+    const input = document.getElementById('intentInput');
+    const messages = document.getElementById('intentChatMessages');
+    const samples = document.getElementById('intentChatSamples');
+    if (!root || !toggle || !panel || !form || !input || !messages || !window.ConfGuideIntent) return;
+
+    const setOpen = open => {
+      panel.hidden = !open;
+      root.classList.toggle('is-open', open);
+      toggle.setAttribute('aria-expanded', String(open));
+      if (open) input.focus();
+      else toggle.focus();
+    };
+
+    const scrollToEnd = () => { messages.scrollTop = messages.scrollHeight; };
+
+    const addMessage = (role, text) => {
+      const msg = document.createElement('div');
+      msg.className = `intent-chat__msg intent-chat__msg--${role}`;
+      if (text) msg.textContent = text;
+      messages.appendChild(msg);
+      scrollToEnd();
+      return msg;
+    };
+
+    const autoGrow = () => {
+      input.style.height = 'auto';
+      input.style.height = `${Math.min(input.scrollHeight, 120)}px`;
+    };
+
+    const topicLabel = key => (topicCatalog.find(t => t.key === key) || {}).label || key;
+    const MODE_LABELS = { online: 'Trực tuyến', offline: 'Trực tiếp', hybrid: 'Kết hợp' };
+
+    async function handleSubmit() {
+      const text = input.value.trim();
+      if (!text) return;
+      addMessage('user', text);
+      input.value = '';
+      autoGrow();
+      if (samples) samples.hidden = true;
+
+      if (!isDataLoaded) {
+        addMessage('bot', 'Dữ liệu hội nghị đang được tải, bạn thử lại sau vài giây nhé.');
+        return;
+      }
+
+      const typing = addMessage('bot');
+      typing.classList.add('intent-chat__msg--typing');
+      typing.innerHTML = '<span></span><span></span><span></span>';
+
+      const intent = window.ConfGuideIntent.parse(text);
+      const ranks = intent.ranks.filter(r => validRankKeys.has(r));
+      const topics = intent.topics.filter(t => validTopicValues.has(t));
+      const modes = intent.modes.filter(m => validModeKeys.has(m));
+
+      const criteria = [];
+      if (topics.length) criteria.push(['Lĩnh vực', topics.map(topicLabel).join(', ')]);
+      if (ranks.length) criteria.push(['Phân hạng', ranks.join(', ')]);
+      if (intent.scopes.length) criteria.push(['Phạm vi', intent.scopes[0] === 'vietnam' ? 'Việt Nam' : 'Quốc tế']);
+      if (modes.length) criteria.push(['Hình thức', modes.map(m => MODE_LABELS[m] || m).join(', ')]);
+
+      if (criteria.length === 0) {
+        typing.remove();
+        addMessage('bot', 'Mình chưa nhận ra tiêu chí nào 😅. Bạn thử nêu lĩnh vực (AI, bảo mật, IoT...), phân hạng (rank B trở lên) hoặc địa điểm (Việt Nam, Hà Nội...) nhé.');
+        return;
+      }
+
+      const searchInput = document.getElementById('searchInput');
+      if (searchInput) searchInput.value = '';
+      filterState.q = '';
+      filterState.ranks = ranks;
+      filterState.topics = topics;
+      filterState.modes = modes;
+      filterState.scopes = intent.scopes;
+      filterState.city = "all";
+      filterState.page = 1;
+
+      // Chờ pipeline lọc xong để đọc số kết quả
+      await new Promise(resolve => setTimeout(resolve, 400));
+      typing.remove();
+
+      const reply = addMessage('bot');
+      const intro = document.createElement('p');
+      intro.textContent = 'Mình hiểu bạn cần:';
+      reply.appendChild(intro);
+
+      const chips = document.createElement('div');
+      chips.className = 'intent-chat__chips';
+      criteria.forEach(([label, value]) => {
+        const chip = document.createElement('span');
+        chip.className = 'intent-chat__chip';
+        chip.textContent = `${label}: ${value}`;
+        chips.appendChild(chip);
+      });
+      reply.appendChild(chips);
+
+      const count = filteredConferences.length;
+      const result = document.createElement('p');
+      result.className = 'intent-chat__result';
+      result.textContent = count > 0
+        ? `Tìm thấy ${count} hội nghị phù hợp. Danh sách đã được lọc sẵn bên trái.`
+        : 'Chưa có hội nghị nào khớp đủ các tiêu chí. Bạn thử bớt một điều kiện (VD: bỏ phân hạng hoặc địa điểm) nhé.';
+      reply.appendChild(result);
+
+      if (count > 0) {
+        const list = document.createElement('ul');
+        list.className = 'intent-chat__list';
+        filteredConferences.slice(0, 3).forEach(conf => {
+          const li = document.createElement('li');
+          const link = document.createElement('a');
+          link.href = `detail.html?id=${encodeURIComponent(conf.id)}`;
+          link.textContent = conf.rank ? `${conf.name} (Rank ${conf.rank})` : conf.name;
+          li.appendChild(link);
+          list.appendChild(li);
+        });
+        reply.appendChild(list);
+      }
+      scrollToEnd();
+    }
+
+    toggle.addEventListener('click', () => setOpen(panel.hidden));
+    if (closeBtn) closeBtn.addEventListener('click', () => setOpen(false));
+    panel.addEventListener('keydown', event => {
+      if (event.key === 'Escape') setOpen(false);
+    });
+
+    form.addEventListener('submit', event => {
+      event.preventDefault();
+      handleSubmit();
+    });
+    input.addEventListener('input', autoGrow);
+    input.addEventListener('keydown', event => {
+      if (event.key === 'Enter' && !event.shiftKey) {
+        event.preventDefault();
+        handleSubmit();
+      }
+    });
+
+    if (samples) {
+      samples.addEventListener('click', event => {
+        const btn = event.target instanceof Element ? event.target.closest('[data-sample]') : null;
+        if (!btn) return;
+        input.value = btn.getAttribute('data-sample') || '';
+        handleSubmit();
+      });
+    }
+  }
+  /**
    * Khởi tạo toàn bộ sự kiện của trang bằng kỹ thuật Event Delegation trên các phần tử tĩnh.
    */
   function initStaticEvents() {
     bindSearchInputEvents();
+    bindIntentChat();
 
     const sidebar = document.getElementById('filtersSidebar');
     if (sidebar) {

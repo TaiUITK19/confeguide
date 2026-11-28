@@ -521,6 +521,23 @@ body.dark {
   scrollbar-color: var(--border-strong) transparent;
 }
 
+/* Không cho dòng lựa chọn bị co lại trong khung cuộn => tránh chữ chồng nhau khi nhãn xuống dòng */
+.filter-fieldset>.check-row,
+.filter-fieldset>.filter-option {
+  flex-shrink: 0;
+}
+
+/* Nhãn dài nhiều dòng: ô tích căn theo dòng đầu tiên */
+.filter-fieldset .check-row,
+.filter-fieldset .filter-option {
+  align-items: flex-start;
+}
+
+.filter-fieldset .check-row input,
+.filter-fieldset .filter-option input {
+  margin-top: 2px;
+}
+
 /* Hàng lựa chọn Checkbox dạng danh sách 1 cột sạch kèm trạng thái vô hiệu hóa 0 bản ghi */
 .check-row,
 .filter-option {
@@ -635,8 +652,8 @@ body.dark {
   line-height: 1.4;
 }
 
-.check-row input:checked ~ .check-row__label,
-.filter-option input:checked ~ .filter-option__text {
+.check-row input:checked~.check-row__label,
+.filter-option input:checked~.filter-option__text {
   color: var(--text);
   font-weight: 500;
 }
@@ -653,8 +670,8 @@ body.dark {
   flex-shrink: 0;
 }
 
-.check-row input:checked ~ .check-row__count,
-.filter-option input:checked ~ .filter-option__count {
+.check-row input:checked~.check-row__count,
+.filter-option input:checked~.filter-option__count {
   color: var(--text-muted);
 }
 
@@ -1330,12 +1347,10 @@ body.dark {
 .skeleton-box {
   display: block;
   border-radius: 6px;
-  background: linear-gradient(
-    90deg,
-    var(--skeleton-base) 25%,
-    var(--skeleton-highlight) 50%,
-    var(--skeleton-base) 75%
-  );
+  background: linear-gradient(90deg,
+      var(--skeleton-base) 25%,
+      var(--skeleton-highlight) 50%,
+      var(--skeleton-base) 75%);
   background-size: 200% 100%;
   animation: searchSkeletonShimmer 1.4s ease-in-out infinite;
 }
@@ -1384,6 +1399,7 @@ body.dark {
   0% {
     background-position: 200% 0;
   }
+
   100% {
     background-position: -200% 0;
   }
@@ -1576,6 +1592,7 @@ body.dark {
 
 /* ================= Tôn trọng tùy chọn giảm chuyển động (Reduced Motion) ================= */
 @media (prefers-reduced-motion: reduce) {
+
   .search-box,
   .search-box button,
   .keyword,
@@ -1611,6 +1628,7 @@ body.dark {
 
 /* ================= RESPONSIVE: Tablet & Mobile (<= 960px: Drawer / Bottom-Sheet) ================= */
 @media (max-width: 960px) {
+
   body.has-filter-drawer,
   body.is-filter-drawer-open {
     overflow: hidden;
@@ -1740,6 +1758,7 @@ body.dark {
 
 /* ================= RESPONSIVE: Mobile (<= 767px: Vùng chạm >= 44px) ================= */
 @media (max-width: 767px) {
+
   .search-box button,
   .keyword,
   .accordion-head,
@@ -1825,5 +1844,407 @@ body.dark {
     flex-basis: 100%;
     text-align: center;
     margin-left: 0;
+  }
+}
+
+/* ===== Chatbox trợ lý gợi ý hội nghị (nổi góc phải) ===== */
+.intent-chat {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 900;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+  font-family: inherit;
+}
+
+.intent-chat__fab {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 20px 14px 16px;
+  border: none;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--cg-blue-600, #1565c0), var(--cg-blue-800, #0d3c7a));
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 600;
+  box-shadow: 0 10px 28px rgba(21, 101, 192, 0.35);
+  cursor: pointer;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+  animation: intent-chat-pulse 2.4s ease-out 1.2s 2;
+}
+
+.intent-chat__fab:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 32px rgba(21, 101, 192, 0.45);
+}
+
+.intent-chat__fab:focus-visible {
+  outline: 3px solid var(--cg-blue-300, #90caf9);
+  outline-offset: 3px;
+}
+
+.intent-chat.is-open .intent-chat__fab-label {
+  display: none;
+}
+
+.intent-chat.is-open .intent-chat__fab {
+  padding: 14px;
+}
+
+@keyframes intent-chat-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(21, 101, 192, 0.5);
+  }
+
+  100% {
+    box-shadow: 0 0 0 18px rgba(21, 101, 192, 0);
+  }
+}
+
+.intent-chat__panel {
+  order: -1;
+  width: 380px;
+  max-height: min(600px, calc(100vh - 120px));
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 18px;
+  background: var(--cg-neutral-0, #fff);
+  border: 1px solid var(--cg-neutral-200, #e2e8f0);
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.22);
+  animation: intent-chat-in 0.22s ease-out;
+}
+
+.intent-chat__panel[hidden] {
+  display: none;
+}
+
+@keyframes intent-chat-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.intent-chat__header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: linear-gradient(135deg, var(--cg-blue-600, #1565c0), var(--cg-blue-800, #0d3c7a));
+  color: #fff;
+}
+
+.intent-chat__avatar {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.18);
+  flex-shrink: 0;
+}
+
+.intent-chat__heading {
+  flex: 1;
+  min-width: 0;
+}
+
+.intent-chat__title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: inherit;
+}
+
+.intent-chat__subtitle {
+  margin: 2px 0 0;
+  font-size: 0.8rem;
+  opacity: 0.85;
+}
+
+.intent-chat__close {
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: #fff;
+  font-size: 1.4rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.intent-chat__close:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.intent-chat__messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: var(--cg-neutral-25, #f8fafc);
+}
+
+.intent-chat__msg {
+  max-width: 85%;
+  padding: 10px 14px;
+  border-radius: 16px;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  word-wrap: break-word;
+}
+
+.intent-chat__msg p {
+  margin: 0 0 6px;
+}
+
+.intent-chat__msg p:last-child {
+  margin-bottom: 0;
+}
+
+.intent-chat__msg--bot {
+  align-self: flex-start;
+  background: var(--cg-neutral-0, #fff);
+  border: 1px solid var(--cg-neutral-200, #e2e8f0);
+  border-bottom-left-radius: 4px;
+  color: var(--cg-neutral-text-light, #1e293b);
+}
+
+.intent-chat__msg--user {
+  align-self: flex-end;
+  background: var(--cg-blue-600, #1565c0);
+  color: #fff;
+  border-bottom-right-radius: 4px;
+  white-space: pre-wrap;
+}
+
+.intent-chat__msg--typing {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.intent-chat__msg--typing span {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--cg-neutral-400, #94a3b8);
+  animation: intent-chat-dot 1s infinite ease-in-out;
+}
+
+.intent-chat__msg--typing span:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.intent-chat__msg--typing span:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+@keyframes intent-chat-dot {
+
+  0%,
+  80%,
+  100% {
+    opacity: 0.3;
+    transform: translateY(0);
+  }
+
+  40% {
+    opacity: 1;
+    transform: translateY(-3px);
+  }
+}
+
+.intent-chat__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 6px 0 8px;
+}
+
+.intent-chat__chip {
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--cg-blue-50, #e3f2fd);
+  color: var(--cg-blue-700, #0d47a1);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.intent-chat__result {
+  font-weight: 600;
+}
+
+.intent-chat__list {
+  margin: 4px 0 0;
+  padding-left: 18px;
+}
+
+.intent-chat__list li {
+  margin: 2px 0;
+}
+
+.intent-chat__list a {
+  color: var(--cg-blue-600, #1565c0);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.intent-chat__list a:hover {
+  text-decoration: underline;
+}
+
+.intent-chat__samples {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 10px 16px 0;
+  background: var(--cg-neutral-25, #f8fafc);
+}
+
+.intent-chat__samples[hidden] {
+  display: none;
+}
+
+.intent-chat__sample {
+  padding: 6px 12px;
+  border: 1px solid var(--cg-blue-200, #bbdefb);
+  border-radius: 999px;
+  background: var(--cg-neutral-0, #fff);
+  color: var(--cg-blue-700, #0d47a1);
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.intent-chat__sample:hover {
+  background: var(--cg-blue-50, #e3f2fd);
+}
+
+.intent-chat__form {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  padding: 12px 16px 14px;
+  background: var(--cg-neutral-25, #f8fafc);
+  border-top: 1px solid var(--cg-neutral-200, #e2e8f0);
+}
+
+.intent-chat__input {
+  flex: 1;
+  min-height: 42px;
+  max-height: 120px;
+  padding: 10px 14px;
+  border: 1px solid var(--cg-neutral-300, #cbd5e1);
+  border-radius: 21px;
+  background: var(--cg-neutral-0, #fff);
+  color: inherit;
+  font: inherit;
+  font-size: 0.9rem;
+  resize: none;
+}
+
+.intent-chat__input:focus {
+  outline: none;
+  border-color: var(--cg-blue-500, #1e88e5);
+  box-shadow: 0 0 0 3px var(--cg-blue-100, #bbdefb);
+}
+
+.intent-chat__send {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border: none;
+  border-radius: 50%;
+  background: var(--cg-blue-600, #1565c0);
+  color: #fff;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.intent-chat__send:hover {
+  background: var(--cg-blue-700, #0d47a1);
+}
+
+/* Chế độ tối */
+body.dark .intent-chat__panel {
+  background: var(--cg-neutral-900, #1e293b);
+  border-color: var(--cg-neutral-750, #334155);
+}
+
+body.dark .intent-chat__messages,
+body.dark .intent-chat__samples,
+body.dark .intent-chat__form {
+  background: var(--cg-neutral-950, #0f172a);
+  border-color: var(--cg-neutral-750, #334155);
+}
+
+body.dark .intent-chat__msg--bot {
+  background: var(--cg-neutral-850, #1e293b);
+  border-color: var(--cg-neutral-750, #334155);
+  color: var(--cg-neutral-text-dark, #e2e8f0);
+}
+
+body.dark .intent-chat__input {
+  background: var(--cg-neutral-850, #1e293b);
+  border-color: var(--cg-neutral-700, #475569);
+}
+
+body.dark .intent-chat__sample {
+  background: transparent;
+  border-color: var(--cg-blue-700, #0d47a1);
+  color: var(--cg-blue-300, #90caf9);
+}
+
+body.dark .intent-chat__chip {
+  background: rgba(30, 136, 229, 0.18);
+  color: var(--cg-blue-300, #90caf9);
+}
+
+body.dark .intent-chat__list a {
+  color: var(--cg-blue-300, #90caf9);
+}
+
+/* Điện thoại: panel chiếm gần hết màn hình */
+@media (max-width: 640px) {
+  .intent-chat {
+    right: 16px;
+    bottom: 16px;
+    left: 16px;
+    align-items: flex-end;
+  }
+
+  .intent-chat__panel {
+    width: 100%;
+    max-height: calc(100vh - 100px);
+  }
+
+  .intent-chat__fab-label {
+    display: none;
+  }
+
+  .intent-chat__fab {
+    padding: 14px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  .intent-chat__fab,
+  .intent-chat__panel,
+  .intent-chat__msg--typing span {
+    animation: none;
   }
 }

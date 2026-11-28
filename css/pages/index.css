@@ -1479,3 +1479,51 @@ body.dark .hero-slide-card__meta-item svg {
     justify-content: center;
   }
 }
+
+/* ===== Hàng phân hạng: ẩn thanh cuộn, mũi tên nổi hai bên ===== */
+.rank-row__viewport {
+  position: relative;
+}
+
+/* Ẩn thanh cuộn ngang (vẫn cuộn được bằng mũi tên, phím ←/→, vuốt, Shift + lăn chuột) */
+.rank-row__track {
+  scrollbar-width: none;
+}
+.rank-row__track::-webkit-scrollbar {
+  display: none;
+}
+
+/* Mũi tên tròn nổi, căn giữa theo chiều cao thẻ */
+.rank-row__viewport .rank-row__nav-btn {
+  position: absolute;
+  top: 50%;
+  z-index: 2;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.16);
+  transform: translateY(-50%);
+  transition: opacity 160ms ease, transform 160ms ease, color 160ms ease, border-color 160ms ease;
+}
+.rank-row__nav-btn--prev { left: -18px; }
+.rank-row__nav-btn--next { right: -18px; }
+
+.rank-row__viewport .rank-row__nav-btn:hover:not(:disabled) {
+  transform: translateY(-50%) scale(1.08);
+}
+
+/* Hết chỗ cuộn thì ẩn hẳn mũi tên bên đó (không làm mờ) */
+.rank-row__viewport .rank-row__nav-btn:disabled {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Màn hình hẹp: đưa mũi tên vào trong mép để không bị cắt */
+@media (max-width: 768px) {
+  .rank-row__nav-btn--prev { left: 4px; }
+  .rank-row__nav-btn--next { right: 4px; }
+  .rank-row__viewport .rank-row__nav-btn { width: 38px; height: 38px; }
+}

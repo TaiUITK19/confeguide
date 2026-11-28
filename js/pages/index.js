@@ -660,7 +660,7 @@
     const hiddenText = rawTopicLabels.slice(2).join(', ');
     const moreBadgeHtml = overflowCount > 0
       ? `<span class="hero-rec-card__topic hero-rec-card__topic--more" `
-        + `title="${esc(hiddenText)}">+${overflowCount}</span>`
+      + `title="${esc(hiddenText)}">+${overflowCount}</span>`
       : '';
 
     return `
@@ -1589,35 +1589,35 @@
             <h3 class="rank-row__title" id="${headingId}">${esc(rankMeta.title)}</h3>
             ${subtitleHtml}
           </div>
-          <div class="rank-row__controls">
-            <button
-              type="button"
-              class="rank-row__nav-btn js-rank-scroll-prev"
-              aria-label="Cuộn sang trái danh sách hội nghị Rank ${esc(rankLabel)}"
-              title="Cuộn sang trái">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
-                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <polyline points="15 18 9 12 15 6"></polyline>
-              </svg>
-            </button>
-            <button
-              type="button"
-              class="rank-row__nav-btn js-rank-scroll-next"
-              aria-label="Cuộn sang phải danh sách hội nghị Rank ${esc(rankLabel)}"
-              title="Cuộn sang phải">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
-                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <polyline points="9 18 15 12 9 6"></polyline>
-              </svg>
-            </button>
           </div>
-        </div>
-        <div
-          class="rank-row__track js-rank-track"
-          tabindex="0"
-          role="region"
-          aria-label="Hội nghị Rank ${esc(rankLabel)}">
-          ${cardsHtml}
+        <div class="rank-row__viewport">
+          <button
+            type="button"
+            class="rank-row__nav-btn rank-row__nav-btn--prev js-rank-scroll-prev"
+            aria-label="Cuộn sang trái danh sách hội nghị Rank ${esc(rankLabel)}"
+            title="Cuộn sang trái">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"
+              stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+          </button>
+          <div
+            class="rank-row__track js-rank-track"
+            tabindex="0"
+            role="region"
+            aria-label="Hội nghị Rank ${esc(rankLabel)}">
+            ${cardsHtml}
+          </div>
+          <button
+            type="button"
+            class="rank-row__nav-btn rank-row__nav-btn--next js-rank-scroll-next"
+            aria-label="Cuộn sang phải danh sách hội nghị Rank ${esc(rankLabel)}"
+            title="Cuộn sang phải">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"
+              stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </button>
         </div>
       </section>
     `;
