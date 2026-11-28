@@ -5,11 +5,13 @@
   bố cục ưu tiên hành động chính (Lưu, Website, Hạn nộp tiếp theo UTC+7).
 -->
 <html lang="vi">
+
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Chi tiết hội nghị - ConfGuide</title>
-  <meta name="description" content="Khám phá thông tin chi tiết hội nghị khoa học Công nghệ thông tin trong nước và quốc tế, tiến trình hạn nộp bài quy đổi về giờ Việt Nam (UTC+7) và thông tin học thuật trên ConfGuide.">
+  <meta name="description"
+    content="Khám phá thông tin chi tiết hội nghị khoa học Công nghệ thông tin trong nước và quốc tế, tiến trình hạn nộp bài quy đổi về giờ Việt Nam (UTC+7) và thông tin học thuật trên ConfGuide.">
 
   <link rel="icon" type="image/svg+xml" href="images/logo.svg">
   <link rel="stylesheet" href="css/base/base.css">
@@ -19,72 +21,86 @@
   <script src="js/core/page-transition.js"></script>
   <script src="js/core/layout.js" defer blocking="render"></script>
 </head>
+
 <body>
   <!-- Áp dụng nhanh Dark Mode trước khi sơn giao diện để tránh nhấp nháy sáng/tối (anti-FOUC) -->
-  <script>try { if (localStorage.getItem('confguide_theme') === 'dark') document.body.classList.add('dark'); } catch (e) {}</script>
+  <script>try { if (localStorage.getItem('confguide_theme') === 'dark') document.body.classList.add('dark'); } catch (e) { }</script>
 
   <!-- Kho biểu tượng SVG Sprite dùng chung cho cả HTML và JavaScript trên trang Chi tiết -->
   <svg class="svg-sprite" aria-hidden="true">
-    <symbol id="icon-arrow-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+    <symbol id="icon-arrow-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+      stroke-linecap="round" stroke-linejoin="round">
       <line x1="19" y1="12" x2="5" y2="12"></line>
       <polyline points="12 19 5 12 12 5"></polyline>
     </symbol>
-    <symbol id="icon-calendar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <symbol id="icon-calendar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+      stroke-linecap="round" stroke-linejoin="round">
       <rect x="3" y="4" width="18" height="18" rx="2"></rect>
       <path d="M16 2v4M8 2v4M3 10h18"></path>
     </symbol>
-    <symbol id="icon-calendar-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <symbol id="icon-calendar-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+      stroke-linecap="round" stroke-linejoin="round">
       <rect x="3" y="4" width="18" height="18" rx="2"></rect>
       <path d="M16 2v4M8 2v4M3 10h18M12 14v4M10 16h4"></path>
     </symbol>
-    <symbol id="icon-location" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <symbol id="icon-location" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+      stroke-linecap="round" stroke-linejoin="round">
       <path d="M12 2a8 8 0 0 0-8 8c0 5.25 8 12 8 12s8-6.75 8-12a8 8 0 0 0-8-8z"></path>
       <circle cx="12" cy="10" r="3"></circle>
     </symbol>
-    <symbol id="icon-mode" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <symbol id="icon-mode" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+      stroke-linejoin="round">
       <rect x="2" y="3" width="20" height="14" rx="2"></rect>
       <line x1="8" y1="21" x2="16" y2="21"></line>
       <line x1="12" y1="17" x2="12" y2="21"></line>
     </symbol>
-    <symbol id="icon-fee" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <symbol id="icon-fee" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+      stroke-linejoin="round">
       <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
     </symbol>
     <symbol id="icon-star" viewBox="0 0 24 24">
       <path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4 6.1 20.5l1.2-6.5L2.5 9.4l6.6-.9z"></path>
     </symbol>
-    <symbol id="icon-external" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <symbol id="icon-external" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+      stroke-linecap="round" stroke-linejoin="round">
       <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
       <polyline points="15 3 21 3 21 9"></polyline>
       <line x1="10" y1="14" x2="21" y2="3"></line>
     </symbol>
-    <symbol id="icon-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+    <symbol id="icon-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1"
+      stroke-linecap="round" stroke-linejoin="round">
       <circle cx="12" cy="12" r="10"></circle>
       <polyline points="12 6 12 12 16 14"></polyline>
     </symbol>
-    <symbol id="icon-globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <symbol id="icon-globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+      stroke-linecap="round" stroke-linejoin="round">
       <circle cx="12" cy="12" r="10"></circle>
       <path d="M2 12h20"></path>
       <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
     </symbol>
-    <symbol id="icon-doc" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <symbol id="icon-doc" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+      stroke-linejoin="round">
       <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
       <polyline points="14 2 14 8 20 8"></polyline>
       <line x1="16" y1="13" x2="8" y2="13"></line>
       <line x1="16" y1="17" x2="8" y2="17"></line>
     </symbol>
-    <symbol id="icon-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <symbol id="icon-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+      stroke-linejoin="round">
       <circle cx="12" cy="12" r="10"></circle>
       <line x1="12" y1="16" x2="12" y2="12"></line>
       <line x1="12" y1="8" x2="12.01" y2="8"></line>
     </symbol>
-    <symbol id="icon-share" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <symbol id="icon-share" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+      stroke-linecap="round" stroke-linejoin="round">
       <circle cx="18" cy="5" r="3"></circle>
       <circle cx="6" cy="12" r="3"></circle>
       <circle cx="18" cy="19" r="3"></circle>
       <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
       <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
     </symbol>
-    <symbol id="icon-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <symbol id="icon-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+      stroke-linecap="round" stroke-linejoin="round">
       <polyline points="20 6 9 17 4 12"></polyline>
     </symbol>
   </svg>
@@ -105,10 +121,12 @@
       </nav>
 
       <!-- Thông báo trạng thái tải dữ liệu hoặc cảnh báo nguồn dữ liệu dự phòng -->
-      <div class="conf-state conf-state--loading js-loading-state" id="detailLoadingBanner" role="status" aria-live="polite">
+      <div class="conf-state conf-state--loading js-loading-state" id="detailLoadingBanner" role="status"
+        aria-live="polite">
         Đang tải thông tin chi tiết hội nghị...
       </div>
-      <div class="conf-fetch-notice js-fetch-notice" id="detailFetchNotice" role="status" aria-live="polite" hidden></div>
+      <div class="conf-fetch-notice js-fetch-notice" id="detailFetchNotice" role="status" aria-live="polite" hidden>
+      </div>
 
       <!-- ================= NỘI DUNG CHI TIẾT HỘI NGHỊ ================= -->
       <div class="conf-detail__view js-view-detail" id="viewDetail" hidden>
@@ -128,7 +146,8 @@
                 <span class="conf-header__sep" aria-hidden="true">·</span>
                 <p class="conf-header__fullname js-conf-fullname" id="detailFullName"></p>
               </div>
-              <div class="conf-header__tags js-conf-tags" id="detailTags" role="group" aria-label="Lĩnh vực nghiên cứu"></div>
+              <div class="conf-header__tags js-conf-tags" id="detailTags" role="group" aria-label="Lĩnh vực nghiên cứu">
+              </div>
             </div>
 
             <div class="conf-header__actions">
@@ -138,7 +157,8 @@
                 </svg>
                 <span class="js-save-text" id="saveText">Lưu hội nghị</span>
               </button>
-              <a class="conf-btn conf-btn--primary js-web-btn" id="webBtn" href="#" target="_blank" rel="noopener noreferrer">
+              <a class="conf-btn conf-btn--primary js-web-btn" id="webBtn" href="#" target="_blank"
+                rel="noopener noreferrer">
                 <span>Website chính thức</span>
                 <svg width="16" height="16" aria-hidden="true">
                   <use xlink:href="#icon-external"></use>
@@ -202,35 +222,22 @@
               </div>
 
               <div class="deadline-timeline__carousel js-timeline-carousel">
-                <div
-                  class="deadline-timeline__track js-timeline-track"
-                  id="timelineTrack"
-                  tabindex="0"
-                  role="region"
-                  aria-label="Các mốc quan trọng"></div>
-                <div class="deadline-timeline__controls js-timeline-controls" id="timelineControls" hidden>
-                  <button
-                    type="button"
-                    class="deadline-timeline__nav-btn js-timeline-prev"
-                    aria-label="Chuyển tới mốc thời gian trước"
-                    title="Mốc trước">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <div class="deadline-timeline__viewport">
+                  <button type="button"
+                    class="deadline-timeline__nav-btn deadline-timeline__nav-btn--prev js-timeline-prev"
+                    aria-label="Chuyển tới mốc thời gian trước" title="Mốc trước">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"
+                      stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                       <polyline points="15 18 9 12 15 6"></polyline>
                     </svg>
                   </button>
-                  <span class="deadline-timeline__indicator js-timeline-indicator" aria-live="polite">Mốc 1 / 1</span>
-                  <button
-                    type="button"
-                    class="deadline-timeline__jump-btn js-timeline-jump-active"
-                    hidden>
-                    Về mốc tiếp theo
-                  </button>
-                  <button
-                    type="button"
-                    class="deadline-timeline__nav-btn js-timeline-next"
-                    aria-label="Chuyển tới mốc thời gian tiếp theo"
-                    title="Mốc tiếp theo">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <div class="deadline-timeline__track js-timeline-track" id="timelineTrack" tabindex="0" role="region"
+                    aria-label="Các mốc quan trọng"></div>
+                  <button type="button"
+                    class="deadline-timeline__nav-btn deadline-timeline__nav-btn--next js-timeline-next"
+                    aria-label="Chuyển tới mốc thời gian tiếp theo" title="Mốc tiếp theo">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"
+                      stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                       <polyline points="9 18 15 12 9 6"></polyline>
                     </svg>
                   </button>
@@ -286,7 +293,8 @@
                 </div>
                 <div class="next-deadline-card__heading">
                   <span class="next-deadline-card__eyebrow">MỐC TIẾP THEO</span>
-                  <h2 class="next-deadline-card__title js-next-milestone-name" id="detailNextMilestoneName">Đang cập nhật</h2>
+                  <h2 class="next-deadline-card__title js-next-milestone-name" id="detailNextMilestoneName">Đang cập
+                    nhật</h2>
                 </div>
               </div>
 
@@ -297,11 +305,13 @@
 
               <div class="next-deadline-card__ticker js-live-ticker-box" id="heroLiveTickerBox">
                 <span class="next-deadline-card__pulse" aria-hidden="true"></span>
-                <span class="next-deadline-card__ticker-text js-live-ticker-text" id="heroLiveTickerText" aria-live="off">Đang đồng bộ...</span>
+                <span class="next-deadline-card__ticker-text js-live-ticker-text" id="heroLiveTickerText"
+                  aria-live="off">Đang đồng bộ...</span>
               </div>
 
               <div class="next-deadline-card__actions js-next-cal-group">
-                <button type="button" class="conf-btn conf-btn--outline js-cal-action" id="btnCalGoogle" data-cal-action="google-next">
+                <button type="button" class="conf-btn conf-btn--outline js-cal-action" id="btnCalGoogle"
+                  data-cal-action="google-next">
                   <svg width="16" height="16" aria-hidden="true">
                     <use xlink:href="#icon-calendar-plus"></use>
                   </svg>
@@ -334,4 +344,5 @@
   <script src="js/components/compare.js" defer></script>
   <script src="js/pages/detail.js" defer></script>
 </body>
+
 </html>
