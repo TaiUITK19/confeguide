@@ -526,11 +526,6 @@ module.exports = {
   SYSTEM_FIELDS,
   VALID_FIELD_KEYS,
   FIELD_LABEL_BY_KEY,
-  FIELD_SYNONYMS,
-  normalizeText,
-  toSlug,
   resolveSystemField,
-  mapResearchInterests,
-  extractFromFreeText,
   extractFieldsFromProfileSignals
 };

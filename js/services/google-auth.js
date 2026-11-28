@@ -22,17 +22,12 @@
   const CLIENT_ID_STORAGE_KEY = 'confguide_google_client_id';
   const BACKEND_URL_STORAGE_KEY = 'confguide_backend_url';
   const GIS_SCRIPT_URL = 'https://accounts.google.com/gsi/client';
-  const GOOGLE_USERINFO_URL = 'https://www.googleapis.com/oauth2/v3/userinfo';
   const CLIENT_ID_PATTERN = /^[0-9]+-[a-zA-Z0-9_.-]+\.apps\.googleusercontent\.com$/;
 
   let gisLoadPromise = null;
-  let tokenClientInstance = null;
-  let activeTokenClientId = '';
   let initializedIdClientId = '';
   let latestIdSuccess = null;
   let latestIdError = null;
-  let pendingTokenResolve = null;
-  let pendingTokenReject = null;
   let backendGoogleClientId = '';
   let backendConfigPromise = null;
 
@@ -72,12 +67,13 @@
         // Bỏ qua lỗi đọc localStorage
       }
       if (protocol === 'http:' || protocol === 'https:') {
-        // Khi chạy frontend qua Live Server / server tĩnh cục bộ khác cổng 3000, trỏ về backend cổng 3000
-        if (isLocalHost && port && port !== '3000') {
+        // Khi chạy frontend qua Live Server / server tĩnh cục bộ (5500, 8000...), trỏ về backend cổng 3000
+        const staticDevPorts = new Set(['5500', '5501', '5502', '8000', '8080', '4173', '5173']);
+        if (isLocalHost && port && staticDevPorts.has(port)) {
           const apiHost = hostname === '[::1]' ? 'localhost' : hostname;
           return `http://${apiHost}:3000`;
         }
-        // Khi chạy trên Vercel hoặc mở trực tiếp trên cổng 3000, gọi API cùng origin
+        // Khi chạy trên Vercel hoặc mở trực tiếp từ backend Express (cổng 3000 hoặc PORT tùy chỉnh), gọi API cùng origin
         return origin.replace(/\/+$/, '');
       }
     }
@@ -273,47 +269,6 @@
   }
 
   /**
-   * Lưu hoặc xóa Google OAuth Client ID trong localStorage để kiểm thử trên localhost / GitHub Pages.
-   * @param {string} rawId - Chuỗi Client ID mới (chuỗi rỗng để xóa cấu hình cục bộ).
-   * @returns {{ ok: boolean, clientId: string, message: string }} Kết quả lưu cấu hình.
-   */
-  function setConfiguredClientId(rawId) {
-    const trimmed = cleanClientIdValue(rawId);
-    if (!trimmed) {
-      try {
-        window.localStorage.removeItem(CLIENT_ID_STORAGE_KEY);
-      } catch {
-        // Bỏ qua lỗi Storage
-      }
-      tokenClientInstance = null;
-      activeTokenClientId = '';
-      return { ok: true, clientId: '', message: 'Đã xóa Client ID cục bộ.' };
-    }
-
-    if (!isValidClientIdFormat(trimmed)) {
-      return {
-        ok: false,
-        clientId: '',
-        message: 'Client ID không đúng định dạng (ví dụ: 123456-abc.apps.googleusercontent.com).'
-      };
-    }
-
-    try {
-      window.localStorage.setItem(CLIENT_ID_STORAGE_KEY, trimmed);
-    } catch {
-      return {
-        ok: false,
-        clientId: '',
-        message: 'Không thể lưu Client ID vào bộ nhớ trình duyệt.'
-      };
-    }
-
-    tokenClientInstance = null;
-    activeTokenClientId = '';
-    return { ok: true, clientId: trimmed, message: 'Đã lưu Google Client ID.' };
-  }
-
-  /**
    * Kiểm tra xem Google Sign-In thật có sẵn sàng hoạt động ở môi trường hiện tại hay không.
    * @returns {{ supportedOrigin: boolean, hasClientId: boolean, ready: boolean, origin: string }}
    */
@@ -453,133 +408,7 @@
     };
   }
 
-  /**
-   * Lấy thông tin tên, email và ảnh đại diện từ Google UserInfo endpoint bằng access token.
-   * @param {string} accessToken - Token OAuth 2.0 trả về từ GIS Token Client.
-   * @returns {Promise<Object>} Hồ sơ Google đã chuẩn hóa.
-   */
-  async function fetchGoogleUserInfo(accessToken) {
-    const response = await fetch(GOOGLE_USERINFO_URL, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        Accept: 'application/json'
-      }
-    });
-    if (!response.ok) {
-      throw new Error(`Không thể đọc thông tin tài khoản Google (HTTP ${response.status}).`);
-    }
-    const data = await response.json();
-    const normalized = normalizeGoogleProfile(data);
-    if (!normalized) {
-      throw new Error('Google không trả về thông tin tên hoặc email hợp lệ.');
-    }
-    return normalized;
-  }
-
-  /* ================= 4. KHỞI TẠO TOKEN CLIENT & POPUP ĐĂNG NHẬP ================= */
-
-  /**
-   * Khởi tạo trước `google.accounts.oauth2.TokenClient` ngay khi GIS tải xong
-   * để thao tác bấm nút của người dùng gọi `requestAccessToken()` đồng bộ (tránh bị trình duyệt chặn popup).
-   * @returns {Promise<boolean>} True nếu TokenClient đã sẵn sàng.
-   */
-  async function prepareTokenClient() {
-    const status = getEnvironmentStatus();
-    if (!status.ready) return false;
-
-    const loaded = await ensureGisLoaded();
-    if (!loaded || !window.google || !window.google.accounts || !window.google.accounts.oauth2) {
-      return false;
-    }
-
-    if (tokenClientInstance && activeTokenClientId === status.clientId) {
-      return true;
-    }
-
-    tokenClientInstance = window.google.accounts.oauth2.initTokenClient({
-      client_id: status.clientId,
-      scope: 'openid profile email',
-      callback: async tokenResponse => {
-        const resolveFn = pendingTokenResolve;
-        const rejectFn = pendingTokenReject;
-        pendingTokenResolve = null;
-        pendingTokenReject = null;
-
-        if (!tokenResponse || tokenResponse.error || !tokenResponse.access_token) {
-          const errMsg = tokenResponse && tokenResponse.error_description
-            ? tokenResponse.error_description
-            : 'Đăng nhập Google chưa hoàn tất hoặc đã bị hủy.';
-          if (rejectFn) rejectFn(new Error(errMsg));
-          return;
-        }
-
-        try {
-          const profile = await fetchGoogleUserInfo(tokenResponse.access_token);
-          if (resolveFn) resolveFn(profile);
-        } catch (err) {
-          if (rejectFn) rejectFn(err);
-        }
-      },
-      error_callback: err => {
-        const rejectFn = pendingTokenReject;
-        pendingTokenResolve = null;
-        pendingTokenReject = null;
-        const type = err && err.type ? err.type : '';
-        const message = type === 'popup_closed'
-          ? 'Bạn đã đóng cửa sổ đăng nhập Google.'
-          : (type === 'popup_failed_to_open'
-            ? 'Trình duyệt đang chặn cửa sổ bật lên (popup). Vui lòng cho phép popup cho trang này.'
-            : 'Không thể kết nối xác thực Google. Hãy kiểm tra Client ID và Authorized JavaScript origins.');
-        if (rejectFn) rejectFn(new Error(message));
-      }
-    });
-
-    activeTokenClientId = status.clientId;
-    return true;
-  }
-
-  /**
-   * Mở popup đăng nhập Google (Gmail) để lấy tên, email và ảnh đại diện người dùng.
-   * Phải được gọi từ sự kiện click khi TokenClient đã được `prepareTokenClient()` sẵn sàng trước đó.
-   * @returns {Promise<{ sub: string, name: string, email: string, picture: string, emailVerified: boolean }>}
-   */
-  function signInWithGooglePopup() {
-    const status = getEnvironmentStatus();
-    if (!status.supportedOrigin) {
-      return Promise.reject(new Error(
-        'Đăng nhập Google thật chỉ hoạt động qua HTTP/HTTPS (Live Server, python -m http.server hoặc GitHub Pages), không hỗ trợ trên file:///.'
-      ));
-    }
-    if (!status.hasClientId) {
-      return Promise.reject(new Error('Chưa cấu hình Google OAuth Client ID.'));
-    }
-
-    if (tokenClientInstance && activeTokenClientId === status.clientId) {
-      return new Promise((resolve, reject) => {
-        pendingTokenResolve = resolve;
-        pendingTokenReject = reject;
-        try {
-          tokenClientInstance.requestAccessToken({ prompt: 'select_account' });
-        } catch (err) {
-          pendingTokenResolve = null;
-          pendingTokenReject = null;
-          reject(err);
-        }
-      });
-    }
-
-    // Fallback chuẩn bị nếu lần đầu bấm chưa kịp pre-load GIS
-    return prepareTokenClient().then(ready => {
-      if (!ready || !tokenClientInstance) {
-        throw new Error('Không thể tải Google Identity Services. Kiểm tra kết nối mạng hoặc trình chặn quảng cáo.');
-      }
-      return new Promise((resolve, reject) => {
-        pendingTokenResolve = resolve;
-        pendingTokenReject = reject;
-        tokenClientInstance.requestAccessToken({ prompt: 'select_account' });
-      });
-    });
-  }
+  /* ================= 4. RENDER NÚT GOOGLE SIGN-IN CHÍNH THỨC ================= */
 
   /**
    * Render nút "Sign in with Google" chính thức (ID Token JWT) vào một phần tử DOM nếu GIS sẵn sàng.
@@ -649,12 +478,9 @@
     fetchBackendAuthConfig,
     verifyCredentialWithBackend,
     getClientId,
-    setConfiguredClientId,
     isValidClientIdFormat,
     isSupportedWebOrigin,
     getEnvironmentStatus,
-    prepareTokenClient,
-    signInWithGooglePopup,
     renderOfficialGoogleButton,
     parseGoogleJwt,
     normalizeGoogleProfile

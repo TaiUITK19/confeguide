@@ -39,12 +39,13 @@
         // Bỏ qua lỗi Storage
       }
       if (protocol === 'http:' || protocol === 'https:') {
-        // Khi chạy frontend qua Live Server / server tĩnh cục bộ khác cổng 3000, trỏ về backend cổng 3000
-        if (isLocalHost && port && port !== '3000') {
+        // Khi chạy frontend qua Live Server / server tĩnh cục bộ (5500, 8000...), trỏ về backend cổng 3000
+        const staticDevPorts = new Set(['5500', '5501', '5502', '8000', '8080', '4173', '5173']);
+        if (isLocalHost && port && staticDevPorts.has(port)) {
           const apiHost = hostname === '[::1]' ? 'localhost' : hostname;
           return `http://${apiHost}:3000`;
         }
-        // Khi chạy trên Vercel hoặc mở trực tiếp trên cổng 3000, gọi API cùng origin
+        // Khi chạy trên Vercel hoặc mở trực tiếp từ backend Express (cổng 3000 hoặc PORT tùy chỉnh), gọi API cùng origin
         return origin.replace(/\/+$/, '');
       }
     }
